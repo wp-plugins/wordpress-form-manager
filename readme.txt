@@ -3,7 +3,7 @@ Contributors: hoffcamp
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.0
+Stable tag: 1.0.1
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
