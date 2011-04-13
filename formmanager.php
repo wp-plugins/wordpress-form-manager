@@ -2,7 +2,7 @@
 /*
 Plugin Name: Form Manager
 Plugin URI: (none)
-Description: Create custom forms; store entered data in a database; view, analyze, & query data;
+Description:  Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
 Version: 1.0
 Author: Campbell Hoffman
 Author URI: (none)
