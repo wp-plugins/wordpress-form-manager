@@ -37,6 +37,14 @@ Method 2: Download the source code for the plugin, and upload the 'formmanager' 
 1. Click on the 'Forms' section, then find the 'Add New' button. A new form has just been created.
 2. To edit the form, click on the name of the new form (usually 'New Form').
 
+= How do I add the form to a post/page? = 
+
+The shortcode is simple:
+
+[form (form shortcode)]
+
+So if your form's shortcode is 'my-contact-form', the code would be [form my-contact-form]
+
 = How do I add elements to the form? =
 
 In the form editor (the title of the page should read 'Edit Form'), look for the text 'Insert Form Element:', and notice the buttons below.  By clicking any of these buttons, you will add this type of form element to the end of the form.
