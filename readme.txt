@@ -41,7 +41,7 @@ Method 2: Download the source code for the plugin, and upload the 'formmanager' 
 
 The shortcode is simple:
 
-[form (form shortcode)]
+[form (shortcode)]
 
 So if your form's shortcode is 'my-contact-form', the code would be [form my-contact-form]
 
