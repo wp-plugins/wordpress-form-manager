@@ -9,6 +9,8 @@ Put custom forms into posts and pages using shortcodes. Download submissions in 
 
 == Description ==
 
+*** The instructions given in the FAQ for the plugin are for the upcoming version 1.2 ***
+
 Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, requried fields, and custom acknowledgments.  Forms can be added to posts or pages using a simple shortcode format.  
 
 Supported field types:
