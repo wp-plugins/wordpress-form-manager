@@ -6,25 +6,31 @@
 //array of arrays: itemID -> item unique name, callbackFn -> callback function
 //	callback function takes unique name as only argument
 
-var fm_val_required = [];
-function fm_val_register_required(_formID, _itemID, _callbackFn, _msg){
+var fm_val = [];
+function fm_val_register(_formID, _itemID, _callbackFn, _msg, _extra){
+	if(!_extra) _extra = "";
 	var newReq = {
 		formID: _formID,
 		itemID: _itemID,
 		callbackFn: _callbackFn,
-		msg: _msg
+		msg: _msg,
+		extra: _extra
 	};	
-	fm_val_required.push(newReq);
+	fm_val.push(newReq);
 }
 
-function fm_val_required_satisfied(){
+function fm_val_satisfied(){
 	var temp = true;
 	var msg = "";
-	for(var x=0;x<fm_val_required.length;x++){
-		eval("temp = " + fm_val_required[x].callbackFn + "('" + fm_val_required[x].formID + "', '" + fm_val_required[x].itemID + "');");
+	for(var x=0;x<fm_val.length;x++){		
+		if(fm_val[x].extra == "")		
+			eval("temp = " + fm_val[x].callbackFn + "('" + fm_val[x].formID + "', '" + fm_val[x].itemID + "');");
+		else		
+			eval("temp = " + fm_val[x].callbackFn + "('" + fm_val[x].formID + "', '" + fm_val[x].itemID + "', '" + fm_val[x].extra + "');");
+			
 		if(!temp){
 			if(msg != "") msg += "\n";
-			msg += fm_val_required[x].msg;	
+			msg += fm_val[x].msg;	
 		}
 	}
 	if(msg != ""){
@@ -35,5 +41,5 @@ function fm_val_required_satisfied(){
 }
 
 function fm_validate(formID){
-	return fm_val_required_satisfied(formID);
+	return fm_val_satisfied(formID);
 }
