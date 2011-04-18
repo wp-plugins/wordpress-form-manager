@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Form Manager
-Plugin URI: (none)
+Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
 Version: 1.2.2
 Author: Campbell Hoffman
-Author URI: (none)
+Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
