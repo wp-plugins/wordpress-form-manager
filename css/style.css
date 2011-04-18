@@ -3,10 +3,18 @@
 
 /* ADMIN SIDE */
 
+.edit-form-body{
+	min-width:550px;
+}
+
 .fm-editor{
 	background-color:#fff;
 	margin:0px;
 	padding:10px;
+}
+
+.edit-form-button{
+	cursor: pointer;
 }
 
 /* control selector in the form editor */
@@ -66,7 +74,7 @@ table.editor-item-table td{
 
 table.editor-item-table td label{
 	float: left;
-	width:150px;
+	width:100px;
 	text-align: left;
 	margin-right: 0.5em;
 	display:block;
@@ -74,13 +82,22 @@ table.editor-item-table td label{
 }
 table.editor-item-table td.editor-item-container{
 	padding-top:0px;
+	padding-bottom:2px;
+	
 }
 td.editor-item-buttons{
 	width:35px;
 	vertical-align:top;
-	padding:4px 5px;
+	padding:6px 5px;
 }
 
+.edit-form-menu-item{
+	border:1px solid #000;
+	padding-top:3px;
+	width:100%;
+	style:block;
+	margin-bottom:10px;
+}
 
 /* some of the editor items use a table of class 'editor-item' within the above 'editor-item-table' */
 table.editor-item{
