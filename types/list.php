@@ -87,6 +87,7 @@ class fm_customListControl extends fm_controlBase{
 		
 	public function editItem($uniqueName, $itemInfo){	
 		$fn = $itemInfo['extra']['list_type']."_showItem";
+		unset($itemInfo['extra']['size']);
 		return $this->$fn($uniqueName, $itemInfo, true);
 	}
 	
