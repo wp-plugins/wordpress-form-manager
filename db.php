@@ -38,7 +38,6 @@ public $formSettingsKeys = array('title' => "New Form",
 					'submitted_msg' => 'Thank you! Your data has been submitted.', 
 					'submit_btn_text' => 'Submit', 
 					'required_msg' => "\'%s\' is required.", 
-					'validation_msg' => "\'%s\' is invalid.",
 					'action' => '',
 					'data_index' => '',
 					'shortcode' => '',
@@ -53,12 +52,14 @@ public $itemKeys = array ('type' => 0,
 				'nickname' => 0,
 				'label' => 0,
 				'required' => 0,
-				'validator' => 0,
-				'validation_msg' => 0,
 				'db_type' => 0,
 				'description' => 0);
 				
-
+public function setFormSettingsDefaults($opt){
+	foreach($this->formSettingsKeys as $k=>$v){
+		if(array_key_exists($k, $opt)) $this->formSettingsKeys[$k] = $opt[$k];
+	}
+}
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -80,8 +81,7 @@ function setupFormManager(){
 				"`labels_on_top` BOOL DEFAULT '0' NOT NULL ,".				//labels displayed on top or to the left
 				"`submitted_msg` TEXT NOT NULL ,".				//message displayed when user submits data
 				"`submit_btn_text` VARCHAR( 32 ) NOT NULL ,".	//text on the 'submit' button
-				"`required_msg` TEXT NOT NULL ,".				//message shown in the 'required' popup; use %s in the string to show the field label. If no string is given, default message is used.
-				"`validation_msg` TEXT NOT NULL ,".				//validation fail message; use %s in string to show field label. If no string is given, default message is used.
+				"`required_msg` TEXT NOT NULL ,".				//message shown in the 'required' popup; use %s in the string to show the field label. If no string is given, default message is used.				
 				"`data_table` VARCHAR( 32 ) NOT NULL ,".		//table where the form's submissions are stored
 				"`action` TEXT NOT NULL ,".						//form 'action' attribute
 				"`data_index` VARCHAR( 32 ) NOT NULL ,".		//data table primary key, if it has one
@@ -96,7 +96,7 @@ function setupFormManager(){
 	}
 	
 	//create a settings row
-	$this->updateSettings(null);
+	$this->initFormsTable();
 	
 	//////////////////////////////////////////////////////////////////
 	//form items - stores the items on all forms
@@ -112,9 +112,7 @@ function setupFormManager(){
 				"`extra` TEXT NOT NULL ,".						//serialized array of type specific options
 				"`nickname` TEXT NOT NULL ,".					//nickname for internal use, such as on query pages
 				"`label` TEXT NOT NULL ,".						//label for the field; can be blank. displayed on top or to the left.
-				"`required` BOOL NOT NULL ,".					//required field or not
-				"`validator` TEXT NOT NULL ,".					//name of javascript function to validate; passed 'unique_name', returns true/false
-				"`validation_msg` TEXT NOT NULL ,".				//overrides the form's default validation message
+				"`required` BOOL NOT NULL ,".					//required field or not				
 				"`db_type` VARCHAR( 32 ) NOT NULL ,".			//the type of column in the data table
 				"`description` TEXT NOT NULL ,".			//the description of the item displayed below the main label
 				"INDEX ( `ID` ) ,".
@@ -164,34 +162,13 @@ function query($q){
 //////////////////////////////////////////////////////////////////
 // Form Settings
 
-// Update form settings - create a settings row if none exists.
-//		$settings - associative array. Only the keyed options are updated.
-//			'labels_on_top' must be 1 or 0 
-//			'title', 'submitted_msg', 'submit_btn_text', 'required_msg', 'validation_msg' can be any string
-//		`ID` stores the (negative of) next available integer ID. All other fields store the default settings, and cannot be set
-function updateSettings($newSettings){	
+function initFormsTable(){	
 	//see if a settings row exists
-	$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` < 0";
-	
+	$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` < 0";	
 	$res = $this->query($q);
 	if(mysql_num_rows($res) == 0){
 		$q = $this->getDefaultSettingsQuery();
-	}
-	else if($newSettings != null){
-		$settingsRow = mysql_fetch_assoc($res);		
-		//make sure only the settings keys are processed
-
-		$toUpdate = array_intersect_key($newSettings,$this->formSettingsKeys);
-		$toUpdate = $this->sanitizeFormSettings($toUpdate);
-		//make sure we have sanitized settings remaining
-		if(sizeof($toUpdate)>0){
-			$strArr=array();
-			foreach($toUpdate as $k=>$v)
-				$strArr[] = "`{$k}` = '".addslashes($newSettings[$k])."'";
-			$q = "UPDATE `".$this->formsTable."` SET ".implode(", ",$strArr)." WHERE `ID` = '".$settingsRow['ID']."'";
-			$this->query($q);
-		}
-	}
+	}	
 	mysql_free_result($res);
 	$this->query($q);
 }
@@ -206,13 +183,7 @@ function getDefaultSettingsQuery(){
 
 // Get the default settings row
 function getSettings(){
-	$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` < 0";
-	$res = $this->query($q);
-	$row = mysql_fetch_assoc($res);
-	mysql_free_result($res);
-	foreach($row as $k=>$v)
-		$row[$k]=stripslashes($v);
-	return $row;
+	return $this->formSettingsKeys;
 }
 
 // Get a particular setting
@@ -280,21 +251,6 @@ function insertSubmissionData($dataTable, $postData){
 	$this->query($q);
 }
 
-function getFormSubmissionData($formID){
-	global $fm_controls;
-	
-	$formInfo = $this->getForm($formID);	
-	$postData = $this->getFormSubmissionDataRaw($formID);
-	if($postData === false) return false;
-	foreach($postData as $index=>$dataRow){
-		foreach($formInfo['items'] as $item){
-			$postData[$index][$item['unique_name']] = $fm_controls[$item['type']]->parseData($item['unique_name'], $item, $dataRow[$item['unique_name']]);
-		}
-	}
-	
-	return $postData;
-}
-
 function writeFormSubmissionDataCSV($formID, $fname){
 	$formInfo = $this->getForm($formID);
 	$data = $this->getFormSubmissionData($formID);
@@ -345,11 +301,31 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	fclose($fp);
 }
 
-function getFormSubmissionDataRaw($formID){
+function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $endIndex = 30){
+	global $fm_controls;
+	
+	$formInfo = $this->getForm($formID);	
+	$postData = $this->getFormSubmissionDataRaw($formID, $orderBy, $ord, $startIndex, $endIndex);
+	$postCount = $this->getSubmissionDataNumRows($formID);
+	
+	if($postData === false) return false;
+	foreach($postData as $index=>$dataRow){
+		foreach($formInfo['items'] as $item){
+			$postData[$index][$item['unique_name']] = $fm_controls[$item['type']]->parseData($item['unique_name'], $item, $dataRow[$item['unique_name']]);
+		}
+	}
+	
+	$dataInfo = array();
+	$dataInfo['data'] = $postData;
+	$dataInfo['count'] = $postCount;
+	return $dataInfo;
+}
+
+function getFormSubmissionDataRaw($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $endIndex = 30){
 	$dataTable = $this->getDataTableName($formID);
-	$q = "SELECT * FROM `{$dataTable}` ORDER BY `timestamp` DESC";
+	$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord} LIMIT {$startIndex}, {$endIndex}";
 	$res = $this->query($q);
-	if(mysql_num_rows($res) == 0) return false;
+	if(mysql_num_rows($res) == 0) return array();
 	$data=array();
 	while($row = mysql_fetch_assoc($res)){
 		$data[] = $row;
@@ -357,6 +333,13 @@ function getFormSubmissionDataRaw($formID){
 	mysql_free_result($res);
 	return $data;
 }
+
+function clearSubmissionData($formID){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "TRUNCATE TABLE `{$dataTable}`";
+	$this->query($q);
+}
+
 function deleteSubmissionDataRow($formID, $data){
 	$dataTable = $this->getDataTableName($formID);	
 	$cond=array();
@@ -400,7 +383,6 @@ function getLastSubmission($formID){
 }
 //////////////////////////////////////////////////////////////////
 
-//returns an indexed array of associative arrays with `ID`, `title`, and `data_table` keys
 function getFormList(){
 	$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` >= 0 ORDER BY `ID` ASC";
 	$res = $this->query($q);
@@ -418,6 +400,21 @@ function getForm($formID){
 	$formInfo = $this->getFormSettings($formID, $this->formsTable, $this->conn);	
 	$formInfo['items']=$this->getFormItems($formID, $this->itemsTable, $this->conn);
 	return $formInfo;
+}
+
+//does not change the database; returns a form identical to $formID, but with new unique names for the form items
+function copyForm($formID){
+	$formInfo = $this->getForm($formID);
+	for($x=0;$x<sizeof($formInfo['items']);$x++){
+		$formInfo['items'][$x]['unique_name'] = $this->getUniqueItemID($item['type']);
+	}
+	return $formInfo;
+}
+function isValidItem($formInfo, $uniqueName){
+	if(sizeof($formInfo['items']) == 0) return false;
+	foreach($formInfo['items'] as $item)
+		if($item['unique_name'] == $uniqueName) return true;
+	return false;
 }
 
 function getFormID($slug){
@@ -449,8 +446,7 @@ function getFormSettings($formID){
  	foreach($row as $k=>$v)
 		$row[$k]=stripslashes($v);
  	mysql_free_result($res);
-	$defaultSettings = $this->getSettings($this->formsTable, $this->conn);
-	foreach($defaultSettings as $k=>$v){
+	foreach($this->formSettingsKeys as $k=>$v){
 		if(trim($row[$k]) == "") $row[$k] = $v;
 	}
  	return $row;
@@ -542,8 +538,10 @@ function createForm($formInfo=null, $dataTablePrefix){
 	$dataTable = $dataTablePrefix."_".$newID;
 	$q = "INSERT INTO `".$this->formsTable."` SET `ID` = '".$newID."', `data_table` = '".$dataTable."'";
 	$this->query($q);
-	if($formInfo != null)
-		$this->updateForm($newID, $formInfo);
+	if($formInfo == null)	//use the default settings
+		$formInfo = $this->formSettingsKeys;
+	$formInfo['shortcode'] = 'form-'.$newID; //give new forms a shortcode based on numerical ID	
+	$this->updateForm($newID, $formInfo);			
 	$this->createDataTable($formInfo, $dataTable);
 	return $newID;
 }
@@ -563,7 +561,6 @@ function createDataTable($formInfo, $dataTable){
 	$q.= ") ENGINE = MYISAM ;";
 	$this->query($q);
 }
-
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -840,5 +837,10 @@ function getDataTableName($formID){
 	return $dataTable;
 }
 
+}
+
+function fm_set_form_defaults($options){
+	global $fmdb;
+	$fmdb->setFormSettingsDefaults($options);
 }
 ?>
