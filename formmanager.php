@@ -2,8 +2,8 @@
 /*
 Plugin Name: Form Manager
 Plugin URI: (none)
-Description:  Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.1
+Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
+Version: 1.2.1
 Author: Campbell Hoffman
 Author URI: (none)
 License: GPL2
@@ -46,7 +46,8 @@ $fmdb = new fm_db_class($wpdb->prefix.get_option('forms-table-name'),
 					$wpdb->prefix.get_option('items-table-name'),
 					$wpdb->dbh);
 $fm_display = new fm_display_class();
-					
+
+				
 /**************************************************************/
 /******* DATABASE SETUP ***************************************/
 
@@ -163,35 +164,7 @@ add_action('wp_ajax_fm_save_form', 'fm_saveFormAjax');
 function fm_saveFormAjax(){
 	global $fmdb;
 	
-	//collect the posted information
-	$formInfo = array();
-	$formInfo['title'] = $_POST['title'];
-	$formInfo['labels_on_top'] = $_POST['labels_on_top'];
-	$formInfo['submitted_msg'] = $_POST['submitted_msg'];
-	$formInfo['submit_btn_text'] = $_POST['submit_btn_text'];
-	$formInfo['show_title'] = ($_POST['show_title']=="true"?1:0);
-	$formInfo['show_border'] = ($_POST['show_border']=="true"?1:0);
-	$formInfo['shortcode'] = sanitize_title($_POST['shortcode']);
-	$formInfo['label_width'] = $_POST['label_width'];
-	
-	//build the items list
-	$formInfo['items'] = array();
-	if(isset($_POST['items'])){
-		foreach($_POST['items'] as $item){			
-			if(!is_serialized($item['extra'])){ //if not a serialized array, hopefully a parseable php array definition..								
-				$item['extra'] = stripslashes(stripslashes($item['extra'])); //both javascript and $_POST add slashes
-				//make sure the code to be eval'ed is safe (otherwise this would be a serious security risk)
-				if(is_valid_array_expr(stripslashes($item['extra'])))
-					eval("\$newExtra = ".$item['extra'].";"); 				
-				else{
-					echo "Error: Save posted an invalid array expression.";
-					die();
-				}					
-				$item['extra'] = $newExtra;
-			}			
-			$formInfo['items'][] = $item;			
-		}
-	}
+	$formInfo = fm_saveHelperGatherFormInfo();
 	
 	//check if the shortcode is a duplicate
 	$scID = $fmdb->getFormID($formInfo['shortcode']);
@@ -212,6 +185,41 @@ function fm_saveFormAjax(){
 	echo "1";
 		
 	die();
+}
+
+function fm_saveHelperGatherFormInfo(){
+	//collect the posted information
+	$formInfo = array();
+	$formInfo['title'] = $_POST['title'];
+	$formInfo['labels_on_top'] = $_POST['labels_on_top'];
+	$formInfo['submitted_msg'] = $_POST['submitted_msg'];
+	$formInfo['submit_btn_text'] = $_POST['submit_btn_text'];
+	$formInfo['show_title'] = ($_POST['show_title']=="true"?1:0);
+	$formInfo['show_border'] = ($_POST['show_border']=="true"?1:0);
+	$formInfo['shortcode'] = sanitize_title($_POST['shortcode']);
+	$formInfo['label_width'] = $_POST['label_width'];
+	
+	//build the items list
+	$formInfo['items'] = array();
+	if(isset($_POST['items'])){
+		foreach($_POST['items'] as $item){			
+			if(!is_serialized($item['extra'])){ //if not a serialized array, hopefully a parseable php array definition..								
+				$item['extra'] = stripslashes(stripslashes($item['extra'])); //both javascript and $_POST add slashes
+				//make sure the code to be eval'ed is safe (otherwise this would be a serious security risk)
+				if(is_valid_array_expr($item['extra']))				
+					eval("\$newExtra = ".$item['extra'].";"); 				
+				else{
+					echo "Error: Save posted an invalid array expression. <br />";
+					echo $item['extra'];
+					die();
+				}					
+				$item['extra'] = $newExtra;
+			}			
+			$formInfo['items'][] = $item;			
+		}
+	}
+	
+	return $formInfo;
 }
 
 //insert a new form item
@@ -268,4 +276,6 @@ function fm_shortcodeHandler($atts){
 	else if($fmdb->isForm($formID))
 		return $fm_display->displayForm($formInfo);
 }
+
+include 'settings.php';
 ?>
