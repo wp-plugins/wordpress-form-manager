@@ -1,5 +1,6 @@
 === WordPress Form Manager ===
 Contributors: hoffcamp
+Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
