@@ -148,7 +148,7 @@ class fm_customListControl extends fm_controlBase{
 				case "radio":
 					return fm_radio_required_validator(formID, itemID);
 				case "checkbox": 
-					return true;
+					return fm_checkbox_required_validator(formID, itemID);
 				default:
 					return fm_select_required_validator(formID, itemID);
 			}

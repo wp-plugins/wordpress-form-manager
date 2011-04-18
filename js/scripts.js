@@ -13,27 +13,37 @@ function fm_deleteFormClick(formID){
 
 //AJAX
 
-function fm_saveForm(){
-	document.getElementById('ajax-loading').style.visibility = 'visible';
+function fm_saveForm(){	
+	var doSave = true;
+	if(fm_itemsWereDeleted){
+		doSave = confirm("There may be data associated with the form item(s) you removed.  Are you sure you want to save?");
+	}
 	
-	var data = {
-			action: 'fm_save_form',
-			id: document.getElementById('form-id').value,
-			title: document.getElementById('title').value,
-			labels_on_top: document.getElementById('labels_on_top').value,
-			submitted_msg: document.getElementById('submitted_msg').value,
-			submit_btn_text: document.getElementById('submit_btn_text').value,
-			show_title: document.getElementById('show_title').checked,
-			show_border: document.getElementById('show_border').checked,
-			shortcode: document.getElementById('shortcode').value,
-			label_width: document.getElementById('label_width').value,
-			items: fm_getFormItems('form-list')
-	};	
+	if(doSave){
+		document.getElementById('ajax-loading').style.visibility = 'visible';
+		var data = {
+				action: 'fm_save_form',
+				id: document.getElementById('form-id').value,
+				title: document.getElementById('title').value,
+				labels_on_top: document.getElementById('labels_on_top').value,
+				submitted_msg: document.getElementById('submitted_msg').value,
+				submit_btn_text: document.getElementById('submit_btn_text').value,
+				show_title: document.getElementById('show_title').checked,
+				show_border: document.getElementById('show_border').checked,
+				shortcode: document.getElementById('shortcode').value,
+				label_width: document.getElementById('label_width').value,
+				items: fm_getFormItems('form-list')
+		};	
+	
+		jQuery.post(ajaxurl, data, function(response){
+			document.getElementById('message-post').value = response;
+			document.getElementById('fm-main-form').submit();
+		});	
+	}
+}
 
-	jQuery.post(ajaxurl, data, function(response){
-		document.getElementById('message-post').value = response;
-		document.getElementById('fm-main-form').submit();
-	});	
+function fm_loadFields(){
+	return confirm("Any unsaved changes will be lost. Are you sure?");
 }
 
 function fm_initEditor(){
@@ -54,15 +64,18 @@ function fm_addItem(type){
 	jQuery.post(ajaxurl, data, function(response){
 		eval('itemInfo = ' + response + ';');
 		newLI.innerHTML = decodeURIComponent((itemInfo['html'] + '').replace(/\+/g, '%20'));
-		newLI.id = itemInfo['uniqueName'];				
+		newLI.id = itemInfo['uniqueName'];
+		newLI.className = "edit-form-menu-item postbox";
 		listUL.appendChild(newLI);
 		fm_initEditor();
 	});		
 }
 
+var fm_itemsWereDeleted = false;
 function fm_deleteItem(itemID){
 	var listItem = document.getElementById(itemID);
 	listItem.parentNode.removeChild(listItem);
+	fm_itemsWereDeleted = true;
 }
 
 function fm_getFormItems(editorID){
