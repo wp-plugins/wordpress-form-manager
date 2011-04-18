@@ -3,9 +3,6 @@
 
 /* ADMIN SIDE */
 
-.edit-form-body{
-	min-width:550px;
-}
 
 .fm-editor{
 	background-color:#fff;
@@ -62,7 +59,7 @@
 
 /* form item in the editor is in a table of class 'editor-item-table' */
 table.editor-item-table{
-
+	width:100%;
 }
 
 table.editor-item-table tr{
@@ -74,7 +71,7 @@ table.editor-item-table td{
 
 table.editor-item-table td label{
 	float: left;
-	width:100px;
+	/* width:100px; */
 	text-align: left;
 	margin-right: 0.5em;
 	display:block;
@@ -83,7 +80,6 @@ table.editor-item-table td label{
 table.editor-item-table td.editor-item-container{
 	padding-top:0px;
 	padding-bottom:2px;
-	
 }
 td.editor-item-buttons{
 	width:35px;
@@ -94,14 +90,15 @@ td.editor-item-buttons{
 .edit-form-menu-item{
 	border:1px solid #000;
 	padding-top:3px;
-	width:100%;
+	/* width:455px; */
 	style:block;
 	margin-bottom:10px;
 }
 
 /* some of the editor items use a table of class 'editor-item' within the above 'editor-item-table' */
 table.editor-item{
-	width:400px;
+	/* width:350px; */
+	width:100%;
 }
 
 table.editor-item td{
@@ -109,6 +106,7 @@ table.editor-item td{
 	text-align:left;
 	padding:0px 10px;
 	height:25px;
+	/* border:1px solid #000; */
 }
 
 td.editor-item-main{
@@ -116,9 +114,13 @@ td.editor-item-main{
 }
 
 table.editor-item td.editor-item-label{
-	width:150px;
+	/* width:50%; */ 
 	vertical-align:top;
 	padding-top:4px;
+}
+
+td.editor-item-label{
+	width:40%;
 }
 
 .editor-item-panel{
