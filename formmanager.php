@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: (none)
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.2
+Version: 1.2.1
 Author: Campbell Hoffman
 Author URI: (none)
 License: GPL2
