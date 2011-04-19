@@ -23,7 +23,7 @@ Supported field types:
 
 Subtitles and notes can also be added to the form in any location.
 
-If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the Form Manager plugin's directory. 
+If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
 
 == Installation ==
 
@@ -112,5 +112,8 @@ fm_new_text_validator($name, $label, $message, $regexp);
 
 Refer to the 'settings.php' file for examples.
 
- 
+== Upgrade Notice ==
+
+= 1.2.4 =
+Fixes an installation error when starting with a fresh plugin install.
 
