@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -115,6 +115,9 @@ fm_new_text_validator($name, $label, $message, $regexp);
 Refer to the 'settings.php' file for examples.
 
 == Upgrade Notice ==
+
+= 1.2.5 =
+Fixes multisite edit/data page bug. 
 
 = 1.2.4 =
 Fixes an installation error when starting with a fresh plugin install.

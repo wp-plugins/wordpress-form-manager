@@ -99,7 +99,6 @@ else: ?>
 	<div class="wrap">
 		<div id="icon-edit-pages" class="icon32"></div>
 		<h2 style="margin-bottom:20px">Forms <input type="submit" class="button-secondary" name="fm-add-new" value="Add New" /></h2>
-		
 		<?php if(sizeof($formList)>0): ?>
 		<div class="tablenav">
 		
@@ -132,11 +131,11 @@ else: ?>
 			<?php	 foreach($formList as $form): ?>
 				<tr class="alternate author-self status-publish iedit">
 					<td><input type="checkbox" name="fm-checked-<?php echo $form['ID'];?>"/></td>
-					<td class="post-title column-title"><strong><a class="row-title" href="<?php echo $_SERVER['PHP_SELF']."?page=fm-edit-form&id=".$form['ID'];?>"><?php echo $form['title'];?></a></strong>
+					<td class="post-title column-title"><strong><a class="row-title" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>"><?php echo $form['title'];?></a></strong>
 						<div class="row-actions">
 						<span class='edit'>
-						<a href="<?php echo $_SERVER['PHP_SELF']."?page=fm-edit-form&id=".$form['ID'];?>" title="Edit this form">Edit</a> | 
-						<a href="<?php echo $_SERVER['PHP_SELF']."?page=fm-form-data&id=".$form['ID'];?>" title="View form data">Data</a> | 
+						<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="Edit this form">Edit</a> | 
+						<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="View form data">Data</a> | 
 						<a href="#" title="Delete this form" onClick="fm_deleteFormClick('<?php echo $form['ID'];?>');return false">Delete</a>
 						</span>
 						</div>

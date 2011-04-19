@@ -74,7 +74,7 @@ if(isset($_POST['message']))
 						<div id="minor-publishing-actions">
 						
 							<div id="preview-action">
-							<a class="button-secondary" href="<?php echo $_SERVER['PHP_SELF']."?page=fm-edit-form&id=".$form['ID'];?>">Cancel Changes</a>
+							<a class="button-secondary" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>">Cancel Changes</a>
 							</div>
 						
 							<div class="clear"></div>
@@ -138,7 +138,7 @@ if(isset($_POST['message']))
 				<div id="minor-publishing">						
 					<div id="minor-publishing-actions">						
 						<div id="preview-action">		
-							<a class="preview button" href="<?php echo $_SERVER['PHP_SELF']."?page=fm-form-data&id=".$form['ID'];?>" >View Data</a>	
+							<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" >View Data</a>	
 						</div>					
 						<div class="clear"></div>			
 					</div>				

@@ -81,7 +81,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 	<h2>Data: <?php echo $form['title'];?></h2>
 	<div style="float:right;">
 		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV">Download Data (.csv)</a>
-		<a class="button-secondary action" href="<?php echo $_SERVER['PHP_SELF']."?page=fm-edit-form&id=".$form['ID'];?>" title="Edit this form">Edit Form</a>
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="Edit this form">Edit Form</a>
 	</div>
 		<div class="tablenav">			
 			<div class="alignleft actions">
@@ -125,7 +125,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				Page: &nbsp;&nbsp;
 				<?php for($x=0;$x<$numDataPages;$x++): ?>
 				<a href="<?php 
-					echo $_SERVER['PHP_SELF']."?".http_build_query(array_merge($queryVars, array('set' => $x)));
+					echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('set' => $x)));
 					?>">
 					<?php echo $x+1; ?></a>&nbsp;
 				<?php endfor; ?>
@@ -137,15 +137,15 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-top" onchange="fm_dataCBColChange()"/></th>
 				<th width="130px"><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == 'timestamp' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo $_SERVER['PHP_SELF']."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'timestamp'))); ?>">Timestamp</a></th>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'timestamp'))); ?>">Timestamp</a></th>
 				<th width="60px"><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == 'user' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo $_SERVER['PHP_SELF']."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user'))); ?>">User</a></th>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user'))); ?>">User</a></th>
 				<?php $x=1; foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo $_SERVER['PHP_SELF']."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a></th>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a></th>
 					<?php endif; ?>
 				<?php endforeach; ?>
 			</tr>
