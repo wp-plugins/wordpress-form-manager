@@ -101,7 +101,7 @@ Note:
 
 No. All HTML tags are stripped from form inputs. 
 
-== How to Add New Validators ==
+= How do I Add New Validators? =
 
 Inside the 'settings.php' file, use the 'fm_new_text_validator' function:
 
@@ -113,6 +113,16 @@ fm_new_text_validator($name, $label, $message, $regexp);
 * $regexp - Regular expression, used in JavaScript's String.match() function. 
 
 Refer to the 'settings.php' file for examples.
+
+= What is the Default Submission Data Table Structure? =
+
+By default, all fields are of the type 'TEXT', and the timestamp is used as the primary key.  
+
+The data tables are named '(wp prefix)fm_data_(form ID #)', where (wp prefix) is usually 'wp_', and the form ID can be found in the URL for editing a form, '(admin url)?page=fm-edit-form&<strong>id=1</strong>', or within the '(wp prefix)fm_forms' table. 
+
+= Can I Change the Submission Data Table Structure? =
+
+Certainly.  You can change field types and indexes.  If you need to restrict the length of a text input, use a custom validator as described above.  However, changing the primary key is not recommended, since duplicate entries cannot be checked with validation.
 
 == Upgrade Notice ==
 
