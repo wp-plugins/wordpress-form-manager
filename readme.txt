@@ -1,9 +1,10 @@
 === WordPress Form Manager ===
 Contributors: hoffcamp
+Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.1
+Stable tag: 1.2.4
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
