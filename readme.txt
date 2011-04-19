@@ -25,6 +25,8 @@ Subtitles and notes can also be added to the form in any location.
 
 If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
 
+*** I am starting work on version 2.  If you have suggestions or requests, please let me know! ***
+
 == Installation ==
 
 Method 1: Activate the 'WordPress Form Manager' plugin through the 'Plugins' menu in WordPress.  
