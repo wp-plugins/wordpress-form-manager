@@ -46,7 +46,9 @@ The shortcode is simple:
 
 [form (shortcode)]
 
-So if your form's shortcode is 'my-contact-form', the code would be [form my-contact-form]
+So if your form's shortcode is 'my-contact-form', the code would be:
+
+[form my-contact-form]
 
 = How do I add elements to the form? =
 
