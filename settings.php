@@ -4,7 +4,7 @@
 //function fm_new_text_validator($name, $label, $message, $regexp)
 					
 //accepts integers and decimal; no scientific notation...				
-fm_new_text_validator('number', "Numbers Only", "'%s' must be a nalid number", '/^\s*[0-9]*[\.]?[0-9]+\s*$/');
+fm_new_text_validator('number', "Numbers Only", "'%s' must be a valid number", '/^\s*[0-9]*[\.]?[0-9]+\s*$/');
 
 //accepts anything with ten numbers, grouped appropriately. This covers any good faith attempt at a phone number, and also accepts extensions, etc.
 fm_new_text_validator('phone', "Phone Number", "'%s' must be a valid phone number", '/^.*[0-9]{3}.*[0-9]{3}.*[0-9]{4}.*$/');
