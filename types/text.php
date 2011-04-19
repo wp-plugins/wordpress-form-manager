@@ -14,7 +14,7 @@ class fm_textControl extends fm_controlBase{
 		$elem=array('type' => 'text',
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,
-											'value'=> $itemInfo['extra']['value'],
+											'value'=> htmlspecialchars($itemInfo['extra']['value']),
 											'style' => "width:".$itemInfo['extra']['size']."px;"											
 											)
 					);											
