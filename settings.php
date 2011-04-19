@@ -18,7 +18,7 @@ fm_new_text_validator('email', "E-Mail", "'%s' Must be a valid E-Mail address", 
 
 fm_set_form_defaults(array(		'title' => 				"New Form",
 								'labels_on_top' =>		 0, 
-								'submitted_msg' => 		'Thanks you! Your data has been submitted.', 
+								'submitted_msg' => 		'Thank you! Your data has been submitted.', 
 								'submit_btn_text' => 	'Submit', 
 								'required_msg' => 		"\'%s\' is required.", 
 								'show_title' => 		1,
