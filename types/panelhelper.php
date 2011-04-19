@@ -30,6 +30,12 @@ class fm_editPanelItemBase{
 	}
 }
 
+class fm_editPanelTextArea extends fm_editPanelItemBase{
+	function getPanelItemInner(){
+		return "<textarea rows=\"".$this->options['rows']."\" cols=\"".$this->options['cols']."\" id=\"{$this->uniqueName}-{$this->itemName}\" >".$this->options['value']."</textarea>";
+	}
+}
+
 class fm_editPanelItemCheckbox extends fm_editPanelItemBase{
 	//$options:
 	//	'checked': value of 'checked' attribute (true/false, 1/0)

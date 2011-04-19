@@ -1,9 +1,10 @@
 === WordPress Form Manager ===
 Contributors: hoffcamp
+Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.1
+Stable tag: 1.2.5
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -22,13 +23,15 @@ Supported field types:
 
 Subtitles and notes can also be added to the form in any location.
 
-If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the Form Manager plugin's directory. 
+If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
+
+*** I am starting work on version 2.  If you have suggestions or requests, please let me know! ***
 
 == Installation ==
 
 Method 1: Activate the 'WordPress Form Manager' plugin through the 'Plugins' menu in WordPress.  
 
-Method 2: Download the source code for the plugin, and upload the 'formmanager' directory to the '/wp-content/plugins/' directory.
+Method 2: Download the source code for the plugin, and upload the 'wordpress-form-manager' directory to the '/wp-content/plugins/' directory.
 
 == Frequently Asked Questions ==
 
@@ -111,5 +114,11 @@ fm_new_text_validator($name, $label, $message, $regexp);
 
 Refer to the 'settings.php' file for examples.
 
- 
+== Upgrade Notice ==
+
+= 1.2.5 =
+Fixes multisite edit/data page bug. 
+
+= 1.2.4 =
+Fixes an installation error when starting with a fresh plugin install.
 

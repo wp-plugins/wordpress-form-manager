@@ -12,4 +12,11 @@ function is_valid_array_expr($exprStr){
 	$arr_item_list_expr = "(".$dbl_quote_str_lit."|".$sngl_quote_str_lit."|[0-9]+|[(),]|array|=>|\s)*";
 	return (preg_match("/^".$arr_item_list_expr."$/", $exprStr) > 0);
 }
+
+//shortens a string to a specified width; if $useEllipse is true (default), three of these characters will be '...'
+function fm_restrictString($string, $length, $useEllipse = true){
+	if(strlen($string)<=$length) return $string;
+	if($length > 3 && $useEllipse)	return substr($string, 0, $length-3)."...";
+	else return substr($string, 0, $length);
+}
 ?>
