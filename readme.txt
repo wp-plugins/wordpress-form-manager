@@ -29,7 +29,7 @@ If you are familiar with regular expessions, adding new validation types can be 
 
 Method 1: Activate the 'WordPress Form Manager' plugin through the 'Plugins' menu in WordPress.  
 
-Method 2: Download the source code for the plugin, and upload the 'formmanager' directory to the '/wp-content/plugins/' directory.
+Method 2: Download the source code for the plugin, and upload the 'wordpress-form-manager' directory to the '/wp-content/plugins/' directory.
 
 == Frequently Asked Questions ==
 
