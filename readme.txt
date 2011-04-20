@@ -137,7 +137,7 @@ If you don't have access to php.ini, your best bet is to consult your host as to
 
 == Upgrade Notice ==
 
-= 1.2.6 =
+= 1.2.7 =
 Added e-mail notifications. 
 
 = 1.2.5 =
