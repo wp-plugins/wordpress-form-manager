@@ -281,6 +281,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	$formInfo = $this->getForm($formID);
 	$data = $this->getFormSubmissionData($formID);
 	
+	$data = $data['data'];
 	//store the lines in an array
 	$csvRows = array();
 	
