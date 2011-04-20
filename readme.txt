@@ -1,15 +1,16 @@
 === WordPress Form Manager ===
 Contributors: hoffcamp
+Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.1
+Stable tag: 1.2.6
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
 == Description ==
 
-Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, requried fields, and custom acknowledgments.  Forms can be added to posts or pages using a simple shortcode format.  
+Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, requried fields, custom acknowledgments, and e-mail notifications.  Forms can be added to posts or pages using a simple shortcode format.  
 
 Supported field types:
 
@@ -22,13 +23,15 @@ Supported field types:
 
 Subtitles and notes can also be added to the form in any location.
 
-If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the Form Manager plugin's directory. 
+If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
+
+*** I am starting work on version 2.  If you have suggestions or requests, please let me know! ***
 
 == Installation ==
 
 Method 1: Activate the 'WordPress Form Manager' plugin through the 'Plugins' menu in WordPress.  
 
-Method 2: Download the source code for the plugin, and upload the 'formmanager' directory to the '/wp-content/plugins/' directory.
+Method 2: Download the source code for the plugin, and upload the 'wordpress-form-manager' directory to the '/wp-content/plugins/' directory.
 
 == Frequently Asked Questions ==
 
@@ -43,7 +46,9 @@ The shortcode is simple:
 
 [form (shortcode)]
 
-So if your form's shortcode is 'my-contact-form', the code would be [form my-contact-form]
+So if your form's shortcode is 'my-contact-form', the code would be:
+
+[form my-contact-form]
 
 = How do I add elements to the form? =
 
@@ -98,7 +103,7 @@ Note:
 
 No. All HTML tags are stripped from form inputs. 
 
-== How to Add New Validators ==
+= How do I add new validators? =
 
 Inside the 'settings.php' file, use the 'fm_new_text_validator' function:
 
@@ -111,5 +116,33 @@ fm_new_text_validator($name, $label, $message, $regexp);
 
 Refer to the 'settings.php' file for examples.
 
- 
+= What is the table structure for submission data? =
+
+By default, all fields are of the type 'TEXT', and the timestamp is used as the primary key.  
+
+The data tables are named '(wp prefix)fm_data_(form ID #)', where (wp prefix) is usually 'wp_', and the form ID can be found in the URL for editing a form, '(admin url)?page=fm-edit-form&<strong>id=1</strong>', or within the '(wp prefix)fm_forms' table. 
+
+= Can I change the table structure for submission data? =
+
+Certainly.  You can change field types and indexes.  If you need to restrict the length of a text input, use a custom validator as described above.  However, changing the primary key is not recommended, since duplicate entries cannot be checked with validation.
+
+= The e-mail notification doesn't seem to work. Why? = 
+
+Who knows. Form Manager uses the wp_mail() function, which according to the WordPress reference requires the following:
+
+* Settings 'SMTP' and 'smtp_port' need to be set in your php.ini
+* Also, either set the 'sendmail_from' setting in php.ini, or pass it as an additional header.
+
+If you don't have access to php.ini, your best bet is to consult your host as to why your site can't send e-mails. 
+
+== Upgrade Notice ==
+
+= 1.2.6 =
+Added e-mail notifications. 
+
+= 1.2.5 =
+Fixes multisite edit/data page bug. 
+
+= 1.2.4 =
+Fixes an installation error when starting with a fresh plugin install.
 
