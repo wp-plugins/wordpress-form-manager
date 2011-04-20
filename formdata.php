@@ -2,83 +2,73 @@
 global $fmdb;
 global $fm_controls;
 
+$itemsPerPage = 30;
+$set = isset($_REQUEST['set']) ? $_REQUEST['set'] : 0;
+
 $form = null;
 $formData = null;
 if($_REQUEST['id']!="") $form = $fmdb->getForm($_REQUEST['id']);
-if($form != null) $formData = $fmdb->getFormSubmissionData($form['ID']);
+if($form != null){
+	$orderBy = isset($_REQUEST['orderby']) ? $_REQUEST['orderby'] : 'timestamp';
+	$orderBy = $fmdb->isValidItem($form, $orderBy) ? $orderBy : 'timestamp';
+	$ord = $_REQUEST['ord'] == 'ASC' ? 'ASC' : 'DESC';
+	$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
+	
+	$numDataPages = ceil($formData['count'] / $itemsPerPage);
+}
+
+// PARSE THE QUERY STRING
+parse_str($_SERVER['QUERY_STRING'], $queryVars);
 
 ////////////////////////////////////////////////////////////////////////////////
 //ACTIONS
 
 //Delete data row(s):
-if(isset($_POST['fm-action-select']) && $_POST['fm-action-select'] == 'delete'){
-	//use the raw data, since we need the slashes for the WHERE = comparison
-	$rawData = $fmdb->getFormSubmissionData($form['ID'], true);
-	$toDelete=array();
-	$numRows = (int)$_POST['fm-num-data-rows'];
-	for($x=0;$x<$numRows;$x++){
-		if(isset($_POST['fm-checked-'.$x])){
-			$toDelete[]=$x;
+if(isset($_POST['fm-action-select'])){
+	if($_POST['fm-action-select'] == 'delete'){	
+		$toDelete=array();
+		$numRows = (int)$_POST['fm-num-data-rows'];
+		for($x=0;$x<$numRows;$x++){
+			if(isset($_POST['fm-checked-'.$x])){
+				$toDelete[]=$x;
+			}
 		}
+		foreach($toDelete as $del){	
+			$fmdb->deleteSubmissionDataRow($form['ID'], $formData['data'][$del]);
+		}		
 	}
-	foreach($toDelete as $del){	
-		$fmdb->deleteSubmissionDataRow($form['ID'], $rawData[$del]);
+	else if($_POST['fm-action-select'] == 'delete_all'){
+		$fmdb->clearSubmissionData($form['ID']);	
 	}
+	
 	//clean up the mess we made
 	$formData = $fmdb->getFormSubmissionData($form['ID']);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//DOWNLOAD CSV
-
-if(isset($_REQUEST['csv']) && $_REQUEST['csv']==1){
-	/*
-	$csvdata = "this is a test.";
-	
-	$fname = 'myCSV.csv';
-	$fp = fopen($fname,'w');
-	fwrite($fp,$csvdata);
-	fclose($fp);	
-	*/
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //MAIN DIALOG
-
-//make the data look nice
-$newData=array();
 
 //keep track of the max number of chars in each column so we can set the table widths appropriately
 $colMaxChars=array();
 for($x=0;$x<sizeof($form['items']);$x++) $colMaxChars[$x]=0;
 
 if($formData !== false){
-	foreach($formData as $dataRow){
+	foreach($formData['data'] as $dataRow){
 		$x=1;
-		foreach($form['items'] as $formItem){
-			//get the raw data
-			$raw = $dataRow[$formItem['unique_name']];
-			//parse the data according to the control type
-			$parsed = $fm_controls[$formItem['type']]->parseData($formItem['unique_name'], $formItem, $raw);
-			//display the shortened version
-			$restricted = fm_restrictString($parsed, 20);
-			$dataRow[$formItem['unique_name']] = $restricted;
-			
-			//update $colMaxChars
+		foreach($form['items'] as $formItem){			
+			$restricted = fm_restrictString($dataRow[$formItem['unique_name']], 20);						
 			$len = strlen($restricted);
 			if($len>$colMaxChars[$x]) $colMaxChars[$x] = $len;		
 			$x++;
 		}
-		$newData[] = $dataRow;
 	}
 }
 
 //'total' character width
 $totalCharWidth = 0;
 for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
-
-$formData = $newData;
 
 ?>
 <form name="fm-main-form" id="fm-main-form" action="" method="post">
@@ -91,13 +81,14 @@ $formData = $newData;
 	<h2>Data: <?php echo $form['title'];?></h2>
 	<div style="float:right;">
 		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV">Download Data (.csv)</a>
-		<a class="button-secondary action" href="<?php echo $_SERVER['PHP_SELF']."?page=fm-edit-form&id=".$form['ID'];?>" title="Edit this form">Edit Form</a>
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="Edit this form">Edit Form</a>
 	</div>
 		<div class="tablenav">			
 			<div class="alignleft actions">
 				<select name="fm-action-select" id="fm-action-select">
 				<option value="-1" selected="selected">Bulk Actions</option>
-				<option value="delete">Delete</option>
+				<option value="delete">Delete Selected</option>
+				<option value="delete_all">Delete All Submission Data</option>
 				</select>
 				<input type="submit" value="Apply" name="fm-doaction" id="fm-doaction" onclick="return fm_confirmSubmit()" class="button-secondary action" />							
 				<script type="text/javascript">
@@ -116,6 +107,9 @@ $formData = $newData;
 						if (selected) return confirm("Are you sure you want to delete the selected items?");
 						return false;
 					}
+					if(action == 'delete_all'){
+						return confirm("This will delete all submission data for this form. Are you sure?");
+					}
 					return false;
 				}
 				</script>
@@ -123,15 +117,35 @@ $formData = $newData;
 			<div class="clear"></div>
 		</div>		
 		
+		<div class="tablenav">
+			<div style="float:left;">
+			Showing page <?php echo $set + 1;?> ( Rows <?php echo $set*$itemsPerPage;?> - <?php echo min(($set+1)*$itemsPerPage, $formData['count']); ?> out of <?php echo $formData['count'];?>): 
+			</div>
+			<div style="float:right;">
+				Page: &nbsp;&nbsp;
+				<?php for($x=0;$x<$numDataPages;$x++): ?>
+				<a href="<?php 
+					echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('set' => $x)));
+					?>">
+					<?php echo $x+1; ?></a>&nbsp;
+				<?php endfor; ?>
+			</div>			
+		</div>
 		<table class="widefat post fixed">
 			<thead>
 			<tr>
 				<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-top" onchange="fm_dataCBColChange()"/></th>
-				<th width="130px">Timestamp</th>
-				<th width="60px">User</th>
+				<th width="130px"><a class="edit-form-button" href="<?php
+									$ord = ($queryVars['orderby'] == 'timestamp' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'timestamp'))); ?>">Timestamp</a></th>
+				<th width="60px"><a class="edit-form-button" href="<?php
+									$ord = ($queryVars['orderby'] == 'user' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user'))); ?>">User</a></th>
 				<?php $x=1; foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
-						<th><?php echo fm_restrictString($formItem['label'],20);?></th>
+						<th><a class="edit-form-button" href="<?php
+									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a></th>
 					<?php endif; ?>
 				<?php endforeach; ?>
 			</tr>
@@ -149,7 +163,7 @@ $formData = $newData;
 			</tr>
 			</tfoot>
 			<?php $index=0; ?>
-			<?php foreach($formData as $dataRow): ?>
+			<?php foreach($formData['data'] as $dataRow): ?>
 				<tr class="alternate author-self status-publish iedit">
 					<td><input type="checkbox" name="fm-checked-<?php echo $index;?>" id="fm-checked-<?php echo $index++;?>"/></td>
 					<td><?php echo $dataRow['timestamp'];?></td>
