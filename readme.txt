@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -137,7 +137,7 @@ If you don't have access to php.ini, your best bet is to consult your host as to
 
 == Upgrade Notice ==
 
-= 1.2.7 =
+= 1.2.8 =
 Added e-mail notifications. 
 
 = 1.2.5 =
