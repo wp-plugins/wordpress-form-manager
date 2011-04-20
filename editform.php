@@ -6,6 +6,48 @@ global $fm_controls;
 $form = null;
 if($_REQUEST['id']!="")
 	$form = $fmdb->getForm($_REQUEST['id']);
+	
+$formList = $fmdb->getFormList();
+
+/// LOAD FIELDS //////////////////////////////////////////
+
+if(isset($_POST['load-fields'])){
+	$loadedForm = $fmdb->copyForm($_POST['load-fields-id']);
+	if($_POST['load-fields-insert-after'] == "0"){  //insert at beginning		
+		$temp = $form['items'];
+		$form['items'] = $loadedForm['items'];
+		foreach($temp as $item)
+			$form['items'][] = $item;
+	}
+	else if($_POST['load-fields-insert-after'] == "1"){  //insert at end
+		foreach($loadedForm['items'] as $item)
+			$form['items'][] = $item;
+	}
+	else{		
+		$temp = array();
+		foreach($form['items'] as $oldItem){
+			$temp[] = $oldItem;
+			if($oldItem['unique_name'] == $_POST['load-fields-insert-after']){
+				foreach($loadedForm['items'] as $newItem)
+					$temp[] = $newItem;
+			}
+		}
+		$form['items'] = $temp;
+	}
+}
+
+// parse e-mail list
+$email_list = explode(",", $form['email_list']);
+$email_admin = "no";
+for($x=0;$x<sizeof($email_list);$x++){
+	$email_list[$x] = trim($email_list[$x]);
+	if($email_list[$x] == trim(get_option('admin_email'))){
+		unset($email_list[$x]);
+		$email_admin = "yes";
+	}
+}
+
+///////////////////////////////////////////////////////
 ?>
 <form name="fm-main-form" id="fm-main-form" action="" method="post">
 <input type="hidden" value="<?php echo $form['ID'];?>" name="form-id" id="form-id"/>
@@ -21,7 +63,11 @@ if(isset($_POST['message']))
 	switch($_POST['message']){
 		case 1: ?><div id="message-success" class="updated"><p>Form updated. </p></div><?php break;
 		case 2: ?><div id="message-error" class="error"><p>Save failed. </p></div><?php break;
-		default: ?><div id="message-error" class="error"><p><?php echo stripslashes($_POST['message']);?></p></div><?php break;
+		default: ?>
+			<?php if(isset($_POST['message']) && trim($_POST['message']) != ""): ?>
+			<div id="message-error" class="error"><p><?php echo stripslashes($_POST['message']);?></p></div>
+			<?php endif; ?>
+		<?php
 	} ?></div>
 
 <div id="poststuff" class="metabox-holder has-right-sidebar">
@@ -40,7 +86,7 @@ if(isset($_POST['message']))
 						<div id="minor-publishing-actions">
 						
 							<div id="preview-action">
-							<a class="button-secondary" href="<?php echo $_SERVER['PHP_SELF']."?page=fm-edit-form&id=".$form['ID'];?>">Cancel Changes</a>
+							<a class="button-secondary" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>">Cancel Changes</a>
 							</div>
 						
 							<div class="clear"></div>
@@ -63,7 +109,39 @@ if(isset($_POST['message']))
 				</div>							
 			</div>				
 		</div>	
-	
+		<!-------------------------------------------------------------------------------------------------- -->
+		<div id="submitdiv" class="postbox " >
+		<h3 class='hndle'><span>Load Fields</span></h3>
+		<div class="inside">
+			<div class="submitbox" id="submitpost">			
+				<div id="minor-publishing">						
+					<div id="minor-publishing-actions">						
+						<div class="metabox-prefs">
+							<label for="load-fields-id">Form: </label>		
+							<select name="load-fields-id">
+								<?php foreach($formList as $f): ?>
+								<option value="<?php echo $f['ID'];?>"><?php echo $f['title']; ?></option>
+								<?php endforeach; ?> 
+							</select>
+							<br />
+							<label for="load-fields-insert-after">Insert After:</label>
+							<select name="load-fields-insert-after">
+								<option value="0">(Insert at beginning)</option>
+								<?php foreach($form['items'] as $item): ?>
+								<option value="<?php echo $item['unique_name'];?>"><?php echo fm_restrictString($item['label'],15);?></option>
+								<?php endforeach; ?>
+								<option value="1">(Insert at end)</option>
+							</select>
+							<br />
+							<input name="load-fields" type="submit" class="button-secondary" value="Load Fields" onclick="return fm_loadFields()"/>	
+						</div>					
+						<div class="clear"></div>			
+					</div>								
+					<div class="clear"></div>
+				</div>				
+			</div>		
+		</div>
+		</div>		
 		<!-------------------------------------------------------------------------------------------------- -->
 		<div id="submitdiv" class="postbox " >
 		<h3 class='hndle'><span>Submission Data</span></h3>
@@ -72,7 +150,7 @@ if(isset($_POST['message']))
 				<div id="minor-publishing">						
 					<div id="minor-publishing-actions">						
 						<div id="preview-action">		
-							<a class="preview button" href="<?php echo $_SERVER['PHP_SELF']."?page=fm-form-data&id=".$form['ID'];?>" >View Data</a>	
+							<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" >View Data</a>	
 						</div>					
 						<div class="clear"></div>			
 					</div>				
@@ -91,7 +169,7 @@ if(isset($_POST['message']))
 </div><!-- poststuff -->
 
 <div id="post-body">
-<div id="post-body-content">
+<div id="post-body-content" class="edit-form-body">
 <div id="titlediv">
 	<div id="titlewrap">		
 		<input type="text" name="post_title" id="title" size="30" tabindex="1" value="<?php echo $form['title'];?>" autocomplete="off" />
@@ -116,7 +194,7 @@ if(isset($_POST['message']))
 				$types=array();
 				foreach($fm_controls as $controlKey=>$controlType){
 					if($controlKey != 'default')
-						$types[]="<a href=\"#\" onclick=\"fm_addItem('{$controlKey}')\">".$controlType->getTypeLabel()."</a>";
+						$types[]="<a class=\"edit-form-button\" onclick=\"fm_addItem('{$controlKey}')\">".$controlType->getTypeLabel()."</a>";
 				}
 				echo implode(" | \n", $types);
 			?>
@@ -124,15 +202,12 @@ if(isset($_POST['message']))
 		</div>
 		<div class="fm-editor">
 			<ul id="form-list">
-			<?php 
-			foreach($form['items'] as $item){				
-				echo "<li class=\"edit-form-menu-item postbox\" id=\"".$item['unique_name']."\">".$fm_display->getEditorItem($item['unique_name'], $item['type'], $item)."</li>\n";
-			} 
-			?>	
+			<?php foreach($form['items'] as $item): ?>
+			<?php	echo "<li class=\"edit-form-menu-item postbox\" id=\"".$item['unique_name']."\">".$fm_display->getEditorItem($item['unique_name'], $item['type'], $item)."</li>\n"; ?>
+			<?php endforeach; ?>	
 			</ul>
 		</div>
 	</div>	
-	
 	
 	
 	<script type="text/javascript">	
@@ -196,8 +271,18 @@ if(isset($_POST['message']))
 					<input type="text" id="submitted_msg" value="<?php echo $form['submitted_msg'];?>" />
 			</div>				
 			<div class="fm-admin-field-wrap">
-				<label>Submt button label:</label>
+				<label>Submit button label:</label>
 					<input type="text" id="submit_btn_text" value="<?php echo $form['submit_btn_text'];?>"/>
+			</div>
+			<div class="fm-admin-field-wrap">
+				<label>Send notification to <?php echo get_option('admin_email'); ?>:</label>
+				<input type="checkbox" id="email_admin" <?php echo ($email_admin=="yes"?'checked':'');?> />
+			</div>
+			<div class="fm-admin-field-wrap">
+				<label>Send notification(s) to:
+				<span class="small">Enter a list of emails separated by commas</span>
+				</label>
+				<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" />				
 			</div>
 		</div>
 		</div>
