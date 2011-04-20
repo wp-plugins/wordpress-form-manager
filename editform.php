@@ -36,6 +36,18 @@ if(isset($_POST['load-fields'])){
 	}
 }
 
+// parse e-mail list
+$email_list = explode(",", $form['email_list']);
+$email_admin = "no";
+for($x=0;$x<sizeof($email_list);$x++){
+	$email_list[$x] = trim($email_list[$x]);
+	if($email_list[$x] == trim(get_option('admin_email'))){
+		unset($email_list[$x]);
+		$email_admin = "yes";
+	}
+}
+
+///////////////////////////////////////////////////////
 ?>
 <form name="fm-main-form" id="fm-main-form" action="" method="post">
 <input type="hidden" value="<?php echo $form['ID'];?>" name="form-id" id="form-id"/>
@@ -259,8 +271,18 @@ if(isset($_POST['message']))
 					<input type="text" id="submitted_msg" value="<?php echo $form['submitted_msg'];?>" />
 			</div>				
 			<div class="fm-admin-field-wrap">
-				<label>Submt button label:</label>
+				<label>Submit button label:</label>
 					<input type="text" id="submit_btn_text" value="<?php echo $form['submit_btn_text'];?>"/>
+			</div>
+			<div class="fm-admin-field-wrap">
+				<label>Send notification to <?php echo get_option('admin_email'); ?>:</label>
+				<input type="checkbox" id="email_admin" <?php echo ($email_admin=="yes"?'checked':'');?> />
+			</div>
+			<div class="fm-admin-field-wrap">
+				<label>Send notification(s) to:
+				<span class="small">Enter a list of emails separated by commas</span>
+				</label>
+				<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" />				
 			</div>
 		</div>
 		</div>

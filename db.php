@@ -44,7 +44,8 @@ public $formSettingsKeys = array('title' => "New Form",
 					'show_title' => 1,
 					'show_border' => 1,
 					'label_width' => 200,
-					'type' => 'form');			
+					'type' => 'form',
+					'email_list' => '');			
 					
 public $itemKeys = array ('type' => 0,
 				'index' => 0,
@@ -71,29 +72,45 @@ function setupFormManager(){
 	//////////////////////////////////////////////////////////////////
 	//form definitions table - stoes ID, title, options, and name of data table for each form
 	
-	$q = "SHOW TABLES LIKE '".$this->formsTable."'";
-	$res = $this->query($q);
-	if(mysql_num_rows($res) == 0){
+	/*
+		ID					- stores the unique integer ID of the form
+		title				- form title
+		labels_on_top		- labels displayed on top or to the left
+		submitted_msg   	- message displayed when user submits data
+		submit_btn_text		- text on the 'submit' button
+		required_msg 		- message shown in the 'required' popup; use %s in the string to show the field label. If no string is given, default message is used.				
+		data_table 			- table where the form's submissions are stored
+		action 				- form 'action' attribute
+		data_index 			- data table primary key, if it has one
+		shortcode 			- shortcode for the form in question (wordpress only)
+		show_title 			- display the form title
+		show_border 		- display the form border
+		label_width 		- width of the labels, when displayed on the left
+		type 				- type of form ('form', 'template')
+		email_list			- list of e-mails to send notifications to
+	*/	
 	
-		$q = "CREATE TABLE `".$this->formsTable."` (".
-				"`ID` INT NOT NULL ,".							//stores the unique integer ID of the form
-				"`title` TEXT NOT NULL ,".
-				"`labels_on_top` BOOL DEFAULT '0' NOT NULL ,".				//labels displayed on top or to the left
-				"`submitted_msg` TEXT NOT NULL ,".				//message displayed when user submits data
-				"`submit_btn_text` VARCHAR( 32 ) NOT NULL ,".	//text on the 'submit' button
-				"`required_msg` TEXT NOT NULL ,".				//message shown in the 'required' popup; use %s in the string to show the field label. If no string is given, default message is used.				
-				"`data_table` VARCHAR( 32 ) NOT NULL ,".		//table where the form's submissions are stored
-				"`action` TEXT NOT NULL ,".						//form 'action' attribute
-				"`data_index` VARCHAR( 32 ) NOT NULL ,".		//data table primary key, if it has one
-				"`shortcode` VARCHAR( 64 ) NOT NULL ,".			//shortcode for the form in question (wordpress only)
-				"`show_title` BOOL DEFAULT '1' NOT NULL ,".					//display the form title
-				"`show_border` BOOL DEFAULT '1' NOT NULL ,".				//display the form border
-				"`label_width` VARCHAR( 32 ) NOT NULL ,".		//width of the labels, when displayed on the left
-				"`type` VARCHAR( 32 ) NOT NULL ,".				//type of form ('form', 'template')
-				"PRIMARY KEY ( `ID` )".
-				")";
-		$this->query($q);
-	}
+	$sql = "CREATE TABLE " . $this->formsTable . " (
+		`ID` INT NOT NULL,
+		`title` TEXT NOT NULL,
+		`labels_on_top` BOOL DEFAULT '0' NOT NULL,
+		`submitted_msg` TEXT NOT NULL,
+		`submit_btn_text` VARCHAR( 32 ) NOT NULL,
+		`required_msg` TEXT NOT NULL,
+		`data_table` VARCHAR( 32 ) NOT NULL,
+		`action` TEXT NOT NULL,
+		`data_index` VARCHAR( 32 ) NOT NULL,
+		`shortcode` VARCHAR( 64 ) NOT NULL,
+		`show_title` BOOL DEFAULT '1' NOT NULL,
+		`show_border` BOOL DEFAULT '1' NOT NULL,
+		`label_width` VARCHAR( 32 ) NOT NULL,
+		`type` VARCHAR( 32 ) NOT NULL,
+		`email_list` TEXT NOT NULL,
+		PRIMARY KEY  (`ID`)
+		)";
+
+	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+	dbDelta($sql);
 	
 	//create a settings row
 	$this->initFormsTable();
@@ -114,7 +131,7 @@ function setupFormManager(){
 				"`label` TEXT NOT NULL ,".						//label for the field; can be blank. displayed on top or to the left.
 				"`required` BOOL NOT NULL ,".					//required field or not				
 				"`db_type` VARCHAR( 32 ) NOT NULL ,".			//the type of column in the data table
-				"`description` TEXT NOT NULL ,".			//the description of the item displayed below the main label
+				"`description` TEXT NOT NULL ,".				//the description of the item displayed below the main label
 				"INDEX ( `ID` ) ,".
 				"UNIQUE (`unique_name`)".
 				");";
@@ -240,7 +257,16 @@ function processPost($formID, $extraInfo = null){
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
 		$postData = array_merge($postData, $extraInfo);
 	}
+	
+	//generate a timestamp
+	$q = "SELECT NOW()";
+	$res = $this->query($q);
+	$row = mysql_fetch_array($res);
+	mysql_free_result($res);
+	$postData['timestamp'] = $row[0];
+	
 	$this->insertSubmissionData($dataTable, $postData);
+	return $postData;
 }
 function insertSubmissionData($dataTable, $postData){
 	$q = "INSERT INTO `{$dataTable}` SET ";

@@ -10,7 +10,7 @@ Put custom forms into posts and pages using shortcodes. Download submissions in 
 
 == Description ==
 
-Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, requried fields, and custom acknowledgments.  Forms can be added to posts or pages using a simple shortcode format.  
+Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, requried fields, custom acknowledgments, and e-mail notifications.  Forms can be added to posts or pages using a simple shortcode format.  
 
 Supported field types:
 
@@ -126,7 +126,20 @@ The data tables are named '(wp prefix)fm_data_(form ID #)', where (wp prefix) is
 
 Certainly.  You can change field types and indexes.  If you need to restrict the length of a text input, use a custom validator as described above.  However, changing the primary key is not recommended, since duplicate entries cannot be checked with validation.
 
+= The e-mail notification doesn't seem to work. Why? = 
+
+Who knows. Form Manager uses the wp_mail() function, which according to the WordPress reference requires the following:
+
+* Settings 'SMTP' and 'smtp_port' need to be set in your php.ini
+* Also, either set the 'sendmail_from' setting in php.ini, or pass it as an additional header.
+
+If you don't have access to php.ini, your best bet is to consult your host as to why your site can't send e-mails. 
+
 == Upgrade Notice ==
+
+= 1.2.6 =
+
+Added e-mail notifications. 
 
 = 1.2.5 =
 Fixes multisite edit/data page bug. 

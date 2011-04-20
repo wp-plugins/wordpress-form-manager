@@ -51,19 +51,19 @@ $fm_display = new fm_display_class();
 /**************************************************************/
 /******* DATABASE SETUP ***************************************/
 
-function fd_install () {
+function fm_install () {
 	global $fmdb;	
 	$fmdb->setupFormManager();   
 }  
-register_activation_hook(__FILE__,'fd_install');
+register_activation_hook(__FILE__,'fm_install');
 
 //uninstall - delete the table(s). 
-function fd_uninstall() {
+function fm_uninstall() {
 	global $fmdb;	
 	$fmdb->removeFormManager();
 }
 
-register_uninstall_hook(__FILE__,'fd_uninstall');
+register_uninstall_hook(__FILE__,'fm_uninstall');
 
 
 /**************************************************************/
@@ -199,6 +199,29 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['shortcode'] = sanitize_title($_POST['shortcode']);
 	$formInfo['label_width'] = $_POST['label_width'];
 	
+	//build the notification email list
+
+	$emailList = explode(",", $_POST['email_list']);
+	$valid = true;
+	for($x=0;$x<sizeof($emailList);$x++){
+		$emailList[$x] = trim($emailList[$x]);		
+		if($emailList[$x] != "" && !preg_match("/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/", $emailList[$x])){
+			$valid = false;
+			$x = sizeof($emailList);
+		}	
+	}
+	if($_POST['email_admin'] == "true")
+		$emailList[] = get_option('admin_email');
+		
+	if($valid){
+		$temp = array();
+		foreach($emailList as $email)
+			if($email != "") $temp[] = $email;
+		$formInfo['email_list'] = implode(",", $temp);
+	}
+	else
+		echo "Error: There was a problem with the notification e-mail list.  Other settings were updated.";
+		
 	//build the items list
 	$formInfo['items'] = array();
 	if(isset($_POST['items'])){
@@ -269,8 +292,23 @@ function fm_shortcodeHandler($atts){
 	$formInfo = $fmdb->getForm($formID);
 	
 	if(wp_verify_nonce($_POST['fm-submit-nonce'],'fm-submit')){
+		// process the post
 		get_currentuserinfo();		
-		$fmdb->processPost($formID, array('user'=>$current_user->user_login));
+		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login));	
+		
+		// send email notifications		
+		if(trim($formInfo['email_list']) != ""){
+			$subject = get_option('blogname').": '".$formInfo['title']."' Submission";
+			$message = $subject."\n";
+			if($postData['user'] != "") $message.= "User: ".$postData['user']."\n";
+			$message.= "Timestamp: ".$postData['timestamp']."\n\n";
+			foreach($formInfo['items'] as $formItem){
+				if($formItem['db_type'] != "NONE")
+					$message.= $formItem['label'].": ".$postData[$formItem['unique_name']]."\n";
+			}
+			wp_mail($formInfo['email_list'], $subject, $message);
+		}
+		
 		return $formInfo['submitted_msg'];
 	}
 	else if($fmdb->isForm($formID))
