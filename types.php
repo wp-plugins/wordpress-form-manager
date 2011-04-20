@@ -9,9 +9,9 @@ include 'formelements/formelements.php';
 $fm_controlTypes = array('default' => 'fm_controlBase',
 						'text' => 'fm_textControl',
 						'textarea' => 'fm_textareaControl',									
-						'checkbox' => 'fm_checkboxControl',
-						'separator' => 'fm_separatorControl',
+						'checkbox' => 'fm_checkboxControl',						
 						'custom_list' => 'fm_customListControl',
+						'separator' => 'fm_separatorControl',
 						'note' => 'fm_noteControl'
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
