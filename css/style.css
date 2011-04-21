@@ -3,10 +3,15 @@
 
 /* ADMIN SIDE */
 
+
 .fm-editor{
 	background-color:#fff;
 	margin:0px;
 	padding:10px;
+}
+
+.edit-form-button{
+	cursor: pointer;
 }
 
 /* control selector in the form editor */
@@ -54,7 +59,7 @@
 
 /* form item in the editor is in a table of class 'editor-item-table' */
 table.editor-item-table{
-
+	width:100%;
 }
 
 table.editor-item-table tr{
@@ -66,7 +71,7 @@ table.editor-item-table td{
 
 table.editor-item-table td label{
 	float: left;
-	width:150px;
+	/* width:100px; */
 	text-align: left;
 	margin-right: 0.5em;
 	display:block;
@@ -74,17 +79,26 @@ table.editor-item-table td label{
 }
 table.editor-item-table td.editor-item-container{
 	padding-top:0px;
+	padding-bottom:2px;
 }
 td.editor-item-buttons{
 	width:35px;
 	vertical-align:top;
-	padding:4px 5px;
+	padding:6px 5px;
 }
 
+.edit-form-menu-item{
+	border:1px solid #000;
+	padding-top:3px;
+	/* width:455px; */
+	style:block;
+	margin-bottom:10px;
+}
 
 /* some of the editor items use a table of class 'editor-item' within the above 'editor-item-table' */
 table.editor-item{
-	width:400px;
+	/* width:350px; */
+	width:100%;
 }
 
 table.editor-item td{
@@ -92,6 +106,12 @@ table.editor-item td{
 	text-align:left;
 	padding:0px 10px;
 	height:25px;
+	/* border:1px solid #000; */
+}
+
+table.editor-item em{
+	color:#FF0000;
+	font-weight:bold;
 }
 
 td.editor-item-main{
@@ -99,9 +119,13 @@ td.editor-item-main{
 }
 
 table.editor-item td.editor-item-label{
-	width:150px;
+	/* width:50%; */ 
 	vertical-align:top;
 	padding-top:4px;
+}
+
+td.editor-item-label{
+	width:40%;
 }
 
 .editor-item-panel{
@@ -138,6 +162,35 @@ hr.edit-panel-sep{
 	height:1px;
 	border:0;
 }
+
+/******************************************/
+/* Data summary */
+
+.fm-data-summary h3{
+	font-weight:bold;
+}
+.fm-data-summary li{
+	list-style:none;
+}
+.fm-data-summary .label{
+	font-weight:bold;
+}
+.fm-data-summary .value{
+	
+}
+.fm-data-summary .edit{
+	float:right;
+}
+
+/* only shown within the 'data' page */
+
+.fm-data-summary-div{
+	border: 1px dotted #999999;
+	padding:10px;
+	margin:20px;
+}
+
+
 /******************************************************************/
 /* USER SIDE */
 

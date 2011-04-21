@@ -26,7 +26,8 @@ class fm_customListControl extends fm_controlBase{
 	public function showItem($uniqueName, $itemInfo){
 		$fn = $itemInfo['extra']['list_type']."_showItem";
 		return $this->$fn($uniqueName, $itemInfo).
-				"<input type=\"hidden\" id=\"".$uniqueName."-list-type\" value=\"".$itemInfo['extra']['list_type']."\" />";
+				"<input type=\"hidden\" id=\"".$uniqueName."-list-type\" value=\"".$itemInfo['extra']['list_type']."\" />".
+				"<input type=\"hidden\" id=\"".$uniqueName."-count\" value=\"".sizeof($itemInfo['extra']['options'])."\" />";
 		
 	}
 		public function select_showItem($uniqueName, $itemInfo, $disabled = false){
@@ -66,7 +67,8 @@ class fm_customListControl extends fm_controlBase{
 												'id'=> $uniqueName
 											),
 						'separator' => '<br>',
-						'options' => $itemInfo['extra']['options']
+						'options' => $itemInfo['extra']['options'],
+						'value' => $itemInfo['extra']['value']
 						);	
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';										
@@ -74,7 +76,8 @@ class fm_customListControl extends fm_controlBase{
 		}
 		public function checkbox_showItem($uniqueName, $itemInfo, $disabled = false){
 			$elem=array('type' => 'checkbox_list',						
-						'separator' => '<br>'
+						'separator' => '<br>',
+						'value' => $itemInfo['extra']['value']
 						);
 			$elem['options'] = array();
 			for($x=0;$x<sizeof($itemInfo['extra']['options']);$x++)
@@ -87,6 +90,7 @@ class fm_customListControl extends fm_controlBase{
 		
 	public function editItem($uniqueName, $itemInfo){	
 		$fn = $itemInfo['extra']['list_type']."_showItem";
+		unset($itemInfo['extra']['size']);
 		return $this->$fn($uniqueName, $itemInfo, true);
 	}
 	
@@ -146,21 +150,28 @@ class fm_customListControl extends fm_controlBase{
 			var listType = document.getElementById('fm-form-' + formID)[itemID + '-list-type'].value;
 			switch(listType){
 				case "radio":
-					return fm_radio_required_validator(formID, itemID);
+					return fm_radio_list_required_validator(formID, itemID);
 				case "checkbox": 
-					return true;
+					return fm_checkbox_list_required_validator(formID, itemID);
 				default:
-					return fm_select_required_validator(formID, itemID);
+					return fm_select_list_required_validator(formID, itemID);
 			}
 			return false;
 		}
-		function fm_select_required_validator(formID, itemID){			
+		function fm_select_list_required_validator(formID, itemID){			
 			return (document.getElementById('fm-form-' + formID)[itemID].value != 0);
 		}
-		function fm_radio_required_validator(formID, itemID){	
+		function fm_radio_list_required_validator(formID, itemID){	
 			var radioList = document.getElementById('fm-form-' + formID)[itemID];
 			for(var x=0;x<radioList.length;x++)
 				if(radioList[x].checked == true) return true;		
+			return false;
+		}
+		function fm_checkbox_list_required_validator(formID, itemID){
+			var count = document.getElementById('fm-form-' + formID)[itemID + '-count'].value;
+			for(var x=0;x<count;x++){
+				if(document.getElementById('fm-form-' + formID)[itemID + '-' + x].checked) return true;
+			}
 			return false;
 		}
 		</script>

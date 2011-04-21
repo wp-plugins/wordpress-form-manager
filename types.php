@@ -10,8 +10,9 @@ $fm_controlTypes = array('default' => 'fm_controlBase',
 						'text' => 'fm_textControl',
 						'textarea' => 'fm_textareaControl',									
 						'checkbox' => 'fm_checkboxControl',
+						'custom_list' => 'fm_customListControl',
 						'separator' => 'fm_separatorControl',
-						'custom_list' => 'fm_customListControl'
+						'note' => 'fm_noteControl'
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,6 +26,7 @@ include 'types/text.php';
 include 'types/textarea.php';
 include 'types/checkbox.php';
 include 'types/list.php';
+include 'types/note.php';
 
 //'panel' helpers
 include 'types/panelhelper.php';
@@ -34,21 +36,20 @@ include 'types/panelhelper.php';
 
 function fm_showControlScripts(){
 	?><script type="text/javascript">
-	function fm_showEditDivCallback(itemID, callback){
+	function fm_showEditDivCallback(itemID, callback){		
 		var editDiv = document.getElementById(itemID + '-edit-div');
 		var editClick = document.getElementById(itemID + '-edit');
-		if(editDiv.style.visibility == 'hidden'){
+				
+		if(editClick.innerHTML == 'edit'){
 			if(callback != "") eval(callback + '(itemID,false);');
-			editDiv.style.position = 'relative';
-			editDiv.style.visibility = 'visible';
 			editClick.innerHTML = 'done';
+			Effect.BlindDown(itemID + '-edit-div', { duration: 0.5 });
 		}
 		else{
 			if(callback != "") eval(callback + '(itemID,true);');
-			editDiv.style.position = 'absolute';
-			editDiv.style.visibility = 'hidden';
 			editClick.innerHTML = 'edit';
-		}
+			Effect.BlindUp(itemID + '-edit-div', { duration: 0.5 });
+		}	
 	}
 	</script><?php
 }	
@@ -65,4 +66,5 @@ function fm_buildControlTypes($controlTypes){
 }
 
 $fm_controls = fm_buildControlTypes($fm_controlTypes);
+
 ?>

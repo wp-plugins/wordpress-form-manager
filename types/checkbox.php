@@ -10,7 +10,7 @@ class fm_checkboxControl extends fm_controlBase{
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName											
 											),
-					'checked'=> $itemInfo['extra']['value']
+					'checked'=> ($itemInfo['extra']['value']=="yes")
 					);											
 		return fe_getElementHTML($elem);
 	}	
@@ -29,12 +29,14 @@ class fm_checkboxControl extends fm_controlBase{
 		$arr=array();
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'value', 'Checked by Default', array('checked'=>$itemInfo['extra']['value']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', 'Required', array('checked'=>$itemInfo['required']));
 		return $arr;
 	}
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
 		$opt['extra'] = "\"array('value' => '\" + ".$this->checkboxScriptHelper('value',array('onValue'=>'checked', 'offValue'=>""))." + \"')\"";
+		$opt['required'] = $this->checkboxScriptHelper('required');
 		return $opt;
 	}
 	
@@ -54,8 +56,21 @@ class fm_checkboxControl extends fm_controlBase{
 		<?php
 	}
 	
+	public function getRequiredValidatorName(){ 
+		return "fm_checkbox_required_validator";
+	}	
+	public function showUserScripts(){		
+		?>
+		<script type="text/javascript">
+		function fm_checkbox_required_validator(formID, itemID){
+			return document.getElementById('fm-form-' + formID)[itemID].checked;
+		}
+		</script>
+		<?php
+	}
+		
 	protected function getPanelKeys(){
-		return array('label');
+		return array('label', 'required');
 	}	
 }
 
