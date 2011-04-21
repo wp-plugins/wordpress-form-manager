@@ -34,6 +34,7 @@ function fm_saveForm(){
 				label_width: document.getElementById('label_width').value,
 				email_admin: document.getElementById('email_admin').checked,
 				email_list: document.getElementById('email_list').value,
+				behaviors: document.getElementById('behaviors').value,
 				items: fm_getFormItems('form-list')
 		};	
 	

@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.2.10
+Stable tag: 1.3.0
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -135,12 +135,26 @@ Who knows. Form Manager uses the wp_mail() function, which according to the Word
 
 If you don't have access to php.ini, your best bet is to consult your host as to why your site can't send e-mails. 
 
+= What are the different form behaviors? =
+
+First, any behavior other than 'Default' restricts the form to registered users of your site.
+
+* Default - The form simply collects submission data. Anybody can use the form.
+* Registered users only - The form is restricted to registered users of your site.  If an unregistered user / user that has not logged in accesses the form, a message is displayed: "(form name) is only available to registered users".  If you want to change the message, edit the line for $fm_registered_user_only_msg in settings.php .
+* Single submission - The form can only be submitted once.  After that, a summary of the user's submission data is displayed in place of the form.
+* 'User profile' style - Like 'Single submission', but allows users to edit the submitted data.  Only one submission is stored in the database.
+* Keep only most recent submission - Behaves like 'Registered users only', but only keeps the latest submission in the database.
+
 == Changelog ==
+= 1.3.0 =
+* Added form behaviors for registered users
+* Cleaned up data page
+* Added data summary to data page
 
 = 1.2.10 =
-* rearranged editor sections
-* fixed checkbox list 'required' test
-* added single checkbox 'requried' test
+* Rearranged editor sections
+* Fixed checkbox list 'required' test
+* Added single checkbox 'requried' test
 
 = 1.2.9 = 
 * Fixed .csv download bug

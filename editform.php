@@ -2,6 +2,7 @@
 global $fmdb;
 global $fm_display;
 global $fm_controls;
+global $fm_form_behavior_types;
 
 $form = null;
 if($_REQUEST['id']!="")
@@ -273,8 +274,7 @@ if(isset($_POST['message']))
 			<div class="fm-admin-field-wrap">
 				<label>Submit button label:</label>
 					<input type="text" id="submit_btn_text" value="<?php echo $form['submit_btn_text'];?>"/>
-			</div>
-			
+			</div>			
 		</div>
 		</div>
 	</div>
@@ -294,6 +294,16 @@ if(isset($_POST['message']))
 				<span class="small">Enter a list of emails separated by commas</span>
 				</label>
 				<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" />				
+			</div>			
+			<div class="fm-admin-field-wrap">
+				<label>Behavior type:
+				<span class="small">(All behaviors except 'Default' will require a registered user)</span>
+				</label>
+					<select id="behaviors">
+						<?php foreach($fm_form_behavior_types as $desc => $val): ?>
+						<option value="<?php echo $val;?>" <?php echo ($form['behaviors']==$val)?'selected="selected"':'';?>><?php echo $desc;?></option>
+						<?php endforeach; ?>
+					</select>
 			</div>
 		</div>
 		</div>

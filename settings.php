@@ -25,5 +25,28 @@ fm_set_form_defaults(array(		'title' => 				"New Form",
 								'show_border' => 		1,
 								'label_width' => 		200
 								));	
+								
+$fm_registered_user_only_msg = "'%s' is only available to registered users.";
+
+/* this shows up in the editor under 'behavior type'. The values are a comma separated list of behavior flags.
+The following flags are available:
+reg_user_only		- form is only available to registered users.  If an unregistered user or somebody who is not logged in tries to view the form, the $fm_registered_user_only_msg is displayed
+no_dup				- only allow a single submission per registered user; must include reg_user_only to behave properly.  If the user views the form after submitting data, a summary of the user's submission data will be displayed.
+edit				- must include reg_user_only and no_dup.  Like above, but gives an 'edit' option to change the submitted values.  Basically a 'user profile' type of behavior.
+overwrite			- allow multiple submissions per registered user, but only store the latest submission.  must include reg_user_only to behave properly.  
+*/
+
+$fm_form_behavior_types = array(	"Default"							=> '', 
+									"Registered users only" 			=> 'reg_user_only',
+									"Single submission"					=> 'reg_user_only,no_dup',
+									"'User profile' style" 				=> 'reg_user_only,no_dup,edit',
+									"Keep only most recent submission" 	=> 'reg_user_only,overwrite'
+								);
+								
+/* 
+
+Registered users only - form is 
+
+*/
 
 ?>

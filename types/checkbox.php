@@ -10,7 +10,7 @@ class fm_checkboxControl extends fm_controlBase{
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName											
 											),
-					'checked'=> $itemInfo['extra']['value']
+					'checked'=> ($itemInfo['extra']['value']=="yes")
 					);											
 		return fe_getElementHTML($elem);
 	}	

@@ -162,6 +162,35 @@ hr.edit-panel-sep{
 	height:1px;
 	border:0;
 }
+
+/******************************************/
+/* Data summary */
+
+.fm-data-summary h3{
+	font-weight:bold;
+}
+.fm-data-summary li{
+	list-style:none;
+}
+.fm-data-summary .label{
+	font-weight:bold;
+}
+.fm-data-summary .value{
+	
+}
+.fm-data-summary .edit{
+	float:right;
+}
+
+/* only shown within the 'data' page */
+
+.fm-data-summary-div{
+	border: 1px dotted #999999;
+	padding:10px;
+	margin:20px;
+}
+
+
 /******************************************************************/
 /* USER SIDE */
 

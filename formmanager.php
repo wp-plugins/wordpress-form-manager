@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.2.10
+Version: 1.3.0
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -198,6 +198,7 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['show_border'] = ($_POST['show_border']=="true"?1:0);
 	$formInfo['shortcode'] = sanitize_title($_POST['shortcode']);
 	$formInfo['label_width'] = $_POST['label_width'];
+	$formInfo['behaviors'] = $_POST['behaviors'];
 	
 	//build the notification email list
 
@@ -286,15 +287,26 @@ function fm_shortcodeHandler($atts){
 	global $fm_display;
 	global $fmdb;
 	global $current_user;
+	global $fm_registered_user_only_msg;
 	
 	$formID = $fmdb->getFormID($atts[0]);
 	if($formID === false) return "(form ".(trim($atts[0])!=""?"'{$atts[0]}' ":"")."not found)";
-	$formInfo = $fmdb->getForm($formID);
 	
+	//get and parse the form settings
+	$formInfo = $fmdb->getForm($formID);
+	$arr = explode(",", $formInfo['behaviors']);
+	$formBehaviors = array();
+	foreach($arr as $v){
+		$formBehaviors[$v] = true;
+	}
+		
+	//process any post
 	if(wp_verify_nonce($_POST['fm-submit-nonce'],'fm-submit')){
 		// process the post
-		get_currentuserinfo();		
-		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login));	
+		get_currentuserinfo();	
+		
+		$overwrite = (isset($formBehaviors['no_dup']) || isset($formBehaviors['overwrite']));
+		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login), $overwrite);	
 		
 		// send email notifications		
 		if(trim($formInfo['email_list']) != ""){
@@ -309,10 +321,41 @@ function fm_shortcodeHandler($atts){
 			wp_mail($formInfo['email_list'], $subject, $message);
 		}
 		
-		return $formInfo['submitted_msg'];
+		if(!isset($formBehaviors['no_dup']))
+			return $formInfo['submitted_msg'];
 	}
-	else if($fmdb->isForm($formID))
-		return $fm_display->displayForm($formInfo);
+	
+	//'reg_user_only', block unregistered users
+	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == "") 
+		return sprintf($fm_registered_user_only_msg, $formInfo['title']);
+		
+	//'no_dup', show previous submission if there is one and break
+	
+	if(isset($formBehaviors['no_dup'])){
+		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login);
+		if(sizeof($userData) > 0){		//only display a summary if there is a previous submission by this user
+			if(!$_REQUEST['fm-edit'] == '1'){							
+				if(!isset($formBehaviors['edit']))
+					return $fm_display->displayDataSummary($formInfo, $userData[0]);
+				else{
+					$currentPage = get_permalink();
+					$parsedURL = parse_url($currentPage);
+					if(trim($parsedURL['query']) == "")
+						$editLink = $curentPage."?fm-edit=1";
+					else
+						$editLink = $currentPage."&fm-edit=1";
+					
+					$str.= "<span class=\"edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
+					return $fm_display->displayDataSummary($formInfo, $userData[0], "<h3>".$formInfo['title']."</h3>\n" , $str);
+				}				
+			}
+			else
+				return $fm_display->displayForm($formInfo, array('action' => get_permalink()), $userData[0]);
+		}
+	}
+	
+	//if we got this far, just display the form
+	return $fm_display->displayForm($formInfo, array('action' => get_permalink()));
 }
 
 include 'settings.php';

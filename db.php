@@ -45,7 +45,9 @@ public $formSettingsKeys = array('title' => "New Form",
 					'show_border' => 1,
 					'label_width' => 200,
 					'type' => 'form',
-					'email_list' => '');			
+					'email_list' => '',
+					'behaviors' => ''
+					);			
 					
 public $itemKeys = array ('type' => 0,
 				'index' => 0,
@@ -54,7 +56,8 @@ public $itemKeys = array ('type' => 0,
 				'label' => 0,
 				'required' => 0,
 				'db_type' => 0,
-				'description' => 0);
+				'description' => 0
+				);
 				
 public function setFormSettingsDefaults($opt){
 	foreach($this->formSettingsKeys as $k=>$v){
@@ -88,6 +91,7 @@ function setupFormManager(){
 		label_width 		- width of the labels, when displayed on the left
 		type 				- type of form ('form', 'template')
 		email_list			- list of e-mails to send notifications to
+		behaviors			- comma separated list of 'behaviors', such as reg_user_only, etc.
 	*/	
 	
 	$sql = "CREATE TABLE " . $this->formsTable . " (
@@ -106,6 +110,7 @@ function setupFormManager(){
 		`label_width` VARCHAR( 32 ) NOT NULL,
 		`type` VARCHAR( 32 ) NOT NULL,
 		`email_list` TEXT NOT NULL,
+		`behaviors` VARCHAR( 256 ) NOT NULL,
 		PRIMARY KEY  (`ID`)
 		)";
 
@@ -243,7 +248,7 @@ function isForm($formID){
 	mysql_free_result($res);
 	return ($n>0);
 }
-function processPost($formID, $extraInfo = null){	
+function processPost($formID, $extraInfo = null, $overwrite = false){	
 	global $fm_controls;
 	global $msg;
 	
@@ -265,7 +270,13 @@ function processPost($formID, $extraInfo = null){
 	mysql_free_result($res);
 	$postData['timestamp'] = $row[0];
 	
+	if($overwrite){	
+		$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
+		$this->query($q);
+	}
+	
 	$this->insertSubmissionData($dataTable, $postData);
+	
 	return $postData;
 }
 function insertSubmissionData($dataTable, $postData){
@@ -378,6 +389,7 @@ function deleteSubmissionDataRow($formID, $data){
 	$q = "DELETE FROM `{$dataTable}` WHERE ".implode(" AND ",$cond)." LIMIT 1";
 	$this->query($q);
 }
+
 //determines if $uniqueName is a "NONE" db_type or not
 function isDataCol($formID, $uniqueName){
 	$cacheKey = $uniqueName."-type";
@@ -407,6 +419,17 @@ function getLastSubmission($formID){
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);
 	return $row;
+}
+
+function getUserSubmissions($formID, $user){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "SELECT * FROM `{$dataTable}` WHERE `user` = '".$user."' ORDER BY `timestamp` DESC LIMIT 1";
+	$res = $this->query($q);
+	$data = array();
+	while($row = mysql_fetch_assoc($res))
+		$data[] = $row;
+	mysql_free_result($res);
+	return $data;
 }
 //////////////////////////////////////////////////////////////////
 

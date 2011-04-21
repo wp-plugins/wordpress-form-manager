@@ -11,7 +11,7 @@ class fm_display_class{
 //	class - 'class' attribute for the <form> tag
 //	action - 'action' attribute for the <form> tag
 //'params' is an associative array of hidden values inserted into the form
-function displayForm($formInfo, $options=array(), $params=array()){
+function displayForm($formInfo, $options=array(), $values=array()){
 	global $msg;
 	global $fmdb;
 	global $fm_controls;	
@@ -38,6 +38,11 @@ function displayForm($formInfo, $options=array(), $params=array()){
 	$str.= "<ul>\n";
 	
 		foreach($formInfo['items'] as $item){
+			
+			//if override $item['extra']['value'] if the unique_name is in $values
+			if(isset($values[$item['unique_name']]))
+				$item['extra']['value'] = $values[$item['unique_name']];
+			
 			$str.= "<li class=\"".$item['type']."\">";
 			
 			////////////////////////////////////////////////////////////////////////////////////////
@@ -118,6 +123,30 @@ function displayForm($formInfo, $options=array(), $params=array()){
 	$str.="<!-- /validation -->\n";
 	return $str;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+function displayDataSummary($formInfo, $data, $before = "", $after = "", $userAndTimestamp = false){
+	global $fm_controls;
+	
+	$str = "";
+	$str.= "<div class=\"fm-data-summary\">\n";
+	$str.= $before;
+	$str.= "<ul>\n";
+	if($userAndTimestamp){
+		$str.= "<li><span class=\"label\">User:&nbsp;&nbsp;</span><span class=\"value\">".$data['user']."</span></li>\n";
+		$str.= "<li><span class=\"label\">Timestamp:&nbsp;&nbsp;</span><span class=\"value\">".$data['timestamp']."</span></li>\n";
+	}
+	foreach($formInfo['items'] as $item){
+		if($item['db_type'] != "NONE")
+			$str.= "<li><span class=\"label\">".$item['label'].":&nbsp;&nbsp;</span><span class=\"value\">".$fm_controls[$item['type']]->parseData($item['unique_name'], $item, $data[$item['unique_name']])."</span></li>\n";
+	}
+	$str.= "</ul>\n";
+	$str.= $after;
+	$str.= "</div>";
+	return $str;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 

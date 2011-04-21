@@ -67,7 +67,8 @@ class fm_customListControl extends fm_controlBase{
 												'id'=> $uniqueName
 											),
 						'separator' => '<br>',
-						'options' => $itemInfo['extra']['options']
+						'options' => $itemInfo['extra']['options'],
+						'value' => $itemInfo['extra']['value']
 						);	
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';										
@@ -75,7 +76,8 @@ class fm_customListControl extends fm_controlBase{
 		}
 		public function checkbox_showItem($uniqueName, $itemInfo, $disabled = false){
 			$elem=array('type' => 'checkbox_list',						
-						'separator' => '<br>'
+						'separator' => '<br>',
+						'value' => $itemInfo['extra']['value']
 						);
 			$elem['options'] = array();
 			for($x=0;$x<sizeof($itemInfo['extra']['options']);$x++)

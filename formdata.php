@@ -1,5 +1,6 @@
 <?php
 global $fmdb;
+global $fm_display;
 global $fm_controls;
 
 $itemsPerPage = 30;
@@ -45,10 +46,49 @@ if(isset($_POST['fm-action-select'])){
 	$formData = $fmdb->getFormSubmissionData($form['ID']);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//SUMMARY DIALOG
+
+if(isset($_POST['fm-action-select']) && $_POST['fm-action-select'] == 'summary'){
+
+if($formData !== false){
+	$numRows = (int)$_POST['fm-num-data-rows'];
+	?>
+<div class="wrap">
+	<div id="icon-edit-pages" class="icon32"></div>
+	<h2>Data: <?php echo $form['title'];?></h2>
+	<div style="float:right;">		
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="Back to Data">Back to Form Data</a>
+	</div>
+	
+	<div class="wrap">
+	<br />
+	Showing data summary: <br />
+	<?php
+	for($x=0;$x<$numRows;$x++){		
+		if(isset($_POST['fm-checked-'.$x])){
+			echo "<div class=\"fm-data-summary-div\" >".$fm_display->displayDataSummary($form, $formData['data'][$x], "", "", true)."</div>\n";
+		}
+	}	
+	?>
+	</div>
+	
+	<div>
+		<div style="float:right;">		
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="Back to Data">Back to Form Data</a>
+		</div>
+	</div>
+</div>
+	<?php
+}
+
+}else{
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //MAIN DIALOG
+
 
 //keep track of the max number of chars in each column so we can set the table widths appropriately
 $colMaxChars=array();
@@ -87,6 +127,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 			<div class="alignleft actions">
 				<select name="fm-action-select" id="fm-action-select">
 				<option value="-1" selected="selected">Bulk Actions</option>
+				<option value="summary">Show Summary</option>
 				<option value="delete">Delete Selected</option>
 				<option value="delete_all">Delete All Submission Data</option>
 				</select>
@@ -94,22 +135,25 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				<script type="text/javascript">
 				function fm_confirmSubmit(){
 					var action = document.getElementById('fm-action-select').value;
-					if(action == 'delete'){
-						//see if anything is selected
-						var numItems = document.getElementById('fm-num-data-rows').value;
-						var selected = false;
-						for(var x=0;x<numItems;x++){
-							if(document.getElementById('fm-checked-' + x).checked){
-								selected = true;
-								x = numItems;
-							}
+					var numItems = document.getElementById('fm-num-data-rows').value;
+					
+					//see if anything is selected
+					var selected = false;
+					for(var x=0;x<numItems;x++){
+						if(document.getElementById('fm-checked-' + x).checked){
+							selected = true;
+							x = numItems;
 						}
+					}					
+					
+					if(action == 'delete'){
 						if (selected) return confirm("Are you sure you want to delete the selected items?");
 						return false;
 					}
-					if(action == 'delete_all'){
+					else if(action == 'delete_all'){
 						return confirm("This will delete all submission data for this form. Are you sure?");
-					}
+					}			
+					else if(action == 'summary') return selected;		
 					return false;
 				}
 				</script>
@@ -170,7 +214,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<td><?php echo $dataRow['user'];?></td>
 					<?php foreach($form['items'] as $formItem): ?>
 						<?php if($formItem['db_type'] != "NONE"): ?>
-							<td class="post-title column-title"><?php echo $dataRow[$formItem['unique_name']];?></td>
+							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>
 						<?php endif; ?>
 					<?php endforeach; ?>					
 				</tr>
@@ -182,3 +226,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 </div><!-- /wrap -->
 
 </form>
+
+<?php 
+}
+?>
