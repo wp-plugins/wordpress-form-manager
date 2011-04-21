@@ -42,7 +42,10 @@ function displayForm($formInfo, $options=array(), $params=array()){
 			
 			////////////////////////////////////////////////////////////////////////////////////////
 			
-			if(($formInfo['labels_on_top']==1 && $item['type'] != 'checkbox') || $item['type'] == 'separator'){
+			if(($formInfo['labels_on_top']==1 && $item['type'] != 'checkbox') 
+				|| $item['type'] == 'separator' 
+				|| ($item['type'] == 'note' && trim($item['label']) == ""))
+			{
 				$str.='<label>'.$item['label'].'</label>';
 				if($item['required']=='1')	$str.= '<em>*</em>';
 				$str.='<br />';
@@ -56,21 +59,7 @@ function displayForm($formInfo, $options=array(), $params=array()){
 				$str.='<td>'.$fm_controls[$item['type']]->showItem($item['unique_name'], $item).'</td>';
 				$str.='</tr></table>';			
 			}
-			/*
-			if($formInfo['labels_on_top']==0 || $item['type']=='checkbox')	//display width adjusted labels for checkboxes, or if labels are on the left
-				$str.= '<label for="'.$item['unique_name'].'" style="width:'.$formInfo['label_width'].'px">'.$item['label'];
-			else
-				$str.= '<label for="'.$item['unique_name'].'">'.$item['label'];
-				
-			if($item['required']=='1')	$str.= '<em>*</em>';
-			$str.= "</label>\n";			
-			
-			if($formInfo['labels_on_top']==1 && $item['type']!='checkbox') $str.="<br />";
-			
-			if(isset($fm_controls[$item['type']])) $str.=$fm_controls[$item['type']]->showItem($item['unique_name'], $item);
-			else $str.=$fm_controls['default']->showItem($item['unique_name'], $item);
-			*/
-			
+						
 			////////////////////////////////////////////////////////////////////////////////////////
 			
 			$str.= "</li>\n";
@@ -104,12 +93,27 @@ function displayForm($formInfo, $options=array(), $params=array()){
 		if($item['required'] == '1'){
 		 	$callback = $fm_controls[$item['type']]->getRequiredValidatorName();
 			if($callback != "")
-				$str.="fm_val_register_required('".$formInfo['ID']."', ".
+				$str.="fm_val_register('".$formInfo['ID']."', ".
 					"'".$item['unique_name']."', ".
 					"'".$callback."', ".
 					"'".format_string_for_js(sprintf($formInfo['required_msg'], $item['label']))."');\n";
 		}
+		if($item['extra']['validation'] != 'none'){
+			$callback = $fm_controls[$item['type']]->getGeneralValidatorName();
+			if($callback != ""){
+				$str.="fm_val_register('".$formInfo['ID']."', ".
+					"'".$item['unique_name']."', ".
+					"'".$callback."', ".
+					"'".format_string_for_js(sprintf($fm_controls[$item['type']]->getGeneralValidatorMessage($item['extra']['validation']), $item['label']))."', ".
+					"'".$item['extra']['validation']."');\n";
+			}
+		}
+	}
+	
+	foreach($fm_controls as $control){
+		
 	}	
+	
 	$str.="</script>\n";
 	$str.="<!-- /validation -->\n";
 	return $str;
@@ -131,11 +135,10 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 	$itemInfo['unique_name'] = $uniqueName;
 	
 	$str = "<table class=\"editor-item-table\">".
-			"<tr>".
-			"<td class=\"editor-item-buttons\"><a href=\"#\" class=\"handle\">move</a></td>".			
-			"<td class=\"editor-item-buttons\"><a href=\"#\" onclick=\"fm_showEditDivCallback('{$uniqueName}','".$control->getShowHideCallbackName()."')\" id=\"{$uniqueName}-edit\"/>edit</a></td>"		.
+			"<tr>".	
 			"<td class=\"editor-item-container\">".$control->showEditorItem($uniqueName, $itemInfo)."</td>".
-			"<td class=\"editor-item-buttons\">"."<a href=\"#\" onclick=\"fm_deleteItem('{$uniqueName}')\">delete</a>"."</td>".
+			"<td class=\"editor-item-buttons\"><a class=\"edit-form-button\" onclick=\"fm_showEditDivCallback('{$uniqueName}','".$control->getShowHideCallbackName()."')\" id=\"{$uniqueName}-edit\"/>edit</a></td>".
+			"<td class=\"editor-item-buttons\">"."<a class=\"edit-form-button\" onclick=\"fm_deleteItem('{$uniqueName}')\">delete</a>"."</td>".
 			"</tr>".
 			"</table>".
 			"<input type=\"hidden\" id=\"{$uniqueName}-type\" value=\"{$type}\" />";
@@ -144,14 +147,5 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-}
-
-//some helper functions 
-
-//shortens a string to a specified width; if $useEllipse is true (default), three of these characters will be '...'
-function fm_restrictString($string, $length, $useEllipse = true){
-	if(strlen($string)<=$length) return $string;
-	if($length > 3 && $useEllipse)	return substr($string, 0, $length-3)."...";
-	else return substr($string, 0, $length);
 }
 ?>
