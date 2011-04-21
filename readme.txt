@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.2.9
+Stable tag: 1.2.10
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -135,17 +135,22 @@ Who knows. Form Manager uses the wp_mail() function, which according to the Word
 
 If you don't have access to php.ini, your best bet is to consult your host as to why your site can't send e-mails. 
 
-== Upgrade Notice ==
+== Changelog ==
+
+= 1.2.10 =
+* rearranged editor sections
+* fixed checkbox list 'required' test
+* added single checkbox 'requried' test
 
 = 1.2.9 = 
-Fixed .csv download bug
+* Fixed .csv download bug
 
 = 1.2.8 =
-Added e-mail notifications. 
+* Added e-mail notifications. 
 
 = 1.2.5 =
-Fixes multisite edit/data page bug. 
+* Fixes multisite edit/data page bug. 
 
 = 1.2.4 =
-Fixes an installation error when starting with a fresh plugin install.
+* Fixes an installation error when starting with a fresh plugin install.
 

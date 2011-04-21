@@ -135,8 +135,7 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 	$itemInfo['unique_name'] = $uniqueName;
 	
 	$str = "<table class=\"editor-item-table\">".
-			"<tr>".
-			//"<td class=\"editor-item-buttons\"><a href=\"#\" class=\"handle\">move</a></td>".			
+			"<tr>".	
 			"<td class=\"editor-item-container\">".$control->showEditorItem($uniqueName, $itemInfo)."</td>".
 			"<td class=\"editor-item-buttons\"><a class=\"edit-form-button\" onclick=\"fm_showEditDivCallback('{$uniqueName}','".$control->getShowHideCallbackName()."')\" id=\"{$uniqueName}-edit\"/>edit</a></td>".
 			"<td class=\"editor-item-buttons\">"."<a class=\"edit-form-button\" onclick=\"fm_deleteItem('{$uniqueName}')\">delete</a>"."</td>".

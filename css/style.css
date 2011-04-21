@@ -109,6 +109,11 @@ table.editor-item td{
 	/* border:1px solid #000; */
 }
 
+table.editor-item em{
+	color:#FF0000;
+	font-weight:bold;
+}
+
 td.editor-item-main{
 	text-align:center;
 }

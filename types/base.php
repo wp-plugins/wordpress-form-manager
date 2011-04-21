@@ -164,7 +164,7 @@ class fm_controlBase{
 		$str="";
 		$str.="<table class=\"editor-item\">".
 				"<tr>".
-				"<td class=\"editor-item-label\"><label id=\"{$uniqueName}-edit-label\">".$itemInfo['label']."</label></td>".
+				"<td class=\"editor-item-label\"><label id=\"{$uniqueName}-edit-label\">".$itemInfo['label'].(($itemInfo['required']=='1')?'<em>*</em>':"")."</label></td>".
 				"<td class=\"editor-item-main\">".$this->editItem($uniqueName, $itemInfo)."</td>".
 				"</tr>";	
 		$str.="</table>";	

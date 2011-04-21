@@ -237,7 +237,7 @@ if(isset($_POST['message']))
 
 <div id="normal-sortables" class="meta-box-sortables">
 	<div id="postexcerpt" class="postbox " >
-	<h3 class='hndle'><span>Settings</span></h3>
+	<h3 class='hndle'><span>Appearance</span></h3>
 		<div class="inside">
 		<div class="fm-form-admin">
 			<br />
@@ -274,6 +274,17 @@ if(isset($_POST['message']))
 				<label>Submit button label:</label>
 					<input type="text" id="submit_btn_text" value="<?php echo $form['submit_btn_text'];?>"/>
 			</div>
+			
+		</div>
+		</div>
+	</div>
+</div>
+
+<div id="normal-sortables" class="meta-box-sortables">
+	<div id="postexcerpt" class="postbox " >
+	<h3 class='hndle'><span>Behavior</span></h3>
+		<div class="inside">
+		<div class="fm-form-admin">
 			<div class="fm-admin-field-wrap">
 				<label>Send notification to <?php echo get_option('admin_email'); ?>:</label>
 				<input type="checkbox" id="email_admin" <?php echo ($email_admin=="yes"?'checked':'');?> />
@@ -288,7 +299,6 @@ if(isset($_POST['message']))
 		</div>
 	</div>
 </div>
-
 
 </div>
 </div>
