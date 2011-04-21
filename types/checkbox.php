@@ -50,6 +50,10 @@ class fm_checkboxControl extends fm_controlBase{
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 				document.getElementById(itemID + '-edit-value').checked = document.getElementById(itemID + '-value').checked;
+				if(document.getElementById(itemID + '-required').checked)
+					document.getElementById(itemID + '-edit-required').innerHTML = "<em>*</em>";
+				else
+					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
 		}
 		</script>

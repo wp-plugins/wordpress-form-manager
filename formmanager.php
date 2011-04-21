@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.0
+Version: 1.3.1
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -54,6 +54,12 @@ $fm_display = new fm_display_class();
 function fm_install () {
 	global $fmdb;	
 	$fmdb->setupFormManager();   
+	
+	/* covers updates from 1.3.0 */
+	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,single_submission' WHERE `behaviors` = 'reg_user_only,no_dup'";
+	$fmdb->query($q);
+	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,edit' WHERE `behaviors` = 'reg_user_only,no_dup,edit'";
+	$fmdb->query($q);									
 }  
 register_activation_hook(__FILE__,'fm_install');
 
@@ -278,6 +284,13 @@ function fm_createCSV(){
 	die();
 }
 
+//Use the 'formelements' helpers
+add_action('wp_ajax_fm_create_form_element', 'fm_createFormElement');
+function fm_createFormElement(){
+	//echo "<pre>".print_r($elem,true)."</pre>";
+	echo fe_getElementHTML($_POST['elem']);
+	die();
+}
 
 /**************************************************************/
 /******* SHORTCODE ********************************************/
@@ -288,9 +301,11 @@ function fm_shortcodeHandler($atts){
 	global $fmdb;
 	global $current_user;
 	global $fm_registered_user_only_msg;
-	
+		
 	$formID = $fmdb->getFormID($atts[0]);
 	if($formID === false) return "(form ".(trim($atts[0])!=""?"'{$atts[0]}' ":"")."not found)";
+	
+	$output = "";
 	
 	//get and parse the form settings
 	$formInfo = $fmdb->getForm($formID);
@@ -299,14 +314,18 @@ function fm_shortcodeHandler($atts){
 	foreach($arr as $v){
 		$formBehaviors[$v] = true;
 	}
-		
-	//process any post
-	if(wp_verify_nonce($_POST['fm-submit-nonce'],'fm-submit')){
+	
+	$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
+	
+	if(wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') && (sizeof($userData) == 0 || !isset($formBehaviors['single_submission']))){
 		// process the post
 		get_currentuserinfo();	
 		
-		$overwrite = (isset($formBehaviors['no_dup']) || isset($formBehaviors['overwrite']));
+		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
 		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login), $overwrite);	
+		
+		
+		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
 		
 		// send email notifications		
 		if(trim($formInfo['email_list']) != ""){
@@ -321,22 +340,24 @@ function fm_shortcodeHandler($atts){
 			wp_mail($formInfo['email_list'], $subject, $message);
 		}
 		
-		if(!isset($formBehaviors['no_dup']))
+		if(!isset($formBehaviors['display_summ']))
 			return $formInfo['submitted_msg'];
+		else
+			$output = $formInfo['submitted_msg'];
 	}
-	
+		
 	//'reg_user_only', block unregistered users
 	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == "") 
 		return sprintf($fm_registered_user_only_msg, $formInfo['title']);
 		
-	//'no_dup', show previous submission if there is one and break
+	//'display_summ', show previous submission if there is one and break
 	
-	if(isset($formBehaviors['no_dup'])){
-		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login);
+	if(isset($formBehaviors['display_summ'])){
+		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
 		if(sizeof($userData) > 0){		//only display a summary if there is a previous submission by this user
 			if(!$_REQUEST['fm-edit'] == '1'){							
 				if(!isset($formBehaviors['edit']))
-					return $fm_display->displayDataSummary($formInfo, $userData[0]);
+					return $output.$fm_display->displayDataSummary($formInfo, $userData[0]);
 				else{
 					$currentPage = get_permalink();
 					$parsedURL = parse_url($currentPage);
@@ -346,11 +367,11 @@ function fm_shortcodeHandler($atts){
 						$editLink = $currentPage."&fm-edit=1";
 					
 					$str.= "<span class=\"edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
-					return $fm_display->displayDataSummary($formInfo, $userData[0], "<h3>".$formInfo['title']."</h3>\n" , $str);
+					return $output.$fm_display->displayDataSummary($formInfo, $userData[0], "<h3>".$formInfo['title']."</h3>\n" , $str);
 				}				
 			}
 			else
-				return $fm_display->displayForm($formInfo, array('action' => get_permalink()), $userData[0]);
+				return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink()), $userData[0]);
 		}
 	}
 	

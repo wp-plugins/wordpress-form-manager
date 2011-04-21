@@ -84,8 +84,7 @@ function displayForm($formInfo, $options=array(), $values=array()){
 		$str.= "</fieldset>\n";		
 	
 	//// echo the nonce ////	
-	//$str.= "<input type=\"hidden\" name=\"fm_nonce\" value=\"".$fmdb->getNonce()."\" />\n";
-	$str.=  wp_nonce_field('fm-submit', 'fm-submit-nonce', true, false );
+	$str.= "<input type=\"hidden\" name=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
 	$str.= "<input type=\"hidden\" name=\"fm_id\" value=\"".$formInfo['ID']."\" />\n";
 	
 	$str.= "</form>\n";

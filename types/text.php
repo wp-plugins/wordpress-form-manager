@@ -79,6 +79,10 @@ class fm_textControl extends fm_controlBase{
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 				document.getElementById(itemID + '-edit-value').value = document.getElementById(itemID + '-value').value;
+				if(document.getElementById(itemID + '-required').checked)
+					document.getElementById(itemID + '-edit-required').innerHTML = "<em>*</em>";
+				else
+					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
 		}		
 		</script>

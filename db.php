@@ -421,15 +421,24 @@ function getLastSubmission($formID){
 	return $row;
 }
 
-function getUserSubmissions($formID, $user){
+function getUserSubmissions($formID, $user, $lastOnly = false){
 	$dataTable = $this->getDataTableName($formID);
-	$q = "SELECT * FROM `{$dataTable}` WHERE `user` = '".$user."' ORDER BY `timestamp` DESC LIMIT 1";
+	$q = "SELECT * FROM `{$dataTable}` WHERE `user` = '".$user."' ORDER BY `timestamp` DESC".($lastOnly?" LIMIT 1":'');
 	$res = $this->query($q);
 	$data = array();
 	while($row = mysql_fetch_assoc($res))
 		$data[] = $row;
 	mysql_free_result($res);
 	return $data;
+}
+
+function getUserSubmissionCount($formID, $user){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "SELECT COUNT(*) FROM `{$dataTable}` WHERE `user` = '".$user."'";
+	$res = $this->query($q);
+	$row = mysql_fetch_array($res);
+	mysql_free_result($res);
+	return $row[0];
 }
 //////////////////////////////////////////////////////////////////
 

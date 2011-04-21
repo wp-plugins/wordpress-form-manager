@@ -147,7 +147,7 @@ function js_multi_item_add(ulID,callback,val){
 	var newLI = document.createElement('li');
 	var newItemID = ulID + '-item-' + js_multi_item_count[ulID];
 	eval("var HTML = " + callback + "('" + ulID + "', '" + newItemID + "', val);");
-	newLI.innerHTML = "<table><tr><td><a href=\"#\" class=\"handle-" + ulID + "\">move</a></td><td>" + HTML + "</td><td><a href=\"#\" onclick=\"js_multi_item_remove('" + newItemID + "')\">delete</a></td></tr></table>";
+	newLI.innerHTML = "<table><tr><td><a class=\"handle-" + ulID + "\" style=\"cursor: move;\">move</a></td><td>" + HTML + "</td><td><a onclick=\"js_multi_item_remove('" + newItemID + "')\">delete</a></td></tr></table>";
 	newLI.id = newItemID;
 	UL.appendChild(newLI);
 	js_multi_item_count[ulID]++;
