@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.1
+Version: 1.3.2
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -37,6 +37,7 @@ include 'display.php';
 update_option("shortcode", "form");
 update_option("forms-table-name", "fm_forms");
 update_option("items-table-name", "fm_items");
+update_option("settings-table-name", "fm_settings");
 update_option("data-table-prefix", "fm_data");
 update_option("query-table-prefix", "fm_queries");
 
@@ -44,7 +45,9 @@ global $wpdb;
 global $fmdb;
 $fmdb = new fm_db_class($wpdb->prefix.get_option('forms-table-name'),
 					$wpdb->prefix.get_option('items-table-name'),
-					$wpdb->dbh);
+					$wpdb->prefix.get_option('settings-table-name'),
+					$wpdb->dbh
+					);
 $fm_display = new fm_display_class();
 
 				
@@ -127,6 +130,11 @@ function fm_setupAdminMenu(){
 	$pages[] = add_submenu_page("fm-admin-main", "Edit", "Edit", "manage_options", "fm-edit-form", 'fm_showEditPage');
 	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');
 	
+	//at some point, make this link go to a fresh form
+	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
+	
+	$pages[] = add_submenu_page("fm-admin-main", "Settings", "Settings", "manage_options", "fm-global-settings", 'fm_showSettingsPage');
+	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
 }
@@ -134,8 +142,9 @@ function fm_setupAdminMenu(){
 add_action('admin_head', 'fm_adminHead');
 function fm_adminHead(){
 	global $submenu;	
+	
 	//we don't actually want all the pages to show up in the menu, but having slugs for pages makes things easy
-	unset($submenu['fm-admin-main'][0]);
+	//unset($submenu['fm-admin-main'][0]);
 	unset($submenu['fm-admin-main'][1]);
 	unset($submenu['fm-admin-main'][2]);
 }
@@ -160,6 +169,10 @@ function fm_showDataPage(){
 
 function fm_showMainPage(){	
 	include 'main.php';
+}
+
+function fm_showSettingsPage(){
+	include 'editsettings.php';
 }
 
 /**************************************************************/
@@ -317,33 +330,40 @@ function fm_shortcodeHandler($atts){
 	
 	$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
 	
-	if(wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') && (sizeof($userData) == 0 || !isset($formBehaviors['single_submission']))){
+	if($_POST['fm_id'] == $formID && (wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') && (sizeof($userData) == 0 || !isset($formBehaviors['single_submission'])))){
 		// process the post
 		get_currentuserinfo();	
 		
 		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
 		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login), $overwrite);	
 		
-		
-		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
-		
-		// send email notifications		
-		if(trim($formInfo['email_list']) != ""){
-			$subject = get_option('blogname').": '".$formInfo['title']."' Submission";
-			$message = $subject."\n";
-			if($postData['user'] != "") $message.= "User: ".$postData['user']."\n";
-			$message.= "Timestamp: ".$postData['timestamp']."\n\n";
-			foreach($formInfo['items'] as $formItem){
-				if($formItem['db_type'] != "NONE")
-					$message.= $formItem['label'].": ".$postData[$formItem['unique_name']]."\n";
+		if($fmdb->processFailed()){
+			foreach($postData as $k=>$v){
+				$postData[$k] = stripslashes($v);
 			}
-			wp_mail($formInfo['email_list'], $subject, $message);
+			return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink()), $postData);
 		}
-		
-		if(!isset($formBehaviors['display_summ']))
-			return $formInfo['submitted_msg'];
-		else
-			$output = $formInfo['submitted_msg'];
+		else{		
+			$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
+			
+			// send email notifications		
+			if(trim($formInfo['email_list']) != ""){
+				$subject = get_option('blogname').": '".$formInfo['title']."' Submission";
+				$message = $subject."\n";
+				if($postData['user'] != "") $message.= "User: ".$postData['user']."\n";
+				$message.= "Timestamp: ".$postData['timestamp']."\n\n";
+				foreach($formInfo['items'] as $formItem){
+					if($formItem['db_type'] != "NONE")
+						$message.= $formItem['label'].": ".$postData[$formItem['unique_name']]."\n";
+				}
+				wp_mail($formInfo['email_list'], $subject, $message);
+			}
+			
+			if(!isset($formBehaviors['display_summ']))
+				return '<p>'.$formInfo['submitted_msg'].'</p>';
+			else
+				$output = '<p>'.$formInfo['submitted_msg'].'</p>';
+		}
 	}
 		
 	//'reg_user_only', block unregistered users
@@ -355,16 +375,16 @@ function fm_shortcodeHandler($atts){
 	if(isset($formBehaviors['display_summ'])){
 		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
 		if(sizeof($userData) > 0){		//only display a summary if there is a previous submission by this user
-			if(!$_REQUEST['fm-edit'] == '1'){							
+			if(!$_REQUEST['fm-edit-'.$formID] == '1'){							
 				if(!isset($formBehaviors['edit']))
 					return $output.$fm_display->displayDataSummary($formInfo, $userData[0]);
 				else{
 					$currentPage = get_permalink();
 					$parsedURL = parse_url($currentPage);
 					if(trim($parsedURL['query']) == "")
-						$editLink = $curentPage."?fm-edit=1";
+						$editLink = $curentPage."?fm-edit-".$formID."=1";
 					else
-						$editLink = $currentPage."&fm-edit=1";
+						$editLink = $currentPage."&fm-edit-".$formID."=1";
 					
 					$str.= "<span class=\"edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
 					return $output.$fm_display->displayDataSummary($formInfo, $userData[0], "<h3>".$formInfo['title']."</h3>\n" , $str);

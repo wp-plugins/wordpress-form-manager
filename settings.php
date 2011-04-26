@@ -42,12 +42,4 @@ $fm_form_behavior_types = array(	"Default"							=> '',
 									"Single submission"					=> 'reg_user_only,display_summ,single_submission',
 									"'User profile' style" 				=> 'reg_user_only,display_summ,edit'									
 								);
-								
-								
-/* 
-
-Registered users only - form is 
-
-*/
-
 ?>

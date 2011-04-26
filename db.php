@@ -4,13 +4,18 @@ class fm_db_class{
 
 public $formsTable;
 public $itemsTable;
+public $settingsTable;
 public $conn;
 
-function __construct($formsTable, $itemsTable, $conn){
+private $lastPostFailed;
+
+function __construct($formsTable, $itemsTable, $settingsTable, $conn){
 	$this->formsTable = $formsTable;
 	$this->itemsTable = $itemsTable;
+	$this->settingsTable = $settingsTable;
 	$this->conn = $conn;
 	$this->cachedInfo = array();
+	$this->lastPostFailed = false;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -33,11 +38,12 @@ protected function setCache($formID, $key, $value){
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //values are the form defaults
-public $formSettingsKeys = array('title' => "New Form", 
+public $formSettingsKeys = array(
+					'title' => '', 
 					'labels_on_top' => 0, 
-					'submitted_msg' => 'Thank you! Your data has been submitted.', 
-					'submit_btn_text' => 'Submit', 
-					'required_msg' => "\'%s\' is required.", 
+					'submitted_msg' => '', 
+					'submit_btn_text' => '', 
+					'required_msg' => '', 
 					'action' => '',
 					'data_index' => '',
 					'shortcode' => '',
@@ -49,15 +55,24 @@ public $formSettingsKeys = array('title' => "New Form",
 					'behaviors' => ''
 					);			
 					
-public $itemKeys = array ('type' => 0,
-				'index' => 0,
-				'extra' => 0,
-				'nickname' => 0,
-				'label' => 0,
-				'required' => 0,
-				'db_type' => 0,
-				'description' => 0
-				);
+public $itemKeys = array (
+					'type' => 0,
+					'index' => 0,
+					'extra' => 0,
+					'nickname' => 0,
+					'label' => 0,
+					'required' => 0,
+					'db_type' => 0,
+					'description' => 0
+					);
+
+public $globalSettings = array(
+					'recaptcha_public' => '',
+					'recaptcha_private' => '',
+					'title' =>				"New Form",	
+					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
+					'required_msg' => 		"\'%s\' is required.",
+					);
 				
 public function setFormSettingsDefaults($opt){
 	foreach($this->formSettingsKeys as $k=>$v){
@@ -73,7 +88,7 @@ public function setFormSettingsDefaults($opt){
 function setupFormManager(){
 	
 	//////////////////////////////////////////////////////////////////
-	//form definitions table - stoes ID, title, options, and name of data table for each form
+	//form definitions table - stores ID, title, options, and name of data table for each form
 	
 	/*
 		ID					- stores the unique integer ID of the form
@@ -119,6 +134,19 @@ function setupFormManager(){
 	
 	//create a settings row
 	$this->initFormsTable();
+	
+	//////////////////////////////////////////////////////////////////
+	//global settings table
+	
+	$sql = "CREATE TABLE " . $this->settingsTable . " (
+		`setting_name` VARCHAR( 32 ) NOT NULL,
+		`setting_value` VARCHAR( 128 ) NOT NULL,
+		PRIMARY KEY  (`setting_name`)
+		)";
+	
+	dbDelta($sql);	
+	
+	$this->initSettingsTable();
 	
 	//////////////////////////////////////////////////////////////////
 	//form items - stores the items on all forms
@@ -195,6 +223,49 @@ function initFormsTable(){
 	$this->query($q);
 }
 
+function initSettingsTable(){	
+	foreach($this->globalSettings as $k=>$v){
+		$this->setGlobalSetting($k, $v, false);
+	}
+}
+
+//returns true if something was written, false otherwise.
+// $overwrite : overwrite the old setting, if one exists.
+function setGlobalSetting($settingName, $settingValue, $overwrite = true){
+	$val = $this->getGlobalSetting($settingName);
+	if($val === false){
+		$q = "INSERT INTO `".$this->settingsTable."` SET `setting_name` = '{$settingName}', `setting_value` = '{$settingValue}'";
+		$this->query($q);
+		return true;
+	}
+	else if($overwrite){
+		$q = "UPDATE `".$this->settingsTable."` SET `setting_value` = '{$settingValue}' WHERE `setting_name` = '{$settingName}'";
+		$this->query($q);
+		return true;
+	}
+	return false;
+}
+
+function getGlobalSetting($settingName){
+	$q = "SELECT `setting_value` FROM `".$this->settingsTable."` WHERE `setting_name` = '".$settingName."'";
+	$res = $this->query($q);
+	if(mysql_num_rows($res) == 0) return false;
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	return $row['setting_value'];
+}
+
+function getGlobalSettings(){
+	$q = "SELECT * FROM `".$this->settingsTable."`";
+	$res = $this->query($q);
+	$vals = array();
+	while($row = mysql_fetch_assoc($res)){
+		$vals[$row['setting_name']] = $row['setting_value'];
+	}
+	mysql_free_result($res);
+	return $vals;
+}
+
 //generate the default form settings query
 function getDefaultSettingsQuery(){
 	$q = "INSERT INTO `".$this->formsTable."` SET `ID` = '-1' ";
@@ -205,11 +276,19 @@ function getDefaultSettingsQuery(){
 
 // Get the default settings row
 function getSettings(){
-	return $this->formSettingsKeys;
+	$formSettingsRow = $this->formSettingsKeys;
+	$settingsTableData = $this->getGlobalSettings();
+	foreach($formSettingsRow as $k=>$v){
+		if(isset($settingsTableData[$k]))
+			$formSettingsRow[$k] = $settingsTableData[$k];
+	}
+	return $formSettingsRow;
 }
 
 // Get a particular setting
 function getSetting($settingName){
+	$val = $this->getGlobalSetting($settingName);
+	if($val !== false) return $val;
 	$q = "SELECT `".$settingName."` FROM `".$this->formsTable."` WHERE `ID` < 0";
 	$this->query($q);
 	$row = mysql_fetch_assoc($res);	
@@ -251,13 +330,16 @@ function isForm($formID){
 function processPost($formID, $extraInfo = null, $overwrite = false){	
 	global $fm_controls;
 	global $msg;
-	
+	$this->lastPostFailed = false;
 	$formInfo = $this->getForm($formID);
 	$dataTable = $this->getDataTableName($formID);
 	$postData = array();
 	foreach($formInfo['items'] as $item){
-		if($item['db_type'] != "NONE")
-			$postData[$item['unique_name']] = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
+		$processed = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
+		if($processed === false) 
+			$this->lastPostFailed = true;
+		if($item['db_type'] != "NONE")						
+			$postData[$item['unique_name']] = $processed;
 	}
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
 		$postData = array_merge($postData, $extraInfo);
@@ -269,15 +351,19 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 	$row = mysql_fetch_array($res);
 	mysql_free_result($res);
 	$postData['timestamp'] = $row[0];
-	
-	if($overwrite){	
-		$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
-		$this->query($q);
+		
+	if($this->lastPostFailed === false){
+		if($overwrite){	
+			$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
+			$this->query($q);
+		}
+		$this->insertSubmissionData($dataTable, $postData);
 	}
 	
-	$this->insertSubmissionData($dataTable, $postData);
-	
 	return $postData;
+}
+function processFailed(){
+	return $this->lastPostFailed;
 }
 function insertSubmissionData($dataTable, $postData){
 	$q = "INSERT INTO `{$dataTable}` SET ";
@@ -323,7 +409,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 			$dataItems[] = $dataRow['timestamp'];
 			$dataItems[] = $dataRow['user'];
 			foreach($formInfo['items'] as $k=>$v){
-				$dataItems[] = str_replace('"', '""', $dataRow[$k]);
+				$dataItems[] = $dataRow[$k];
 			}
 			$csvRows[] = $dataItems;
 		}
@@ -598,7 +684,7 @@ function createForm($formInfo=null, $dataTablePrefix){
 	$q = "INSERT INTO `".$this->formsTable."` SET `ID` = '".$newID."', `data_table` = '".$dataTable."'";
 	$this->query($q);
 	if($formInfo == null)	//use the default settings
-		$formInfo = $this->formSettingsKeys;
+		$formInfo = $this->getSettings();
 	$formInfo['shortcode'] = 'form-'.$newID; //give new forms a shortcode based on numerical ID	
 	$this->updateForm($newID, $formInfo);			
 	$this->createDataTable($formInfo, $dataTable);

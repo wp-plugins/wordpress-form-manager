@@ -19,18 +19,20 @@ function fm_val_register(_formID, _itemID, _callbackFn, _msg, _extra){
 	fm_val.push(newReq);
 }
 
-function fm_val_satisfied(){
+function fm_val_satisfied(formID){
 	var temp = true;
 	var msg = "";
-	for(var x=0;x<fm_val.length;x++){		
-		if(fm_val[x].extra == "")		
-			eval("temp = " + fm_val[x].callbackFn + "('" + fm_val[x].formID + "', '" + fm_val[x].itemID + "');");
-		else		
-			eval("temp = " + fm_val[x].callbackFn + "('" + fm_val[x].formID + "', '" + fm_val[x].itemID + "', '" + fm_val[x].extra + "');");
-			
-		if(!temp){
-			if(msg != "") msg += "\n";
-			msg += fm_val[x].msg;	
+	for(var x=0;x<fm_val.length;x++){
+		if(fm_val[x].formID == formID){
+			if(fm_val[x].extra == "")		
+				eval("temp = " + fm_val[x].callbackFn + "('" + fm_val[x].formID + "', '" + fm_val[x].itemID + "');");
+			else		
+				eval("temp = " + fm_val[x].callbackFn + "('" + fm_val[x].formID + "', '" + fm_val[x].itemID + "', '" + fm_val[x].extra + "');");
+				
+			if(!temp){
+				if(msg != "") msg += "\n";
+				msg += fm_val[x].msg;	
+			}
 		}
 	}
 	if(msg != ""){

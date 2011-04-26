@@ -78,7 +78,7 @@ class fm_controlBase{
 	
 	//called when processing a submission from the user version of the form; $itemInfo is an associative array of the db row defining the form item
 	public function processPost($uniqueName, $itemInfo){
-		if(isset($_POST[$uniqueName]))
+		if($_POST[$uniqueName] != null)
 			return strip_tags($_POST[$uniqueName]);
 		return "";
 	}

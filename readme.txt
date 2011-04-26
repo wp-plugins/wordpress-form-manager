@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -146,6 +146,13 @@ First, any behavior other than 'Default' restricts the form to registered users 
 * Keep only most recent submission - Behaves like 'Registered users only', but only keeps the latest submission in the database.
 
 == Changelog ==
+= 1.3.2 =
+* Added reCAPTCHA field
+* Added Settings page
+* Multiple forms per page
+* Fixed CSV data double quote bug
+* Improved acknowledgement formatting
+
 = 1.3.1 =
 * Fixed 'Single submission' behavior bug
 * Items in form editor update when 'done' is clicked

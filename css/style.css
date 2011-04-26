@@ -215,6 +215,7 @@ hr.edit-panel-sep{
 .fm-form em{
 	color:#FF0000;
 	font-weight:bold;
+	font-style: normal;
 }
 .fm-form .separator{
 	font-size:15px;
