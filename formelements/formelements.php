@@ -6,11 +6,11 @@ PHP classes for defining and displaying form elements
 provides an instantiation $fe_formElements that converts from form definitions (arrays) to html of the form item
 
 array definition:
-'type' : type of element ('text', 'select', 'textarea', 'checkbox', 'radio', 'button', 'submit')
-'default' : default value for select, radio, and textarea
-'options' : for select/radio, an associative array of options (key=>value)
-'attributes' : an associative array of attributes for the input/select/textarea tag
-'separator' : for radio button list; html to separate radio options
+'type' 			: type of element ('text', 'select', 'textarea', 'checkbox', 'radio', 'button', 'submit')
+'default' 		: default value for select, radio, and textarea
+'options' 		: for select/radio, an associative array of options (key=>value)
+'attributes' 	: an associative array of attributes for the input/select/textarea tag
+'separator' 	: for radio button list; html to separate radio options
 
 
 *****/
@@ -29,11 +29,12 @@ function fe_getTextareaHTML($elementDef){
 //radio buttons; can be a single button, or a group
 function fe_getRadioHTML($elementDef){
 	if(!isset($elementDef['options'])) //single radio button
-		return "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." />";
+		return "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." ".($elementDef['value']?'checked':'')."/>";
 	//multiple radio options
 	$arr=array();
 	foreach($elementDef['options'] as $k=>$v){
-		$arr[] = "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." value=\"{$k}\"/>&nbsp;&nbsp;{$v}";
+		$arr[] = "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." value=\"{$k}\" ".
+				((isset($elementDef['value']) && $elementDef['value']==$v)?'checked':'')."/>&nbsp;&nbsp;{$v}";
 	}
 	$str = implode($elementDef['separator'],$arr);
 	return $str;
@@ -50,7 +51,7 @@ function fe_getSelectHTML($elementDef){
 	$default = (isset($elementDef['value'])?$elementDef['value']:"");
 	$str="<select ".fe_getAttributeString($elementDef['attributes'])." >";
 	foreach($elementDef['options'] as $k=>$v){
-		if($k==$default) 	$str.="<option value=\"{$k}\" selected=\"selected\">{$v}</option>";
+		if($v==$default) 	$str.="<option value=\"{$k}\" selected=\"selected\">{$v}</option>";
 		else				$str.="<option value=\"{$k}\">{$v}</option>";
 	}
 	$str.="</select>";	
@@ -77,15 +78,30 @@ function fe_getCheckboxHTML($elementDef){
 
 // checkbox lists
 function fe_getCheckboxListHTML($elementDef){
+	//the 'value' option is a set of values separated by ", " (like "Item 1, Item 3, Item 4")
+	$vals = fe_parseCHeckboxValue($elementDef);	
+
 	if(!(isset($elementDef['options']) && is_array($elementDef['options']))) return "";
 	$arr=array();
 	foreach($elementDef['options'] as $k=>$v){
-		$arr[] = "<input type=\"checkbox\" ".fe_getAttributeString($elementDef['attributes'])." id=\"{$k}\" name=\"{$k}\"/>&nbsp;&nbsp;{$v}";
+		$arr[] = "<input type=\"checkbox\" ".fe_getAttributeString($elementDef['attributes'])." id=\"{$k}\" name=\"{$k}\" ".($vals[$k]?'checked':'')."/>&nbsp;&nbsp;{$v}";
 	}
 	$str = implode($elementDef['separator'],$arr);
 	return $str;
 }
 
+function fe_parseCheckboxValue($elementDef){
+	//unless the user is trying to break the system, the following should retrieve the selections (if they exist)
+	$val = ", ".$elementDef['value'].", ";
+	$opt = array();
+	foreach($elementDef['options'] as $k=>$v){
+		if(strpos($val, ", ".$v.", ") !== false)
+			$opt[$k] = true;
+		else
+			$opt[$k] = false;
+	}
+	return $opt;
+}
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 

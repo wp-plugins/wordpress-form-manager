@@ -26,7 +26,8 @@ class fm_customListControl extends fm_controlBase{
 	public function showItem($uniqueName, $itemInfo){
 		$fn = $itemInfo['extra']['list_type']."_showItem";
 		return $this->$fn($uniqueName, $itemInfo).
-				"<input type=\"hidden\" id=\"".$uniqueName."-list-type\" value=\"".$itemInfo['extra']['list_type']."\" />";
+				"<input type=\"hidden\" id=\"".$uniqueName."-list-style\" value=\"".$itemInfo['extra']['list_type']."\" />".
+				"<input type=\"hidden\" id=\"".$uniqueName."-count\" value=\"".sizeof($itemInfo['extra']['options'])."\" />";
 		
 	}
 		public function select_showItem($uniqueName, $itemInfo, $disabled = false){
@@ -66,7 +67,8 @@ class fm_customListControl extends fm_controlBase{
 												'id'=> $uniqueName
 											),
 						'separator' => '<br>',
-						'options' => $itemInfo['extra']['options']
+						'options' => $itemInfo['extra']['options'],
+						'value' => $itemInfo['extra']['value']
 						);	
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';										
@@ -74,7 +76,8 @@ class fm_customListControl extends fm_controlBase{
 		}
 		public function checkbox_showItem($uniqueName, $itemInfo, $disabled = false){
 			$elem=array('type' => 'checkbox_list',						
-						'separator' => '<br>'
+						'separator' => '<br>',
+						'value' => $itemInfo['extra']['value']
 						);
 			$elem['options'] = array();
 			for($x=0;$x<sizeof($itemInfo['extra']['options']);$x++)
@@ -87,7 +90,8 @@ class fm_customListControl extends fm_controlBase{
 		
 	public function editItem($uniqueName, $itemInfo){	
 		$fn = $itemInfo['extra']['list_type']."_showItem";
-		return $this->$fn($uniqueName, $itemInfo, true);
+		unset($itemInfo['extra']['size']);
+		return "<div id=\"".$itemInfo['unique_name']."-edit-value\">".$this->$fn($uniqueName, $itemInfo, true)."</div>";
 	}
 	
 	public function processPost($uniqueName, $itemInfo){
@@ -143,24 +147,31 @@ class fm_customListControl extends fm_controlBase{
 		?>
 		<script type="text/javascript">
 		function fm_custom_list_required_validator(formID, itemID){
-			var listType = document.getElementById('fm-form-' + formID)[itemID + '-list-type'].value;
+			var listType = document.getElementById('fm-form-' + formID)[itemID + '-list-style'].value;
 			switch(listType){
 				case "radio":
-					return fm_radio_required_validator(formID, itemID);
+					return fm_radio_list_required_validator(formID, itemID);
 				case "checkbox": 
-					return true;
+					return fm_checkbox_list_required_validator(formID, itemID);
 				default:
-					return fm_select_required_validator(formID, itemID);
+					return fm_select_list_required_validator(formID, itemID);
 			}
 			return false;
 		}
-		function fm_select_required_validator(formID, itemID){			
+		function fm_select_list_required_validator(formID, itemID){			
 			return (document.getElementById('fm-form-' + formID)[itemID].value != 0);
 		}
-		function fm_radio_required_validator(formID, itemID){	
+		function fm_radio_list_required_validator(formID, itemID){	
 			var radioList = document.getElementById('fm-form-' + formID)[itemID];
 			for(var x=0;x<radioList.length;x++)
 				if(radioList[x].checked == true) return true;		
+			return false;
+		}
+		function fm_checkbox_list_required_validator(formID, itemID){
+			var count = document.getElementById('fm-form-' + formID)[itemID + '-count'].value;
+			for(var x=0;x<count;x++){
+				if(document.getElementById('fm-form-' + formID)[itemID + '-' + x].checked) return true;
+			}
 			return false;
 		}
 		</script>
@@ -177,12 +188,94 @@ class fm_customListControl extends fm_controlBase{
 		function fm_custom_list_show_hide(itemID, isDone){
 			if(isDone){				
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
-				//document.getElementById(itemID + '-edit-value').options[0].text = js_multi_item_get_index('multi-panel-' + itemID, 'fm_custom_list_option_get', 0);							
+				if(document.getElementById(itemID + '-required').checked)
+					document.getElementById(itemID + '-edit-required').innerHTML = "<em>*</em>";
+				else
+					document.getElementById(itemID + '-edit-required').innerHTML = "";
+				var listType = fm_get_item_value(itemID, 'list_type');
+				var listOptions = js_multi_item_get('multi-panel-' + itemID, 'fm_custom_list_option_get');
+				
+				var itemDef;
+				switch(listType){
+					case "radio":
+						itemDef = fm_get_radio_list_preview(itemID, listOptions);
+						break;
+					case "checkbox": 
+						itemDef = fm_get_checkbox_list_preview(itemID, listOptions);
+						break;
+					case "select":
+						itemDef = fm_get_select_list_preview(itemID, listOptions);
+						break;
+					case "list":
+						itemDef = fm_get_list_list_preview(itemID, listOptions);
+						break;
+				}
+			
+				var data = {
+					action: 'fm_create_form_element',
+					elem: itemDef
+				};		
+				
+				jQuery.post(ajaxurl, data, function(response){		
+					document.getElementById(itemID + '-edit-value').innerHTML = response;
+				});
+				
 			}
 		}
+		function fm_get_radio_list_preview(itemID, listOptions){		
+			var data = {	
+					type: 'radio',
+					separator: '<br />',
+					options: listOptions,
+					attributes: { disabled: 'disabled' }
+			};		
+					
+			return data;
+		}
+		function fm_get_checkbox_list_preview(itemID, listOptions){
+			var data = {	
+					type: 'checkbox_list',
+					separator: '<br />',
+					options: listOptions,
+					attributes: { disabled: 'disabled' }
+			};		
+					
+			return data;	
+		}
+		function fm_get_select_list_preview(itemID, listOptions){
+			if(document.getElementById(itemID + '-required').checked){
+				var newList = new Array();
+				newList.push('...');
+				for(x=0;x<listOptions.length;x++)
+					newList.push(listOptions[x]);
+				listOptions = newList;
+			}
+			
+			var data = {	
+					type: 'select',
+					options: listOptions,
+					attributes: { disabled: 'disabled' }
+			};		
+					
+			return data;	
+			
+		}
+		function fm_get_list_list_preview(itemID, listOptions){
+			var data = {	
+					type: 'select',
+					options: listOptions,
+					attributes: { disabled: 'disabled', size: listOptions.length }
+			};		
+					
+			return data;
+		}
+		
+		
+		//script to generate the 'options' items
 		function fm_custom_list_options_panel_item(itemID, optionID, optValue){
 			return "<input id=\"" + optionID + "-text\" type=\"text\" value=\"" + fm_htmlEntities(optValue) + "\" style=\"width:100px;\"/>";
 		}
+		//script to collect info from the 'options' items
 		function fm_custom_list_option_get(optionID){
 			var textInput = document.getElementById(optionID + "-text");
 			return textInput.value;
