@@ -20,6 +20,7 @@ Supported field types:
 * radio buttons
 * checkbox / checkbox list
 * multiline select
+* reCAPTCHA
 
 Subtitles and notes can also be added to the form in any location.
 
@@ -99,6 +100,10 @@ Note:
 * Label - This is the label that will be displayed with the form element.
 * Note - The note to be displayed. 
 
+reCAPTCHA: 
+
+* Label - This is the label that will be displayed with the form element.
+ 
 = Can users put HTML or JavaScript in my forms? =
 
 No. All HTML tags are stripped from form inputs. 
@@ -144,6 +149,16 @@ First, any behavior other than 'Default' restricts the form to registered users 
 * Single submission - The form can only be submitted once.  After that, a summary of the user's submission data is displayed in place of the form.
 * 'User profile' style - Like 'Single submission', but allows users to edit the submitted data.  Only one submission is stored in the database.
 * Keep only most recent submission - Behaves like 'Registered users only', but only keeps the latest submission in the database.
+
+= How do I use / what is reCAPTCHA? =
+
+The 'reCAPTCHA' form element is a spam / bot blocker.  It presents an image of some distorted text and asks you to enter the text, proving that you are a human being and not a spam bot.
+
+To use a reCAPTCHA, simply insert one into your form - though you have to enter the reCAPTCHA API keys in the 'Settings' page under 'Forms' in WordPress.  
+
+= How do I get reCAPTCHA API keys? =
+
+As of this writing, go to www.google.com/recaptcha, click on 'USE reCAPTCHA ON YOUR SITE', then 'Sign up Now!', and follow the instructions.  You will be shown your 'public' and 'private' API keys; copy and paste these into the 'Settings' page under 'Forms' in WordPress.
 
 == Changelog ==
 = 1.3.2 =
