@@ -10,7 +10,7 @@ $currentDialog = "main";
 //ADD NEW
 //for now just add blank forms for 'Add New'
 if(isset($_POST['fm-add-new']))
-	$fmdb->createForm(null,$wpdb->prefix.get_option('data-table-prefix'));
+	$fmdb->createForm(null,$wpdb->prefix.get_option('fm-data-table-prefix'));
 	
 	
 //APPLY ACTION

@@ -196,6 +196,8 @@ function removeFormManager(){
 	$this->query($q);
 	$q = "DROP TABLE IF EXISTS `{$this->itemsTable}`";	
 	$this->query($q);
+	$q = "DROP TABLE IF EXISTS `{$this->settingsTable}`";	
+	$this->query($q);
 }
 
 //////////////////////////////////////////////////////////////////

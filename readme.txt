@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -161,6 +161,10 @@ To use a reCAPTCHA, simply insert one into your form - though you have to enter 
 As of this writing, go to www.google.com/recaptcha, click on 'USE reCAPTCHA ON YOUR SITE', then 'Sign up Now!', and follow the instructions.  You will be shown your 'public' and 'private' API keys; copy and paste these into the 'Settings' page under 'Forms' in WordPress.
 
 == Changelog ==
+= 1.3.3 =
+* Adjusted for register_activation_hook() change
+* Fixed some CSS style names likely to have conflicts
+
 = 1.3.2 =
 * Added reCAPTCHA field
 * Added Settings page

@@ -3,11 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.2
+Version: 1.3.3
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
+
+global $fm_currentVersion;
+$fm_currentVersion = "1.3.3";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -34,18 +37,18 @@ include 'display.php';
 /**************************************************************/
 /******* PLUGIN OPTIONS ***************************************/
 
-update_option("shortcode", "form");
-update_option("forms-table-name", "fm_forms");
-update_option("items-table-name", "fm_items");
-update_option("settings-table-name", "fm_settings");
-update_option("data-table-prefix", "fm_data");
-update_option("query-table-prefix", "fm_queries");
+update_option("fm-shortcode", "form");
+update_option("fm-forms-table-name", "fm_forms");
+update_option("fm-items-table-name", "fm_items");
+update_option("fm-settings-table-name", "fm_settings");
+update_option("fm-data-table-prefix", "fm_data");
+update_option("fm-query-table-prefix", "fm_queries");
 
 global $wpdb;
 global $fmdb;
-$fmdb = new fm_db_class($wpdb->prefix.get_option('forms-table-name'),
-					$wpdb->prefix.get_option('items-table-name'),
-					$wpdb->prefix.get_option('settings-table-name'),
+$fmdb = new fm_db_class($wpdb->prefix.get_option('fm-forms-table-name'),
+					$wpdb->prefix.get_option('fm-items-table-name'),
+					$wpdb->prefix.get_option('fm-settings-table-name'),
 					$wpdb->dbh
 					);
 $fm_display = new fm_display_class();
@@ -62,7 +65,7 @@ function fm_install () {
 	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,single_submission' WHERE `behaviors` = 'reg_user_only,no_dup'";
 	$fmdb->query($q);
 	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,edit' WHERE `behaviors` = 'reg_user_only,no_dup,edit'";
-	$fmdb->query($q);									
+	$fmdb->query($q);						
 }  
 register_activation_hook(__FILE__,'fm_install');
 
@@ -71,7 +74,6 @@ function fm_uninstall() {
 	global $fmdb;	
 	$fmdb->removeFormManager();
 }
-
 register_uninstall_hook(__FILE__,'fm_uninstall');
 
 
@@ -106,6 +108,15 @@ function fm_adminInit(){
 
 add_action('init', 'fm_userInit');
 function fm_userInit(){
+	global $fm_currentVersion;
+	//update check, since the snarky wordpress dev changed the behavior of a function based on its english name, rather than its widely accepted usage.
+	//"The perfect is the enemy of the good". 
+	$ver = get_option('fm-version');
+	if($ver != $fm_currentVersion){
+		update_option('fm-version', $fm_currentVersion);
+		fm_install();
+	}
+
 	wp_enqueue_script('form-manager-js-helpers', plugins_url('/js/helpers.js', __FILE__));
 	wp_enqueue_script('form-manager-js-validation', plugins_url('/js/validation.js', __FILE__));
 	
@@ -308,7 +319,7 @@ function fm_createFormElement(){
 /**************************************************************/
 /******* SHORTCODE ********************************************/
 
-add_shortcode(get_option('shortcode'), 'fm_shortcodeHandler');
+add_shortcode(get_option('fm-shortcode'), 'fm_shortcodeHandler');
 function fm_shortcodeHandler($atts){
 	global $fm_display;
 	global $fmdb;
@@ -386,7 +397,7 @@ function fm_shortcodeHandler($atts){
 					else
 						$editLink = $currentPage."&fm-edit-".$formID."=1";
 					
-					$str.= "<span class=\"edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
+					$str.= "<span class=\"fm-data-summary-edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
 					return $output.$fm_display->displayDataSummary($formInfo, $userData[0], "<h3>".$formInfo['title']."</h3>\n" , $str);
 				}				
 			}

@@ -176,13 +176,13 @@ hr.edit-panel-sep{
 .fm-data-summary li{
 	list-style:none;
 }
-.fm-data-summary .label{
+.fm-data-summary-label{
 	font-weight:bold;
 }
-.fm-data-summary .value{
+.fm-data-summary-value{
 	
 }
-.fm-data-summary .edit{
+.fm-data-summary-edit{
 	float:right;
 }
 

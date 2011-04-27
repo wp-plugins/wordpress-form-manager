@@ -133,12 +133,12 @@ function displayDataSummary($formInfo, $data, $before = "", $after = "", $userAn
 	$str.= $before;
 	$str.= "<ul>\n";
 	if($userAndTimestamp){
-		$str.= "<li><span class=\"label\">User:&nbsp;&nbsp;</span><span class=\"value\">".$data['user']."</span></li>\n";
-		$str.= "<li><span class=\"label\">Timestamp:&nbsp;&nbsp;</span><span class=\"value\">".$data['timestamp']."</span></li>\n";
+		$str.= "<li><span class=\"fm-data-summary-label\">User:&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['user']."</span></li>\n";
+		$str.= "<li><span class=\"fm-data-summary-label\">Timestamp:&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['timestamp']."</span></li>\n";
 	}
 	foreach($formInfo['items'] as $item){
 		if($item['db_type'] != "NONE")
-			$str.= "<li><span class=\"label\">".$item['label'].":&nbsp;&nbsp;</span><span class=\"value\">".$fm_controls[$item['type']]->parseData($item['unique_name'], $item, $data[$item['unique_name']])."</span></li>\n";
+			$str.= "<li><span class=\"fm-data-summary-label\">".$item['label'].":&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$fm_controls[$item['type']]->parseData($item['unique_name'], $item, $data[$item['unique_name']])."</span></li>\n";
 	}
 	$str.= "</ul>\n";
 	$str.= $after;
