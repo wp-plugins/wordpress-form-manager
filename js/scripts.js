@@ -35,6 +35,7 @@ function fm_saveForm(){
 				email_admin: document.getElementById('email_admin').checked,
 				email_list: document.getElementById('email_list').value,
 				behaviors: document.getElementById('behaviors').value,
+				email_user_field: document.getElementById('email_user_field').value,
 				items: fm_getFormItems('form-list')
 		};	
 	

@@ -19,4 +19,29 @@ function fm_restrictString($string, $length, $useEllipse = true){
 	if($length > 3 && $useEllipse)	return substr($string, 0, $length-3)."...";
 	else return substr($string, 0, $length);
 }
+
+function helper_text_field($id, $label, $value, $desc = ""){
+	global $fm_globalSettings;
+	?>
+<tr valign="top">
+	<th scope="row"><label for="<?php echo $id;?>"><?php echo $label;?></label></th>
+	<td><input name="<?php echo $id;?>" type="text" id="<?php echo $id;?>"  value="<?php echo $value;?>" class="regular-text" />
+	<span class="description"><?php echo $desc;?></span>
+	</td>
+</tr>
+<?php
+}
+
+function helper_checkbox_field($id, $label, $checked, $desc = ""){
+	global $fm_globalSettings;
+	?>
+<tr valign="top">
+	<th scope="row"><label for="<?php echo $id;?>"><?php echo $label;?></label></th>
+	<td><input name="<?php echo $id;?>" type="checkbox" id="<?php echo $id;?>"  <?php echo $checked===true?"checked":"";?> class="regular-text" />
+	<span class="description"><?php echo $desc;?></span>
+	</td>
+</tr>
+<?php
+}
+
 ?>

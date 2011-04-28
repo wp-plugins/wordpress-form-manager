@@ -112,10 +112,6 @@ function displayForm($formInfo, $options=array(), $values=array()){
 					"'".$item['extra']['validation']."');\n";
 			}
 		}
-	}
-	
-	foreach($fm_controls as $control){
-		
 	}	
 	
 	$str.="</script>\n";

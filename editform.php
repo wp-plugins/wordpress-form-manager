@@ -112,39 +112,6 @@ if(isset($_POST['message']))
 		</div>	
 		<!-------------------------------------------------------------------------------------------------- -->
 		<div id="submitdiv" class="postbox " >
-		<h3 class='hndle'><span>Load Fields</span></h3>
-		<div class="inside">
-			<div class="submitbox" id="submitpost">			
-				<div id="minor-publishing">						
-					<div id="minor-publishing-actions">						
-						<div class="metabox-prefs">
-							<label for="load-fields-id">Form: </label>		
-							<select name="load-fields-id">
-								<?php foreach($formList as $f): ?>
-								<option value="<?php echo $f['ID'];?>"><?php echo $f['title']; ?></option>
-								<?php endforeach; ?> 
-							</select>
-							<br />
-							<label for="load-fields-insert-after">Insert After:</label>
-							<select name="load-fields-insert-after">
-								<option value="0">(Insert at beginning)</option>
-								<?php foreach($form['items'] as $item): ?>
-								<option value="<?php echo $item['unique_name'];?>"><?php echo fm_restrictString($item['label'],15);?></option>
-								<?php endforeach; ?>
-								<option value="1">(Insert at end)</option>
-							</select>
-							<br />
-							<input name="load-fields" type="submit" class="button-secondary" value="Load Fields" onclick="return fm_loadFields()"/>	
-						</div>					
-						<div class="clear"></div>			
-					</div>								
-					<div class="clear"></div>
-				</div>				
-			</div>		
-		</div>
-		</div>		
-		<!-------------------------------------------------------------------------------------------------- -->
-		<div id="submitdiv" class="postbox " >
 		<h3 class='hndle'><span>Submission Data</span></h3>
 		<div class="inside">
 			<div class="submitbox" id="submitpost">			
@@ -166,6 +133,62 @@ if(isset($_POST['message']))
 		</div>
 		<!-------------------------------------------------------------------------------------------------- -->	
 		
+		<div id="tagsdiv-post_tag" class="postbox " >
+			<h3 class='hndle'><span>Form Slug</span></h3>
+			
+			<div class="inside">
+				<div class="tagsdiv" id="post_tag">
+					<div class="jaxtag">
+						<div class="ajaxtag">															
+							<p><input style="text-align:left;" type="text" id="shortcode" value="<?php echo $form['shortcode'];?>" /></p>
+						</div>
+					<p class="howto">Use the above to put this form into a post or page:  for example, if the form's slug is "form-1", then put "[form form-1]" in your post or page where you want to insert the form. </p>
+					</div>					
+				</div>	
+			</div>
+		</div>	
+
+		<!-------------------------------------------------------------------------------------------------- -->
+		
+		<div id="tagsdiv-post_tag" class="postbox " >
+			<h3 class='hndle'><span>E-Mail Notifications</span></h3>
+			
+			<div class="inside">
+				<div class="tagsdiv" id="post_tag">
+				  <div class="jaxtag">
+						<div class="ajaxtag">															
+							<p>
+							<label>Send to <?php echo get_option('admin_email'); ?>:</label> <input type="checkbox" id="email_admin" <?php echo ($email_admin=="yes"?'checked':'');?> />
+							</p>
+							
+							<p>
+							<label>Send to (user entry):</label>
+								<select name="email_user_field" id="email_user_field">
+									<option value="">(none)</option>
+								<?php foreach($form['items'] as $item): ?>
+									<?php if($item['type'] == 'text'): ?>
+										<option value="<?php echo $item['unique_name'];?>" <?php echo ($form['email_user_field'] == $item['unique_name'])?"selected=\"selected\"":"";?> ><?php echo fm_restrictString($item['label'],30);?></option>
+									<?php endif;?>
+								<?php endforeach; ?>
+								</select>
+								<p class="howto" style="margin-top:-8px">Make sure the field you choose contains an E-Mail validator</p>
+							</p>							
+
+							<p>
+							<label>Also send notification(s) to:</label>
+							<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" />
+							<p class="howto" style="margin-top:-8px">Enter a list of e-mail addresses separated by commas</p>
+							</p>
+							
+						</div>						
+					</div>					
+				</div>	
+			</div>
+		</div>	
+
+		<!-------------------------------------------------------------------------------------------------- -->
+			
+		
 	</div><!-- side-info-column -->
 </div><!-- poststuff -->
 
@@ -183,9 +206,7 @@ if(isset($_POST['message']))
 		<!-- <div class="zerosize"><input accesskey="e" type="button" onclick="switchEditors.go('content')" /></div>
 		<a id="edButtonHTML" class="hide-if-no-js" onclick="switchEditors.go('content', 'html');">HTML</a>
 		<a id="edButtonPreview" class="active hide-if-no-js" onclick="switchEditors.go('content', 'tinymce');">Visual</a> -->
-		<div id="media-buttons" class="hide-if-no-js"> Insert Form Element: 
-			
-		</div>		
+		<div id="media-buttons"> Add Form Element:</div>		
 
 	</div>
 	<div id='editorcontainer'>
@@ -199,9 +220,38 @@ if(isset($_POST['message']))
 				}
 				echo implode(" | \n", $types);
 			?>
+			<div style="float:right"><a class="edit-form-button" onclick="fm_toggleLoadSavedFieldsDIV()" >Insert Saved Form</a></div>
+			<script type="text/javascript">
+			function fm_toggleLoadSavedFieldsDIV(){
+				Effect.toggle('load-saved-fields-div', 'Blind', {duration:0.3});
+			}
+			</script>
 			</div>
+			
 		</div>
 		<div class="fm-editor">
+			<div style="display:none;" id="load-saved-fields-div">
+				<div class="load-saved-fields">
+					<label for="load-fields-id">Inert Fields From: </label>		
+					<select name="load-fields-id">
+						<?php foreach($formList as $f): ?>
+						<option value="<?php echo $f['ID'];?>"><?php echo $f['title']; ?></option>
+						<?php endforeach; ?> 
+					</select>&nbsp;&nbsp;
+					
+					<label for="load-fields-insert-after">Insert After:</label>
+					<select name="load-fields-insert-after">
+						<option value="0">(Insert at beginning)</option>
+						<?php foreach($form['items'] as $item): ?>
+						<option value="<?php echo $item['unique_name'];?>"><?php echo fm_restrictString($item['label'],15);?></option>
+						<?php endforeach; ?>
+						<option value="1">(Insert at end)</option>
+					</select>
+					&nbsp;&nbsp;
+					<input name="load-fields" type="submit" class="button-secondary" value="Load Fields" onclick="return fm_loadFields()"/>	
+				</div>
+			</div>					
+			
 			<ul id="form-list">
 			<?php foreach($form['items'] as $item): ?>
 			<?php	echo "<li class=\"edit-form-menu-item postbox\" id=\"".$item['unique_name']."\">".$fm_display->getEditorItem($item['unique_name'], $item['type'], $item)."</li>\n"; ?>
@@ -227,14 +277,6 @@ if(isset($_POST['message']))
 
 </div>
 
-<div id="normal-sortables" class="meta-box-sortables">
-	<div id="postexcerpt" class="postbox " >
-	<h3 class='hndle'><span>Shortcode</span></h3>
-		<div class="inside">		
-		<input type="text" id="shortcode" value="<?php echo $form['shortcode'];?>" />
-		</div>
-	</div>
-</div>
 
 <div id="normal-sortables" class="meta-box-sortables">
 	<div id="postexcerpt" class="postbox " >
@@ -283,18 +325,8 @@ if(isset($_POST['message']))
 <div id="normal-sortables" class="meta-box-sortables">
 	<div id="postexcerpt" class="postbox " >
 	<h3 class='hndle'><span>Behavior</span></h3>
-		<div class="inside">
+		<div class="inside">	
 		<div class="fm-form-admin">
-			<div class="fm-admin-field-wrap">
-				<label>Send notification to <?php echo get_option('admin_email'); ?>:</label>
-				<input type="checkbox" id="email_admin" <?php echo ($email_admin=="yes"?'checked':'');?> />
-			</div>
-			<div class="fm-admin-field-wrap">
-				<label>Send notification(s) to:
-				<span class="small">Enter a list of emails separated by commas</span>
-				</label>
-				<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" />				
-			</div>			
 			<div class="fm-admin-field-wrap">
 				<label>Behavior type:
 				<span class="small">(All behaviors except 'Default' will require a registered user)</span>

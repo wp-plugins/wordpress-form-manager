@@ -2,18 +2,6 @@
 global $fmdb;
 global $fm_globalSettings;
 
-function helper_text_field($id, $label, $desc = ""){
-	global $fm_globalSettings;
-	?>
-<tr valign="top">
-	<th scope="row"><label for="<?php echo $id;?>"><?php echo $label;?></label></th>
-	<td><input name="<?php echo $id;?>" type="text" id="<?php echo $id;?>"  value="<?php echo htmlspecialchars($fm_globalSettings[$id]);?>" class="regular-text" />
-	<span class="description"><?php echo $desc;?></span>
-	</td>
-</tr>
-<?php
-}
-
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
@@ -24,7 +12,6 @@ if(isset($_POST['submit-settings'])){
 	$fmdb->setGlobalSetting('recaptcha_public', $_POST['recaptcha_public']);
 	$fmdb->setGlobalSetting('recaptcha_private', $_POST['recaptcha_private']);	
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////
 $fm_globalSettings = $fmdb->getGlobalSettings();
@@ -53,16 +40,16 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 
 <h3>Default Form Settings</h3>
 <table class="form-table">
-<?php helper_text_field('title', "Form Title"); ?>
-<?php helper_text_field('submitted_msg', "Submit Acknowledgment"); ?>
-<?php helper_text_field('required_msg', "Required Item Message", "This is displayed when a user fails to input a required item.  Include '%s' in the message where you would like the item's label to appear."); ?>
+<?php helper_text_field('title', "Form Title", htmlspecialchars($fm_globalSettings['title'])); ?>
+<?php helper_text_field('submitted_msg', "Submit Acknowledgment", htmlspecialchars($fm_globalSettings['submitted_msg'])); ?>
+<?php helper_text_field('required_msg', "Required Item Message", htmlspecialchars($fm_globalSettings['required_msg']), "This is displayed when a user fails to input a required item.  Include '%s' in the message where you would like the item's label to appear."); ?>
 </table>
 
 <h3>reCAPTCHA API Keys</h3>
 <span class="description">API Keys for reCAPTCHA can be acquired (for free) by visiting <a target="_blank" href="https://www.google.com/recaptcha">www.google.com/recaptcha</a>.</span>
 <table class="form-table">
-<?php helper_text_field('recaptcha_public', "reCAPTCHA Public Key"); ?>
-<?php helper_text_field('recaptcha_private', "reCAPTCHA Private Key"); ?>
+<?php helper_text_field('recaptcha_public', "reCAPTCHA Public Key", htmlspecialchars($fm_globalSettings['recaptcha_public'])); ?>
+<?php helper_text_field('recaptcha_private', "reCAPTCHA Private Key", htmlspecialchars($fm_globalSettings['recaptcha_private'])); ?>
 </table>
 
 

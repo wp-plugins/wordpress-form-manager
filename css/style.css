@@ -167,6 +167,12 @@ hr.edit-panel-sep{
 	border:0;
 }
 
+/* load saved fields menu bar */
+.load-saved-fields{
+	text-align:right;
+	margin-bottom:10px;
+}
+
 /******************************************/
 /* Data summary */
 

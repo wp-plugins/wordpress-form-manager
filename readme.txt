@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -26,6 +26,50 @@ Subtitles and notes can also be added to the form in any location.
 
 If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
 
+
+= 1.3.4 =
+* Added e-mail notification for user input (acknowledgment e-mail)
+* Changed editor interface
+
+= 1.3.3 =
+* Adjusted for register_activation_hook() change
+* Fixed some CSS style names likely to have conflicts
+
+= 1.3.2 =
+* Added reCAPTCHA field
+* Added Settings page
+* Multiple forms per page
+* Fixed CSV data double quote bug
+* Improved acknowledgement formatting
+
+= 1.3.1 =
+* Fixed 'Single submission' behavior bug
+* Items in form editor update when 'done' is clicked
+* Fixed list option editor bug
+
+= 1.3.0 =
+* Added form behaviors for registered users
+* Cleaned up data page
+* Added data summary to data page
+
+= 1.2.10 =
+* Rearranged editor sections
+* Fixed checkbox list 'required' test
+* Added single checkbox 'requried' test
+
+= 1.2.9 = 
+* Fixed .csv download bug
+
+= 1.2.8 =
+* Added e-mail notifications. 
+
+= 1.2.5 =
+* Fixes multisite edit/data page bug. 
+
+= 1.2.4 =
+* Fixes an installation error when starting with a fresh plugin install.
+
+
 *** I am starting work on version 2.  If you have suggestions or requests, please let me know! ***
 
 == Installation ==
@@ -43,11 +87,11 @@ Method 2: Download the source code for the plugin, and upload the 'wordpress-for
 
 = How do I add the form to a post/page? = 
 
-The shortcode is simple:
+The shortcode format is simple:
 
-[form (shortcode)]
+[form (slug)]
 
-So if your form's shortcode is 'my-contact-form', the code would be:
+So if your form's slug is 'my-contact-form', the shortcode would be:
 
 [form my-contact-form]
 
@@ -159,43 +203,3 @@ To use a reCAPTCHA, simply insert one into your form - though you have to enter 
 = How do I get reCAPTCHA API keys? =
 
 As of this writing, go to www.google.com/recaptcha, click on 'USE reCAPTCHA ON YOUR SITE', then 'Sign up Now!', and follow the instructions.  You will be shown your 'public' and 'private' API keys; copy and paste these into the 'Settings' page under 'Forms' in WordPress.
-
-== Changelog ==
-= 1.3.3 =
-* Adjusted for register_activation_hook() change
-* Fixed some CSS style names likely to have conflicts
-
-= 1.3.2 =
-* Added reCAPTCHA field
-* Added Settings page
-* Multiple forms per page
-* Fixed CSV data double quote bug
-* Improved acknowledgement formatting
-
-= 1.3.1 =
-* Fixed 'Single submission' behavior bug
-* Items in form editor update when 'done' is clicked
-* Fixed list option editor bug
-
-= 1.3.0 =
-* Added form behaviors for registered users
-* Cleaned up data page
-* Added data summary to data page
-
-= 1.2.10 =
-* Rearranged editor sections
-* Fixed checkbox list 'required' test
-* Added single checkbox 'requried' test
-
-= 1.2.9 = 
-* Fixed .csv download bug
-
-= 1.2.8 =
-* Added e-mail notifications. 
-
-= 1.2.5 =
-* Fixes multisite edit/data page bug. 
-
-= 1.2.4 =
-* Fixes an installation error when starting with a fresh plugin install.
-

@@ -52,7 +52,8 @@ public $formSettingsKeys = array(
 					'label_width' => 200,
 					'type' => 'form',
 					'email_list' => '',
-					'behaviors' => ''
+					'behaviors' => '',
+					'email_user_field' => ''
 					);			
 					
 public $itemKeys = array (
@@ -126,6 +127,7 @@ function setupFormManager(){
 		`type` VARCHAR( 32 ) NOT NULL,
 		`email_list` TEXT NOT NULL,
 		`behaviors` VARCHAR( 256 ) NOT NULL,
+		`email_user_field` VARCHAR( 64 ) NOT NULL,
 		PRIMARY KEY  (`ID`)
 		)";
 

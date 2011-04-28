@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.3
+Version: 1.3.4
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.3";
+$fm_currentVersion = "1.3.4";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -229,6 +229,7 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['shortcode'] = sanitize_title($_POST['shortcode']);
 	$formInfo['label_width'] = $_POST['label_width'];
 	$formInfo['behaviors'] = $_POST['behaviors'];
+	$formInfo['email_user_field'] = $_POST['email_user_field'];
 	
 	//build the notification email list
 
@@ -354,20 +355,24 @@ function fm_shortcodeHandler($atts){
 			}
 			return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink()), $postData);
 		}
-		else{		
-			$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
-			
-			// send email notifications		
-			if(trim($formInfo['email_list']) != ""){
+		else{					
+			// send email notifications
+			$formInfo['email_list'] = trim($formInfo['email_list']) ;
+			$formInfo['email_user_field'] = trim($formInfo['email_user_field']);		
+				
+			if($formInfo['email_list'] != "" || $formInfo['email_user_field'] != ""){
 				$subject = get_option('blogname').": '".$formInfo['title']."' Submission";
 				$message = $subject."\n";
 				if($postData['user'] != "") $message.= "User: ".$postData['user']."\n";
 				$message.= "Timestamp: ".$postData['timestamp']."\n\n";
 				foreach($formInfo['items'] as $formItem){
 					if($formItem['db_type'] != "NONE")
-						$message.= $formItem['label'].": ".$postData[$formItem['unique_name']]."\n";
+						$message.= $formItem['label'].": ".stripslashes($postData[$formItem['unique_name']])."\n";
 				}
-				wp_mail($formInfo['email_list'], $subject, $message);
+				if($formInfo['email_list'] != "")
+					wp_mail($formInfo['email_list'], $subject, $message);
+				if($formInfo['email_user_field'] != "") //do a separate call, in case the form / user input is malformed, so we at least get the admin emails sent
+					wp_mail($postData[$formInfo['email_user_field']], $subject, $message);
 			}
 			
 			if(!isset($formBehaviors['display_summ']))
