@@ -175,6 +175,10 @@ The data tables are named '(wp prefix)fm_data_(form ID #)', where (wp prefix) is
 
 Certainly.  You can change field types and indexes.  If you need to restrict the length of a text input, use a custom validator as described above.  However, changing the primary key is not recommended, since duplicate entries cannot be checked with validation.
 
+= Can I send e-mail acknowledgmements when somebody submits my form? =
+
+Yes.  You first have to add a 'Text' field to your form, give it a label, set the validation to 'E-Mail'.  Now save the form.  Then, under 'E-Mail Notifications' (on the right hand side of the page), select the form item you just created under 'Send to (user entry)'.  Only text fields will show up in this list, and only saved fields as well.  If the field does not show up, make sure you have saved the form, then check again.  Although you can choose any text field, it is highly recommended that you set the validation for the field to 'E-Mail'.  Also, make sure to add a 'reCAPTCHA' to any forms you make public on your site.  Otherwise, a spam bot could cause your site to generate hundreds of e-mails... this is to be avoided!
+
 = The e-mail notification doesn't seem to work. Why? = 
 
 Who knows. Form Manager uses the wp_mail() function, which according to the WordPress reference requires the following:
@@ -196,7 +200,7 @@ First, any behavior other than 'Default' restricts the form to registered users 
 
 = How do I use / what is reCAPTCHA? =
 
-The 'reCAPTCHA' form element is a spam / bot blocker.  It presents an image of some distorted text and asks you to enter the text, proving that you are a human being and not a spam bot.
+The 'reCAPTCHA' form element is a spam / bot blocker.  It can be though of as a 'human test', that is, it distinguishes between human beings using your site and a spam bots.  It presents an image of some distorted text and asks you to enter the text.
 
 To use a reCAPTCHA, simply insert one into your form - though you have to enter the reCAPTCHA API keys in the 'Settings' page under 'Forms' in WordPress.  
 
