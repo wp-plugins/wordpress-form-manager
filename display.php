@@ -11,7 +11,7 @@ class fm_display_class{
 //	class - 'class' attribute for the <form> tag
 //	action - 'action' attribute for the <form> tag
 //'params' is an associative array of hidden values inserted into the form
-function displayForm($formInfo, $options=array(), $params=array()){
+function displayForm($formInfo, $options=array(), $values=array()){
 	global $msg;
 	global $fmdb;
 	global $fm_controls;	
@@ -38,11 +38,19 @@ function displayForm($formInfo, $options=array(), $params=array()){
 	$str.= "<ul>\n";
 	
 		foreach($formInfo['items'] as $item){
+			
+			//if override $item['extra']['value'] if the unique_name is in $values
+			if(isset($values[$item['unique_name']]))
+				$item['extra']['value'] = $values[$item['unique_name']];
+			
 			$str.= "<li class=\"".$item['type']."\">";
 			
 			////////////////////////////////////////////////////////////////////////////////////////
 			
-			if(($formInfo['labels_on_top']==1 && $item['type'] != 'checkbox') || $item['type'] == 'separator'){
+			if(($formInfo['labels_on_top']==1 && $item['type'] != 'checkbox') 
+				|| $item['type'] == 'separator' 
+				|| ($item['type'] == 'note' && trim($item['label']) == ""))
+			{
 				$str.='<label>'.$item['label'].'</label>';
 				if($item['required']=='1')	$str.= '<em>*</em>';
 				$str.='<br />';
@@ -56,21 +64,7 @@ function displayForm($formInfo, $options=array(), $params=array()){
 				$str.='<td>'.$fm_controls[$item['type']]->showItem($item['unique_name'], $item).'</td>';
 				$str.='</tr></table>';			
 			}
-			/*
-			if($formInfo['labels_on_top']==0 || $item['type']=='checkbox')	//display width adjusted labels for checkboxes, or if labels are on the left
-				$str.= '<label for="'.$item['unique_name'].'" style="width:'.$formInfo['label_width'].'px">'.$item['label'];
-			else
-				$str.= '<label for="'.$item['unique_name'].'">'.$item['label'];
-				
-			if($item['required']=='1')	$str.= '<em>*</em>';
-			$str.= "</label>\n";			
-			
-			if($formInfo['labels_on_top']==1 && $item['type']!='checkbox') $str.="<br />";
-			
-			if(isset($fm_controls[$item['type']])) $str.=$fm_controls[$item['type']]->showItem($item['unique_name'], $item);
-			else $str.=$fm_controls['default']->showItem($item['unique_name'], $item);
-			*/
-			
+						
 			////////////////////////////////////////////////////////////////////////////////////////
 			
 			$str.= "</li>\n";
@@ -90,8 +84,7 @@ function displayForm($formInfo, $options=array(), $params=array()){
 		$str.= "</fieldset>\n";		
 	
 	//// echo the nonce ////	
-	//$str.= "<input type=\"hidden\" name=\"fm_nonce\" value=\"".$fmdb->getNonce()."\" />\n";
-	$str.=  wp_nonce_field('fm-submit', 'fm-submit-nonce', true, false );
+	$str.= "<input type=\"hidden\" name=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
 	$str.= "<input type=\"hidden\" name=\"fm_id\" value=\"".$formInfo['ID']."\" />\n";
 	
 	$str.= "</form>\n";
@@ -104,16 +97,51 @@ function displayForm($formInfo, $options=array(), $params=array()){
 		if($item['required'] == '1'){
 		 	$callback = $fm_controls[$item['type']]->getRequiredValidatorName();
 			if($callback != "")
-				$str.="fm_val_register_required('".$formInfo['ID']."', ".
+				$str.="fm_val_register('".$formInfo['ID']."', ".
 					"'".$item['unique_name']."', ".
 					"'".$callback."', ".
 					"'".format_string_for_js(sprintf($formInfo['required_msg'], $item['label']))."');\n";
 		}
+		if($item['extra']['validation'] != 'none'){
+			$callback = $fm_controls[$item['type']]->getGeneralValidatorName();
+			if($callback != ""){
+				$str.="fm_val_register('".$formInfo['ID']."', ".
+					"'".$item['unique_name']."', ".
+					"'".$callback."', ".
+					"'".format_string_for_js(sprintf($fm_controls[$item['type']]->getGeneralValidatorMessage($item['extra']['validation']), $item['label']))."', ".
+					"'".$item['extra']['validation']."');\n";
+			}
+		}
 	}	
+	
 	$str.="</script>\n";
 	$str.="<!-- /validation -->\n";
 	return $str;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+function displayDataSummary($formInfo, $data, $before = "", $after = "", $userAndTimestamp = false){
+	global $fm_controls;
+	
+	$str = "";
+	$str.= "<div class=\"fm-data-summary\">\n";
+	$str.= $before;
+	$str.= "<ul>\n";
+	if($userAndTimestamp){
+		$str.= "<li><span class=\"fm-data-summary-label\">User:&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['user']."</span></li>\n";
+		$str.= "<li><span class=\"fm-data-summary-label\">Timestamp:&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['timestamp']."</span></li>\n";
+	}
+	foreach($formInfo['items'] as $item){
+		if($item['db_type'] != "NONE")
+			$str.= "<li><span class=\"fm-data-summary-label\">".$item['label'].":&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$fm_controls[$item['type']]->parseData($item['unique_name'], $item, $data[$item['unique_name']])."</span></li>\n";
+	}
+	$str.= "</ul>\n";
+	$str.= $after;
+	$str.= "</div>";
+	return $str;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -131,11 +159,10 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 	$itemInfo['unique_name'] = $uniqueName;
 	
 	$str = "<table class=\"editor-item-table\">".
-			"<tr>".
-			"<td class=\"editor-item-buttons\"><a href=\"#\" class=\"handle\">move</a></td>".			
-			"<td class=\"editor-item-buttons\"><a href=\"#\" onclick=\"fm_showEditDivCallback('{$uniqueName}','".$control->getShowHideCallbackName()."')\" id=\"{$uniqueName}-edit\"/>edit</a></td>"		.
+			"<tr>".	
 			"<td class=\"editor-item-container\">".$control->showEditorItem($uniqueName, $itemInfo)."</td>".
-			"<td class=\"editor-item-buttons\">"."<a href=\"#\" onclick=\"fm_deleteItem('{$uniqueName}')\">delete</a>"."</td>".
+			"<td class=\"editor-item-buttons\"><a class=\"edit-form-button\" onclick=\"fm_showEditDivCallback('{$uniqueName}','".$control->getShowHideCallbackName()."')\" id=\"{$uniqueName}-edit\"/>edit</a></td>".
+			"<td class=\"editor-item-buttons\">"."<a class=\"edit-form-button\" onclick=\"fm_deleteItem('{$uniqueName}')\">delete</a>"."</td>".
 			"</tr>".
 			"</table>".
 			"<input type=\"hidden\" id=\"{$uniqueName}-type\" value=\"{$type}\" />";
@@ -144,14 +171,5 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-}
-
-//some helper functions 
-
-//shortens a string to a specified width; if $useEllipse is true (default), three of these characters will be '...'
-function fm_restrictString($string, $length, $useEllipse = true){
-	if(strlen($string)<=$length) return $string;
-	if($length > 3 && $useEllipse)	return substr($string, 0, $length-3)."...";
-	else return substr($string, 0, $length);
 }
 ?>
