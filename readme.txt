@@ -26,7 +26,7 @@ Subtitles and notes can also be added to the form in any location.
 
 If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
 
-
+Changes: 
 = 1.3.4 =
 * Added e-mail notification for user input (acknowledgment e-mail)
 * Changed editor interface
