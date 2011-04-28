@@ -102,8 +102,8 @@ function fm_adminInit(){
 	
 	wp_enqueue_script('form-manager-js', plugins_url('/js/scripts.js', __FILE__));	
 	
-	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
-	wp_enqueue_style('form-manager-css');
+	//wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
+	//wp_enqueue_style('form-manager-css');
 }
 
 add_action('init', 'fm_userInit');
