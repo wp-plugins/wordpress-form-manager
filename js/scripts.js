@@ -32,7 +32,6 @@ function fm_saveForm(){
 				show_border: document.getElementById('show_border').checked,
 				shortcode: document.getElementById('shortcode').value,
 				label_width: document.getElementById('label_width').value,
-				email_admin: document.getElementById('email_admin').checked,
 				email_list: document.getElementById('email_list').value,
 				behaviors: document.getElementById('behaviors').value,
 				email_user_field: document.getElementById('email_user_field').value,

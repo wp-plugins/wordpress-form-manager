@@ -270,7 +270,7 @@ class fm_customListControl extends fm_controlBase{
 			return data;
 		}
 		
-		
+		// for the multi-item library ////////////
 		//script to generate the 'options' items
 		function fm_custom_list_options_panel_item(itemID, optionID, optValue){
 			return "<input id=\"" + optionID + "-text\" type=\"text\" value=\"" + fm_htmlEntities(optValue) + "\" style=\"width:100px;\"/>";

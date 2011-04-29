@@ -156,11 +156,7 @@ if(isset($_POST['message']))
 			<div class="inside">
 				<div class="tagsdiv" id="post_tag">
 				  <div class="jaxtag">
-						<div class="ajaxtag">															
-							<p>
-							<label>Send to <?php echo get_option('admin_email'); ?>:</label> <input type="checkbox" id="email_admin" <?php echo ($email_admin=="yes"?'checked':'');?> />
-							</p>
-							
+						<div class="ajaxtag">											
 							<p>
 							<label>Send to (user entry):</label>
 								<select name="email_user_field" id="email_user_field">
