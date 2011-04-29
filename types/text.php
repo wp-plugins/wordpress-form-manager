@@ -115,19 +115,13 @@ class fm_textControl extends fm_controlBase{
 			$list[$val['name']] = $val['label'];
 		}
 		return $list;
-	}
+	}	
 	
-	public function addValidator($name, $label, $message, $regexp){
-		$this->validators[$name] = array('name' => $name, 'label' => $label, 'message' => $message, 'regexp' => $regexp);
+	public function initValidators(){
+		global $fmdb;
+		$this->validators = $fmdb->getTextValidators();
 	}
 }
 
-// HELPERS FOR VALIDATION
-
-function fm_new_text_validator($name, $label, $message, $regexp){
-	global $fm_controls;
-	if(isset($fm_controls['text']))
-		$fm_controls['text']->addValidator($name, $label, $message, $regexp);
-}
 
 ?>
