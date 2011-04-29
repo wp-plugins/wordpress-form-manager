@@ -2,7 +2,8 @@
 //// DEFINITIONS FOR TEXT FIELD VALIDATORS
 
 //function fm_new_text_validator($name, $label, $message, $regexp)
-					
+
+/*				
 //accepts integers and decimal; no scientific notation...				
 fm_new_text_validator('number', "Numbers Only", "'%s' must be a valid number", '/^\s*[0-9]*[\.]?[0-9]+\s*$/');
 
@@ -11,8 +12,7 @@ fm_new_text_validator('phone', "Phone Number", "'%s' must be a valid phone numbe
 
 //accepts email addresses (makes sure there is an '@' and a '.' - otherwise, could be jibberish, funny characters, etc., but thats okay.)
 fm_new_text_validator('email', "E-Mail", "'%s' Must be a valid E-Mail address", '/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/');
-
-
+*/
 
 //// DEFAULT FORM SETTINGS
 
@@ -42,4 +42,5 @@ $fm_form_behavior_types = array(	"Default"							=> '',
 									"Single submission"					=> 'reg_user_only,display_summ,single_submission',
 									"'User profile' style" 				=> 'reg_user_only,display_summ,edit'									
 								);
+$fm_controls['text']->initValidators();
 ?>

@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.5
+Version: 1.3.6
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.5";
+$fm_currentVersion = "1.3.6";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -139,12 +139,13 @@ add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
 	$pages[] = add_object_page("Forms", "Forms", "manage_options", "fm-admin-main", 'fm_showMainPage');
 	$pages[] = add_submenu_page("fm-admin-main", "Edit", "Edit", "manage_options", "fm-edit-form", 'fm_showEditPage');
-	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');
+	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');	
 	
 	//at some point, make this link go to a fresh form
 	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
 	
 	$pages[] = add_submenu_page("fm-admin-main", "Settings", "Settings", "manage_options", "fm-global-settings", 'fm_showSettingsPage');
+	$pages[] = add_submenu_page("fm-admin-main", "Advanced Settings", "Advanced Settings", "manage_options", "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
@@ -156,8 +157,10 @@ function fm_adminHead(){
 	
 	//we don't actually want all the pages to show up in the menu, but having slugs for pages makes things easy
 	//unset($submenu['fm-admin-main'][0]);
-	unset($submenu['fm-admin-main'][1]);
-	unset($submenu['fm-admin-main'][2]);
+	unset($submenu['fm-admin-main'][1]); //Edit
+	unset($submenu['fm-admin-main'][2]); //Data
+	
+	unset($submenu['fm-admin-main'][4]); //Advanced settings
 }
 
 //only show this stuff when viewing a plugin page, since some of it is messy
@@ -184,6 +187,10 @@ function fm_showMainPage(){
 
 function fm_showSettingsPage(){
 	include 'editsettings.php';
+}
+
+function fM_showSettingsAdvancedPage(){
+	include 'editsettingsadv.php';
 }
 
 /**************************************************************/

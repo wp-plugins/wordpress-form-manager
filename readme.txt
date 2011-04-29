@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -24,8 +24,11 @@ Form Manager is a tool for creating forms to collect and download data from visi
 
 Subtitles and notes can also be added to the form in any location.
 
-
 = Changes: =
+= 1.3.6 =
+* Advanced settings page
+* Custom text validators using regular expressions
+
 = 1.3.5 =
 * E-mail notifications for registered users
 * Admin and registered user e-mail notifications are now a global rather than per form setting.
@@ -157,14 +160,11 @@ No. All HTML tags are stripped from form inputs.
 
 = How do I add new validators? =
 
-Inside the 'settings.php' file, use the 'fm_new_text_validator' function:
+Go to the 'Settings' page, then click on 'Advanced' in the upper right hand corner.  Under 'Text Validators', you can add / remove new validators for text fields.
 
-fm_new_text_validator($name, $label, $message, $regexp);
-
-* $name - The 'slug' for the validator. Should only contain letters, dashes, and underscore.
-* $label - The label of the validator in the 'Validation' dropdown for the Text element.
-* $message - Message displayed for an invalid input. Should include one '%s', which will be repaced with the particular element's label when using the form. 
-* $regexp - Regular expression, used in JavaScript's String.match() function. 
+* Label - The label of the validator in the 'Validation' dropdown for the Text element.
+* Error Message - Message displayed for an invalid input. Should include one '%s', which will be repaced with the particular element's label when using the form. 
+* Regular Expression - A regular expression, used in JavaScript's String.match() function.  You should include the '/' character at the beginning and end of the regular expression.
 
 Refer to the 'settings.php' file for examples.
 

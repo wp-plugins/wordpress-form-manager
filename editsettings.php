@@ -26,6 +26,8 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <div id="icon-edit-pages" class="icon32"></div>
 <h2>Form Manager Settings</h2>
 
+<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-global-settings-advanced";?>" >Advanced</a>
+
 	<div id="message-container"><?php 
 	if(isset($_POST['message']))
 		switch($_POST['message']){
