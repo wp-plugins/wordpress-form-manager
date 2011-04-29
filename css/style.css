@@ -259,8 +259,12 @@ hr.edit-panel-sep{
 	padding:0px 0px 0px 0px;
 }
 
+.fm-form ul li:before{
+	content:inherit; 
+}
+
 .fm-form li{
-	list-style:none !important;
+	list-style:none; !important;
 	margin:0px 0px 10px 0px;
 	padding:0px 0px 0px 0px;
 }
