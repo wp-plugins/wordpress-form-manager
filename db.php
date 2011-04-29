@@ -73,6 +73,8 @@ public $globalSettings = array(
 					'title' =>				"New Form",	
 					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
 					'required_msg' => 		"\'%s\' is required.",
+					'email_admin' => "YES",
+					'email_reg_users' => "YES"
 					);
 				
 public function setFormSettingsDefaults($opt){

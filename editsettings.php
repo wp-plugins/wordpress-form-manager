@@ -10,7 +10,9 @@ if(isset($_POST['submit-settings'])){
 	$fmdb->setGlobalSetting('submitted_msg', $_POST['submitted_msg']);
 	$fmdb->setGlobalSetting('required_msg', $_POST['required_msg']);
 	$fmdb->setGlobalSetting('recaptcha_public', $_POST['recaptcha_public']);
-	$fmdb->setGlobalSetting('recaptcha_private', $_POST['recaptcha_private']);	
+	$fmdb->setGlobalSetting('recaptcha_private', $_POST['recaptcha_private']);
+	$fmdb->setGlobalSetting('email_admin', $_POST['email_admin'] == "on" ? "YES" : "");
+	$fmdb->setGlobalSetting('email_reg_users', $_POST['email_reg_users'] == "on" ? "YES" : "");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +39,11 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 		} 
 	?></div>
 
+<h3>E-Mail Notifications</h3>
+<table class="form-table">
+<?php helper_checkbox_field('email_admin', "Administrator (".get_option('admin_email').")", ($fm_globalSettings['email_admin'] == "YES")); ?>
+<?php helper_checkbox_field('email_reg_users', "Registered Users ", ($fm_globalSettings['email_reg_users'] == "YES"), "A confirmation e-mail will be sent to a registered user only when they submit a form"); ?>
+</table>
 
 <h3>Default Form Settings</h3>
 <table class="form-table">
