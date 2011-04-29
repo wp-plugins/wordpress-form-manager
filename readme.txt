@@ -24,6 +24,7 @@ Form Manager is a tool for creating forms to collect and download data from visi
 
 Subtitles and notes can also be added to the form in any location.
 
+
 = Changes: =
 = 1.3.7 =
 * Fixed 'fm_settiings' table install error
