@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -12,7 +12,7 @@ Put custom forms into posts and pages using shortcodes. Download submissions in 
 
 Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, required fields, custom acknowledgments, and e-mail notifications.  Forms can be added to posts or pages using a simple shortcode format.  
 
-Supported field types:
+= Supported field types: =
 
 * text field
 * text area
@@ -24,9 +24,12 @@ Supported field types:
 
 Subtitles and notes can also be added to the form in any location.
 
-If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
 
-Changes: 
+= Changes: =
+= 1.3.5 =
+* E-mail notifications for registered users
+* Admin and registered user e-mail notifications are now a global rather than per form setting.
+
 = 1.3.4 =
 * Added e-mail notification for user input (acknowledgment e-mail)
 * Changed editor interface
