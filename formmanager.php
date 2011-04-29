@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.6
+Version: 1.3.7
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.6";
+$fm_currentVersion = "1.3.7";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -117,6 +117,8 @@ function fm_userInit(){
 		fm_install();
 	}
 
+	include 'settings.php';
+	
 	wp_enqueue_script('form-manager-js-helpers', plugins_url('/js/helpers.js', __FILE__));
 	wp_enqueue_script('form-manager-js-validation', plugins_url('/js/validation.js', __FILE__));
 	
@@ -433,6 +435,4 @@ function fm_shortcodeHandler($atts){
 	//if we got this far, just display the form
 	return $fm_display->displayForm($formInfo, array('action' => get_permalink()));
 }
-
-include 'settings.php';
 ?>

@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -25,6 +25,9 @@ Form Manager is a tool for creating forms to collect and download data from visi
 Subtitles and notes can also be added to the form in any location.
 
 = Changes: =
+= 1.3.7 =
+* Fixed 'fm_settiings' table install error
+
 = 1.3.6 =
 * Advanced settings page
 * Custom text validators using regular expressions

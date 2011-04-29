@@ -1,4 +1,6 @@
 <?php 
+global $fm_controls;
+
 //// DEFINITIONS FOR TEXT FIELD VALIDATORS
 
 //function fm_new_text_validator($name, $label, $message, $regexp)
