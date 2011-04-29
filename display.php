@@ -43,7 +43,7 @@ function displayForm($formInfo, $options=array(), $values=array()){
 			if(isset($values[$item['unique_name']]))
 				$item['extra']['value'] = $values[$item['unique_name']];
 			
-			$str.= "<li class=\"".$item['type']."\">";
+			$str.= "<li>";
 			
 			////////////////////////////////////////////////////////////////////////////////////////
 			

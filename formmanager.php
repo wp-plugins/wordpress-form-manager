@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.4
+Version: 1.3.8
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.4";
+$fm_currentVersion = "1.3.8";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -117,6 +117,8 @@ function fm_userInit(){
 		fm_install();
 	}
 
+	include 'settings.php';
+	
 	wp_enqueue_script('form-manager-js-helpers', plugins_url('/js/helpers.js', __FILE__));
 	wp_enqueue_script('form-manager-js-validation', plugins_url('/js/validation.js', __FILE__));
 	
@@ -139,12 +141,13 @@ add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
 	$pages[] = add_object_page("Forms", "Forms", "manage_options", "fm-admin-main", 'fm_showMainPage');
 	$pages[] = add_submenu_page("fm-admin-main", "Edit", "Edit", "manage_options", "fm-edit-form", 'fm_showEditPage');
-	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');
+	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');	
 	
 	//at some point, make this link go to a fresh form
 	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
 	
 	$pages[] = add_submenu_page("fm-admin-main", "Settings", "Settings", "manage_options", "fm-global-settings", 'fm_showSettingsPage');
+	$pages[] = add_submenu_page("fm-admin-main", "Advanced Settings", "Advanced Settings", "manage_options", "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
@@ -156,8 +159,10 @@ function fm_adminHead(){
 	
 	//we don't actually want all the pages to show up in the menu, but having slugs for pages makes things easy
 	//unset($submenu['fm-admin-main'][0]);
-	unset($submenu['fm-admin-main'][1]);
-	unset($submenu['fm-admin-main'][2]);
+	unset($submenu['fm-admin-main'][1]); //Edit
+	unset($submenu['fm-admin-main'][2]); //Data
+	
+	unset($submenu['fm-admin-main'][4]); //Advanced settings
 }
 
 //only show this stuff when viewing a plugin page, since some of it is messy
@@ -184,6 +189,10 @@ function fm_showMainPage(){
 
 function fm_showSettingsPage(){
 	include 'editsettings.php';
+}
+
+function fM_showSettingsAdvancedPage(){
+	include 'editsettingsadv.php';
 }
 
 /**************************************************************/
@@ -242,8 +251,6 @@ function fm_saveHelperGatherFormInfo(){
 			$x = sizeof($emailList);
 		}	
 	}
-	if($_POST['email_admin'] == "true")
-		$emailList[] = get_option('admin_email');
 		
 	if($valid){
 		$temp = array();
@@ -360,7 +367,11 @@ function fm_shortcodeHandler($atts){
 			$formInfo['email_list'] = trim($formInfo['email_list']) ;
 			$formInfo['email_user_field'] = trim($formInfo['email_user_field']);		
 				
-			if($formInfo['email_list'] != "" || $formInfo['email_user_field'] != ""){
+			if($formInfo['email_list'] != ""
+			|| $formInfo['email_user_field'] != "" 
+			|| $fmdb->getGlobalSetting('email_admin') == "YES"
+			|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
+			
 				$subject = get_option('blogname').": '".$formInfo['title']."' Submission";
 				$message = $subject."\n";
 				if($postData['user'] != "") $message.= "User: ".$postData['user']."\n";
@@ -369,10 +380,20 @@ function fm_shortcodeHandler($atts){
 					if($formItem['db_type'] != "NONE")
 						$message.= $formItem['label'].": ".stripslashes($postData[$formItem['unique_name']])."\n";
 				}
+				$temp = "";
+				if($fmdb->getGlobalSetting('email_admin') == "YES")
+					wp_mail(get_option('admin_email'), $subject, $message);
+					
+				if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
+					if(trim($current_user->user_email) != "")
+						wp_mail($current_user->user_email, $subject, $message);
+				}
 				if($formInfo['email_list'] != "")
 					wp_mail($formInfo['email_list'], $subject, $message);
-				if($formInfo['email_user_field'] != "") //do a separate call, in case the form / user input is malformed, so we at least get the admin emails sent
+					
+				if($formInfo['email_user_field'] != "")
 					wp_mail($postData[$formInfo['email_user_field']], $subject, $message);
+	
 			}
 			
 			if(!isset($formBehaviors['display_summ']))
@@ -414,6 +435,4 @@ function fm_shortcodeHandler($atts){
 	//if we got this far, just display the form
 	return $fm_display->displayForm($formInfo, array('action' => get_permalink()));
 }
-
-include 'settings.php';
 ?>

@@ -67,6 +67,8 @@ function fm_buildControlTypes($controlTypes){
 	return $arr;
 }
 
+global $fm_controls;
+
 $fm_controls = fm_buildControlTypes($fm_controlTypes);
 
 ?>
