@@ -20,6 +20,15 @@ function __construct($formsTable, $itemsTable, $settingsTable, $conn){
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
+
+function query($q){
+	//echo $q."<br />";
+	$res = mysql_query($q, $this->conn) or die(mysql_error());
+	return $res;
+}
+
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 //Cache 
 
 //the fm_db_class appears stateless to the user; however we can keep track of some things to make fewer queries.
@@ -73,13 +82,49 @@ public $globalSettings = array(
 					'title' =>				"New Form",	
 					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
 					'required_msg' => 		"\'%s\' is required.",
+					'email_admin' => "YES",
+					'email_reg_users' => "YES",
+					'text_validator_count' => 3,
+					'text_validator_0' => array('name' => 'number',
+												'label' => 'Numbers Only',
+												'message' => "'%s' must be a valid number",
+												'regexp' => '/^\s*[0-9]*[\.]?[0-9]+\s*$/'
+												),
+					'text_validator_1' => array('name' => 'phone',
+												'label' => 'Phone Number',
+												'message' => "'%s' must be a valid phone number",
+												'regexp' => '/^.*[0-9]{3}.*[0-9]{3}.*[0-9]{4}.*$/'
+												),
+					'text_validator_2' => array('name' => 'email',
+												'label' => "E-Mail",
+												'message' => "'%s' Must be a valid E-Mail address",
+												'regexp' => '/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/'
+												)
 					);
-				
+
+public function getTextValidators(){
+	$arr = array();
+	$count = $this->getGlobalSetting('text_validator_count');
+	for($x=0;$x<$count;$x++){
+		$val = $this->getGlobalSetting('text_validator_'.$x);
+		$arr[$val['name']] = $val;
+	}
+	return $arr;
+}
+
+public function setTextValidators($validatorList){
+	$x=0;
+	foreach($validatorList as $validator)
+		$this->setGlobalSetting('text_validator_'.$x++, $validator, true);
+	$this->setGlobalSetting('text_validator_count', sizeof($validatorList));
+}
+
 public function setFormSettingsDefaults($opt){
 	foreach($this->formSettingsKeys as $k=>$v){
 		if(array_key_exists($k, $opt)) $this->formSettingsKeys[$k] = $opt[$k];
 	}
 }
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -142,7 +187,7 @@ function setupFormManager(){
 	
 	$sql = "CREATE TABLE " . $this->settingsTable . " (
 		`setting_name` VARCHAR( 32 ) NOT NULL,
-		`setting_value` VARCHAR( 128 ) NOT NULL,
+		`setting_value` TEXT NOT NULL,
 		PRIMARY KEY  (`setting_name`)
 		)";
 	
@@ -204,15 +249,6 @@ function removeFormManager(){
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
-
-function query($q){
-	//echo $q."<br />";
-	$res = mysql_query($q, $this->conn) or die(mysql_error());
-	return $res;
-}
-
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 // Form Settings
 
@@ -237,6 +273,8 @@ function initSettingsTable(){
 // $overwrite : overwrite the old setting, if one exists.
 function setGlobalSetting($settingName, $settingValue, $overwrite = true){
 	$val = $this->getGlobalSetting($settingName);
+	if(is_array($settingValue))
+		$settingValue = addslashes(serialize($settingValue));
 	if($val === false){
 		$q = "INSERT INTO `".$this->settingsTable."` SET `setting_name` = '{$settingName}', `setting_value` = '{$settingValue}'";
 		$this->query($q);
@@ -256,6 +294,8 @@ function getGlobalSetting($settingName){
 	if(mysql_num_rows($res) == 0) return false;
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);
+	if(is_serialized($row['setting_value']))
+		return unserialize($row['setting_value']);
 	return $row['setting_value'];
 }
 
@@ -264,7 +304,9 @@ function getGlobalSettings(){
 	$res = $this->query($q);
 	$vals = array();
 	while($row = mysql_fetch_assoc($res)){
-		$vals[$row['setting_name']] = $row['setting_value'];
+		if(is_serialized($row['setting_value']))
+			$row['setting_value'] = unserialize($row['setting_value']);
+		$vals[$row['setting_name']] = $row['setting_value'];		
 	}
 	mysql_free_result($res);
 	return $vals;
