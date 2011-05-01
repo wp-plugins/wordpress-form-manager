@@ -45,12 +45,12 @@ function fm_showControlScripts(){
 		if(editClick.innerHTML == 'edit'){
 			if(callback != "") eval(callback + '(itemID,false);');
 			editClick.innerHTML = 'done';
-			Effect.BlindDown(itemID + '-edit-div', { duration: 0.5 });
+			Effect.BlindDown(itemID + '-edit-div', { duration: 0.2 });
 		}
 		else{
 			if(callback != "") eval(callback + '(itemID,true);');
 			editClick.innerHTML = 'edit';
-			Effect.BlindUp(itemID + '-edit-div', { duration: 0.5 });
+			Effect.BlindUp(itemID + '-edit-div', { duration: 0.2 });
 		}	
 	}
 	</script><?php

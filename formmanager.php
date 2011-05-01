@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.9
+Version: 1.3.10
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.9";
+$fm_currentVersion = "1.3.10";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -37,7 +37,8 @@ include 'display.php';
 /**************************************************************/
 /******* PLUGIN OPTIONS ***************************************/
 
-update_option("fm-shortcode", "form");
+if(get_option('fm-shortcode') === false) 
+	update_option("fm-shortcode", "form");
 update_option("fm-forms-table-name", "fm_forms");
 update_option("fm-items-table-name", "fm_items");
 update_option("fm-settings-table-name", "fm_settings");
@@ -58,7 +59,9 @@ $fm_display = new fm_display_class();
 /******* DATABASE SETUP ***************************************/
 
 function fm_install () {
-	global $fmdb;	
+	global $fmdb;
+	
+	//initialize the database
 	$fmdb->setupFormManager();   
 	
 	/* covers updates from 1.3.0 */
@@ -73,6 +76,14 @@ register_activation_hook(__FILE__,'fm_install');
 function fm_uninstall() {
 	global $fmdb;	
 	$fmdb->removeFormManager();
+	
+	delete_option('fm-shortcode');
+	delete_option('fm-forms-table-name');
+	delete_option('fm-items-table-name');
+	delete_option('fm-settings-table-name');
+	delete_option('fm-data-table-prefix');
+	delete_option('fm-query-table-prefix');
+	delete_option('fm-version');
 }
 register_uninstall_hook(__FILE__,'fm_uninstall');
 
@@ -329,13 +340,17 @@ function fm_createFormElement(){
 
 add_shortcode(get_option('fm-shortcode'), 'fm_shortcodeHandler');
 function fm_shortcodeHandler($atts){
+	return fm_doFormBySlug($atts[0]);
+}
+
+function fm_doFormBySlug($formSlug){
 	global $fm_display;
 	global $fmdb;
 	global $current_user;
 	global $fm_registered_user_only_msg;
 		
-	$formID = $fmdb->getFormID($atts[0]);
-	if($formID === false) return "(form ".(trim($atts[0])!=""?"'{$atts[0]}' ":"")."not found)";
+	$formID = $fmdb->getFormID($formSlug);
+	if($formID === false) return "(form ".(trim($formSlug)!=""?"'{$formSlug}' ":"")."not found)";
 	
 	$output = "";
 	

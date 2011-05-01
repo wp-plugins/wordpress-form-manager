@@ -118,14 +118,14 @@ else: ?>
 			<tr>
 				<th scope="col" class="manage-column column-cb check-column">&nbsp;</th>
 				<th>Name</th>
-				<th>Shortcode</th>
+				<th>Slug</th>
 			</tr>
 			</thead>
 			<tfoot>
 			<tr>
 				<th scope="col" class="manage-column column-cb check-column">&nbsp;</th>
 				<th>Name</th>
-				<th>Shortcode</th>
+				<th>Slug</th>
 			</tr>
 			</tfoot>
 			<?php	 foreach($formList as $form): ?>

@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.9
+Stable tag: 1.3.10
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -25,11 +25,15 @@ Form Manager is a tool for creating forms to collect and download data from visi
 Subtitles and notes can also be added to the form in any location.
 
 = Changes: =
+= 1.3.10 =
+* Added API stable fm_doFormBySlug($formSlug) to show forms within templates
+* Admin can change plugin's shortcode in 'Advanced Settings'
+
 = 1.3.9 =
 * Fixed form behavior selection bug
 
 = 1.3.8 =
-* Fixed style conflict with Kubric (Default) theme
+* Fixed possible style conflict with Kubric (Default) theme
 
 = 1.3.7 =
 * Fixed 'fm_settiings' table install error

@@ -6,7 +6,6 @@ global $fm_globalSettings;
 // Process settings changes
 
 if(isset($_POST['submit-settings'])){
-	//echo "<pre>".print_r($_POST,true)."</pre>";
 	
 	////////////////////////////////////////////////////////////////////////////////////
 	//Process validators
@@ -28,9 +27,17 @@ if(isset($_POST['submit-settings'])){
 	}
 	
 	$fmdb->setTextValidators($validators);
-	////////////////////////////////////////////////////////////////////////////////////
 	
-	//echo "<pre>".print_r($validators,true)."</pre>";
+	////////////////////////////////////////////////////////////////////////////////////
+	//Process shortcode
+	
+	$newShortcode = sanitize_title($_POST['shortcode']);
+	$oldShortcode = get_option('fm-shortcode');
+	if($newShortcode != $oldShortcode){
+		remove_shortcode($oldShortcode);	
+		update_option('fm-shortcode', $newShortcode);
+		add_shortcode($newShortcode, 'fm_shortcodeHandler');
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +141,13 @@ function fm_getManagedListCount(ulID){
 	</pre>
 	<a class="button" onclick="fm_addManagedListItem('validator-list', fm_blankItem)" >Add </a>
 </table>
+<br />
+<br />
+<h3>Shortcode</h3>
+<table class="form-table">
+<?php helper_text_field('shortcode', "Plugin shortcode", get_option('fm-shortcode')); ?>
+</table>
+
 
 </div>
 

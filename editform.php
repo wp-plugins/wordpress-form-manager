@@ -219,7 +219,7 @@ if(isset($_POST['message']))
 			<div style="float:right"><a class="edit-form-button" onclick="fm_toggleLoadSavedFieldsDIV()" >Insert Saved Form</a></div>
 			<script type="text/javascript">
 			function fm_toggleLoadSavedFieldsDIV(){
-				Effect.toggle('load-saved-fields-div', 'Blind', {duration:0.3});
+				Effect.toggle('load-saved-fields-div', 'Blind', {duration:0.1});
 			}
 			</script>
 			</div>
