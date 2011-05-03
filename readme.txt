@@ -4,15 +4,21 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.4
+Stable tag: 1.3.11
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
 == Description ==
 
-Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, required fields, custom acknowledgments, and e-mail notifications.  Forms can be added to posts or pages using a simple shortcode format.  
+Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Forms are added to posts or pages using a simple shortcode format, or can be added to your theme with a simple API. 
 
-Supported field types:
+= Features =
+* validation
+* required fields
+* custom acknowledgments
+* e-mail notifications.   
+
+= Supported field types: =
 
 * text field
 * text area
@@ -24,9 +30,37 @@ Supported field types:
 
 Subtitles and notes can also be added to the form in any location.
 
-If you are familiar with regular expessions, adding new validation types can be done quickly by editing the 'settings.php' file in the plugin's directory. 
+= Publishing a Form =
+Forms are placed within posts or pages.  For example, if your form's slug is 'form-1', put the following within a post or page: 
 
-Changes: 
+`[form form-1]`
+
+= Changes: =
+= 1.3.11 =
+* Full Unicode support
+* Added date validator for text fields
+
+= 1.3.10 =
+* Added API stable fm_doFormBySlug($formSlug) to show forms within templates
+* Admin can change plugin's shortcode in 'Advanced Settings'
+
+= 1.3.9 =
+* Fixed form behavior selection bug
+
+= 1.3.8 =
+* Fixed possible style conflict with Kubric (Default) theme
+
+= 1.3.7 =
+* Fixed 'fm_settiings' table install error
+
+= 1.3.6 =
+* Advanced settings page
+* Custom text validators using regular expressions
+
+= 1.3.5 =
+* E-mail notifications for registered users
+* Admin and registered user e-mail notifications are now a global rather than per form setting.
+
 = 1.3.4 =
 * Added e-mail notification for user input (acknowledgment e-mail)
 * Changed editor interface
@@ -154,14 +188,11 @@ No. All HTML tags are stripped from form inputs.
 
 = How do I add new validators? =
 
-Inside the 'settings.php' file, use the 'fm_new_text_validator' function:
+Go to the 'Settings' page, then click on 'Advanced' in the upper right hand corner.  Under 'Text Validators', you can add / remove new validators for text fields.
 
-fm_new_text_validator($name, $label, $message, $regexp);
-
-* $name - The 'slug' for the validator. Should only contain letters, dashes, and underscore.
-* $label - The label of the validator in the 'Validation' dropdown for the Text element.
-* $message - Message displayed for an invalid input. Should include one '%s', which will be repaced with the particular element's label when using the form. 
-* $regexp - Regular expression, used in JavaScript's String.match() function. 
+* Label - The label of the validator in the 'Validation' dropdown for the Text element.
+* Error Message - Message displayed for an invalid input. Should include one '%s', which will be repaced with the particular element's label when using the form. 
+* Regular Expression - A regular expression, used in JavaScript's String.match() function.  You should include the '/' character at the beginning and end of the regular expression.
 
 Refer to the 'settings.php' file for examples.
 
@@ -207,3 +238,9 @@ To use a reCAPTCHA, simply insert one into your form - though you have to enter 
 = How do I get reCAPTCHA API keys? =
 
 As of this writing, go to www.google.com/recaptcha, click on 'USE reCAPTCHA ON YOUR SITE', then 'Sign up Now!', and follow the instructions.  You will be shown your 'public' and 'private' API keys; copy and paste these into the 'Settings' page under 'Forms' in WordPress.
+
+= How do I add a form to my theme / use the form API? =
+
+The API only has a single function, fm_doFormBySlug(), that takes a single parameter, a string containing the slug of a form.  For example, if your form's slug is 'form-1', you would put the following somewhere in your theme:
+
+`echo fm_doFormBySlug('form-1');`

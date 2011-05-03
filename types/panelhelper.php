@@ -30,6 +30,17 @@ class fm_editPanelItemBase{
 	}
 }
 
+class fm_editPanelItemMultiText extends fm_editPanelItemBase{
+	function getPanelItemInner(){
+		$arr = array();
+		$x=0;
+		foreach($this->options['fields'] as $field){
+			$arr[] = "{$field['label']}<input type=\"text\" id=\"{$this->uniqueName}-{$field['name']}\" value=\"".htmlspecialchars($this->options['value'][$field['name']])."\" style=\"width:{$field['size']};\">";
+		}
+		return implode($this->options['separator'], $arr);
+	}	
+}
+
 class fm_editPanelTextArea extends fm_editPanelItemBase{
 	function getPanelItemInner(){
 		return "<textarea rows=\"".$this->options['rows']."\" cols=\"".$this->options['cols']."\" id=\"{$this->uniqueName}-{$this->itemName}\" >".$this->options['value']."</textarea>";
