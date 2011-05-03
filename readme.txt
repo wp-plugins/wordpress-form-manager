@@ -18,7 +18,7 @@ Form Manager is a tool for creating forms to collect and download data from visi
 * custom acknowledgments
 * e-mail notifications.   
 
-= Supported field types: =
+= Supported field types =
 
 * text field
 * text area
