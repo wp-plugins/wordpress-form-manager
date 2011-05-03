@@ -84,7 +84,7 @@ public $globalSettings = array(
 					'required_msg' => 		"\'%s\' is required.",
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
-					'text_validator_count' => 3,
+					'text_validator_count' => 4,
 					'text_validator_0' => array('name' => 'number',
 												'label' => 'Numbers Only',
 												'message' => "'%s' must be a valid number",
@@ -97,10 +97,201 @@ public $globalSettings = array(
 												),
 					'text_validator_2' => array('name' => 'email',
 												'label' => "E-Mail",
-												'message' => "'%s' Must be a valid E-Mail address",
+												'message' => "'%s' must be a valid E-Mail address",
 												'regexp' => '/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/'
+												),
+					'text_validator_3' => array('name' => 'date',
+												'label' => "Date (MM/DD/YY)",
+												'message' => "'%s' must be a date (MM/DD/YY)",
+												'regexp' => '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'
 												)
 					);
+
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+// Database setup & removal
+
+
+function setupFormManager(){
+	global $wpdb;
+	
+	if (!empty($wpdb->charset))
+		$charset_collate = "CHARACTER SET ".$wpdb->charset;
+	if (!empty($wpdb->collate))
+		$charset_collate.= " COLLATE ".$wpdb->collate;
+
+	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+	
+	//////////////////////////////////////////////////////////////////
+	//form definitions table - stores ID, title, options, and name of data table for each form
+	
+	/*
+		ID					- stores the unique integer ID of the form
+		title				- form title
+		labels_on_top		- labels displayed on top or to the left
+		submitted_msg   	- message displayed when user submits data
+		submit_btn_text		- text on the 'submit' button
+		required_msg 		- message shown in the 'required' popup; use %s in the string to show the field label. If no string is given, default message is used.				
+		data_table 			- table where the form's submissions are stored
+		action 				- form 'action' attribute
+		data_index 			- data table primary key, if it has one
+		shortcode 			- shortcode for the form in question (wordpress only)
+		show_title 			- display the form title
+		show_border 		- display the form border
+		label_width 		- width of the labels, when displayed on the left
+		type 				- type of form ('form', 'template')
+		email_list			- list of e-mails to send notifications to
+		behaviors			- comma separated list of 'behaviors', such as reg_user_only, etc.
+	*/	
+	
+	
+	$sql = "CREATE TABLE `".$this->formsTable."` (
+		`ID` INT NOT NULL,
+		`title` TEXT NOT NULL,
+		`labels_on_top` BOOL DEFAULT '0' NOT NULL,
+		`submitted_msg` TEXT NOT NULL,
+		`submit_btn_text` VARCHAR( 32 ) NOT NULL,
+		`required_msg` TEXT NOT NULL,
+		`data_table` VARCHAR( 32 ) NOT NULL,
+		`action` TEXT NOT NULL,
+		`data_index` VARCHAR( 32 ) NOT NULL,
+		`shortcode` VARCHAR( 64 ) NOT NULL,
+		`show_title` BOOL DEFAULT '1' NOT NULL,
+		`show_border` BOOL DEFAULT '1' NOT NULL,
+		`label_width` VARCHAR( 32 ) NOT NULL,
+		`type` VARCHAR( 32 ) NOT NULL,
+		`email_list` TEXT NOT NULL,
+		`behaviors` VARCHAR( 256 ) NOT NULL,
+		`email_user_field` VARCHAR( 64 ) NOT NULL,
+		PRIMARY KEY  (`ID`)
+		) ".$charset_collate.";";
+
+	
+	dbDelta($sql);
+	
+	//create a settings row
+	$this->initFormsTable();
+	
+	//////////////////////////////////////////////////////////////////
+	//global settings table
+	
+	$sql = "CREATE TABLE " . $this->settingsTable . " (
+		`setting_name` VARCHAR( 32 ) NOT NULL,
+		`setting_value` TEXT NOT NULL,
+		PRIMARY KEY  (`setting_name`)
+		) ".$charset_collate.";";
+	
+	dbDelta($sql);	
+	
+	$this->initSettingsTable();
+	
+	//////////////////////////////////////////////////////////////////
+	//form items - stores the items on all forms
+	
+	$sql = "CREATE TABLE `".$this->itemsTable."` ( 
+				`ID` INT NOT NULL ,							
+				`index` INT NOT NULL ,
+				`unique_name` VARCHAR( 64 ) NOT NULL ,
+				`type` VARCHAR( 32 ) NOT NULL ,
+				`extra` TEXT NOT NULL ,
+				`nickname` TEXT NOT NULL ,
+				`label` TEXT NOT NULL ,
+				`required` BOOL NOT NULL ,
+				`db_type` VARCHAR( 32 ) NOT NULL ,
+				`description` TEXT NOT NULL ,
+				INDEX ( `ID` ) ,
+				UNIQUE (`unique_name`)
+				) ".$charset_collate.";";
+		
+	dbDelta($sql);
+	
+}
+
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+//fix the collation on the data tables
+function fixCollation(){
+	global $wpdb;
+	
+	//establish the current charset / collation
+	if (!empty($wpdb->charset))
+		$charset_collate = "CHARACTER SET ".$wpdb->charset;
+	if (!empty($wpdb->collate))
+		$charset_collate.= " COLLATE ".$wpdb->collate;
+	
+	//build a list of tables to fix
+	$tableList = array($this->formsTable, $this->itemsTable, $this->settingsTable);
+
+	$formList = $this->getFormList();
+	if(sizeof($formList) > 0)
+		foreach($formList as $form)
+			$tableList[] = $form['data_table'];
+	
+	//fix the tables
+	foreach($tableList as $table){
+		$q = "ALTER TABLE `".$table."` DEFAULT ".$charset_collate;
+		$this->query($q);
+		
+		$q = "SHOW FULL COLUMNS FROM `".$table."`";
+		$res = $this->query($q);
+		$cols = array();
+		while($row = mysql_fetch_assoc($res))
+			if(!is_null($row['Collation']))
+				$cols[] = $row;		
+		
+		if(sizeof($cols)>0){
+			$q = "ALTER TABLE `".$table."` ";
+			for($x=0;$x<sizeof($cols);$x++)
+				$cols[$x] = "CHANGE `".$cols[$x]['Field']."` `".$cols[$x]['Field']."` ".$cols[$x]['Type']." ".$charset_collate." NOT NULL";
+			$q.= implode(" , ", $cols);
+			$this->query($q);
+		}
+			
+		mysql_free_result($res);
+	}
+}
+
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+function removeFormManager(){
+	$q = "SHOW TABLES LIKE '{$this->formsTable}'";
+	$res = $this->query($q);
+	if(mysql_num_rows($res)>0){
+		mysql_free_result($res);
+		$q = "SELECT `data_table` FROM `{$this->formsTable}`";	
+		$res = $this->query($q);
+		while($row=mysql_fetch_assoc($res)){
+			if($row['data_table'] != ""){			
+				$q = "SHOW TABLES LIKE '".$row['data_table']."'";
+				$r = $this->query($q);
+				if(mysql_num_rows($r) > 0){
+					$q="DROP TABLE IF EXISTS `".$row['data_table']."`";				
+					$this->query($q);
+				}
+				mysql_free_result($r);
+			}
+		}
+		mysql_free_result($res);
+	}
+	else
+		mysql_free_result($res);	
+		
+	$q = "DROP TABLE IF EXISTS `{$this->formsTable}`";	
+	$this->query($q);
+	$q = "DROP TABLE IF EXISTS `{$this->itemsTable}`";	
+	$this->query($q);
+	$q = "DROP TABLE IF EXISTS `{$this->settingsTable}`";	
+	$this->query($q);
+}
+
+
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+// Form Settings
 
 public function getTextValidators(){
 	$arr = array();
@@ -125,133 +316,6 @@ public function setFormSettingsDefaults($opt){
 	}
 }
 
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-// Database setup & removal
-
-
-function setupFormManager(){
-	
-	//////////////////////////////////////////////////////////////////
-	//form definitions table - stores ID, title, options, and name of data table for each form
-	
-	/*
-		ID					- stores the unique integer ID of the form
-		title				- form title
-		labels_on_top		- labels displayed on top or to the left
-		submitted_msg   	- message displayed when user submits data
-		submit_btn_text		- text on the 'submit' button
-		required_msg 		- message shown in the 'required' popup; use %s in the string to show the field label. If no string is given, default message is used.				
-		data_table 			- table where the form's submissions are stored
-		action 				- form 'action' attribute
-		data_index 			- data table primary key, if it has one
-		shortcode 			- shortcode for the form in question (wordpress only)
-		show_title 			- display the form title
-		show_border 		- display the form border
-		label_width 		- width of the labels, when displayed on the left
-		type 				- type of form ('form', 'template')
-		email_list			- list of e-mails to send notifications to
-		behaviors			- comma separated list of 'behaviors', such as reg_user_only, etc.
-	*/	
-	
-	$sql = "CREATE TABLE " . $this->formsTable . " (
-		`ID` INT NOT NULL,
-		`title` TEXT NOT NULL,
-		`labels_on_top` BOOL DEFAULT '0' NOT NULL,
-		`submitted_msg` TEXT NOT NULL,
-		`submit_btn_text` VARCHAR( 32 ) NOT NULL,
-		`required_msg` TEXT NOT NULL,
-		`data_table` VARCHAR( 32 ) NOT NULL,
-		`action` TEXT NOT NULL,
-		`data_index` VARCHAR( 32 ) NOT NULL,
-		`shortcode` VARCHAR( 64 ) NOT NULL,
-		`show_title` BOOL DEFAULT '1' NOT NULL,
-		`show_border` BOOL DEFAULT '1' NOT NULL,
-		`label_width` VARCHAR( 32 ) NOT NULL,
-		`type` VARCHAR( 32 ) NOT NULL,
-		`email_list` TEXT NOT NULL,
-		`behaviors` VARCHAR( 256 ) NOT NULL,
-		`email_user_field` VARCHAR( 64 ) NOT NULL,
-		PRIMARY KEY  (`ID`)
-		)";
-
-	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-	dbDelta($sql);
-	
-	//create a settings row
-	$this->initFormsTable();
-	
-	//////////////////////////////////////////////////////////////////
-	//global settings table
-	
-	$sql = "CREATE TABLE " . $this->settingsTable . " (
-		`setting_name` VARCHAR( 32 ) NOT NULL,
-		`setting_value` TEXT NOT NULL,
-		PRIMARY KEY  (`setting_name`)
-		)";
-	
-	dbDelta($sql);	
-	
-	$this->initSettingsTable();
-	
-	//////////////////////////////////////////////////////////////////
-	//form items - stores the items on all forms
-	
-	$q = "SHOW TABLES LIKE '".$this->itemsTable."'";	
-	$res = $this->query($q);
-	if(mysql_num_rows($res) == 0){		
-		$q = "CREATE TABLE `".$this->itemsTable."` (".
-				"`ID` INT NOT NULL ,".							//corresponds to the 'ID' in the forms table
-				"`index` INT NOT NULL ,".						//used to order the form items
-				"`unique_name` VARCHAR( 64 ) NOT NULL ,".		//unique name given to all items using uniq_id()
-				"`type` VARCHAR( 32 ) NOT NULL ,".				//'sanitized' type name - used as array key
-				"`extra` TEXT NOT NULL ,".						//serialized array of type specific options
-				"`nickname` TEXT NOT NULL ,".					//nickname for internal use, such as on query pages
-				"`label` TEXT NOT NULL ,".						//label for the field; can be blank. displayed on top or to the left.
-				"`required` BOOL NOT NULL ,".					//required field or not				
-				"`db_type` VARCHAR( 32 ) NOT NULL ,".			//the type of column in the data table
-				"`description` TEXT NOT NULL ,".				//the description of the item displayed below the main label
-				"INDEX ( `ID` ) ,".
-				"UNIQUE (`unique_name`)".
-				");";
-		
-		$this->query($q);
-	}
-}
-
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-
-function removeFormManager(){
-	$q = "SELECT `data_table` FROM `{$this->formsTable}`";	
-	$res = $this->query($q);
-	while($row=mysql_fetch_assoc($res)){
-		if($row['data_table'] != ""){			
-			$q = "SHOW TABLES LIKE '".$row['data_table']."'";
-			$r = $this->query($q);
-			if(mysql_num_rows($r) > 0){
-				$q="DROP TABLE IF EXISTS `".$row['data_table']."`";				
-				$this->query($q);
-			}
-			mysql_free_result($r);
-		}
-	}
-	mysql_free_result($res);
-		
-	$q = "DROP TABLE IF EXISTS `{$this->formsTable}`";	
-	$this->query($q);
-	$q = "DROP TABLE IF EXISTS `{$this->itemsTable}`";	
-	$this->query($q);
-	$q = "DROP TABLE IF EXISTS `{$this->settingsTable}`";	
-	$this->query($q);
-}
-
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-// Form Settings
-
 function initFormsTable(){	
 	//see if a settings row exists
 	$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` < 0";	
@@ -267,6 +331,15 @@ function initSettingsTable(){
 	foreach($this->globalSettings as $k=>$v){
 		$this->setGlobalSetting($k, $v, false);
 	}
+	
+	//Add any default validators that aren't in the database
+	$validators = $this->getTextValidators();
+	for($x=0;$x<$this->globalSettings['text_validator_count'];$x++){
+		$name = $this->globalSettings['text_validator_'.$x]['name'];
+		if(!isset($validators[$name]))
+			$validators[$name] = $this->globalSettings['text_validator_'.$x];
+	}
+	$this->setTextValidators($validators);
 }
 
 //returns true if something was written, false otherwise.
@@ -373,6 +446,7 @@ function isForm($formID){
 	mysql_free_result($res);
 	return ($n>0);
 }
+
 function processPost($formID, $extraInfo = null, $overwrite = false){	
 	global $fm_controls;
 	global $msg;
@@ -408,9 +482,11 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 	
 	return $postData;
 }
+
 function processFailed(){
 	return $this->lastPostFailed;
 }
+
 function insertSubmissionData($dataTable, $postData){
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
@@ -536,6 +612,7 @@ function isDataCol($formID, $uniqueName){
 	}	
 	return ($type != "NONE");	
 }
+
 function getSubmissionDataNumRows($formID){
 	$dataTable = $this->getDataTableName($formID);
 	$q = "SELECT COUNT(*) FROM `{$dataTable}`";
@@ -544,6 +621,7 @@ function getSubmissionDataNumRows($formID){
 	mysql_free_result($res);
 	return $row[0];
 }
+
 function getLastSubmission($formID){
 	$dataTable = $this->getDataTableName($formID);
 	$q = "SELECT * FROM `{$dataTable}` ORDER BY `timestamp` DESC LIMIT 1";
@@ -572,6 +650,7 @@ function getUserSubmissionCount($formID, $user){
 	mysql_free_result($res);
 	return $row[0];
 }
+
 //////////////////////////////////////////////////////////////////
 
 function getFormList(){
@@ -601,6 +680,7 @@ function copyForm($formID){
 	}
 	return $formInfo;
 }
+
 function isValidItem($formInfo, $uniqueName){
 	if(sizeof($formInfo['items']) == 0) return false;
 	foreach($formInfo['items'] as $item)
@@ -676,6 +756,7 @@ function updateForm($formID, $formInfoNew){
 	foreach($compare['create'] as $toCreate) //creations give the entire item arrays
 		$this->createFormItem($formID, $toCreate['unique_name'], $toCreate);
 }
+
 //returns an array with three keys, 'delete', 'update', and 'create'
 // 'delete' is an array of the unique names of the items to be deleted
 // 'update' and 'create' contain 'item info' arrays of the updated / new values respectively
@@ -739,6 +820,13 @@ function createForm($formInfo=null, $dataTablePrefix){
 
 //creates a data table associated with a form
 function createDataTable($formInfo, $dataTable){
+	global $wpdb;
+	
+	if (!empty($wpdb->charset))
+		$charset_collate = "CHARACTER SET ".$wpdb->charset;
+	if (!empty($wpdb->collate))
+		$charset_collate.= " COLLATE ".$wpdb->collate;
+		
 	$q = "CREATE TABLE `{$dataTable}` (".
 		"`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,".
 		"`user` VARCHAR( 64 ) NOT NULL";	
@@ -749,7 +837,7 @@ function createDataTable($formInfo, $dataTable){
 		$itemArr[] = "PRIMARY KEY (`timestamp`)";
 		$q.=", ".implode(", ",$itemArr);
 	}
-	$q.= ") ENGINE = MYISAM ;";
+	$q.= ") ".$charset_collate.";";
 	$this->query($q);
 }
 
@@ -785,6 +873,7 @@ function changeUniqueName($old, $new){
 	if($dbType!="NONE") $this->changeDataFieldName($old, $new, $formID, $dbType);
 	return true;
 }
+
 function changeDataFieldName($old, $new, $formID, $dbType){
 	$dataTable = $this->getDataTableName($formID);	
 	$q = "ALTER TABLE `".$dataTable."` CHANGE `".$old."` `".$new."` ".$dbType;
@@ -847,6 +936,7 @@ function createFormItem($formID, $uniqueName, $itemInfo){
 	//add a field to the data table
 	if($itemInfo['db_type'] != "NONE") $this->createFormItemDataField($formID, $uniqueName, $itemInfo);
 }	
+
 function createFormItemDataField($formID, $uniqueName, $itemInfo){	
 	$dataTable = $this->getDataTableName($formID);		
 	$q = "ALTER TABLE `".$dataTable."` ADD `".$uniqueName."` ".$itemInfo['db_type']." NOT NULL";
@@ -879,11 +969,13 @@ function updateFormItem($formID, $uniqueName, $itemInfo){
 		if($isIndex) $this->setDataFieldIndex($formID, $uniqueName, false);
 	}
 }
+
 function updateDataFieldType($formID, $uniqueName, $newType){
 	$dataTable = $this->getDataTableName($formID);
 	$q = "ALTER TABLE `".$dataTable."` MODIFY `".$uniqueName."` ".$newType;
 	$this->query($q);
 }
+
 function setDataFieldIndex($formID, $uniqueName, $remove=true){
 	global $msg;
 	$indexItem = $this->getFormItem($uniqueName);
@@ -894,6 +986,7 @@ function setDataFieldIndex($formID, $uniqueName, $remove=true){
 	$q = "ALTER TABLE `".$dataTable."` ADD INDEX (`".$uniqueName."`{$prefixStr})";
 	$this->query($q);	
 }
+
 function getDataFieldIndex($formID){
 	$dataTable = $this->getDataTableName($formID);
 	$q = "SHOW INDEXES FROM `".$dataTable."`";
@@ -903,6 +996,7 @@ function getDataFieldIndex($formID){
 	mysql_free_result($res);
 	return $row['Column_name'];
 }
+
 function removeDataFieldIndex($formID){
 	$dataTable = $this->getDataTableName($formID);
 	$q = "SHOW INDEXES FROM `".$dataTable."`";
@@ -913,6 +1007,7 @@ function removeDataFieldIndex($formID){
 	}	
 	mysql_free_result($res);	
 }
+
 function deleteFormItem($formID, $uniqueName){
 	$q = "SELECT `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
 	$res = $this->query($q);
@@ -924,6 +1019,7 @@ function deleteFormItem($formID, $uniqueName){
 	$this->query($q);
 	if($dbType != "NONE") $this->deleteDataField($formID, $uniqueName);
 }
+
 function deleteDataField($formID, $uniqueName){	
 	$dataTable = $this->getDataTableName($formID);	
 	$q = "ALTER TABLE `".$dataTable."` DROP `".$uniqueName."`";	
@@ -935,6 +1031,7 @@ function formInfoGetItem($uniqueName, $formInfo){
 		if($item['unique_name'] == $uniqueName) return $item;
 	return null;
 }
+
 function itemInfoIsEqual($itemA, $itemB){
 	foreach($itemA as $k=>$v)
 		if(!isset($itemB[$k]) || $itemB[$k] != $itemA[$k]) 
@@ -955,6 +1052,7 @@ function getNonce(){
 	$_SESSION['fm-nonce'][] = $nonce;
 	return $nonce;
 }
+
 // if $remove is set to false, will not remove the nonce from the session variable
 function checkNonce($nonce, $remove = true){
 	if(!isset($_SESSION['fm-nonce'])) return false;

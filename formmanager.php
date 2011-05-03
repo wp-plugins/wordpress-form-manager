@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.10
+Version: 1.3.11
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.10";
+$fm_currentVersion = "1.3.11";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -58,22 +58,35 @@ $fm_display = new fm_display_class();
 /**************************************************************/
 /******* DATABASE SETUP ***************************************/
 
-function fm_install () {
+function fm_install(){
 	global $fmdb;
+	global $fm_currentVersion;
 	
 	//initialize the database
-	$fmdb->setupFormManager();   
-	
-	/* covers updates from 1.3.0 */
-	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,single_submission' WHERE `behaviors` = 'reg_user_only,no_dup'";
-	$fmdb->query($q);
-	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,edit' WHERE `behaviors` = 'reg_user_only,no_dup,edit'";
-	$fmdb->query($q);						
+	$fmdb->setupFormManager();
+	$ver = get_option('fm-version');	
+	if($ver != $fm_currentVersion && $ver !== false)  // this covers any changes that a aren't relevant to a fresh install
+		fm_upgrade();  
+		
+	update_option('fm-version', $fm_currentVersion);			
 }  
 register_activation_hook(__FILE__,'fm_install');
 
+function fm_upgrade(){
+	global $fmdb;
+	
+	// covers updates from 1.3.0 
+	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,single_submission' WHERE `behaviors` = 'reg_user_only,no_dup'";
+	$fmdb->query($q);
+	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,edit' WHERE `behaviors` = 'reg_user_only,no_dup,edit'";
+	$fmdb->query($q);
+	
+	// covers versions up to and including 1.3.10
+	$fmdb->fixCollation();	
+}
+
 //uninstall - delete the table(s). 
-function fm_uninstall() {
+function fm_uninstall(){
 	global $fmdb;	
 	$fmdb->removeFormManager();
 	
@@ -124,7 +137,6 @@ function fm_userInit(){
 	//"The perfect is the enemy of the good". 
 	$ver = get_option('fm-version');
 	if($ver != $fm_currentVersion){
-		update_option('fm-version', $fm_currentVersion);
 		fm_install();
 	}
 
@@ -343,6 +355,11 @@ function fm_shortcodeHandler($atts){
 	return fm_doFormBySlug($atts[0]);
 }
 
+
+/**************************************************************/
+/******* API **************************************************/
+
+//takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior), processes posts, etc.
 function fm_doFormBySlug($formSlug){
 	global $fm_display;
 	global $fmdb;

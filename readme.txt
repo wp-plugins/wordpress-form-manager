@@ -4,13 +4,19 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.10
+Stable tag: 1.3.11
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
 == Description ==
 
-Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Form features include validation, required fields, custom acknowledgments, and e-mail notifications.  Forms can be added to posts or pages using a simple shortcode format.  
+Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Forms are added to posts or pages using a simple shortcode format, or can be added to your theme with a simple API. 
+
+= Features =
+* validation
+* required fields
+* custom acknowledgments
+* e-mail notifications.   
 
 = Supported field types: =
 
@@ -24,7 +30,16 @@ Form Manager is a tool for creating forms to collect and download data from visi
 
 Subtitles and notes can also be added to the form in any location.
 
+= Publishing a Form =
+Forms are placed within posts or pages.  For example, if your form's slug is 'form-1', put the following within a post or page: 
+
+`[form form-1]`
+
 = Changes: =
+= 1.3.11 =
+* Full Unicode support
+* Added date validator for text fields
+
 = 1.3.10 =
 * Added API stable fm_doFormBySlug($formSlug) to show forms within templates
 * Admin can change plugin's shortcode in 'Advanced Settings'
@@ -223,3 +238,9 @@ To use a reCAPTCHA, simply insert one into your form - though you have to enter 
 = How do I get reCAPTCHA API keys? =
 
 As of this writing, go to www.google.com/recaptcha, click on 'USE reCAPTCHA ON YOUR SITE', then 'Sign up Now!', and follow the instructions.  You will be shown your 'public' and 'private' API keys; copy and paste these into the 'Settings' page under 'Forms' in WordPress.
+
+= How do I add a form to my theme / use the form API? =
+
+The API only has a single function, fm_doFormBySlug(), that takes a single parameter, a string containing the slug of a form.  For example, if your form's slug is 'form-1', you would put the following somewhere in your theme:
+
+`echo fm_doFormBySlug('form-1');`
