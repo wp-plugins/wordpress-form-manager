@@ -114,12 +114,8 @@ public $globalSettings = array(
 
 
 function setupFormManager(){
-	global $wpdb;
 	
-	if (!empty($wpdb->charset))
-		$charset_collate = "CHARACTER SET ".$wpdb->charset;
-	if (!empty($wpdb->collate))
-		$charset_collate.= " COLLATE ".$wpdb->collate;
+	$charset_collate = $this->getCharsetCollation();
 
 	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 	
@@ -213,13 +209,8 @@ function setupFormManager(){
 
 //fix the collation on the data tables
 function fixCollation(){
-	global $wpdb;
 	
-	//establish the current charset / collation
-	if (!empty($wpdb->charset))
-		$charset_collate = "CHARACTER SET ".$wpdb->charset;
-	if (!empty($wpdb->collate))
-		$charset_collate.= " COLLATE ".$wpdb->collate;
+	$charset_collate = $this->getCharsetCollation();
 	
 	//build a list of tables to fix
 	$tableList = array($this->formsTable, $this->itemsTable, $this->settingsTable);
@@ -253,6 +244,17 @@ function fixCollation(){
 	}
 }
 
+function getCharsetCollation(){
+	global $wpdb;
+	
+	//establish the current charset / collation
+	if (!empty($wpdb->charset))
+		$charset_collate = "CHARACTER SET ".$wpdb->charset;
+	if (!empty($wpdb->collate))
+		$charset_collate.= " COLLATE ".$wpdb->collate;
+	
+	return $charset_collate;
+}
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
@@ -820,12 +822,8 @@ function createForm($formInfo=null, $dataTablePrefix){
 
 //creates a data table associated with a form
 function createDataTable($formInfo, $dataTable){
-	global $wpdb;
 	
-	if (!empty($wpdb->charset))
-		$charset_collate = "CHARACTER SET ".$wpdb->charset;
-	if (!empty($wpdb->collate))
-		$charset_collate.= " COLLATE ".$wpdb->collate;
+	$charset_collate = $this->getCharsetCollation();
 		
 	$q = "CREATE TABLE `{$dataTable}` (".
 		"`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,".

@@ -35,7 +35,12 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
 
 `[form form-1]`
 
+
+
 = Changes: =
+= 1.3.12 =
+* Fixed upgrade from 1.3.3 and older
+
 = 1.3.11 =
 * Full Unicode support
 * Added date validator for text fields

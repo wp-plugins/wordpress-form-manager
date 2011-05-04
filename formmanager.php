@@ -10,7 +10,7 @@ License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.11";
+$fm_currentVersion = "1.3.12";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -65,8 +65,8 @@ function fm_install(){
 	//initialize the database
 	$fmdb->setupFormManager();
 	$ver = get_option('fm-version');	
-	if($ver != $fm_currentVersion && $ver !== false)  // this covers any changes that a aren't relevant to a fresh install
-		fm_upgrade();  
+	//if($ver != $fm_currentVersion) 
+	fm_upgrade();  
 		
 	update_option('fm-version', $fm_currentVersion);			
 }  
