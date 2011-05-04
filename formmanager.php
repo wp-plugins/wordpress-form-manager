@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.4
+Version: 1.3.12
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.4";
+$fm_currentVersion = "1.3.12";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -37,7 +37,8 @@ include 'display.php';
 /**************************************************************/
 /******* PLUGIN OPTIONS ***************************************/
 
-update_option("fm-shortcode", "form");
+if(get_option('fm-shortcode') === false) 
+	update_option("fm-shortcode", "form");
 update_option("fm-forms-table-name", "fm_forms");
 update_option("fm-items-table-name", "fm_items");
 update_option("fm-settings-table-name", "fm_settings");
@@ -57,22 +58,44 @@ $fm_display = new fm_display_class();
 /**************************************************************/
 /******* DATABASE SETUP ***************************************/
 
-function fm_install () {
-	global $fmdb;	
-	$fmdb->setupFormManager();   
+function fm_install(){
+	global $fmdb;
+	global $fm_currentVersion;
 	
-	/* covers updates from 1.3.0 */
-	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,single_submission' WHERE `behaviors` = 'reg_user_only,no_dup'";
-	$fmdb->query($q);
-	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,edit' WHERE `behaviors` = 'reg_user_only,no_dup,edit'";
-	$fmdb->query($q);						
+	//initialize the database
+	$fmdb->setupFormManager();
+
+	fm_upgrade();  
+		
+	update_option('fm-version', $fm_currentVersion);			
 }  
 register_activation_hook(__FILE__,'fm_install');
 
+function fm_upgrade(){
+	global $fmdb;
+	
+	// covers updates from 1.3.0 
+	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,single_submission' WHERE `behaviors` = 'reg_user_only,no_dup'";
+	$fmdb->query($q);
+	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,edit' WHERE `behaviors` = 'reg_user_only,no_dup,edit'";
+	$fmdb->query($q);
+	
+	// covers versions up to and including 1.3.10
+	$fmdb->fixCollation();	
+}
+
 //uninstall - delete the table(s). 
-function fm_uninstall() {
+function fm_uninstall(){
 	global $fmdb;	
 	$fmdb->removeFormManager();
+	
+	delete_option('fm-shortcode');
+	delete_option('fm-forms-table-name');
+	delete_option('fm-items-table-name');
+	delete_option('fm-settings-table-name');
+	delete_option('fm-data-table-prefix');
+	delete_option('fm-query-table-prefix');
+	delete_option('fm-version');
 }
 register_uninstall_hook(__FILE__,'fm_uninstall');
 
@@ -113,10 +136,11 @@ function fm_userInit(){
 	//"The perfect is the enemy of the good". 
 	$ver = get_option('fm-version');
 	if($ver != $fm_currentVersion){
-		update_option('fm-version', $fm_currentVersion);
 		fm_install();
 	}
 
+	include 'settings.php';
+	
 	wp_enqueue_script('form-manager-js-helpers', plugins_url('/js/helpers.js', __FILE__));
 	wp_enqueue_script('form-manager-js-validation', plugins_url('/js/validation.js', __FILE__));
 	
@@ -139,12 +163,13 @@ add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
 	$pages[] = add_object_page("Forms", "Forms", "manage_options", "fm-admin-main", 'fm_showMainPage');
 	$pages[] = add_submenu_page("fm-admin-main", "Edit", "Edit", "manage_options", "fm-edit-form", 'fm_showEditPage');
-	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');
+	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');	
 	
 	//at some point, make this link go to a fresh form
 	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
 	
 	$pages[] = add_submenu_page("fm-admin-main", "Settings", "Settings", "manage_options", "fm-global-settings", 'fm_showSettingsPage');
+	$pages[] = add_submenu_page("fm-admin-main", "Advanced Settings", "Advanced Settings", "manage_options", "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
@@ -156,8 +181,10 @@ function fm_adminHead(){
 	
 	//we don't actually want all the pages to show up in the menu, but having slugs for pages makes things easy
 	//unset($submenu['fm-admin-main'][0]);
-	unset($submenu['fm-admin-main'][1]);
-	unset($submenu['fm-admin-main'][2]);
+	unset($submenu['fm-admin-main'][1]); //Edit
+	unset($submenu['fm-admin-main'][2]); //Data
+	
+	unset($submenu['fm-admin-main'][4]); //Advanced settings
 }
 
 //only show this stuff when viewing a plugin page, since some of it is messy
@@ -184,6 +211,10 @@ function fm_showMainPage(){
 
 function fm_showSettingsPage(){
 	include 'editsettings.php';
+}
+
+function fM_showSettingsAdvancedPage(){
+	include 'editsettingsadv.php';
 }
 
 /**************************************************************/
@@ -230,6 +261,7 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['label_width'] = $_POST['label_width'];
 	$formInfo['behaviors'] = $_POST['behaviors'];
 	$formInfo['email_user_field'] = $_POST['email_user_field'];
+	$formInfo['required_msg'] = $_POST['required_msg'];
 	
 	//build the notification email list
 
@@ -242,8 +274,6 @@ function fm_saveHelperGatherFormInfo(){
 			$x = sizeof($emailList);
 		}	
 	}
-	if($_POST['email_admin'] == "true")
-		$emailList[] = get_option('admin_email');
 		
 	if($valid){
 		$temp = array();
@@ -322,13 +352,22 @@ function fm_createFormElement(){
 
 add_shortcode(get_option('fm-shortcode'), 'fm_shortcodeHandler');
 function fm_shortcodeHandler($atts){
+	return fm_doFormBySlug($atts[0]);
+}
+
+
+/**************************************************************/
+/******* API **************************************************/
+
+//takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior), processes posts, etc.
+function fm_doFormBySlug($formSlug){
 	global $fm_display;
 	global $fmdb;
 	global $current_user;
 	global $fm_registered_user_only_msg;
 		
-	$formID = $fmdb->getFormID($atts[0]);
-	if($formID === false) return "(form ".(trim($atts[0])!=""?"'{$atts[0]}' ":"")."not found)";
+	$formID = $fmdb->getFormID($formSlug);
+	if($formID === false) return "(form ".(trim($formSlug)!=""?"'{$formSlug}' ":"")."not found)";
 	
 	$output = "";
 	
@@ -360,7 +399,11 @@ function fm_shortcodeHandler($atts){
 			$formInfo['email_list'] = trim($formInfo['email_list']) ;
 			$formInfo['email_user_field'] = trim($formInfo['email_user_field']);		
 				
-			if($formInfo['email_list'] != "" || $formInfo['email_user_field'] != ""){
+			if($formInfo['email_list'] != ""
+			|| $formInfo['email_user_field'] != "" 
+			|| $fmdb->getGlobalSetting('email_admin') == "YES"
+			|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
+			
 				$subject = get_option('blogname').": '".$formInfo['title']."' Submission";
 				$message = $subject."\n";
 				if($postData['user'] != "") $message.= "User: ".$postData['user']."\n";
@@ -369,10 +412,20 @@ function fm_shortcodeHandler($atts){
 					if($formItem['db_type'] != "NONE")
 						$message.= $formItem['label'].": ".stripslashes($postData[$formItem['unique_name']])."\n";
 				}
+				$temp = "";
+				if($fmdb->getGlobalSetting('email_admin') == "YES")
+					wp_mail(get_option('admin_email'), $subject, $message);
+					
+				if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
+					if(trim($current_user->user_email) != "")
+						wp_mail($current_user->user_email, $subject, $message);
+				}
 				if($formInfo['email_list'] != "")
 					wp_mail($formInfo['email_list'], $subject, $message);
-				if($formInfo['email_user_field'] != "") //do a separate call, in case the form / user input is malformed, so we at least get the admin emails sent
+					
+				if($formInfo['email_user_field'] != "")
 					wp_mail($postData[$formInfo['email_user_field']], $subject, $message);
+	
 			}
 			
 			if(!isset($formBehaviors['display_summ']))
@@ -414,6 +467,4 @@ function fm_shortcodeHandler($atts){
 	//if we got this far, just display the form
 	return $fm_display->displayForm($formInfo, array('action' => get_permalink()));
 }
-
-include 'settings.php';
 ?>
