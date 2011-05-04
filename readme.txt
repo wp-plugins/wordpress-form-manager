@@ -129,11 +129,11 @@ Method 2: Download the source code for the plugin, and upload the 'wordpress-for
 
 The shortcode format is simple:
 
-[form (slug)]
+`[form (slug)]`
 
 So if your form's slug is 'my-contact-form', the shortcode would be:
 
-[form my-contact-form]
+`[form my-contact-form]`
 
 = How do I add elements to the form? =
 
