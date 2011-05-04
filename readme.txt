@@ -36,7 +36,6 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
 `[form form-1]`
 
 
-
 = Changes: =
 = 1.3.12 =
 * Added 'required item message' to form editor
