@@ -312,6 +312,12 @@ if(isset($_POST['message']))
 			<div class="fm-admin-field-wrap">
 				<label>Submit button label:</label>
 					<input type="text" id="submit_btn_text" value="<?php echo $form['submit_btn_text'];?>"/>
+			</div>
+			<div class="fm-admin-field-wrap">								
+				<label>Required item message:
+				<span class="small">This is shown if a user leaves a required item blank.  The item's label will appear in place of '%s'.</span>
+				</label>
+					<input type="text" id="required_msg" value="<?php echo $form['required_msg'];?>" />
 			</div>			
 		</div>
 		</div>

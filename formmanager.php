@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.11
+Version: 1.3.12
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -64,8 +64,7 @@ function fm_install(){
 	
 	//initialize the database
 	$fmdb->setupFormManager();
-	$ver = get_option('fm-version');	
-	//if($ver != $fm_currentVersion) 
+
 	fm_upgrade();  
 		
 	update_option('fm-version', $fm_currentVersion);			
@@ -262,6 +261,7 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['label_width'] = $_POST['label_width'];
 	$formInfo['behaviors'] = $_POST['behaviors'];
 	$formInfo['email_user_field'] = $_POST['email_user_field'];
+	$formInfo['required_msg'] = $_POST['required_msg'];
 	
 	//build the notification email list
 
