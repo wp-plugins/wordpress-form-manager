@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.12
+Stable tag: 1.3.13
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -36,8 +36,10 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
 `[form form-1]`
 
 
-
 = Changes: =
+= 1.3.13 =
+* Changed upgrade mechanism
+
 = 1.3.12 =
 * Added 'required item message' to form editor
 * Fixed upgrade from 1.3.3 and older
