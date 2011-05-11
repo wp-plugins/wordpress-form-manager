@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.3.13
+Stable tag: 1.3.14
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -36,7 +36,12 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
 `[form form-1]`
 
 
+
 = Changes: =
+= 1.3.14 =
+* Added reCAPTCHA color scheme option in settings
+* Fixed conflict with other plugins using Google RECAPTCHA
+
 = 1.3.13 =
 * Changed upgrade mechanism
 
