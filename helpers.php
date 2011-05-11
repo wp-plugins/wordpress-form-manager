@@ -44,4 +44,20 @@ function helper_checkbox_field($id, $label, $checked, $desc = ""){
 <?php
 }
 
+function helper_option_field($id, $label, $options, $value = false, $desc = ""){
+	?>
+<tr valign="top">
+	<th scope="row"><label for="<?php echo $id;?>"><?php echo $label;?></label></th>
+	<td>
+		<select name="<?php echo $id;?>" type="text" id="<?php echo $id;?>"/>
+		<?php foreach($options as $k=>$v): ?>
+			<option value="<?php echo $k;?>" <?php echo ($value==$k)?"selected=\"selected\"":"";?> ><?php echo $v;?></option>
+		<?php endforeach; ?>
+		</select>
+	<span class="description"><?php echo $desc;?></span>
+	</td>
+</tr>
+	<?php
+}
+
 ?>

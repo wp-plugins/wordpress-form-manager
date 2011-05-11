@@ -79,6 +79,7 @@ public $itemKeys = array (
 public $globalSettings = array(
 					'recaptcha_public' => '',
 					'recaptcha_private' => '',
+					'recaptcha_theme' => 'red',
 					'title' =>				"New Form",	
 					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
 					'required_msg' => 		"\'%s\' is required.",
