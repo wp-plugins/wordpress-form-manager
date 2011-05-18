@@ -51,15 +51,17 @@ function displayForm($formInfo, $options=array(), $values=array()){
 				|| $item['type'] == 'separator' 
 				|| ($item['type'] == 'note' && trim($item['label']) == ""))
 			{
-				$str.='<label>'.$item['label'].'</label>';
-				if($item['required']=='1')	$str.= '<em>*</em>';
-				$str.='<br />';
+				$str.='<label>'.$item['label'];
+				if($item['required']=='1')	$str.= '&nbsp;<em>*</em>';
+				$str.= '</label>';
+				//$str.='<br />';
 				$str.=$fm_controls[$item['type']]->showItem($item['unique_name'], $item);
 			}
 			else{
 				$str.='<table><tr>';
-				$str.='<td style="width:'.$formLabelWidth.'px"><label>'.$item['label'].'</label>';
-				if($item['required']=='1')	$str.= '<em>*</em>';
+				$str.='<td style="width:'.$formLabelWidth.'px"><label>'.$item['label'];
+				if($item['required']=='1')	$str.= '&nbsp;<em>*</em>';
+				$str.= '</label>';
 				$str.='</td>';
 				$str.='<td>'.$fm_controls[$item['type']]->showItem($item['unique_name'], $item).'</td>';
 				$str.='</tr></table>';			
