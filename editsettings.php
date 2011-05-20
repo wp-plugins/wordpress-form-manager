@@ -1,6 +1,7 @@
 <?php 
 global $fmdb;
 global $fm_globalSettings;
+global $fm_templates;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
@@ -42,9 +43,10 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 		} 
 	?></div>
 
-<h3>E-Mail Notifications</h3>
+<h3>Global E-Mail Notifications</h3>
 <table class="form-table">
-<?php helper_checkbox_field('email_admin', "Administrator (".get_option('admin_email').")", ($fm_globalSettings['email_admin'] == "YES")); ?>
+<tr><td colspan="2">These settings will be applied to every form you create.</td></tr>
+<?php helper_checkbox_field('email_admin', "Send to Administrator (".get_option('admin_email').")", ($fm_globalSettings['email_admin'] == "YES")); ?>
 <?php helper_checkbox_field('email_reg_users', "Registered Users ", ($fm_globalSettings['email_reg_users'] == "YES"), "A confirmation e-mail will be sent to a registered user only when they submit a form"); ?>
 </table>
 
@@ -62,7 +64,6 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <?php helper_text_field('recaptcha_private', "reCAPTCHA Private Key", htmlspecialchars($fm_globalSettings['recaptcha_private'])); ?>
 <?php helper_option_field('recaptcha_theme', "Color Scheme", array('red' => "Red", 'white' => "White", 'blackglass' => "Black", 'clean' => "Clean"), $fm_globalSettings['recaptcha_theme']); ?>
 </table>
-
 
 </div>
 

@@ -60,4 +60,28 @@ function helper_option_field($id, $label, $options, $value = false, $desc = ""){
 	<?php
 }
 
+function fm_get_file_data( $file, $fields) {
+	
+	$fp = fopen( $file, 'r' );
+	$file_data = fread( $fp, 8192 );
+	fclose( $fp );
+	
+	$file_vars = array();
+	foreach ( $fields as $field => $regex ) {
+		$matches = array();
+		preg_match_all( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $matches, PREG_OFFSET_CAPTURE);
+		
+		foreach($matches[1] as $match){
+			$arr = array('field' => $field,
+							'value' => trim($match[0])
+							);
+			$file_vars[$match[1]] = $arr;
+		}
+	}
+	
+	ksort($file_vars);
+	
+	return $file_vars;
+}
+
 ?>
