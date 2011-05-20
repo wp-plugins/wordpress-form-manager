@@ -830,7 +830,7 @@ function getFormSettings($formID){
 	}
  	mysql_free_result($res);
 	foreach($this->formSettingsKeys as $k=>$v){
-		if(trim($row[$k]) == "") $row[$k] = $v;
+		if(!is_array($row[$k]) && trim($row[$k]) == "") $row[$k] = $v;
 	}
  	return $row;
 }
