@@ -44,4 +44,44 @@ function helper_checkbox_field($id, $label, $checked, $desc = ""){
 <?php
 }
 
+function helper_option_field($id, $label, $options, $value = false, $desc = ""){
+	?>
+<tr valign="top">
+	<th scope="row"><label for="<?php echo $id;?>"><?php echo $label;?></label></th>
+	<td>
+		<select name="<?php echo $id;?>" type="text" id="<?php echo $id;?>"/>
+		<?php foreach($options as $k=>$v): ?>
+			<option value="<?php echo $k;?>" <?php echo ($value==$k)?"selected=\"selected\"":"";?> ><?php echo $v;?></option>
+		<?php endforeach; ?>
+		</select>
+	<span class="description"><?php echo $desc;?></span>
+	</td>
+</tr>
+	<?php
+}
+
+function fm_get_file_data( $file, $fields) {
+	
+	$fp = fopen( $file, 'r' );
+	$file_data = fread( $fp, 8192 );
+	fclose( $fp );
+	
+	$file_vars = array();
+	foreach ( $fields as $field => $regex ) {
+		$matches = array();
+		preg_match_all( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $matches, PREG_OFFSET_CAPTURE);
+		
+		foreach($matches[1] as $match){
+			$arr = array('field' => $field,
+							'value' => trim($match[0])
+							);
+			$file_vars[$match[1]] = $arr;
+		}
+	}
+	
+	ksort($file_vars);
+	
+	return $file_vars;
+}
+
 ?>
