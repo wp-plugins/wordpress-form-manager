@@ -13,8 +13,11 @@ class fm_recaptchaControl extends fm_controlBase{
 		$publickey = $fmdb->getGlobalSetting('recaptcha_public'); 
 		if($publickey == "") return "(No reCAPTCHA API public key found)";
 		
-		require_once('recaptcha/recaptchalib.php');		
-		return recaptcha_get_html($publickey).
+		if(!function_exists('recaptcha_get_html'))
+			require_once('recaptcha/recaptchalib.php');		
+			
+		return "<script type=\"text/javascript\"> var RecaptchaOptions = { theme : '".$fmdb->getGlobalSetting('recaptcha_theme')."' }; </script>".
+				recaptcha_get_html($publickey).
 				(isset($_POST['recaptcha_challenge_field'])?"<br /> <em> The reCAPTCHA was incorrect. </em>":"");
 	}	
 	
@@ -24,7 +27,9 @@ class fm_recaptchaControl extends fm_controlBase{
 		$privatekey = $fmdb->getGlobalSetting('recaptcha_private');
 		if($privatekey == "" || $publickey == "" ) return "";
 		
-		require_once('recaptcha/recaptchalib.php');		
+		if(!function_exists('recaptcha_check_answer'))			
+			require_once('recaptcha/recaptchalib.php');		
+			
 		$resp = recaptcha_check_answer ($privatekey,
 									$_SERVER["REMOTE_ADDR"],
 									$_POST["recaptcha_challenge_field"],
@@ -38,6 +43,7 @@ class fm_recaptchaControl extends fm_controlBase{
 		$this->err = false;
 		return "";
 	}
+	
 
 	public function itemDefaults(){
 		$itemInfo = array();
@@ -62,15 +68,13 @@ class fm_recaptchaControl extends fm_controlBase{
 	}
 	
 	public function getPanelItems($uniqueName, $itemInfo){
-		$arr=array();
-		
+		$arr=array();		
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
 		return $arr;
 	}
 	
 	public function getPanelScriptOptions(){
-		$opt = $this->getPanelScriptOptionDefaults();		
-
+		$opt = $this->getPanelScriptOptionDefaults();
 		return $opt;
 	}
 	

@@ -24,25 +24,52 @@ function fm_saveForm(){
 		var data = {
 				action: 'fm_save_form',
 				id: document.getElementById('form-id').value,
-				title: document.getElementById('title').value,
-				labels_on_top: document.getElementById('labels_on_top').value,
+				title: document.getElementById('title').value,				
 				submitted_msg: document.getElementById('submitted_msg').value,
-				submit_btn_text: document.getElementById('submit_btn_text').value,
-				show_title: document.getElementById('show_title').checked,
-				show_border: document.getElementById('show_border').checked,
-				shortcode: document.getElementById('shortcode').value,
-				label_width: document.getElementById('label_width').value,
+				submit_btn_text: document.getElementById('submit_btn_text').value,				
+				shortcode: document.getElementById('shortcode').value,				
 				email_list: document.getElementById('email_list').value,
 				behaviors: document.getElementById('behaviors').value,
 				email_user_field: document.getElementById('email_user_field').value,
 				required_msg: document.getElementById('required_msg').value,
+				form_template: document.getElementById('form_template').value,
+				email_template: document.getElementById('email_template').value,
+				summary_template: document.getElementById('summary_template').value,
+				show_summary: document.getElementById('show_summary').checked,
+				template_values: { },
 				items: fm_getFormItems('form-list')
 		};	
-	
+		
+		for(var x=0;x<fm_save_extra_vars.length;x++){
+			var extraVal = fm_getItemValue(fm_save_extra_vars[x].id, fm_save_extra_vars[x].value);	
+			var id = fm_save_extra_vars[x].id.toString();
+			id = id.substr(3);
+			data.template_values[id] = extraVal;			
+		}
+		
 		jQuery.post(ajaxurl, data, function(response){
 			document.getElementById('message-post').value = response;
 			document.getElementById('fm-main-form').submit();
 		});	
+	}
+}
+
+var fm_save_extra_vars = [];
+
+function fm_registerExtraSaveVar(elementId, val){
+	var newVar = {
+		id: elementId,
+		value: val
+	};
+	fm_save_extra_vars.push(newVar);
+}
+
+function fm_getItemValue(id, val){
+	try{
+		return document.getElementById(id)[val];
+	}
+	catch(err){
+		return null;
 	}
 }
 
@@ -137,13 +164,17 @@ function fm_downloadCSV(){
 /***************************************************************************/
 
 var js_multi_item_count = [];
-function js_multi_item_create(ulID){
-	js_multi_item_count[ulID] = 0;
+function js_multi_item_create(ulID){	
+	js_multi_item_count[ulID] = 0;	
 }
 function js_multi_item_init(ulID){
 	Sortable.create(ulID,{handles:$$('a.handle-' + ulID)});
 }
 function js_multi_item_add(ulID,callback,val){
+	
+	if(typeof js_multi_item_count[ulID] == 'undefined')
+		js_multi_item_create(ulID);
+	
 	var UL = document.getElementById(ulID);
 	var newLI = document.createElement('li');
 	var newItemID = ulID + '-item-' + js_multi_item_count[ulID];
@@ -161,9 +192,10 @@ function js_multi_item_remove(itemID){
 function js_multi_item_get(ulID,itemCallback){
 	var UL = document.getElementById(ulID);
 	var arr = [];
+	var itemValue = "";
 	for(var i=0;i<UL.childNodes.length;i++){
 		if(typeof UL.childNodes[i].id != 'undefined'){
-			eval("var itemValue = " + itemCallback + "('" + UL.childNodes[i].id + "');");
+			eval("itemValue = " + itemCallback + "('" + UL.childNodes[i].id + "');");
 			arr.push(itemValue);			
 		}
 	}
