@@ -5,14 +5,16 @@ class fm_db_class{
 public $formsTable;
 public $itemsTable;
 public $settingsTable;
+public $templatesTable;
 public $conn;
 
 private $lastPostFailed;
 
-function __construct($formsTable, $itemsTable, $settingsTable, $conn){
+function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn){
 	$this->formsTable = $formsTable;
 	$this->itemsTable = $itemsTable;
 	$this->settingsTable = $settingsTable;
+	$this->templatesTable = $templatesTable;
 	$this->conn = $conn;
 	$this->cachedInfo = array();
 	$this->lastPostFailed = false;
@@ -48,21 +50,22 @@ protected function setCache($formID, $key, $value){
 //////////////////////////////////////////////////////////////////
 //values are the form defaults
 public $formSettingsKeys = array(
-					'title' => '', 
-					'labels_on_top' => 0, 
+					'title' => '',
 					'submitted_msg' => '', 
 					'submit_btn_text' => '', 
 					'required_msg' => '', 
 					'action' => '',
 					'data_index' => '',
 					'shortcode' => '',
-					'show_title' => 1,
-					'show_border' => 1,
-					'label_width' => 200,
 					'type' => 'form',
 					'email_list' => '',
 					'behaviors' => '',
-					'email_user_field' => ''
+					'email_user_field' => '',
+					'form_template' => '',
+					'email_template' => '',
+					'summary_template' => '',
+					'template_values' => '',
+					'show_summary' => 0
 					);			
 					
 public $itemKeys = array (
@@ -79,11 +82,13 @@ public $itemKeys = array (
 public $globalSettings = array(
 					'recaptcha_public' => '',
 					'recaptcha_private' => '',
+					'recaptcha_theme' => 'red',
 					'title' =>				"New Form",	
 					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
 					'required_msg' => 		"\'%s\' is required.",
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
+					'template_form' => '',
 					'text_validator_count' => 4,
 					'text_validator_0' => array('name' => 'number',
 												'label' => 'Numbers Only',
@@ -125,27 +130,28 @@ function setupFormManager(){
 	/*
 		ID					- stores the unique integer ID of the form
 		title				- form title
-		labels_on_top		- labels displayed on top or to the left
 		submitted_msg   	- message displayed when user submits data
 		submit_btn_text		- text on the 'submit' button
 		required_msg 		- message shown in the 'required' popup; use %s in the string to show the field label. If no string is given, default message is used.				
 		data_table 			- table where the form's submissions are stored
 		action 				- form 'action' attribute
 		data_index 			- data table primary key, if it has one
-		shortcode 			- shortcode for the form in question (wordpress only)
-		show_title 			- display the form title
-		show_border 		- display the form border
-		label_width 		- width of the labels, when displayed on the left
+		shortcode 			- shortcode for the form in question (wordpress only)		
 		type 				- type of form ('form', 'template')
 		email_list			- list of e-mails to send notifications to
 		behaviors			- comma separated list of 'behaviors', such as reg_user_only, etc.
+		email_user_field	- the unique name of a field within the form that will contain an e-mail address upon submission, which will be sent a notification
+		form_template		- the file name of the form template to use. if blank, uses the default template
+		email_template		- same as above, as applies to email notifications
+		summary_template	- same as aoove, as applies to the summaries displayed for single submission / user profile style forms
+		template_values		- associative array of the template specific values, as set in the form editor
+		show_summary		- whether or not to show a summary of the submitted data along with the submission acknowledgment
 	*/	
 	
 	
 	$sql = "CREATE TABLE `".$this->formsTable."` (
 		`ID` INT NOT NULL,
 		`title` TEXT NOT NULL,
-		`labels_on_top` BOOL DEFAULT '0' NOT NULL,
 		`submitted_msg` TEXT NOT NULL,
 		`submit_btn_text` VARCHAR( 32 ) NOT NULL,
 		`required_msg` TEXT NOT NULL,
@@ -153,13 +159,15 @@ function setupFormManager(){
 		`action` TEXT NOT NULL,
 		`data_index` VARCHAR( 32 ) NOT NULL,
 		`shortcode` VARCHAR( 64 ) NOT NULL,
-		`show_title` BOOL DEFAULT '1' NOT NULL,
-		`show_border` BOOL DEFAULT '1' NOT NULL,
-		`label_width` VARCHAR( 32 ) NOT NULL,
 		`type` VARCHAR( 32 ) NOT NULL,
 		`email_list` TEXT NOT NULL,
 		`behaviors` VARCHAR( 256 ) NOT NULL,
 		`email_user_field` VARCHAR( 64 ) NOT NULL,
+		`form_template` VARCHAR( 128 ) NOT NULL,
+		`email_template` VARCHAR( 128 ) NOT NULL,
+		`summary_template` VARCHAR( 128 ) NOT NULL,
+		`template_values` TEXT NOT NULL,
+		`show_summary` BOOL DEFAULT '0' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -202,10 +210,23 @@ function setupFormManager(){
 		
 	dbDelta($sql);
 	
+	//////////////////////////////////////////////////////////////////
+	//templates - even though these are used as files, they are kept track of by and stored in the database so they persist across updates
+	
+	$sql = "CREATE TABLE `".$this->templatesTable."` (
+		`title` TEXT NOT NULL,
+		`filename` TEXT NOT NULL,
+		`content` TEXT NOT NULL,
+		`status` VARCHAR( 32 ) NOT NULL,
+		`modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		) ".$charset_collate.";";
+	
+	dbDelta($sql);
 }
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
+// for upgrading the database
 
 //fix the collation on the data tables
 function fixCollation(){
@@ -255,6 +276,56 @@ function getCharsetCollation(){
 	
 	return $charset_collate;
 }
+
+//converts from storing certain appearance settings as columns in the database versus options in the standard template
+function convertAppearanceSettings(){
+	
+	//check if this is a fresh install
+	$q = "SHOW TABLES LIKE '".$this->formsTable."'";
+	$res = $this->query($q);
+	if(mysql_num_rows($res) == 0) return false;
+	
+	//check if the old columns exist; if not, no need to do anything
+	$q = "SHOW COLUMNS FROM `".$this->formsTable."`";
+	$res = $this->query($q);
+	$found = false;
+	while($row = mysql_fetch_assoc($res))
+		if($row['Field'] == 'labels_on_top')
+			$found = true;
+	
+	mysql_free_result($res);	
+
+	if(!$found) return false;
+	
+	$q = "ALTER TABLE `".$this->formsTable."` ADD `template_values` TEXT NOT NULL ";
+	$this->query($q);		
+	
+	$q = "SELECT * FROM `".$this->formsTable."`";
+	$res = $this->query($q);
+	$forms = array();
+	while($row = mysql_fetch_assoc($res)){
+		$forms[] = $row;
+	}	
+	mysql_free_result($res);
+	
+	foreach($forms as $form){		
+		$values = array( 'showFormTitle' => ($form['show_title']==1?"true":"false"),
+						'showBorder' => ($form['show_border']==1?"true":"false"),
+						'labelPosition' => ($form['labels_on_top']==1?"top":"left"),
+						'labelWidth' => $form['label_width']
+						);
+		$q = "UPDATE `".$this->formsTable."` SET `template_values` = '".addslashes(serialize($values))."' WHERE `ID` = '".$form['ID']."'";
+		$this->query($q);
+	}
+	
+	$q = "ALTER TABLE `".$this->formsTable."`
+		  DROP `labels_on_top`,
+		  DROP `show_title`,
+		  DROP `show_border`,
+		  DROP `label_width`;";
+	$this->query($q);
+}
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
@@ -287,8 +358,45 @@ function removeFormManager(){
 	$this->query($q);
 	$q = "DROP TABLE IF EXISTS `{$this->settingsTable}`";	
 	$this->query($q);
+	$q = "DROP TABLE IF EXISTS `{$this->templatesTable}`";	
+	$this->query($q);
 }
 
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+// Templates
+
+function storeTemplate($filename, $title, $content){
+	$this->removeTemplate($filename);
+	
+	$q = "INSERT INTO `".$this->templatesTable."` SET ".
+			"`title` = '".addslashes($title)."', ".
+			"`filename` = '".addslashes($filename)."', ".
+			"`content` = '".addslashes($content)."'";			
+	$this->query($q);
+}
+function getTemplate($filename){
+	$q = "SELECT * FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
+	$res = $this->query($q);
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	return $row;
+}
+function getTemplateList(){
+	$q = "SELECT `title`, `filename`, `modified` FROM `".$this->templatesTable."`";
+	$res = $this->query($q);
+	$list = array();
+	while($row = mysql_fetch_assoc($res)){
+		$list[$row['filename']] = $row;
+	}
+	mysql_free_result($res);
+	return $list;
+}
+function removeTemplate($filename){
+	$q = "DELETE FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";	
+	$this->query($q);
+}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -711,17 +819,22 @@ function getFormShortcode($formID){
 //gets a particular form's settings; uses defaults where blank
 function getFormSettings($formID){
 	global $msg;
+	
 	$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` = '".$formID."'";
 
 	$res = $this->query($q);
  	if(mysql_num_rows($res)==0) return null;
  	$row = mysql_fetch_assoc($res);
- 	foreach($row as $k=>$v)
+ 	foreach($row as $k=>$v){
 		$row[$k]=stripslashes($v);
+		if(is_serialized($row[$k])) $row[$k] = unserialize($row[$k]);
+	}
+	
  	mysql_free_result($res);
 	foreach($this->formSettingsKeys as $k=>$v){
-		if(trim($row[$k]) == "") $row[$k] = $v;
+		if(!is_array($row[$k]) && trim($row[$k]) == "") $row[$k] = $v;
 	}
+
  	return $row;
 }
 
@@ -733,8 +846,10 @@ function updateFormSettings($formID, $formInfo){
 		//make sure we have sanitized settings remaining
 		if(sizeof($toUpdate)>0){
 			$strArr=array();
-			foreach($toUpdate as $k=>$v)
+			foreach($toUpdate as $k=>$v){
+				if(is_array($formInfo[$k])) $formInfo[$k] = serialize($formInfo[$k]);
 				$strArr[] = "`{$k}` = '".addslashes($formInfo[$k])."'";
+			}
 			$q = "UPDATE `".$this->formsTable."` SET ".implode(", ",$strArr)." WHERE `ID` = '".$formID."'";
 			$this->query($q);
 		}

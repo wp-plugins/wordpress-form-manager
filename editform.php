@@ -3,12 +3,22 @@ global $fmdb;
 global $fm_display;
 global $fm_controls;
 global $fm_form_behavior_types;
+global $fm_templates;
+global $fm_template_controls;
 
 $form = null;
 if($_REQUEST['id']!="")
 	$form = $fmdb->getForm($_REQUEST['id']);
 	
 $formList = $fmdb->getFormList();
+
+$formTemplateFile = $formInfo['form_template'];
+	if($formTemplateFile == '') $formTemplateFile = $fmdb->getGlobalSetting('template_form');
+	if($formTemplateFile == '') $formTemplateFile = get_option('fm-default-form-template');
+
+$formTemplate = $fm_templates->getTemplateAttributes($formTemplateFile);
+
+$templateList = $fm_templates->getTemplateFilesByType();
 
 /// LOAD FIELDS //////////////////////////////////////////
 
@@ -39,14 +49,6 @@ if(isset($_POST['load-fields'])){
 
 // parse e-mail list
 $email_list = explode(",", $form['email_list']);
-$email_admin = "no";
-for($x=0;$x<sizeof($email_list);$x++){
-	$email_list[$x] = trim($email_list[$x]);
-	if($email_list[$x] == trim(get_option('admin_email'))){
-		unset($email_list[$x]);
-		$email_admin = "yes";
-	}
-}
 
 ///////////////////////////////////////////////////////
 ?>
@@ -56,6 +58,7 @@ for($x=0;$x<sizeof($email_list);$x++){
 
 <div class="wrap">
 <div id="icon-edit-pages" class="icon32"></div>
+
 <h2>Edit Form</h2>
 
 <div id="message-container">
@@ -141,8 +144,7 @@ if(isset($_POST['message']))
 					<div class="jaxtag">
 						<div class="ajaxtag">															
 							<p><input style="text-align:left;" type="text" id="shortcode" value="<?php echo $form['shortcode'];?>" /></p>
-						</div>
-					<p class="howto">Use the above to put this form into a post or page:  for example, if the form's slug is "form-1", then put "[form form-1]" in your post or page where you want to insert the form. </p>
+						</div>					
 					</div>					
 				</div>	
 			</div>
@@ -183,7 +185,74 @@ if(isset($_POST['message']))
 		</div>	
 
 		<!-------------------------------------------------------------------------------------------------- -->
+		
+		<div id="tagsdiv-post_tag" class="postbox " >
+			<h3 class='hndle'><span>Behavior</span></h3>
 			
+			<div class="inside">
+				<div class="tagsdiv" id="post_tag">
+					<div class="jaxtag">
+						<div class="ajaxtag">							
+							<p><strong>Behavior Type</strong></p>
+							<p>
+							<select id="behaviors">
+								<?php foreach($fm_form_behavior_types as $desc => $val): ?>
+								<option value="<?php echo $val;?>" <?php echo ($form['behaviors']==$val)?'selected="selected"':'';?>><?php echo $desc;?></option>
+								<?php endforeach; ?>
+							</select>
+							<p class="howto">Behaviors require a registered user</p>
+							</p>
+						</div>					
+					</div>					
+				</div>	
+			</div>
+		</div>	
+		
+		<!-------------------------------------------------------------------------------------------------- -->
+		
+		<div id="tagsdiv-post_tag" class="postbox " >
+			<h3 class='hndle'><span>Templates</span></h3>
+			
+			<div class="inside">
+				<div class="tagsdiv" id="post_tag">
+					<div class="jaxtag">
+						<div class="ajaxtag">							
+							<p><strong>Form Display</strong></p>
+							<p>
+							<select id="form_template">
+								<option value="">(use default)</option>
+								<?php foreach($templateList['form'] as $file=>$template): ?>
+								<option value="<?php echo $file;?>" <?php echo ($form['form_template']==$file)?'selected="selected"':'';?>><?php echo $template;?></option>
+								<?php endforeach; ?>
+							</select>							
+							</p>
+							
+							<p><strong>E-Mail Notifications</strong></p>
+							<p>
+							<select id="email_template">
+								<option value="">(use default)</option>
+								<?php foreach($templateList['email'] as $file=>$template): ?>
+								<option value="<?php echo $file;?>" <?php echo ($form['email_template']==$file)?'selected="selected"':'';?>><?php echo $template;?></option>
+								<?php endforeach; ?>
+							</select>							
+							</p>
+							
+							<p><strong>Data Summary</strong></p>
+							<p>
+							<select id="summary_template">
+								<option value="">(use default)</option>
+								<?php foreach($templateList['summary'] as $file=>$template): ?>
+								<option value="<?php echo $file;?>" <?php echo ($form['summary_template']==$file)?'selected="selected"':'';?>><?php echo $template;?></option>
+								<?php endforeach; ?>
+							</select>							
+							</p>
+						</div>					
+					</div>					
+				</div>	
+			</div>
+		</div>	
+	
+		<!-------------------------------------------------------------------------------------------------- -->
 		
 	</div><!-- side-info-column -->
 </div><!-- poststuff -->
@@ -273,42 +342,54 @@ if(isset($_POST['message']))
 
 </div>
 
-
+<?php if(sizeof($formTemplate['options']) > 0) : ?>
 <div id="normal-sortables" class="meta-box-sortables">
 	<div id="postexcerpt" class="postbox " >
 	<h3 class='hndle'><span>Appearance</span></h3>
 		<div class="inside">
 		<div class="fm-form-admin">
-			<br />
-			<div class="fm-admin-field-wrap">
-				<label>Show form title:</label>
-				<input type="checkbox" id="show_title" <?php echo ($form['show_title']==1?'checked':'');?> />
-			</div>
-			<div class="fm-admin-field-wrap">
-				<label>Show border:</label>
-				<input type="checkbox" id="show_border" <?php echo ($form['show_border']==1?'checked':'');?> />
-			</div>
-			<div class="fm-admin-field-wrap">
-				<label>Label position:
-				<span class="small">Labels can be placed to the left or above each field</span>
-				</label>
-					<select id="labels_on_top">
-						<option value="1" <?php if($form['labels_on_top']==1) echo "selected=\"selected\"";?>>Top</option>
-						<option value="0" <?php if($form['labels_on_top']==0) echo "selected=\"selected\"";?>>Left</option>
-					</select>		
-			</div>
+			<?php foreach($formTemplate['options'] as $option): ?>
 			<div class="fm-admin-field-wrap">								
-				<label>Label width (in pixels):
-				<span class="small">Applies to checkboxes, and when labels are to the left</span>
+				<label><?php echo $option['label'];?>
+				<span class="small"><?php echo $option['description'];?></span>
 				</label>
-					<input type="text" id="label_width" value="<?php echo $form['label_width'];?>" />
-			</div>	
+					<?php
+					$varId = $fm_template_controls[$option['type']]->getVarId($option);
+					$storedId = substr($varId, 3);
+					
+					if(!isset($form['template_values'][$storedId]) || $form['template_values'] === false) $val = $option['default'];
+					else $val = $form['template_values'][$storedId];
+					
+					echo $fm_template_controls[$option['type']]->getEditor($val, $option); 					
+					?>
+					<script type="text/javascript">
+					<?php	echo "fm_registerExtraSaveVar('".$varId."', '".$fm_template_controls[$option['type']]->getElementValueAttribute()."');\n";?>
+					</script>
+			</div>
+			<?php endforeach; ?>						
+		</div>
+		</div>
+	</div>
+</div>
+<?php endif; ?>
+
+<div id="normal-sortables" class="meta-box-sortables">
+	<div id="postexcerpt" class="postbox " >
+	<h3 class='hndle'><span>Customize</span></h3>
+		<div class="inside">	
+		<div class="fm-form-admin">
 			<div class="fm-admin-field-wrap">								
 				<label>Submit acknowledgement message:
 				<span class="small">This is displayed after the form has been submitted</span>
 				</label>
 					<input type="text" id="submitted_msg" value="<?php echo $form['submitted_msg'];?>" />
-			</div>				
+			</div>
+			<div class="fm-admin-field-wrap">								
+				<label>Show summary with acknowledgment:
+				<span class="small">A summary of the submitted data will be shown along with the acknowledgment message</span>
+				</label>
+					<input type="checkbox" id="show_summary" <?php echo ($form['show_summary']==1?"checked=\"checked\"":"");?> />
+			</div>			
 			<div class="fm-admin-field-wrap">
 				<label>Submit button label:</label>
 					<input type="text" id="submit_btn_text" value="<?php echo $form['submit_btn_text'];?>"/>
@@ -318,26 +399,6 @@ if(isset($_POST['message']))
 				<span class="small">This is shown if a user leaves a required item blank.  The item's label will appear in place of '%s'.</span>
 				</label>
 					<input type="text" id="required_msg" value="<?php echo $form['required_msg'];?>" />
-			</div>			
-		</div>
-		</div>
-	</div>
-</div>
-
-<div id="normal-sortables" class="meta-box-sortables">
-	<div id="postexcerpt" class="postbox " >
-	<h3 class='hndle'><span>Behavior</span></h3>
-		<div class="inside">	
-		<div class="fm-form-admin">
-			<div class="fm-admin-field-wrap">
-				<label>Behavior type:
-				<span class="small">(All behaviors except 'Default' will require a registered user)</span>
-				</label>
-					<select id="behaviors">
-						<?php foreach($fm_form_behavior_types as $desc => $val): ?>
-						<option value="<?php echo $val;?>" <?php echo ($form['behaviors']==$val)?'selected="selected"':'';?>><?php echo $desc;?></option>
-						<?php endforeach; ?>
-					</select>
 			</div>
 		</div>
 		</div>
