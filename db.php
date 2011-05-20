@@ -819,6 +819,7 @@ function getFormShortcode($formID){
 //gets a particular form's settings; uses defaults where blank
 function getFormSettings($formID){
 	global $msg;
+	
 	$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` = '".$formID."'";
 
 	$res = $this->query($q);
@@ -828,10 +829,12 @@ function getFormSettings($formID){
 		$row[$k]=stripslashes($v);
 		if(is_serialized($row[$k])) $row[$k] = unserialize($row[$k]);
 	}
+	
  	mysql_free_result($res);
 	foreach($this->formSettingsKeys as $k=>$v){
 		if(!is_array($row[$k]) && trim($row[$k]) == "") $row[$k] = $v;
 	}
+
  	return $row;
 }
 

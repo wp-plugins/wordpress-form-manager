@@ -49,14 +49,6 @@ if(isset($_POST['load-fields'])){
 
 // parse e-mail list
 $email_list = explode(",", $form['email_list']);
-$email_admin = "no";
-for($x=0;$x<sizeof($email_list);$x++){
-	$email_list[$x] = trim($email_list[$x]);
-	if($email_list[$x] == trim(get_option('admin_email'))){
-		unset($email_list[$x]);
-		$email_admin = "yes";
-	}
-}
 
 ///////////////////////////////////////////////////////
 ?>
