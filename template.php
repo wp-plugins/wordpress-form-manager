@@ -110,7 +110,7 @@ function getTemplateAttributes($fileName){
 function initTemplates(){
 	global $fmdb;	
 	
-	//compare the stored templates with those in the templates directory.  Files that exist in the database but on on disk are re-created on disk; files that exist on disk are all stored in the database.
+	//compare the stored templates with those in the templates directory.  Files that exist in the database but not on disk are re-created on disk; files that exist on disk are all stored in the database.
 	$templateFiles = $this->getTemplateList();
 	$dbTemplates = $fmdb->getTemplateList();
 	

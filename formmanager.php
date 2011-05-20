@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.2
+Version: 1.4.3
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.2";
+$fm_currentVersion = "1.4.3";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -84,6 +84,8 @@ function fm_install(){
 	
 	// covers versions up to and including 1.3.10
 	$fmdb->fixCollation();		
+	
+	$fmdb->updateDataTables();
 		
 	update_option('fm-version', $fm_currentVersion);			
 }  
@@ -394,7 +396,7 @@ function fm_doFormBySlug($formSlug){
 		get_currentuserinfo();	
 		
 		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
-		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login), $overwrite);			
+		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login, 'user_ip' => fm_get_user_IP()), $overwrite);			
 		foreach($postData as $k=>$v){
 			$postData[$k] = stripslashes($v);
 		}

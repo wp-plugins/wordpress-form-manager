@@ -460,6 +460,10 @@ function fm_summary_the_user(){
 	return fm_summary_get_item_value('user');
 }
 
+function fm_summary_the_IP(){
+	return fm_summary_get_item_value('user_ip');
+}
+
 function fm_summary_the_title(){
 	global $fm_display;
 	return $fm_display->currentFormInfo['title'];

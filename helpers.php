@@ -84,4 +84,10 @@ function fm_get_file_data( $file, $fields) {
 	return $file_vars;
 }
 
+function fm_get_user_IP(){
+	if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+        $IPAddr=$_SERVER['HTTP_X_FORWARDED_FOR'];
+    else $IPAddr=$_SERVER['REMOTE_ADDR'];
+	return $IPAddr;
+}
 ?>

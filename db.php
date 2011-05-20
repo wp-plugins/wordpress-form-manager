@@ -326,6 +326,31 @@ function convertAppearanceSettings(){
 	$this->query($q);
 }
 
+//fix data tables for versions prior to 1.4.3; adds a column for the user's IP address
+function updateDataTables(){
+	$q = "SELECT `ID`, `data_table` FROM `".$this->formsTable."` WHERE `ID` > 0";
+	$res = $this->query($q);
+	$dataTables = array();
+	while($row = mysql_fetch_assoc($res)){
+		$dataTables[] = $row['data_table'];
+	}
+	mysql_free_result($res);
+	foreach($dataTables as $dataTable){
+		$q = "SHOW COLUMNS FROM `".$dataTable."`";
+		$res = $this->query($q);
+		$found = false;
+		while($row = mysql_fetch_assoc($res))
+			if($row['Field'] == 'user_ip')
+				$found = true;
+		mysql_free_result($res);
+		
+		if(!$found){
+			$q = "ALTER TABLE `".$dataTable."` ADD `user_ip` VARCHAR( 64 ) NOT NULL";
+			$this->query($q);
+		}		
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
@@ -628,6 +653,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	//add the field headers
 	$fieldNames[] = 'timestamp';
 	$fieldNames[] = 'user';
+	$fieldNames[] = 'user_ip';
 	foreach($formInfo['items'] as $k=>$v){
 		$label = isset($formInfo['items'][$k]) ? $formInfo['items'][$k]['label'] : $k;
 		$fieldNames[] = $label;		
@@ -640,6 +666,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 			$dataItems=array();
 			$dataItems[] = $dataRow['timestamp'];
 			$dataItems[] = $dataRow['user'];
+			$dataItems[] = $dataRow['user_ip'];
 			foreach($formInfo['items'] as $k=>$v){
 				$dataItems[] = $dataRow[$k];
 			}
@@ -922,7 +949,8 @@ function deleteForm($formID){
 }
 
 //creates a form; returns the ID of the created form
-function createForm($formInfo=null, $dataTablePrefix){	
+function createForm($formInfo=null){	
+	$dataTablePrefix = $this->dataTablePrefix();	
 	$newID = $this->getUniqueFormID();
 	$dataTable = $dataTablePrefix."_".$newID;
 	$q = "INSERT INTO `".$this->formsTable."` SET `ID` = '".$newID."', `data_table` = '".$dataTable."'";
@@ -942,7 +970,9 @@ function createDataTable($formInfo, $dataTable){
 		
 	$q = "CREATE TABLE `{$dataTable}` (".
 		"`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,".
-		"`user` VARCHAR( 64 ) NOT NULL";	
+		"`user` VARCHAR( 64 ) NOT NULL ,".
+		"`user_ip` VARCHAR( 64 ) NOT NULL";
+			
 	if(isset($formInfo['items']) && sizeof($formInfo['items'])>0){
 		$itemArr = array();
 		foreach($formInfo['items'] as $item)
@@ -954,6 +984,10 @@ function createDataTable($formInfo, $dataTable){
 	$this->query($q);
 }
 
+function dataTablePrefix(){
+	global $wpdb;
+	return $wpdb->prefix.get_option('fm-data-table-prefix');
+}
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
