@@ -3,14 +3,14 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.3.12
+Version: 1.4.1
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.3.12";
+$fm_currentVersion = "1.4.1";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -28,11 +28,12 @@ if ( version_compare( get_bloginfo( 'version' ), '3.0.0', '<' ) )
 // only PHP 5.0+
 if ( version_compare(PHP_VERSION, '5.0.0', '<') ) 
 	wp_die( 'Form Manager requires PHP version 5.0 or higher' );
-	
+
 include 'helpers.php';
 
 include 'db.php';
 include 'display.php';
+include 'template.php';
 
 /**************************************************************/
 /******* PLUGIN OPTIONS ***************************************/
@@ -42,18 +43,25 @@ if(get_option('fm-shortcode') === false)
 update_option("fm-forms-table-name", "fm_forms");
 update_option("fm-items-table-name", "fm_items");
 update_option("fm-settings-table-name", "fm_settings");
+update_option("fm-templates-table-name", "fm_templates");
 update_option("fm-data-table-prefix", "fm_data");
 update_option("fm-query-table-prefix", "fm_queries");
+update_option("fm-default-form-template", "fm-form-default.php");
+update_option("fm-default-summary-template", "fm-summary-default.php");
 
 global $wpdb;
 global $fmdb;
+global $fm_display;
+global $fm_templates;
+
 $fmdb = new fm_db_class($wpdb->prefix.get_option('fm-forms-table-name'),
 					$wpdb->prefix.get_option('fm-items-table-name'),
 					$wpdb->prefix.get_option('fm-settings-table-name'),
+					$wpdb->prefix.get_option('fm-templates-table-name'),
 					$wpdb->dbh
 					);
 $fm_display = new fm_display_class();
-
+$fm_templates = new fm_template_manager();
 				
 /**************************************************************/
 /******* DATABASE SETUP ***************************************/
@@ -62,18 +70,12 @@ function fm_install(){
 	global $fmdb;
 	global $fm_currentVersion;
 	
+	//from any version before 1.4.0; must be done before the old columns are removed
+	$fmdb->convertAppearanceSettings();
+	
 	//initialize the database
 	$fmdb->setupFormManager();
 
-	fm_upgrade();  
-		
-	update_option('fm-version', $fm_currentVersion);			
-}  
-register_activation_hook(__FILE__,'fm_install');
-
-function fm_upgrade(){
-	global $fmdb;
-	
 	// covers updates from 1.3.0 
 	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,single_submission' WHERE `behaviors` = 'reg_user_only,no_dup'";
 	$fmdb->query($q);
@@ -81,8 +83,11 @@ function fm_upgrade(){
 	$fmdb->query($q);
 	
 	// covers versions up to and including 1.3.10
-	$fmdb->fixCollation();	
-}
+	$fmdb->fixCollation();		
+		
+	update_option('fm-version', $fm_currentVersion);			
+}  
+register_activation_hook(__FILE__,'fm_install');
 
 //uninstall - delete the table(s). 
 function fm_uninstall(){
@@ -93,8 +98,11 @@ function fm_uninstall(){
 	delete_option('fm-forms-table-name');
 	delete_option('fm-items-table-name');
 	delete_option('fm-settings-table-name');
+	delete_option('fm-templates-table-name');
 	delete_option('fm-data-table-prefix');
 	delete_option('fm-query-table-prefix');
+	delete_option('fm-default-form-template');
+	delete_option('fm-default-summary-template');
 	delete_option('fm-version');
 }
 register_uninstall_hook(__FILE__,'fm_uninstall');
@@ -120,6 +128,8 @@ function fm_cleanCSVData(){
 
 add_action('admin_init', 'fm_adminInit');
 function fm_adminInit(){
+	global $fm_templates;
+	
 	wp_enqueue_script('scriptaculous');
 	wp_enqueue_script('scriptaculous-dragdrop');
 	
@@ -127,6 +137,8 @@ function fm_adminInit(){
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');
+	
+	$fm_templates->initTemplates();
 }
 
 add_action('init', 'fm_userInit');
@@ -171,6 +183,8 @@ function fm_setupAdminMenu(){
 	$pages[] = add_submenu_page("fm-admin-main", "Settings", "Settings", "manage_options", "fm-global-settings", 'fm_showSettingsPage');
 	$pages[] = add_submenu_page("fm-admin-main", "Advanced Settings", "Advanced Settings", "manage_options", "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
+	$pages[] = add_submenu_page("fm-admin-main", "Edit Form - Advanced", "Edit Form - Advanced", "manage_options", "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
+	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
 }
@@ -185,6 +199,8 @@ function fm_adminHead(){
 	unset($submenu['fm-admin-main'][2]); //Data
 	
 	unset($submenu['fm-admin-main'][4]); //Advanced settings
+	
+	unset($submenu['fm-admin-main'][5]); //Edit Form Advanced
 }
 
 //only show this stuff when viewing a plugin page, since some of it is messy
@@ -197,25 +213,12 @@ function fm_adminHeadPluginOnly(){
 	}
 }
 
-function fm_showEditPage(){
-	include 'editform.php';
-}
-
-function fm_showDataPage(){
-	include 'formdata.php';
-}
-
-function fm_showMainPage(){	
-	include 'main.php';
-}
-
-function fm_showSettingsPage(){
-	include 'editsettings.php';
-}
-
-function fM_showSettingsAdvancedPage(){
-	include 'editsettingsadv.php';
-}
+function fm_showEditPage(){	include 'editform.php'; }
+function fm_showEditAdvancedPage(){	include 'editformadv.php'; }
+function fm_showDataPage(){	include 'formdata.php'; }
+function fm_showMainPage(){	include 'main.php'; }
+function fm_showSettingsPage(){	include 'editsettings.php'; }
+function fm_showSettingsAdvancedPage(){	include 'editsettingsadv.php'; }
 
 /**************************************************************/
 /******* AJAX *************************************************/
@@ -262,6 +265,11 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['behaviors'] = $_POST['behaviors'];
 	$formInfo['email_user_field'] = $_POST['email_user_field'];
 	$formInfo['required_msg'] = $_POST['required_msg'];
+	$formInfo['template_values'] = $_POST['template_values'];
+	$formInfo['form_template'] = $_POST['form_template'];
+	$formInfo['email_template'] = $_POST['email_template'];
+	$formInfo['summary_template'] = $_POST['summary_template'];
+	$formInfo['show_summary'] = ($_POST['show_summary']=="true"?1:0);
 	
 	//build the notification email list
 
@@ -386,12 +394,12 @@ function fm_doFormBySlug($formSlug){
 		get_currentuserinfo();	
 		
 		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
-		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login), $overwrite);	
-		
-		if($fmdb->processFailed()){
-			foreach($postData as $k=>$v){
-				$postData[$k] = stripslashes($v);
-			}
+		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login), $overwrite);			
+		foreach($postData as $k=>$v){
+			$postData[$k] = stripslashes($v);
+		}
+			
+		if($fmdb->processFailed()){			
 			return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink()), $postData);
 		}
 		else{					
@@ -404,32 +412,32 @@ function fm_doFormBySlug($formSlug){
 			|| $fmdb->getGlobalSetting('email_admin') == "YES"
 			|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
 			
-				$subject = get_option('blogname').": '".$formInfo['title']."' Submission";
-				$message = $subject."\n";
-				if($postData['user'] != "") $message.= "User: ".$postData['user']."\n";
-				$message.= "Timestamp: ".$postData['timestamp']."\n\n";
-				foreach($formInfo['items'] as $formItem){
-					if($formItem['db_type'] != "NONE")
-						$message.= $formItem['label'].": ".stripslashes($postData[$formItem['unique_name']])."\n";
-				}
+				$subject = get_option('blogname').": '".$formInfo['title']."' Submission";				
+				$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
+				$headers  = 'MIME-Version: 1.0'."\r\n".
+							'Content-type: text/html'."\r\n".
+							'From: '.get_option('admin_email')."\r\n".
+    						'Reply-To: '.get_option('admin_email')."\r\n";
+				
 				$temp = "";
 				if($fmdb->getGlobalSetting('email_admin') == "YES")
-					wp_mail(get_option('admin_email'), $subject, $message);
+					wp_mail(get_option('admin_email'), $subject, $message, $headers);
 					
 				if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
 					if(trim($current_user->user_email) != "")
-						wp_mail($current_user->user_email, $subject, $message);
+						wp_mail($current_user->user_email, $subject, $message, $headers);
 				}
 				if($formInfo['email_list'] != "")
-					wp_mail($formInfo['email_list'], $subject, $message);
+					wp_mail($formInfo['email_list'], $subject, $message, $headers);
 					
 				if($formInfo['email_user_field'] != "")
-					wp_mail($postData[$formInfo['email_user_field']], $subject, $message);
+					wp_mail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
 	
 			}
 			
 			if(!isset($formBehaviors['display_summ']))
-				return '<p>'.$formInfo['submitted_msg'].'</p>';
+				return '<p>'.$formInfo['submitted_msg'].'</p>'.
+						($formInfo['show_summary']==1 ? $fm_display->displayDataSummary('summary', $formInfo, $postData) : "");
 			else
 				$output = '<p>'.$formInfo['submitted_msg'].'</p>';
 		}
@@ -442,11 +450,11 @@ function fm_doFormBySlug($formSlug){
 	//'display_summ', show previous submission if there is one and break
 	
 	if(isset($formBehaviors['display_summ'])){
-		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
+		
 		if(sizeof($userData) > 0){		//only display a summary if there is a previous submission by this user
 			if(!$_REQUEST['fm-edit-'.$formID] == '1'){							
 				if(!isset($formBehaviors['edit']))
-					return $output.$fm_display->displayDataSummary($formInfo, $userData[0]);
+					return $output.$fm_display->displayDataSummary('summary', $formInfo, $userData[0]);
 				else{
 					$currentPage = get_permalink();
 					$parsedURL = parse_url($currentPage);
@@ -455,8 +463,9 @@ function fm_doFormBySlug($formSlug){
 					else
 						$editLink = $currentPage."&fm-edit-".$formID."=1";
 					
-					$str.= "<span class=\"fm-data-summary-edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
-					return $output.$fm_display->displayDataSummary($formInfo, $userData[0], "<h3>".$formInfo['title']."</h3>\n" , $str);
+					return $output.
+							$fm_display->displayDataSummary('summary', $formInfo, $userData[0]).
+							"<span class=\"fm-data-summary-edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
 				}				
 			}
 			else
