@@ -13,14 +13,16 @@ function fm_deleteFormClick(formID){
 
 //AJAX
 
-function fm_saveForm(){	
+function fm_saveForm(){
 	var doSave = true;
 	if(fm_itemsWereDeleted){
 		doSave = confirm("There may be data associated with the form item(s) you removed.  Are you sure you want to save?");
 	}
 	
 	if(doSave){
+		fm_save_error = false;
 		document.getElementById('ajax-loading').style.visibility = 'visible';
+
 		var data = {
 				action: 'fm_save_form',
 				id: document.getElementById('form-id').value,
@@ -47,11 +49,20 @@ function fm_saveForm(){
 			data.template_values[id] = extraVal;			
 		}
 		
-		jQuery.post(ajaxurl, data, function(response){
-			document.getElementById('message-post').value = response;
-			document.getElementById('fm-main-form').submit();
-		});	
+		if(!fm_save_error){		
+			jQuery.post(ajaxurl, data, function(response){
+				document.getElementById('message-post').value = response;
+				document.getElementById('fm-main-form').submit();
+			});	
+		}
 	}
+}
+
+var fm_save_error;
+var fm_save_validators = [];
+
+function fm_registerSaveValidator(_itemType, _fn){
+	fm_save_validators[_itemType] = _fn;	
 }
 
 var fm_save_extra_vars = [];
@@ -112,10 +123,12 @@ function fm_deleteItem(itemID){
 function fm_getFormItems(editorID){
 	var listUL = document.getElementById(editorID);
 	var arr = [];
+	var fail;
 	for(var index=0; index<listUL.childNodes.length; index++){
 		if(typeof listUL.childNodes[index].id != 'undefined'){				
 			var itemID = listUL.childNodes[index].id;
 			var newItem = fm_getFormItem(itemID,index);
+			
 			arr.push( newItem );			
 		}
 	}
@@ -123,7 +136,16 @@ function fm_getFormItems(editorID){
 }
 function fm_getFormItem(itemID,index){	
 	var fn = document.getElementById(itemID + '-get').value;
+	var type = document.getElementById(itemID + '-type').value;
+	var valid;
+
 	eval('newItem = ' + fn + ';');
+	if(typeof(fm_save_validators[type]) != 'undefined'){
+		eval("valid = " + fm_save_validators[type] + "('" + 	itemID + "');");
+		if(!valid)
+			fm_save_error = true;
+	}
+		
 	return newItem;
 }
 
@@ -151,14 +173,41 @@ function fm_dataCBColChange(){
 
 function fm_downloadCSV(){
 	var data = {
-			action: 'fm_create_csv',
-			id: document.getElementById('form-id').value,
-			title: document.getElementById('title').value
+		action: 'fm_create_csv',
+		id: document.getElementById('form-id').value,
+		title: document.getElementById('title').value
 	};	
 
 	jQuery.post(ajaxurl, data, function(response){		
 		window.open(response,'Download');
 	});	
+}
+
+function fm_downloadFile(_itemID, _timestamp, _user, _user_ip){
+	var data = {
+		action: 'fm_download_file',
+		id: document.getElementById('form-id').value,
+		itemid: _itemID,
+		timestamp: _timestamp,
+		user: _user,
+		user_ip: _user_ip
+	}
+	
+	jQuery.post(ajaxurl, data, function(response){		
+		window.open(response,'Download');				
+	});
+}
+
+function fm_downloadAllFiles(_itemID){
+	var data = {
+		action: 'fm_download_all_files',
+		id: document.getElementById('form-id').value,
+		itemid: _itemID			
+	}
+	
+	jQuery.post(ajaxurl, data, function(response){		
+		window.open(response,'Download');
+	});
 }
 
 /***************************************************************************/

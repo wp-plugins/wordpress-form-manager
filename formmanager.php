@@ -3,12 +3,12 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.3
+Version: 1.4.4
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
 
-/*  Copyright 2011 Campbell Hoffman
+  Copyright 2011 Campbell Hoffman
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.3";
+$fm_currentVersion = "1.4.4";
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -63,6 +63,7 @@ update_option("fm-data-table-prefix", "fm_data");
 update_option("fm-query-table-prefix", "fm_queries");
 update_option("fm-default-form-template", "fm-form-default.php");
 update_option("fm-default-summary-template", "fm-summary-default.php");
+update_option("fm-temp-dir", "tmp");
 
 global $wpdb;
 global $fmdb;
@@ -121,6 +122,7 @@ function fm_uninstall(){
 	delete_option('fm-default-form-template');
 	delete_option('fm-default-summary-template');
 	delete_option('fm-version');
+	delete_option('fm-temp-dir');
 }
 register_uninstall_hook(__FILE__,'fm_uninstall');
 
@@ -131,10 +133,10 @@ register_uninstall_hook(__FILE__,'fm_uninstall');
 //delete .csv files on each login
 add_action('wp_login', 'fm_cleanCSVData');
 function fm_cleanCSVData(){
-	$dirName = @dirname(__FILE__)."/csvdata";
+	$dirName = @dirname(__FILE__)."/".get_option("fm-temp-dir");
 	$dir = @opendir($dirName);
 	while($fname = @readdir($dir)) {
-		if(strpos($fname, ".csv") !== false)
+		if(file_exists(dirname(__FILE__)."/".get_option("fm-temp-dir")."/".$fname))
 			@unlink($dirName."/".$fname);
 	}
 	@closedir($dir);
@@ -350,6 +352,14 @@ function fm_newItemAjax(){
 	die();
 }
 
+//Use the 'formelements' helpers
+add_action('wp_ajax_fm_create_form_element', 'fm_createFormElement');
+function fm_createFormElement(){
+	//echo "<pre>".print_r($elem,true)."</pre>";
+	echo fe_getElementHTML($_POST['elem']);
+	die();
+}
+
 //Create a CSV file for download
 add_action('wp_ajax_fm_create_csv', 'fm_createCSV');
 function fm_createCSV(){
@@ -357,19 +367,114 @@ function fm_createCSV(){
 	
 	$fname = sanitize_title($_POST['title'])." (".date("m-y-d h-i-s").").csv";
 	
-	$fmdb->writeFormSubmissionDataCSV($_POST['id'], dirname(__FILE__)."/csvdata/".$fname);
+	$fmdb->writeFormSubmissionDataCSV($_POST['id'], dirname(__FILE__)."/".get_option("fm-temp-dir")."/".$fname);
 	
-	echo plugins_url('/csvdata/',  __FILE__).$fname;
+	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__).$fname;
 	
 	die();
 }
 
-//Use the 'formelements' helpers
-add_action('wp_ajax_fm_create_form_element', 'fm_createFormElement');
-function fm_createFormElement(){
-	//echo "<pre>".print_r($elem,true)."</pre>";
-	echo fe_getElementHTML($_POST['elem']);
+//Download an uploaded file
+add_action('wp_ajax_fm_download_file', 'fm_downloadFile');
+function fm_downloadFile(){
+	global $fmdb;
+	
+	$tmpDir =  dirname(__FILE__)."/".get_option("fm-temp-dir")."/";
+	
+	$formID = $_POST['id'];
+	$itemID = $_POST['itemid'];
+	$timestamp = $_POST['timestamp'];
+	$userName = $_POST['user'];
+	
+	$dataRow = $fmdb->getSubmission($formID, $timestamp, $userName, "`".$itemID."`");
+	
+	$fileInfo = unserialize($dataRow[$itemID]);	
+	
+	fm_createFileFromDB($fileInfo['filename'], $fileInfo, $tmpDir);
+	
+	echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$fileInfo['filename'];		
+	
 	die();
+}
+
+add_action('wp_ajax_fm_download_all_files', 'fm_downloadAllFiles');
+function fm_downloadAllFiles(){
+	global $fmdb;
+	
+	$tmpDir =  dirname(__FILE__)."/".get_option("fm-temp-dir")."/";
+	
+	$formID = $_POST['id'];	
+	$itemID = $_POST['itemid'];
+	
+	$formInfo = $fmdb->getForm($formID);
+	foreach($formInfo['items'] as $item)
+		if($item['unique_name'] == $itemID)
+			$itemLabel = $item['label'];
+			
+	$formData = $fmdb->getFormSubmissionDataRaw($formID, 'timestamp', 'DESC', 0, 0);
+	$files = array();
+	foreach($formData as $dataRow){
+		$fileInfo = unserialize($dataRow[$itemID]);
+		$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
+		$files[] = $tmpDir.$fname;
+		fm_createFileFromDB($fname, $fileInfo, $tmpDir);
+	}
+	
+	$zipFileName = sanitize_title($formInfo['title']." - ".$itemLabel).".zip";
+	$zipFullPath =  $tmpDir.$zipFileName;	
+	fm_createZIP($files, $zipFullPath); 
+	 
+	echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$zipFileName;
+		
+	die();
+}
+
+function fm_createFileFromDB($filename, $fileInfo, $dir){
+	$fullpath = $dir.$filename;
+	$fp = @fopen($fullpath,'wb') or die("Failed to open file");
+	fwrite($fp, $fileInfo['contents']);
+	fclose($fp);
+}
+
+/* Below is from David Walsh (davidwalsh.name), slightly modified. Thanks Dave! */
+function fm_createZIP($files = array(),$destination = '') {
+   
+  //vars
+  $valid_files = array();
+  //if files were passed in...
+  if(is_array($files)) {
+    //cycle through each file
+    foreach($files as $file) {
+      //make sure the file exists
+      if(file_exists($file)) {
+        $valid_files[] = $file;
+      }
+    }
+  }
+  //if we have good files...
+  if(count($valid_files)) {
+    //create the archive
+    $zip = new ZipArchive();
+    if($zip->open($destination, ZIPARCHIVE::OVERWRITE | ZIPARCHIVE::CREATE | ZIPARCHIVE::FL_NODIR) !== true) {
+	  return false;
+    }
+    //add the files
+    foreach($valid_files as $file) {
+      $zip->addFile($file,basename($file));
+    }
+    //debug
+    //echo 'The zip archive contains ',$zip->numFiles,' files with a status of ',$zip->status;
+    
+    //close the zip -- done!
+    $zip->close();
+    
+    //check to make sure the file exists
+	return file_exists($destination);
+  }
+  else
+  { 
+    return false;
+  }
 }
 
 /**************************************************************/
@@ -417,7 +522,9 @@ function fm_doFormBySlug($formSlug){
 		}
 			
 		if($fmdb->processFailed()){			
-			return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink()), $postData);
+			return '<em>'.$fmdb->getErrorMessage().'</em>'.
+					$output.
+					$fm_display->displayForm($formInfo, array('action' => get_permalink()), $postData);
 		}
 		else{					
 			// send email notifications

@@ -82,4 +82,12 @@ class fm_editPanelItemMulti extends fm_editPanelItemBase{
 		return $str;
 	}
 }
+
+class fm_editPanelItemNote extends fm_editPanelItemBase{
+	function getPanelItem(){
+		return "<tr><td colspan=\"2\">".
+				$this->itemLabel.
+				"</td></tr>";
+	}
+}
 ?>

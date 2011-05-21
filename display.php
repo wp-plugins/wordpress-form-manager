@@ -44,8 +44,7 @@ function displayFormNoTemplate($formInfo, $options=array(), $values=array()){
 	//default div id
 	if(!isset($options['class'])) $options['class'] = 'fm-form';
 	
-	$str = "";
-	$str.= "<form class=\"".$options['class']."\" method=\"post\" action=\"".$options['action']."\" name=\"fm-form-".$formInfo['ID']."\" id=\"fm-form-".$formInfo['ID']."\">\n";
+	$str.= "<form enctype=\"multipart/form-data\" class=\"".$options['class']."\" method=\"post\" action=\"".$options['action']."\" name=\"fm-form-".$formInfo['ID']."\" id=\"fm-form-".$formInfo['ID']."\">\n";
 	
 	if($formInfo['show_border']==1)
 		$str.= "<fieldset>\n";
@@ -324,7 +323,8 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 
 function fm_form_start(){
 	global $fm_display;
-	echo "<form class=\"".$fm_display->currentFormOptions['class']."\" ".
+
+	echo "<form enctype=\"multipart/form-data\" class=\"".$fm_display->currentFormOptions['class']."\" ".
 			"method=\"post\" action=\"".$fm_display->currentFormOptions['action']."\" ".
 			"name=\"fm-form-".$fm_display->currentFormInfo['ID']."\" id=\"fm-form-".$fm_display->currentFormInfo['ID']."\">\n";	
 }

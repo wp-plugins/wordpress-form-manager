@@ -43,7 +43,7 @@
 	float:left;
 	font-size:13px;
 }
-.fm-form-admin .small{
+.fm-form-admin .small, .fm-small{
 	color:#666666;
 	display:block;
 	font-size:11px;

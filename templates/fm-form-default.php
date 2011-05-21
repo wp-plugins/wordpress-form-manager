@@ -48,9 +48,10 @@ fm_form_is_required() - Returns true if the current item is set as required
 fm_form_item_type() - The current item's type
 
 //////////////////////////////////////////////////////////////////////////////////////////
+
 */
 ?>
-<form class="<?php echo fm_form_class();?>" method="post" action="<?php echo fm_form_action();?>" name="<?php echo fm_form_ID();?>" id="<?php echo fm_form_ID();?>" >
+<?php echo fm_form_start(); ?>
 
 	<?php if($showBorder): ?><fieldset><?php endif; ?>
 	

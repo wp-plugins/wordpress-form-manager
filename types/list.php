@@ -11,7 +11,7 @@ class fm_customListControl extends fm_controlBase{
 	
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
+		$itemInfo['label'] = "New List";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('list_type' => 'select');
 		$itemInfo['nickname'] = "Item Nickname";

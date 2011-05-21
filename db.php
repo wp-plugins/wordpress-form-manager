@@ -8,7 +8,10 @@ public $settingsTable;
 public $templatesTable;
 public $conn;
 
+
+private $lastErrorMessage;
 private $lastPostFailed;
+private $lastUniqueName;
 
 function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn){
 	$this->formsTable = $formsTable;
@@ -591,8 +594,9 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 	$postData = array();
 	foreach($formInfo['items'] as $item){
 		$processed = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
-		if($processed === false) 
+		if($processed === false){
 			$this->lastPostFailed = true;
+		}
 		if($item['db_type'] != "NONE")						
 			$postData[$item['unique_name']] = $processed;
 	}
@@ -620,6 +624,16 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 
 function processFailed(){
 	return $this->lastPostFailed;
+}
+function setErrorMessage($message, $for = ""){
+	$this->lastErrorMessage = $message;
+	$this->lastUniqueName = $for;
+}
+function getErrorMessage(){
+	return $this->lastErrorMessage;
+}
+function getErrorUniqueName(){
+	return $this->lastUniqueName;
 }
 
 function insertSubmissionData($dataTable, $postData){
@@ -706,7 +720,10 @@ function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $
 
 function getFormSubmissionDataRaw($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $endIndex = 30){
 	$dataTable = $this->getDataTableName($formID);
-	$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord} LIMIT {$startIndex}, {$endIndex}";
+	if($startIndex == 0 && $endIndex == 0)
+		$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord}";
+	else
+		$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord} LIMIT {$startIndex}, {$endIndex}";
 	$res = $this->query($q);
 	if(mysql_num_rows($res) == 0) return array();
 	$data=array();
@@ -724,14 +741,8 @@ function clearSubmissionData($formID){
 }
 
 function deleteSubmissionDataRow($formID, $data){
-	$dataTable = $this->getDataTableName($formID);	
-	$cond=array();
-	foreach($data as $k=>$v){
-		if($this->isDataCol($formID, $k)){
-			$cond[] = "`{$k}` = '".addslashes($v)."'";
-		}
-	}
-	$q = "DELETE FROM `{$dataTable}` WHERE ".implode(" AND ",$cond)." LIMIT 1";
+	$dataTable = $this->getDataTableName($formID);
+	$q = "DELETE FROM `{$dataTable}` WHERE `timestamp` = '".$data['timestamp']."' AND `user` = '".$data['user']."' AND `user_ip` = '".$data['user_ip']."' LIMIT 1";
 	$this->query($q);
 }
 
@@ -787,6 +798,15 @@ function getUserSubmissionCount($formID, $user){
 	mysql_free_result($res);
 	return $row[0];
 }
+
+function getSubmission($formID, $timestamp, $user, $cols = "*"){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "SELECT ".$cols." FROM `".$dataTable."` WHERE `timestamp` = '".$timestamp."' AND `user` = '".$user."'";
+	$res = $this->query($q);
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	return $row;
+}	
 
 //////////////////////////////////////////////////////////////////
 

@@ -5,6 +5,20 @@ class fm_checkboxControl extends fm_controlBase{
 		
 	public function getTypeLabel(){ return "Checkbox"; }
 	
+	public function itemDefaults(){
+		$itemInfo = array();
+		$itemInfo['label'] = "New Checkbox";
+		$itemInfo['description'] = "Item Description";
+		$itemInfo['extra'] = array();
+		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['required'] = 0;
+		$itemInfo['validator'] = "";
+		$ItemInfo['validation_msg'] = "";
+		$itemInfo['db_type'] = "BLOB";
+		
+		return $itemInfo;
+	}
+	
 	public function showItem($uniqueName, $itemInfo){
 		$elem=array('type' => 'checkbox',
 					'attributes' => array('name' => $uniqueName,

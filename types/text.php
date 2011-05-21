@@ -24,7 +24,7 @@ class fm_textControl extends fm_controlBase{
 	//returns an associative array keyed by the item db fields; used in the AJAX for creating a new form item in the back end / admin side
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
+		$itemInfo['label'] = "New Text";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('size' => '300');
 		$itemInfo['nickname'] = "Item Nickname";
