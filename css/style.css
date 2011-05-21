@@ -204,6 +204,10 @@ hr.edit-panel-sep{
 	margin:20px;
 }
 
+.fm-download-link{
+	cursor: pointer;
+}
+
 
 /******************************************************************/
 /* USER SIDE */
