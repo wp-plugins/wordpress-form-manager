@@ -348,6 +348,7 @@ fm_summary_the_label() - label of the current form item
 fm_summary_the_value() - submitted value of the current form item
 fm_summary_the_timestamp() - timestamp for the current submission
 fm_summary_the_user() - the login name for the current user.  If no user is logged in, this returns an empty string.
+fm_summary_the_ip() - the IP address of the user who submitted the form.
 
 = Creating a form template =
 
@@ -371,7 +372,7 @@ Step 2: First, every form template needs appropriate open and close <form> tags.
 
 or
 
-`<form class="<?php echo fm_form_class();?>" method="post" action="<?php echo fm_form_action();?>" name="<?php echo fm_form_ID();?>" id="<?php echo fm_form_ID();?>" >`
+`<form enctype="multipart/form-data" class="<?php echo fm_form_class();?>" method="post" action="<?php echo fm_form_action();?>" name="<?php echo fm_form_ID();?>" id="<?php echo fm_form_ID();?>" >`
 
 The second method gives you more freedom, the first method is simpler.  Either way, you must closeout the form:
 
