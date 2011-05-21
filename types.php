@@ -29,6 +29,7 @@ include 'types/checkbox.php';
 include 'types/list.php';
 include 'types/note.php';
 include 'types/recaptcha.php';
+//include 'types/file.php';
 
 //'panel' helpers
 include 'types/panelhelper.php';
