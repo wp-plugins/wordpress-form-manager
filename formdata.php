@@ -193,7 +193,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
 									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a>
-									<a onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')">Download Files</a>
+									<a class="fm-download-link" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')">Download Files</a>
 									</th>
 					<?php endif; ?>
 				<?php endforeach; ?>
@@ -221,7 +221,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<td><?php echo $dataRow['user_ip'];?></td>
 					<?php foreach($form['items'] as $formItem): ?>
 						<?php if($formItem['type'] == 'file'): ?>
-							<td><a onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="Download '<?php echo $formItem['label'];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
+							<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="Download '<?php echo $formItem['label'];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
 						<?php elseif($formItem['db_type'] != "NONE"): ?>
 							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
 						<?php endif; ?>
