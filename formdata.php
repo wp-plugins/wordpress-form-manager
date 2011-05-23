@@ -163,7 +163,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 		
 		<div class="tablenav">
 			<div style="float:left;">
-			Showing page <?php echo $set + 1;?> ( Rows <?php echo $set*$itemsPerPage;?> - <?php echo min(($set+1)*$itemsPerPage, $formData['count']); ?> out of <?php echo $formData['count'];?>): 
+			Showing page <?php echo $set + 1;?> ( Rows <?php echo $set*$itemsPerPage;?> - <?php echo min(($set+1)*$itemsPerPage, $formData['count']); ?> out of <?php echo $formData['count'];?> ): 
 			</div>
 			<div style="float:right;">
 				Page: &nbsp;&nbsp;
@@ -185,11 +185,16 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				<th width="60px"><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == 'user' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
 									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user'))); ?>">User</a></th>
+				<th width="130px"><a class="edit-form-button" href="<?php
+									$ord = ($queryVars['orderby'] == 'user_ip' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user_ip'))); ?>">IP Address</a></th>
 				<?php $x=1; foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a></th>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a>
+									<a class="fm-download-link" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')">Download Files</a>
+									</th>
 					<?php endif; ?>
 				<?php endforeach; ?>
 			</tr>
@@ -199,6 +204,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-bottom" onchange="fm_dataCBColChange()"/></th>
 				<th>Timestamp</th>
 				<th>User</th>
+				<th>IP Address</th>
 				<?php foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><?php echo fm_restrictString($formItem['label'],20);?></th>
@@ -212,9 +218,12 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<td><input type="checkbox" name="fm-checked-<?php echo $index;?>" id="fm-checked-<?php echo $index++;?>"/></td>
 					<td><?php echo $dataRow['timestamp'];?></td>
 					<td><?php echo $dataRow['user'];?></td>
+					<td><?php echo $dataRow['user_ip'];?></td>
 					<?php foreach($form['items'] as $formItem): ?>
-						<?php if($formItem['db_type'] != "NONE"): ?>
-							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>
+						<?php if($formItem['type'] == 'file'): ?>
+							<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="Download '<?php echo $formItem['label'];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
+						<?php elseif($formItem['db_type'] != "NONE"): ?>
+							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
 						<?php endif; ?>
 					<?php endforeach; ?>					
 				</tr>
