@@ -32,6 +32,8 @@ function fm_saveForm(){
 				shortcode: document.getElementById('shortcode').value,	
 				required_msg: document.getElementById('required_msg').value,				
 				show_summary: document.getElementById('show_summary').checked,
+				email_list: document.getElementById('email_list').value,
+				email_user_field: document.getElementById('email_user_field').value,
 				template_values: { },
 				items: fm_getFormItems('form-list')
 		};	

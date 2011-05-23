@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.6
+Version: 1.4.7
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -25,7 +25,7 @@ License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.6";
+$fm_currentVersion = "1.4.7";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -287,7 +287,29 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['required_msg'] = $_POST['required_msg'];
 	$formInfo['template_values'] = $_POST['template_values'];	
 	$formInfo['show_summary'] = ($_POST['show_summary']=="true"?1:0);
-			
+	$formInfo['email_user_field'] = $_POST['email_user_field'];
+	
+	//build the notification email list
+	$emailList = explode(",", $_POST['email_list']);
+	$valid = true;
+	for($x=0;$x<sizeof($emailList);$x++){
+		$emailList[$x] = trim($emailList[$x]);		
+		if($emailList[$x] != "" && !preg_match("/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/", $emailList[$x])){
+			$valid = false;
+			$x = sizeof($emailList);
+		}	
+	}
+		
+	if($valid){
+		$temp = array();
+		foreach($emailList as $email)
+			if($email != "") $temp[] = $email;
+		$formInfo['email_list'] = implode(",", $temp);
+	}
+	else
+		echo "Error: There was a problem with the notification e-mail list.  Other settings were updated.";
+		
+		
 	//build the items list
 	$formInfo['items'] = array();
 	if(isset($_POST['items'])){

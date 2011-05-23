@@ -19,6 +19,8 @@ if(isset($_POST['submit-form-settings'])){
 	$formInfo['form_template'] = $_POST['form_template'];
 	$formInfo['email_template'] = $_POST['email_template'];
 	$formInfo['summary_template'] = $_POST['summary_template'];
+	$formInfo['use_advanced_email'] = ($_POST['use_advanced_email']=="on"?1:0);
+	$formInfo['advanced_email'] = $_POST['advanced_email'];
 	
 	$fmdb->updateFormSettings($_POST['fm-form-id'], $formInfo);
 }
@@ -93,6 +95,14 @@ helper_option_field('summary_template', "Data Summary", array_merge(array( '' =>
 ?>
 </table>
 
+<?php /*
+<h3>Custom E-Mail Notifications</h3>
+<table>
+<tr><td width="300px">Use custom e-mail notifications</td><td align="left"><input type="checkbox" name="use_advanced_email" <?php echo ($form['use_advanced_email'] == 1 ? "checked=\"checked\"" : ""); ?> ? /></td></tr>
+<tr><td colspan="2"><span class="description">This will override the 'E-Mail Notifications' settings in the main editor with the information entered below</span></td></tr>
+</table>
+<textarea name="advanced_email" rows="20" style="width:80%" ><?php echo $form['advanced_email']; ?></textarea>
+
 </div>
 
 <p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="Save Changes"  /></p>
@@ -105,3 +115,17 @@ helper_option_field('summary_template', "Data Summary", array_merge(array( '' =>
 	<p class="submit"><input type="submit" name="submit-form-definition" class="button-primary" value="Update Form" /></p>
 </form>
 <?php endif; ?>
+
+<pre>
+<?php $customEmails = new fm_custom_email_class(); echo $customEmails->parseCustomEmailDef($_POST['advanced_email']); ?>
+</pre>
+<?php
+
+class fm_custom_email_class{
+	function parseCustomEmailDef($inputStr){
+		$
+		return preg_match_all(
+	}
+}
+*/
+?>

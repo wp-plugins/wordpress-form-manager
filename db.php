@@ -68,7 +68,9 @@ public $formSettingsKeys = array(
 					'email_template' => '',
 					'summary_template' => '',
 					'template_values' => '',
-					'show_summary' => 0
+					'show_summary' => 0,
+					'use_advanced_email' => false,
+					'advanced_email' => ''
 					);			
 					
 public $itemKeys = array (
@@ -149,28 +151,32 @@ function setupFormManager(){
 		summary_template	- same as aoove, as applies to the summaries displayed for single submission / user profile style forms
 		template_values		- associative array of the template specific values, as set in the form editor
 		show_summary		- whether or not to show a summary of the submitted data along with the submission acknowledgment
+		use_advanced_email	- whether or not to override the 'E-Mail Notifications' settings on the main form editor
+		advanced_email		- the advanced email settings, a block of text defining e-mails, headers, etc.
 	*/	
 	
 	
 	$sql = "CREATE TABLE `".$this->formsTable."` (
-		`ID` INT NOT NULL,
-		`title` TEXT NOT NULL,
-		`submitted_msg` TEXT NOT NULL,
-		`submit_btn_text` VARCHAR( 32 ) NOT NULL,
-		`required_msg` TEXT NOT NULL,
-		`data_table` VARCHAR( 32 ) NOT NULL,
-		`action` TEXT NOT NULL,
-		`data_index` VARCHAR( 32 ) NOT NULL,
-		`shortcode` VARCHAR( 64 ) NOT NULL,
-		`type` VARCHAR( 32 ) NOT NULL,
-		`email_list` TEXT NOT NULL,
-		`behaviors` VARCHAR( 256 ) NOT NULL,
-		`email_user_field` VARCHAR( 64 ) NOT NULL,
-		`form_template` VARCHAR( 128 ) NOT NULL,
-		`email_template` VARCHAR( 128 ) NOT NULL,
-		`summary_template` VARCHAR( 128 ) NOT NULL,
-		`template_values` TEXT NOT NULL,
+		`ID` INT DEFAULT '0' NOT NULL,
+		`title` TEXT DEFAULT '' NOT NULL,
+		`submitted_msg` TEXT NOT NULL DEFAULT '',
+		`submit_btn_text` VARCHAR( 32 ) DEFAULT '' NOT NULL,
+		`required_msg` TEXT DEFAULT '' NOT NULL,
+		`data_table` VARCHAR( 32 ) DEFAULT '' NOT NULL,
+		`action` TEXT DEFAULT '' NOT NULL,
+		`data_index` VARCHAR( 32 )L DEFAULT '' NOT NUL,
+		`shortcode` VARCHAR( 64 ) DEFAULT '' NOT NULL,
+		`type` VARCHAR( 32 ) DEFAULT '' NOT NULL,
+		`email_list` TEXT DEFAULT '' NOT NULL,
+		`behaviors` VARCHAR( 256 ) DEFAULT '' NOT NULL,
+		`email_user_field` VARCHAR( 64 ) DEFAULT '' NOT NULL,
+		`form_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
+		`email_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
+		`summary_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
+		`template_values` TEXT DEFAULT '' NOT NULL,
 		`show_summary` BOOL DEFAULT '0' NOT NULL,
+		`use_advanced_email` BOOL DEFAULT '0' NOT NULL,
+		`advanced_email` TEXT DEFAULT '' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
