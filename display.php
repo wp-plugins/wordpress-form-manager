@@ -447,6 +447,16 @@ function fm_summary_the_label(){
 	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['label'];
 }
 
+function fm_summary_the_type(){
+	global $fm_display;
+	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['type'];
+}
+
+function fm_summary_has_data(){
+	global $fm_display;
+	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['db_type'] != "NONE";
+}
+
 function fm_summary_the_value(){
 	global $fm_display;
 	return $fm_display->currentFormData[$fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['unique_name']];

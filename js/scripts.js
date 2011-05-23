@@ -29,14 +29,8 @@ function fm_saveForm(){
 				title: document.getElementById('title').value,				
 				submitted_msg: document.getElementById('submitted_msg').value,
 				submit_btn_text: document.getElementById('submit_btn_text').value,				
-				shortcode: document.getElementById('shortcode').value,				
-				email_list: document.getElementById('email_list').value,
-				behaviors: document.getElementById('behaviors').value,
-				email_user_field: document.getElementById('email_user_field').value,
-				required_msg: document.getElementById('required_msg').value,
-				form_template: document.getElementById('form_template').value,
-				email_template: document.getElementById('email_template').value,
-				summary_template: document.getElementById('summary_template').value,
+				shortcode: document.getElementById('shortcode').value,	
+				required_msg: document.getElementById('required_msg').value,				
 				show_summary: document.getElementById('show_summary').checked,
 				template_values: { },
 				items: fm_getFormItems('form-list')
@@ -264,4 +258,36 @@ function js_multi_item_get_php_array(ulID, itemCallback){
 	}
 	str += ")";
 	return str;
+}
+
+function js_multi_item_clear(ulID){
+	var UL = document.getElementById(ulID);		
+	for(var i=UL.childNodes.length-1;i>=0;i--){
+		if(typeof UL.childNodes[i].id != 'undefined'){
+			js_multi_item_remove(UL.childNodes[i].id);
+		}
+	}	
+}
+
+function js_multi_item_text_entry(ulID, getcallback, setcallback){
+	var UL = document.getElementById(ulID);	
+	var listItems = js_multi_item_get(ulID, getcallback);
+	var listItemsText = "";
+	for(var x=0; x<listItems.length;x++){		
+		if(x>0) listItemsText += ", ";		
+		listItemsText += listItems[x];
+	}
+	var newListItemsText = prompt("Enter items separated by commas", listItemsText);
+	
+	var neverHappens = "@%#$*&))("
+	newListItemsText = newListItemsText.replace(/\\,/, neverHappens);
+	newListItems = newListItemsText.split(",");
+	
+	js_multi_item_clear(ulID);
+	
+	var tempStr;
+	for(var x=0; x<newListItems.length;x++){
+		tempStr = jQuery.trim(newListItems[x].replace(neverHappens, ","));
+		js_multi_item_add(ulID, setcallback, tempStr);	
+	}
 }

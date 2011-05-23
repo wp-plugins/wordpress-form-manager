@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.5
+Version: 1.4.6
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -25,7 +25,10 @@ License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.5";
+$fm_currentVersion = "1.4.6";
+
+global $fm_DEBUG;
+$fm_DEBUG = false;
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -281,36 +284,10 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['show_border'] = ($_POST['show_border']=="true"?1:0);
 	$formInfo['shortcode'] = sanitize_title($_POST['shortcode']);
 	$formInfo['label_width'] = $_POST['label_width'];
-	$formInfo['behaviors'] = $_POST['behaviors'];
-	$formInfo['email_user_field'] = $_POST['email_user_field'];
 	$formInfo['required_msg'] = $_POST['required_msg'];
-	$formInfo['template_values'] = $_POST['template_values'];
-	$formInfo['form_template'] = $_POST['form_template'];
-	$formInfo['email_template'] = $_POST['email_template'];
-	$formInfo['summary_template'] = $_POST['summary_template'];
+	$formInfo['template_values'] = $_POST['template_values'];	
 	$formInfo['show_summary'] = ($_POST['show_summary']=="true"?1:0);
-	
-	//build the notification email list
-
-	$emailList = explode(",", $_POST['email_list']);
-	$valid = true;
-	for($x=0;$x<sizeof($emailList);$x++){
-		$emailList[$x] = trim($emailList[$x]);		
-		if($emailList[$x] != "" && !preg_match("/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/", $emailList[$x])){
-			$valid = false;
-			$x = sizeof($emailList);
-		}	
-	}
-		
-	if($valid){
-		$temp = array();
-		foreach($emailList as $email)
-			if($email != "") $temp[] = $email;
-		$formInfo['email_list'] = implode(",", $temp);
-	}
-	else
-		echo "Error: There was a problem with the notification e-mail list.  Other settings were updated.";
-		
+			
 	//build the items list
 	$formInfo['items'] = array();
 	if(isset($_POST['items'])){
@@ -509,9 +486,9 @@ function fm_doFormBySlug($formSlug){
 		$formBehaviors[$v] = true;
 	}
 	
-	$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
+	$userDataCount = $fmdb->getUserSubmissionCount($formID, $current_user->user_login);
 	
-	if($_POST['fm_id'] == $formID && (wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') && (sizeof($userData) == 0 || !isset($formBehaviors['single_submission'])))){
+	if($_POST['fm_id'] == $formID && (wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') && ($userDataCount == 0 || !isset($formBehaviors['single_submission'])))){
 		// process the post
 		get_currentuserinfo();	
 		
@@ -574,11 +551,12 @@ function fm_doFormBySlug($formSlug){
 	//'display_summ', show previous submission if there is one and break
 	
 	if(isset($formBehaviors['display_summ'])){
+		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
 		
 		if(sizeof($userData) > 0){		//only display a summary if there is a previous submission by this user
 			if(!$_REQUEST['fm-edit-'.$formID] == '1'){							
 				if(!isset($formBehaviors['edit']))
-					return $output.$fm_display->displayDataSummary('summary', $formInfo, $userData[0]);
+					return $output.$fm_display->displayDataSummary('summary', $formInfo, $postData);
 				else{
 					$currentPage = get_permalink();
 					$parsedURL = parse_url($currentPage);

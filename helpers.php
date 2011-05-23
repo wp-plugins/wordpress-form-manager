@@ -66,10 +66,16 @@ function fm_get_file_data( $file, $fields) {
 	$file_data = fread( $fp, 8192 );
 	fclose( $fp );
 	
+	$file_vars = fm_get_str_data($file_data, $fields);
+	
+	return $file_vars;
+}
+
+function fm_get_str_data($str, $fields){
 	$file_vars = array();
 	foreach ( $fields as $field => $regex ) {
 		$matches = array();
-		preg_match_all( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $matches, PREG_OFFSET_CAPTURE);
+		preg_match_all( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $str, $matches, PREG_OFFSET_CAPTURE);
 		
 		foreach($matches[1] as $match){
 			$arr = array('field' => $field,

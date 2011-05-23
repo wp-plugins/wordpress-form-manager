@@ -69,9 +69,15 @@ class fm_editPanelItemDropdown extends fm_editPanelItemBase{
 
 class fm_editPanelItemMulti extends fm_editPanelItemBase{
 	function getPanelItemInner(){
+		$str.="<table>";
+		$str.="<tr><td><input type=\"button\" value=\"Enter Items as Text\" onclick=\"js_multi_item_text_entry('multi-panel-{$this->uniqueName}','".$this->options['get_item_value_script']."','".$this->options['get_item_script']."')\"/></td></tr>";
+		$str.="</table>";
 		$str.="<ul id=\"multi-panel-{$this->uniqueName}\">";
 		$str.="</ul>";
-		$str.="<table><tr><td><input type=\"button\" value=\"Add\" onclick=\"js_multi_item_add('multi-panel-{$this->uniqueName}','".$this->options['get_item_script']."','')\"/></td></tr></table>";		
+		$str.="<table><tr><td>";
+		$str.="<input type=\"button\" value=\"Add\" onclick=\"js_multi_item_add('multi-panel-{$this->uniqueName}','".$this->options['get_item_script']."','')\"/>";
+		$str.="</td></tr>";		
+		$str.="</table>";
 		$str.="<script type=\"text/javascript\">";
 		$str.="js_multi_item_create('multi-panel-{$this->uniqueName}');";
 		if(is_array($this->options['options']) && sizeof($this->options['options'])>0){

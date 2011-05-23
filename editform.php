@@ -76,8 +76,10 @@ if(isset($_POST['message']))
 
 <div id="poststuff" class="metabox-holder has-right-sidebar">
 	<div id="side-info-column" class="inner-sidebar">	
+			
 		
 		<div id="side-sortables" class="meta-box-sortables">
+			
 			<div id="submitdiv" class="postbox " >
 			<h3><span>Publish</span></h3>
 			<div class="inside">
@@ -112,7 +114,7 @@ if(isset($_POST['message']))
 					</div>										
 				</div>							
 			</div>				
-		</div>	
+			</div>	
 		<!-------------------------------------------------------------------------------------------------- -->
 		<div id="submitdiv" class="postbox " >
 		<h3 class='hndle'><span>Submission Data</span></h3>
@@ -152,6 +154,7 @@ if(isset($_POST['message']))
 
 		<!-------------------------------------------------------------------------------------------------- -->
 		
+		
 		<div id="tagsdiv-post_tag" class="postbox " >
 			<h3 class='hndle'><span>E-Mail Notifications</span></h3>
 			
@@ -184,75 +187,7 @@ if(isset($_POST['message']))
 			</div>
 		</div>	
 
-		<!-------------------------------------------------------------------------------------------------- -->
-		
-		<div id="tagsdiv-post_tag" class="postbox " >
-			<h3 class='hndle'><span>Behavior</span></h3>
-			
-			<div class="inside">
-				<div class="tagsdiv" id="post_tag">
-					<div class="jaxtag">
-						<div class="ajaxtag">							
-							<p><strong>Behavior Type</strong></p>
-							<p>
-							<select id="behaviors">
-								<?php foreach($fm_form_behavior_types as $desc => $val): ?>
-								<option value="<?php echo $val;?>" <?php echo ($form['behaviors']==$val)?'selected="selected"':'';?>><?php echo $desc;?></option>
-								<?php endforeach; ?>
-							</select>
-							<p class="howto">Behaviors require a registered user</p>
-							</p>
-						</div>					
-					</div>					
-				</div>	
-			</div>
-		</div>	
-		
-		<!-------------------------------------------------------------------------------------------------- -->
-		
-		<div id="tagsdiv-post_tag" class="postbox " >
-			<h3 class='hndle'><span>Templates</span></h3>
-			
-			<div class="inside">
-				<div class="tagsdiv" id="post_tag">
-					<div class="jaxtag">
-						<div class="ajaxtag">							
-							<p><strong>Form Display</strong></p>
-							<p>
-							<select id="form_template">
-								<option value="">(use default)</option>
-								<?php foreach($templateList['form'] as $file=>$template): ?>
-								<option value="<?php echo $file;?>" <?php echo ($form['form_template']==$file)?'selected="selected"':'';?>><?php echo $template;?></option>
-								<?php endforeach; ?>
-							</select>							
-							</p>
-							
-							<p><strong>E-Mail Notifications</strong></p>
-							<p>
-							<select id="email_template">
-								<option value="">(use default)</option>
-								<?php foreach($templateList['email'] as $file=>$template): ?>
-								<option value="<?php echo $file;?>" <?php echo ($form['email_template']==$file)?'selected="selected"':'';?>><?php echo $template;?></option>
-								<?php endforeach; ?>
-							</select>							
-							</p>
-							
-							<p><strong>Data Summary</strong></p>
-							<p>
-							<select id="summary_template">
-								<option value="">(use default)</option>
-								<?php foreach($templateList['summary'] as $file=>$template): ?>
-								<option value="<?php echo $file;?>" <?php echo ($form['summary_template']==$file)?'selected="selected"':'';?>><?php echo $template;?></option>
-								<?php endforeach; ?>
-							</select>							
-							</p>
-						</div>					
-					</div>					
-				</div>	
-			</div>
-		</div>	
-	
-		<!-------------------------------------------------------------------------------------------------- -->
+		<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form-advanced&id=".$form['ID'];?>" >Advanced Settings</a>
 		
 	</div><!-- side-info-column -->
 </div><!-- poststuff -->

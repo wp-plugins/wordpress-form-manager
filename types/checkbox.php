@@ -14,7 +14,7 @@ class fm_checkboxControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "BLOB";
+		$itemInfo['db_type'] = "VARCHAR( 10 )";
 		
 		return $itemInfo;
 	}

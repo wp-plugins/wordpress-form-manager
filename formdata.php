@@ -193,7 +193,9 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
 									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a>
+									<?php if($formItem['type'] == 'file'): ?>
 									<a class="fm-download-link" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')">Download Files</a>
+									<?php endif; ?>
 									</th>
 					<?php endif; ?>
 				<?php endforeach; ?>

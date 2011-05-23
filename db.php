@@ -27,7 +27,7 @@ function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, 
 //////////////////////////////////////////////////////////////////
 
 function query($q){
-	//echo $q."<br />";
+	//echo '<p>'.$q.'</p>';
 	$res = mysql_query($q, $this->conn) or die(mysql_error());
 	return $res;
 }
