@@ -37,7 +37,7 @@ if($userName != ""){
 
 <?php /* The time and date of the submission.  Look up date() in the PHP reference at php.net for more info on how to format timestamps. */ ?>
 On: <strong><?php echo date("M j, Y @ g:i A", strtotime(fm_summary_the_timestamp())); ?></strong> <br />
-IP: <strong><?php echo fm_summary_the_IP(); ?>
+IP: <strong><?php echo fm_summary_the_IP(); ?></strong>
 <?php /* The code below displays each form element, in order, along with the submitted data. */ ?>
 <ul>
 <?php while(fm_summary_have_items()): fm_summary_the_item(); ?>
