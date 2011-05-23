@@ -11,7 +11,7 @@ class fm_customListControl extends fm_controlBase{
 	
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
+		$itemInfo['label'] = "New List";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('list_type' => 'select');
 		$itemInfo['nickname'] = "Item Nickname";
@@ -127,10 +127,10 @@ class fm_customListControl extends fm_controlBase{
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();		
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'list_type', 'Style', array('options' => array('select' => "Dropdown", 'list' => "List Box", 'radio' => "Buttons", 'checkbox' => "Checkboxes"), 'value' => $itemInfo['extra']['list_type']));
+		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'list_type', 'Style', array('options' => array('select' => "Dropdown", 'list' => "List Box", 'radio' => "Radio Buttons", 'checkbox' => "Checkboxes"), 'value' => $itemInfo['extra']['list_type']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', 'Width (in pixels)', array('value' => $itemInfo['extra']['size']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', 'Required', array('checked'=>$itemInfo['required']));
-		$arr[] = new fm_editPanelItemMulti($uniqueName, 'options', 'List Items', array('options' => $itemInfo['extra']['options'], 'get_item_script' => 'fm_custom_list_options_panel_item'));
+		$arr[] = new fm_editPanelItemMulti($uniqueName, 'options', 'List Items', array('options' => $itemInfo['extra']['options'], 'get_item_script' => 'fm_custom_list_options_panel_item', 'get_item_value_script' => 'fm_custom_list_option_get'));
 		return $arr;
 	}
 	
