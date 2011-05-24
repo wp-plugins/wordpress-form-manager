@@ -20,12 +20,12 @@ class fm_noteControl extends fm_controlBase{
 	}
 	
 	public function getShowHideCallbackName(){
-		return "fm_sep_show_hide";
+		return "fm_note_show_hide";
 	}
 	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
-		function fm_sep_show_hide(itemID, isDone){
+		function fm_note_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 				var noteStr = document.getElementById(itemID + '-content').value.toString();
@@ -45,10 +45,10 @@ class fm_noteControl extends fm_controlBase{
 	}
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
+		$itemInfo['label'] = "New Note";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('content'=>'');
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";

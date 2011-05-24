@@ -10,10 +10,10 @@ $currentDialog = "main";
 //ADD NEW
 //for now just add blank forms for 'Add New'
 if(isset($_POST['fm-add-new']))
-	$fmdb->createForm(null,$wpdb->prefix.get_option('fm-data-table-prefix'));
+	$fmdb->createForm(null);
 	
 	
-//APPLY ACTION
+//APPLY ACTION$wpdb->prefix.get_option('fm-data-table-prefix')
 if(isset($_POST['fm-doaction'])){
 	//check for 'delete'
 	if($_POST['fm-action-select'] == "delete"){
