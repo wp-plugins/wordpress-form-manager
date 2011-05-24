@@ -108,10 +108,8 @@ function getTemplateAttributes($fileName){
 }
 
 function resetTemplates(){
-	$dbTemplates = $fmdb->getTemplateList();
-	foreach($dbTemplates as $dbFile => $dbTemp)
-		$this->removeTemplate($dbFile);
-		
+	global $fmdb;
+	$fmdb->flushTemplates();				
 	$this->initTemplates();
 }
 

@@ -50,6 +50,9 @@ if(isset($_POST['submit-settings'])){
 elseif(isset($_POST['remove-template'])){
 	$fm_templates->removeTemplate($_POST['remove-template-filename']);	
 }
+else if(isset($_POST['reset-templates'])){
+	$fm_templates->resetTemplates();
+}
 
 /////////////////////////////////////////////////////////////////////////////////////
 $fm_globalSettings = $fmdb->getGlobalSettings();
@@ -70,6 +73,10 @@ function fm_saveSettingsAdvanced(){
 function fm_submitRemoveTemplate(templateName, templateFile){
 	document.getElementById('remove-template-filename').value = templateFile;
 	return confirm("Are you sure you want to remove '" + templateName + "' ?");
+}
+
+function fm_resetTemplatesSubmit(){
+	return confirm("Are you sure? All templates other than the default will be removed.");
 }
 
 /***************************************************************/
@@ -178,7 +185,7 @@ function fm_getManagedListCount(ulID){
 <?php helper_option_field('template_email', "Default E-Mail Template", $templateList['email'], $fm_globalSettings['template_email']); ?>
 <?php helper_option_field('template_summary', "Default Summary Template", $templateList['summary'], $fm_globalSettings['template_summary']); ?>
 </table>
-
+<input type="submit" class="preview button" name="reset-templates" value="Reset Templates" onclick="return fm_resetTemplatesSubmit()" />
 <table class="form-table">
 <?php foreach($templateFiles as $file=>$template): ?>
 <tr>
@@ -189,6 +196,7 @@ function fm_getManagedListCount(ulID){
 <td><input type="submit" name="remove-template" value="Remove"  onclick="return fm_submitRemoveTemplate('<?php echo $template['template_name'];?>', '<?php echo $file;?>')" /></td></tr>
 <?php endforeach; ?>
 </table>
+
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />
 
 </div>

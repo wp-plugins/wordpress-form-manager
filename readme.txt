@@ -38,6 +38,8 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
   
 
 = Changes: =
+* Added 'template reset' in advanced settings
+
 = 1.4.11 =
 * Minor bug fixes
 
