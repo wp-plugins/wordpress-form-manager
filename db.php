@@ -164,7 +164,7 @@ function setupFormManager(){
 		`required_msg` TEXT DEFAULT '' NOT NULL,
 		`data_table` VARCHAR( 32 ) DEFAULT '' NOT NULL,
 		`action` TEXT DEFAULT '' NOT NULL,
-		`data_index` VARCHAR( 32 )L DEFAULT '' NOT NUL,
+		`data_index` VARCHAR( 32 ) DEFAULT '' NOT NULL,
 		`shortcode` VARCHAR( 64 ) DEFAULT '' NOT NULL,
 		`type` VARCHAR( 32 ) DEFAULT '' NOT NULL,
 		`email_list` TEXT DEFAULT '' NOT NULL,
@@ -181,7 +181,7 @@ function setupFormManager(){
 		) ".$charset_collate.";";
 
 	
-	dbDelta($sql);
+	dbDelta($sql);	
 	
 	//create a settings row
 	$this->initFormsTable();
