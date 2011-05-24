@@ -27,12 +27,8 @@ if(isset($_POST['submit-form-settings'])){
 	
 	$formInfo['items'] = $form['items'];
 	foreach($form['items'] as $index => $item){
-		$formInfo['items'][$index]['nickname'] = $_POST[$item['unique_name'].'-nickname'];
-		//echo  $_POST[$item['unique_name'].'-nickname'];
+		$formInfo['items'][$index]['nickname'] = sanitize_title($_POST[$item['unique_name'].'-nickname']);		
 	}
-	
-	//echo '<pre>'.print_r($formInfo,true).'</pre>';
-
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 }
 
