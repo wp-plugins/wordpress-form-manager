@@ -6,12 +6,15 @@ global $fm_form_behavior_types;
 
 global $fm_DEBUG;
 
+
 include 'formdefinition.php';
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
 if(isset($_POST['submit-form-settings'])){
+	$form = $fmdb->getForm($_POST['fm-form-id']);
+	
 	$formInfo = array();
 	
 	$formInfo['behaviors'] = $_POST['behaviors'];
@@ -22,14 +25,22 @@ if(isset($_POST['submit-form-settings'])){
 	$formInfo['use_advanced_email'] = ($_POST['use_advanced_email']=="on"?1:0);
 	$formInfo['advanced_email'] = $_POST['advanced_email'];
 	
-	$fmdb->updateFormSettings($_POST['fm-form-id'], $formInfo);
+	$formInfo['items'] = $form['items'];
+	foreach($form['items'] as $index => $item){
+		$formInfo['items'][$index]['nickname'] = $_POST[$item['unique_name'].'-nickname'];
+		//echo  $_POST[$item['unique_name'].'-nickname'];
+	}
+	
+	//echo '<pre>'.print_r($formInfo,true).'</pre>';
+
+	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 }
 
 
 // Process an updated form definition
-$formDef = new fm_form_definition_class(); 
-
 if($fm_DEBUG && isset($_POST['form-definition'])){	
+	$formDef = new fm_form_definition_class(); 
+	
 	$formInfo = $formDef->createFormInfo($_POST['form-definition']);	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 } 
@@ -95,18 +106,32 @@ helper_option_field('summary_template', "Data Summary", array_merge(array( '' =>
 ?>
 </table>
 
-<?php /*
 <h3>Custom E-Mail Notifications</h3>
 <table>
 <tr><td width="300px">Use custom e-mail notifications</td><td align="left"><input type="checkbox" name="use_advanced_email" <?php echo ($form['use_advanced_email'] == 1 ? "checked=\"checked\"" : ""); ?> ? /></td></tr>
 <tr><td colspan="2"><span class="description">This will override the 'E-Mail Notifications' settings in the main editor with the information entered below</span></td></tr>
 </table>
-<textarea name="advanced_email" rows="20" style="width:80%" ><?php echo $form['advanced_email']; ?></textarea>
+<textarea name="advanced_email" rows="15" style="width:80%" ><?php echo $form['advanced_email']; ?></textarea>
+
+<h3>Form Item Nicknames</h3>
+<table>
+<tr><td colspan="2"><span class="description">Giving a nickname to form items makes it easier to access their information within custom e-mail notifications and templates</span></td></tr>
+</table>
+<br />
+<table class="form-table">
+<tr><th><strong>Item Label</strong></th><th><strong>Nickname</strong></th></tr>
+<?php foreach($form['items'] as $item){
+	if($item['type'] != 'separator' && $item['type'] != 'note' && $item['type'] != 'recaptcha')
+		helper_text_field($item['unique_name'].'-nickname', $item['label'], $item['nickname']);
+} ?>
+</table>
+
+<p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="Save Changes"  /></p>
 
 </div>
 
-<p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="Save Changes"  /></p>
 </form>
+
 <?php if($fm_DEBUG): ?>
 <h3>Edit Form Definition:</h3>
 <form name="fm-definition-form" action="" method="post">
@@ -115,17 +140,3 @@ helper_option_field('summary_template', "Data Summary", array_merge(array( '' =>
 	<p class="submit"><input type="submit" name="submit-form-definition" class="button-primary" value="Update Form" /></p>
 </form>
 <?php endif; ?>
-
-<pre>
-<?php $customEmails = new fm_custom_email_class(); echo $customEmails->parseCustomEmailDef($_POST['advanced_email']); ?>
-</pre>
-<?php
-
-class fm_custom_email_class{
-	function parseCustomEmailDef($inputStr){
-		$
-		return preg_match_all(
-	}
-}
-*/
-?>

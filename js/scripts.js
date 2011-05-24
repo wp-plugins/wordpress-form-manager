@@ -201,8 +201,16 @@ function fm_downloadAllFiles(_itemID){
 		itemid: _itemID			
 	}
 	
-	jQuery.post(ajaxurl, data, function(response){		
-		window.open(response,'Download');
+	jQuery.post(ajaxurl, data, function(response){
+		switch(response){
+			case "empty":
+				alert("There are no files to download");
+				break;
+			case "fail":
+				alert("Unable to create .ZIP file");
+			default:
+				window.open(response,'Download');
+		}
 	});
 }
 

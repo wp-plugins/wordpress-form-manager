@@ -429,6 +429,19 @@ function fm_form_get_item(){
 	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]; 
 }
 
+function fm_form_get_item_input($nickname){
+	global $fm_display;
+	global $fm_controls;
+	$item = fm_summary_get_item($nickname);
+	if(isset($fm_display->currentFormValues[$item['unique_name']]))
+		$item['extra']['value'] = $fm_display->currentFormValues[$item['unique_name']];				
+	return $fm_controls[$item['type']]->showItem($item['unique_name'], $item);
+}
+
+function fm_form_get_item_label($nickname){
+	return fm_summary_get_item_label($nickname);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///// EMAIL TEMPLATE FUNCTIONS ////////////////////////////////////////////////////////////////
 
@@ -459,7 +472,9 @@ function fm_summary_has_data(){
 
 function fm_summary_the_value(){
 	global $fm_display;
-	return $fm_display->currentFormData[$fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['unique_name']];
+	global $fm_controls;
+	$item = $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex];
+	return $fm_controls[$item['type']]->parseData($item['unique_name'], $item, $fm_display->currentFormData[$item['unique_name']]);
 }
 
 function fm_summary_the_timestamp(){
@@ -479,16 +494,26 @@ function fm_summary_the_title(){
 	return $fm_display->currentFormInfo['title'];
 }
 
-function fm_summary_get_item_label($uniqueName){
-	global $fm_display;
-	foreach($fm_display_currentFormInfo['items'] as $item)
-		if($item['unique_name'] == $uniqueName)
-			return $item['label'];
+function fm_summary_get_item_label($nickname){
+	$item = fm_summary_get_item($nickname);
+	return $item['label'];
 }
 
-function fm_summary_get_item_value($uniqueName){
+function fm_summary_get_item_value($nickname){
 	global $fm_display;
-	return $fm_display->currentFormData[$uniqueName];
+	$item = fm_summary_get_item($nickname);
+	return $fm_display->currentFormData[$item['unique_name']];
+}
+
+function fm_summary_get_item($nickname){
+	global $fmdb;
+	global $fm_display;
+	return $fmdb->getItemByNickname($fm_display->currentFormInfo['ID'], $nickname);
+}
+
+function fm_summary_get_form_info(){
+	global $fm_display;
+	return $fm_display->currentFormInfo;
 }
 
 ?>

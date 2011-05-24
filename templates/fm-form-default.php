@@ -47,6 +47,9 @@ fm_form_is_note() - Returns true if the current element is a note
 fm_form_is_required() - Returns true if the current item is set as required
 fm_form_item_type() - The current item's type
 
+fm_form_get_item_input($nickname) - get an item's input by nickname
+fm_form_get_item_label($nickname) - get an item's label by nickname
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 */

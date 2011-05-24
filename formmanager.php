@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.8
+Version: 1.4.9
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -25,7 +25,7 @@ License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.8";
+$fm_currentVersion = "1.4.9";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -52,6 +52,7 @@ include 'helpers.php';
 include 'db.php';
 include 'display.php';
 include 'template.php';
+include 'email.php';
 
 /**************************************************************/
 /******* PLUGIN OPTIONS ***************************************/
@@ -414,17 +415,28 @@ function fm_downloadAllFiles(){
 	$files = array();
 	foreach($formData as $dataRow){
 		$fileInfo = unserialize($dataRow[$itemID]);
-		$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
-		$files[] = $tmpDir.$fname;
-		fm_createFileFromDB($fname, $fileInfo, $tmpDir);
+		if(sizeof($fileInfo) > 1){			
+			$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
+			$files[] = $tmpDir.$fname;
+			fm_createFileFromDB($fname, $fileInfo, $tmpDir);
+		}
 	}
 	
-	$zipFileName = sanitize_title($formInfo['title']." - ".$itemLabel).".zip";
-	$zipFullPath =  $tmpDir.$zipFileName;	
-	fm_createZIP($files, $zipFullPath); 
-	 
-	echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$zipFileName;
-		
+	if(sizeof($files) > 0){
+	
+		$zipFileName = sanitize_title($formInfo['title']." - ".$itemLabel).".zip";
+		$zipFullPath =  $tmpDir.$zipFileName;	
+		fm_createZIP($files, $zipFullPath); 
+		 
+		echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$zipFileName;
+		die();
+	}
+	else{
+		echo "empty";
+		die();
+	}
+	
+	echo "fail";	
 	die();
 }
 
@@ -516,8 +528,9 @@ function fm_doFormBySlug($formSlug){
 		
 		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
 		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login, 'user_ip' => fm_get_user_IP()), $overwrite);			
-		foreach($postData as $k=>$v){
-			$postData[$k] = stripslashes($v);
+		foreach($formInfo['items'] as $item){
+			if($item['type'] != 'file')
+				$postData[$item['unique_name']] = stripslashes($postData[$item['unique_name']]);
 		}
 			
 		if($fmdb->processFailed()){			
@@ -525,39 +538,55 @@ function fm_doFormBySlug($formSlug){
 					$output.
 					$fm_display->displayForm($formInfo, array('action' => get_permalink()), $postData);
 		}
-		else{					
+		else{
 			// send email notifications
-			$formInfo['email_list'] = trim($formInfo['email_list']) ;
-			$formInfo['email_user_field'] = trim($formInfo['email_user_field']);		
 				
-			if($formInfo['email_list'] != ""
-			|| $formInfo['email_user_field'] != "" 
-			|| $fmdb->getGlobalSetting('email_admin') == "YES"
-			|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
+			if($formInfo['use_advanced_email'] != 1){
 			
-				$subject = get_option('blogname').": '".$formInfo['title']."' Submission";				
-				$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
-				$headers  = 'MIME-Version: 1.0'."\r\n".
-							'Content-type: text/html'."\r\n".
-							'From: '.get_option('admin_email')."\r\n".
-    						'Reply-To: '.get_option('admin_email')."\r\n";
-				
-				$temp = "";
-				if($fmdb->getGlobalSetting('email_admin') == "YES")
-					wp_mail(get_option('admin_email'), $subject, $message, $headers);
+				$formInfo['email_list'] = trim($formInfo['email_list']) ;
+				$formInfo['email_user_field'] = trim($formInfo['email_user_field']);		
 					
-				if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
-					if(trim($current_user->user_email) != "")
-						wp_mail($current_user->user_email, $subject, $message, $headers);
+				if($formInfo['email_list'] != ""
+				|| $formInfo['email_user_field'] != "" 
+				|| $fmdb->getGlobalSetting('email_admin') == "YES"
+				|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
+				
+					$subject = get_option('blogname').": '".$formInfo['title']."' Submission";				
+					$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
+					$headers  = 'MIME-Version: 1.0'."\r\n".
+								'Content-type: text/html'."\r\n".
+								'From: '.get_option('admin_email')."\r\n".
+								'Reply-To: '.get_option('admin_email')."\r\n";
+					
+					$temp = "";
+					if($fmdb->getGlobalSetting('email_admin') == "YES")
+						wp_mail(get_option('admin_email'), $subject, $message, $headers);
+						
+					if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
+						if(trim($current_user->user_email) != "")
+							wp_mail($current_user->user_email, $subject, $message, $headers);
+					}
+					if($formInfo['email_list'] != "")
+						wp_mail($formInfo['email_list'], $subject, $message, $headers);
+						
+					if($formInfo['email_user_field'] != "")
+						wp_mail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
+		
 				}
-				if($formInfo['email_list'] != "")
-					wp_mail($formInfo['email_list'], $subject, $message, $headers);
-					
-				if($formInfo['email_user_field'] != "")
-					wp_mail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
-	
+			}else{
+				//use the advanced e-mail settings 
+				$advEmail = new fm_advanced_email_class($formInfo, $postData);
+
+				$emails = $advEmail->generateEmails($formInfo['advanced_email']);
+								
+				foreach($emails as $email){
+					$headerStr = "";
+					foreach($email['headers'] as $header => $value)
+						$headerStr = $header.": ".$value."\r\n";
+					wp_mail($email['to'], $email['subject'], $email['message'], $headerStr);
+				}
 			}
-			
+			//display the acknowledgment of a successful submission
 			if(!isset($formBehaviors['display_summ']))
 				return '<p>'.$formInfo['submitted_msg'].'</p>'.
 						($formInfo['show_summary']==1 ? $fm_display->displayDataSummary('summary', $formInfo, $postData) : "");

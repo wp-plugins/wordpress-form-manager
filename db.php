@@ -181,7 +181,7 @@ function setupFormManager(){
 		) ".$charset_collate.";";
 
 	
-	dbDelta($sql);	
+	dbDelta($sql);
 	
 	//create a settings row
 	$this->initFormsTable();
@@ -1130,6 +1130,7 @@ function updateFormItem($formID, $uniqueName, $itemInfo){
 	foreach($toUpdate as $k=>$v)
 		$strArr[] = "`{$k}` = '".$itemInfo[$k]."'";
 	$q = "UPDATE `".$this->itemsTable."` SET ".implode(", ",$strArr)." WHERE `unique_name` = '".$uniqueName."'";
+
 	$this->query($q);
 	
 	//check if the db_type was updated
@@ -1203,6 +1204,15 @@ function formInfoGetItem($uniqueName, $formInfo){
 	foreach($formInfo['items'] as $item)
 		if($item['unique_name'] == $uniqueName) return $item;
 	return null;
+}
+
+function getItemByNickname($formID, $nickname){
+	$q = "SELECT * FROM `".$this->itemsTable."` WHERE `nickname` = '".$nickname."' AND `ID` = '".$formID."'";
+	$res = $this->query($q);
+	if(mysql_num_rows($res) == 0) return false;
+	$row = $this->unpackItem(mysql_fetch_assoc($res));
+	mysql_free_result($res);
+	return $row;
 }
 
 function itemInfoIsEqual($itemA, $itemB){

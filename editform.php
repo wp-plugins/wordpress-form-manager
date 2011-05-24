@@ -107,7 +107,7 @@ if(isset($_POST['message']))
 						<a class="submitdelete deletion" href="#">Move to Trash</a>
 						</div>						
 						<div id="publishing-action">
-						<img src="http://localhost/wordpress/wp-admin/images/wpspin_light.gif" id="ajax-loading" style="visibility:hidden;" alt="" />								
+						<img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" style="visibility:hidden;" alt="" />								
 								<input name="publish" type="button" class="button-primary" id="publish" tabindex="5" accesskey="p" value="Save Form" onclick="fm_saveForm()" />						
 						</div>						
 						<div class="clear"></div>

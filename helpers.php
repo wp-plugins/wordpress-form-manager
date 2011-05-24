@@ -75,7 +75,7 @@ function fm_get_str_data($str, $fields){
 	$file_vars = array();
 	foreach ( $fields as $field => $regex ) {
 		$matches = array();
-		preg_match_all( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $str, $matches, PREG_OFFSET_CAPTURE);
+		preg_match_all( '/^[ \t\/*#@]*' . $regex . ':(.*)$/mi', $str, $matches, PREG_OFFSET_CAPTURE);
 		
 		foreach($matches[1] as $match){
 			$arr = array('field' => $field,
@@ -95,5 +95,46 @@ function fm_get_user_IP(){
         $IPAddr=$_SERVER['HTTP_X_FORWARDED_FOR'];
     else $IPAddr=$_SERVER['REMOTE_ADDR'];
 	return $IPAddr;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Custom shortcode processor
+
+class fm_custom_shortcode_parser{
+
+	var $shortcodeList;
+	var $shortcodeCallback; 
+	
+	function __construct($shortcodeList, $shortcodeCallback){
+		$this->shortcodeList = $shortcodeList;
+		$this->shortcodeCallback = $shortcodeCallback;
+	}
+	
+	function parse($inputStr){		
+		return $this->parseShortcodes($inputStr);
+	}
+	
+	/////////////////////////////////////////////////////////////////////////
+	// Parse Shortcodes
+	
+	function getShortcodeRegexp() {		
+		$regexp = implode('|', $this->shortcodeList);
+		return '/\[('.$regexp.')\b(.*?)(?:(\/))?\](?:(.+?)\[\/\2\])?/s';
+	}
+	
+	function parseShortcodes($inputStr){		
+		return preg_replace_callback($this->getShortcodeRegexp(), $this->shortcodeCallback, $inputStr);
+	}
+}
+
+class fm_custom_attribute_parser{	
+	function getAttributes($str){
+		$vars = array();
+		$matches = array();		
+		preg_match_all( '/^[ \t\/*#@]*([a-zA-Z0-9\-]+):(.*)$/mi', $str, $matches, PREG_OFFSET_CAPTURE);		
+		foreach($matches[2] as $index => $match)
+			$vars[$matches[1][$index][0]] = $match[0];
+		return $vars;
+	}
 }
 ?>
