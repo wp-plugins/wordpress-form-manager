@@ -227,7 +227,7 @@ function setupFormManager(){
 		`filename` TEXT NOT NULL,
 		`content` TEXT NOT NULL,
 		`status` VARCHAR( 32 ) NOT NULL,
-		`modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		`modified` BIGINT NOT NULL
 		) ".$charset_collate.";";
 	
 	dbDelta($sql);
@@ -360,6 +360,17 @@ function updateDataTables(){
 	}
 }
 
+function fixTemplatesTableModified(){
+	$q = "SHOW COLUMNS FROM `".$this->templatesTable."`";
+	$res = $this->query($q);
+	while($row = mysql_fetch_assoc($res)){
+		if($row['Field'] == 'modified' && strpos(strtolower($row['Type']), 'bigint') !== false){
+			$q = "ALTER TABLE `".$this->templatesTable."` CHANGE `modified` `modified` BIGINT NOT NULL ";
+			$this->query($q);
+		}
+	}
+	mysql_free_result($res);	
+}
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
@@ -401,13 +412,14 @@ function removeFormManager(){
 //////////////////////////////////////////////////////////////////
 // Templates
 
-function storeTemplate($filename, $title, $content){
+function storeTemplate($filename, $title, $content, $modified){
 	$this->removeTemplate($filename);
 	
 	$q = "INSERT INTO `".$this->templatesTable."` SET ".
 			"`title` = '".addslashes($title)."', ".
 			"`filename` = '".addslashes($filename)."', ".
-			"`content` = '".addslashes($content)."'";			
+			"`content` = '".addslashes($content)."', ".
+			"`modified` = '".addslashes($modified)."'";
 	$this->query($q);
 }
 function getTemplate($filename){

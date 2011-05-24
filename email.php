@@ -134,7 +134,7 @@ class fm_advanced_email_class{
 					case "email":
 						return $fm_display->displayDataSummary($templateType, $this->formInfo, $this->formData);
 				}
-				return $fm_display->displayDataSummary('summary', $this->formInfo, $this->formData);
+				return $fm_display->displayDataSummary('email', $this->formInfo, $this->formData);
 				break;
 			default: return $matches[0];
 		}

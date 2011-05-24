@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.10
+Version: 1.4.11
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -25,7 +25,7 @@ License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.10";
+$fm_currentVersion = "1.4.11";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -102,6 +102,9 @@ function fm_install(){
 	$q = "UPDATE `{$fmdb->formsTable}` SET `behaviors` = 'reg_user_only,display_summ,edit' WHERE `behaviors` = 'reg_user_only,no_dup,edit'";
 	$fmdb->query($q);
 	
+	//updates from 1.4.10 and previous
+	$fmdb->fixTemplatesTableModified();
+	
 	// covers versions up to and including 1.3.10
 	$fmdb->fixCollation();		
 	
@@ -151,22 +154,19 @@ function fm_cleanCSVData(){
 
 add_action('admin_init', 'fm_adminInit');
 function fm_adminInit(){
-	global $fm_templates;
-	
 	wp_enqueue_script('scriptaculous');
 	wp_enqueue_script('scriptaculous-dragdrop');
 	
 	wp_enqueue_script('form-manager-js', plugins_url('/js/scripts.js', __FILE__));	
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
-	wp_enqueue_style('form-manager-css');
-	
-	$fm_templates->initTemplates();
+	wp_enqueue_style('form-manager-css');	
 }
 
 add_action('init', 'fm_userInit');
 function fm_userInit(){
 	global $fm_currentVersion;
+	global $fm_templates;
 	//update check, since the snarky wordpress dev changed the behavior of a function based on its english name, rather than its widely accepted usage.
 	//"The perfect is the enemy of the good". 
 	$ver = get_option('fm-version');
@@ -175,6 +175,8 @@ function fm_userInit(){
 	}
 
 	include 'settings.php';
+	
+	$fm_templates->initTemplates();
 	
 	wp_enqueue_script('form-manager-js-helpers', plugins_url('/js/helpers.js', __FILE__));
 	wp_enqueue_script('form-manager-js-validation', plugins_url('/js/validation.js', __FILE__));

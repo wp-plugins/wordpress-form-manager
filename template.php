@@ -107,30 +107,56 @@ function getTemplateAttributes($fileName){
 	return $templateAtts;
 }
 
+function resetTemplates(){
+	$dbTemplates = $fmdb->getTemplateList();
+	foreach($dbTemplates as $dbFile => $dbTemp)
+		$this->removeTemplate($dbFile);
+		
+	$this->initTemplates();
+}
+
 function initTemplates(){
 	global $fmdb;	
 	
 	//compare the stored templates with those in the templates directory.  Files that exist in the database but not on disk are re-created on disk; files that exist on disk are all stored in the database.
-	$templateFiles = $this->getTemplateList();
+	$files = $this->getTemplateFiles($this->templatesDir);
 	$dbTemplates = $fmdb->getTemplateList();
-	
-	//load the templates into the database
-	foreach($templateFiles as $file => $template){
-		$content = file_get_contents($this->templatesDir.'/'.$file);
-		$title = $template['template_name'];
 		
-		$fmdb->storeTemplate($file, $title, $content);		
-	}
+	//echo '<pre>'.print_r($files, true).'</pre>';
+	//echo '<pre>'.print_r($dbTemplates, true).'</pre>';
 	
 	//replace any 'lost' templates (this is primarily to keep template files across an update)
 	foreach($dbTemplates as $dbFile => $dbTemp){
-		if(!isset($templateFiles[$dbFile])){
-			$templateInfo = $fmdb->getTemplate($dbFile);
+		$dbFile = trim($dbFile);
+		$templateInfo = $fmdb->getTemplate($dbFile);
+		if(isset($files[$dbFile])){ // file exists on disk
+			unset($files[$dbFile]);		//unset the file; the list of files will be used later to load in new files	
+			$filemtime = filemtime($this->templatesDir.'/'.$dbFile);
+			if( $filemtime > $templateInfo['modified']){ //file is a newer version than the one in the db
+				$content = file_get_contents($this->templatesDir.'/'.$dbFile);
+				$template = $this->getTemplateAttributes($dbFile);
+				$title = $template['template_name'];
+				//echo $title." updated<br />";
+				$fmdb->storeTemplate($dbFile, $title, $content, $filemtime);
+			}
+		}
+		else{	// file does not exist on disk
+			//echo $dbFile." recreated<br />";
+			
 			$fp = fopen($this->templatesDir."/".$dbFile, "w");
 			fwrite($fp, $templateInfo['content']);
 			fclose($fp);
+			
 		}
 	}	
+	
+	foreach($files as $file){
+		$filemtime = filemtime($this->templatesDir.'/'.$file);
+		$content = file_get_contents($this->templatesDir.'/'.$file);
+		$title = $template['template_name'];
+		//echo $title." loaded<br />";
+		$fmdb->storeTemplate($file, $title, $content, $filemtime);		
+	}
 }
 
 function getTemplateList(){

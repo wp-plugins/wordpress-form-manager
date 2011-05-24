@@ -105,7 +105,7 @@ helper_option_field('summary_template', "Data Summary", array_merge(array( '' =>
 <h3>Custom E-Mail Notifications</h3>
 <table>
 <tr><td width="300px">Use custom e-mail notifications</td><td align="left"><input type="checkbox" name="use_advanced_email" <?php echo ($form['use_advanced_email'] == 1 ? "checked=\"checked\"" : ""); ?> ? /></td></tr>
-<tr><td colspan="2"><span class="description">This will override the 'E-Mail Notifications' settings in the main editor with the information entered below</span></td></tr>
+<tr><td colspan="2"><span class="description">This will override the 'E-Mail Notifications' settings in both the main editor and the plugin settings page with the information entered below</span></td></tr>
 </table>
 <textarea name="advanced_email" rows="15" style="width:80%" ><?php echo $form['advanced_email']; ?></textarea>
 
