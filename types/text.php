@@ -14,7 +14,7 @@ class fm_textControl extends fm_controlBase{
 		$elem=array('type' => 'text',
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,
-											'value'=> htmlspecialchars($itemInfo['extra']['value']),
+											'placeholder'=> htmlspecialchars($itemInfo['extra']['value']),
 											'style' => "width:".$itemInfo['extra']['size']."px;"											
 											)
 					);											
@@ -24,10 +24,10 @@ class fm_textControl extends fm_controlBase{
 	//returns an associative array keyed by the item db fields; used in the AJAX for creating a new form item in the back end / admin side
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
+		$itemInfo['label'] = "New Text";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('size' => '300');
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
@@ -43,7 +43,7 @@ class fm_textControl extends fm_controlBase{
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', 'Default Value', array('value' => $itemInfo['extra']['value']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', 'Placeholder', array('value' => $itemInfo['extra']['value']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', 'Width (in pixels)', array('value' => $itemInfo['extra']['size']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', 'Required', array('checked'=>$itemInfo['required']));
 		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'validation', 'Validation', array('options' => array_merge(array('none' => "..."), $this->getValidatorList()), 'value' => $itemInfo['extra']['validation']));		

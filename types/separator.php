@@ -35,10 +35,10 @@ class fm_separatorControl extends fm_controlBase{
 	
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
+		$itemInfo['label'] = "New Separator";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array();
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
