@@ -424,6 +424,11 @@ function fm_form_is_required(){
 	return ($fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['required'] == '1');
 }
 
+function fm_form_the_nickname(){
+	global $fm_display;
+	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['nickname'];
+}
+
 function fm_form_get_item(){
 	global $fm_display;
 	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]; 
@@ -478,15 +483,20 @@ function fm_summary_the_value(){
 }
 
 function fm_summary_the_timestamp(){
-	return fm_summary_get_item_value('timestamp');
+	return fm_summary_get_value('timestamp');
 }
 
 function fm_summary_the_user(){
-	return fm_summary_get_item_value('user');
+	return fm_summary_get_value('user');
+}
+
+function fm_summary_the_nickname(){
+	global $fm_display;
+	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['nickname'];
 }
 
 function fm_summary_the_IP(){
-	return fm_summary_get_item_value('user_ip');
+	return fm_summary_get_value('user_ip');
 }
 
 function fm_summary_the_title(){
@@ -514,6 +524,11 @@ function fm_summary_get_item($nickname){
 function fm_summary_get_form_info(){
 	global $fm_display;
 	return $fm_display->currentFormInfo;
+}
+
+function fm_summary_get_value($uniqueName){
+	global $fm_display;
+	return $fm_display->currentFormData[$uniqueName];
 }
 
 ?>

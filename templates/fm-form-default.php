@@ -41,6 +41,7 @@ fm_form_have_items() - Returns true if there are more items (used to loop throug
 fm_form_the_item() - Sets up the current item (similar to the_post() in wordpress themes)
 fm_form_the_label() - The current item's label
 fm_form_the_input() - The current item's input element
+fm_form_the_nickname() - The current item's nickname
 
 fm_form_is_separator() - Returns true if the current element is a horizontal line
 fm_form_is_note() - Returns true if the current element is a note
