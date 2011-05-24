@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.12
+Version: 1.4.13
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 License: GPL2
@@ -25,7 +25,7 @@ License: GPL2
 */
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.12";
+$fm_currentVersion = "1.4.13";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
