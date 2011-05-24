@@ -14,7 +14,7 @@ class fm_customListControl extends fm_controlBase{
 		$itemInfo['label'] = "New List";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('list_type' => 'select');
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";

@@ -16,7 +16,7 @@ class fm_fileControl extends fm_controlBase{
 		$itemInfo['label'] = "New File Upload";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('max_size' => 1000);
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
@@ -31,11 +31,13 @@ class fm_fileControl extends fm_controlBase{
 	
 	public function processPost($uniqueName, $itemInfo){
 		global $fmdb;
+		
 		if($_FILES[$uniqueName]['error'] > 0){
 			if($_FILES[$uniqueName]['error'] == 2)
 				$fmdb->setErrorMessage("(".$itemInfo['label'].") File upload exceeded maximum allowable size.");
-			else
-				$fmdb->setErrorMessage("(".$itemInfo['label'].") There was an error with the file upload.");
+			else if($_FILES[$uniqueName]['error'] == 4) // no file
+				return "";
+			$fmdb->setErrorMessage("(".$itemInfo['label'].") There was an error with the file upload.");
 			return false;
 		}
 		
@@ -63,6 +65,7 @@ class fm_fileControl extends fm_controlBase{
 	}
 	
 	public function parseData($uniqueName, $itemInfo, $data){
+		if(trim($data) == "") return "";
 		$fileInfo = unserialize($data);
 		return $fileInfo['filename']." (".((int)($fileInfo['size']/1024))." kB)";
 	}

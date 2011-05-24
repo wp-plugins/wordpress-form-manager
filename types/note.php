@@ -48,7 +48,7 @@ class fm_noteControl extends fm_controlBase{
 		$itemInfo['label'] = "New Note";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('content'=>'');
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";

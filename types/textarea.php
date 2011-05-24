@@ -21,7 +21,7 @@ class fm_textareaControl extends fm_controlBase{
 		$itemInfo['label'] = "New Text Area";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('cols'=>'300', 'rows' => '100');
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";

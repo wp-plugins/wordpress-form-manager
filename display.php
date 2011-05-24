@@ -483,11 +483,11 @@ function fm_summary_the_value(){
 }
 
 function fm_summary_the_timestamp(){
-	return fm_summary_get_value('timestamp');
+	return fm_summary_get_item_value('timestamp');
 }
 
 function fm_summary_the_user(){
-	return fm_summary_get_value('user');
+	return fm_summary_get_item_value('user');
 }
 
 function fm_summary_the_nickname(){

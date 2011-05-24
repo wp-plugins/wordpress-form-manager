@@ -50,7 +50,7 @@ class fm_recaptchaControl extends fm_controlBase{
 		$itemInfo['label'] = "New reCAPTCHA";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array();
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";

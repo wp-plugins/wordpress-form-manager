@@ -27,7 +27,7 @@ class fm_textControl extends fm_controlBase{
 		$itemInfo['label'] = "New Text";
 		$itemInfo['description'] = "Item Description";
 		$itemInfo['extra'] = array('size' => '300');
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
