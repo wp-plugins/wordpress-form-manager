@@ -68,7 +68,10 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <div id="icon-edit-pages" class="icon32"></div>
 <h2><?php echo $form['title'];?> - Advanced</h2>
 
+<div style="float:right;">
+<input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="Save Changes"  />&nbsp;&nbsp;
 <a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" >Edit Form</a>
+</div>
 
 	<div id="message-container"><?php 
 	if(isset($_POST['message']))

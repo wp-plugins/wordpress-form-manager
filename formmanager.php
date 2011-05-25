@@ -24,6 +24,9 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+$fm_oldIncludePath = get_include_path();
+set_include_path(dirname(__FILE__).'/');
+
 global $fm_currentVersion;
 $fm_currentVersion = "1.4.14";
 
@@ -49,7 +52,7 @@ if ( version_compare(PHP_VERSION, '5.0.0', '<') )
 
 include 'helpers.php';
 
-include dirname(__FILE__).'/db.php'; //apparently needed for certain environments
+include 'db.php'; //apparently needed for certain environments
 
 include 'display.php';
 include 'template.php';
@@ -632,4 +635,6 @@ function fm_doFormBySlug($formSlug){
 	//if we got this far, just display the form
 	return $fm_display->displayForm($formInfo, array('action' => get_permalink()));
 }
+
+set_include_path($fm_oldIncludePath);
 ?>
