@@ -286,8 +286,8 @@ if(isset($_POST['message']))
 		<div class="fm-form-admin">
 			<?php foreach($formTemplate['options'] as $option): ?>
 			<div class="fm-admin-field-wrap">								
-				<label><?php _e($option['label'], 'wordpress-form-manager');?>
-				<span class="small"><?php _e($option['description'], 'wordpress-form-manager');?></span>
+				<label><?php echo $option['label'];?>
+				<span class="small"><?php echo $option['description'];?></span>
 				</label>
 					<?php
 					$varId = $fm_template_controls[$option['type']]->getVarId($option);
