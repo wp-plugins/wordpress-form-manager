@@ -204,6 +204,12 @@ hr.edit-panel-sep{
 	margin:20px;
 }
 
+.fm-data-edit-div{
+	border-bottom: 1px dotted #999999;
+	padding:10px;
+	margin:20px;
+}
+
 .fm-download-link{
 	cursor: pointer;
 }

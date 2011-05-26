@@ -223,8 +223,10 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 	<div id="icon-edit-pages" class="icon32"></div>
 	<h2>Data: <?php echo $form['title'];?></h2>
 	<div style="float:right;">
+		
 		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?></a>
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit Form", 'wordpress-form-manager');?></a>
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit Form", 'wordpress-form-manager');?></a><br />
+		<div id="csv-working" style="visibility:hidden;padding-top:10px;margin-bottom:-20px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;Working...</div><a href="#" id="fm-csv-download-link"></a>
 	</div>
 		<div class="tablenav">			
 			<div class="alignleft actions">
@@ -296,7 +298,9 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>">
+									<?php echo (trim($formItem['nickname']) != "" ? $formItem['nickname'] : fm_restrictString($formItem['label'],20));?>
+									</a>
 									<?php if($formItem['type'] == 'file'): ?>
 									<a class="fm-download-link" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')"><?php _e("Download Files", 'wordpress-form-manager');?></a>
 									<?php endif; ?>

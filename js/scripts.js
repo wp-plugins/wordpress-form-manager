@@ -168,6 +168,7 @@ function fm_dataCBColChange(){
 }
 
 function fm_downloadCSV(){
+	document.getElementById('csv-working').style.visibility = 'visible';
 	var data = {
 		action: 'fm_create_csv',
 		id: document.getElementById('form-id').value,
@@ -175,7 +176,10 @@ function fm_downloadCSV(){
 	};	
 
 	jQuery.post(ajaxurl, data, function(response){		
-		window.open(response,'Download');
+		//window.open(encodeURI(response),'Download');
+		document.getElementById('csv-working').style.visibility = 'hidden';
+		document.getElementById('fm-csv-download-link').href = encodeURI(response);
+		document.getElementById('fm-csv-download-link').innerHTML = "Click here to download";
 	});	
 }
 

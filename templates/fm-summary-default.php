@@ -37,14 +37,13 @@ fm_summary_get_item_value($nickname) - get an item's value by nickname
 $userName = fm_summary_the_user(); 
 if($userName != ""){
 	$userData = get_userdatabylogin($userName);
-	echo __("Submitted by:", 'wordpress-form-manager')." <strong>".$userData->last_name.", ".$userData->first_name."</strong><br />";
+	echo "Submitted by: <strong>".$userData->last_name.", ".$userData->first_name."</strong><br />";
 }
 ?>
 
 <?php /* The time and date of the submission.  Look up date() in the PHP reference at php.net for more info on how to format timestamps. */ ?>
-<?php /* translators: showing a date. For example, On: May 24, 2011 */ ?>
-<?php _e("On:", 'wordpress-form-manager');?> <strong><?php echo date("M j, Y @ g:i A", strtotime(fm_summary_the_timestamp())); ?></strong> <br />
-<?php _e("IP Address:", 'wordpress-form-manager');?> <strong><?php echo fm_summary_the_IP(); ?></strong> <br />
+On: <strong><?php echo date("M j, Y @ g:i A", strtotime(fm_summary_the_timestamp())); ?></strong> <br />
+IP: <strong><?php echo fm_summary_the_IP(); ?></strong> <br />
 <?php /* The code below displays each form element, in order, along with the submitted data. */ ?>
 <ul>
 <?php while(fm_summary_have_items()): fm_summary_the_item(); ?>

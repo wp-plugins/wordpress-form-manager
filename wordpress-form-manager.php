@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.14
+Version: 1.4.15
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.14";
+$fm_currentVersion = "1.4.15";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -174,8 +174,7 @@ function fm_userInit(){
 	global $fm_currentVersion;
 	global $fm_templates;
 	
-	if(!load_plugin_textdomain('wordpress-form-manager','/wp-content/languages/'))
-		load_plugin_textdomain('wordpress-form-manager', '', '/wp-content/plugins/wordpress-form-manager/languages/');
+	load_plugin_textdomain('wordpress-form-manager', 'wp-content/plugins/wordpress-form-manager/languages');
 		
 	//update check, since the snarky wordpress dev changed the behavior of a function based on its english name, rather than its widely accepted usage.
 	//"The perfect is the enemy of the good". 
@@ -208,17 +207,17 @@ function fm_userHead(){
 
 add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
-	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), "manage_options", "fm-admin-main", 'fm_showMainPage');
-	$pages[] = add_submenu_page("fm-admin-main", __("Edit", 'wordpress-form-manager'), __("Edit", 'wordpress-form-manager'), "manage_options", "fm-edit-form", 'fm_showEditPage');
-	$pages[] = add_submenu_page("fm-admin-main", __("Data", 'wordpress-form-manager'), __("Data", 'wordpress-form-manager'), "manage_options", "fm-form-data", 'fm_showDataPage');	
+	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-admin-main", 'fm_showMainPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Edit", 'wordpress-form-manager'), __("Edit", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-edit-form", 'fm_showEditPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Data", 'wordpress-form-manager'), __("Data", 'wordpress-form-manager'), apply_filters('fm_data_capability', 'manage_options'), "fm-form-data", 'fm_showDataPage');	
 	
 	//at some point, make this link go to a fresh form
 	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
 	
-	$pages[] = add_submenu_page("fm-admin-main", __("Settings", 'wordpress-form-manager'), __("Settings", 'wordpress-form-manager'), "manage_options", "fm-global-settings", 'fm_showSettingsPage');
-	$pages[] = add_submenu_page("fm-admin-main", __("Advanced Settings", 'wordpress-form-manager'), __("Advanced Settings", 'wordpress-form-manager'), "manage_options", "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Settings", 'wordpress-form-manager'), __("Settings", 'wordpress-form-manager'), apply_filters('fm_settings_capability', 'manage_options'), "fm-global-settings", 'fm_showSettingsPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Advanced Settings", 'wordpress-form-manager'), __("Advanced Settings", 'wordpress-form-manager'), apply_filters('fm_settings_capability', 'manage_options'), "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
-	$pages[] = add_submenu_page("fm-admin-main", __("Edit Form - Advanced", 'wordpress-form-manager'), __("Edit Form - Advanced", 'wordpress-form-manager'), "manage_options", "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Edit Form - Advanced", 'wordpress-form-manager'), __("Edit Form - Advanced", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
 	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
@@ -264,13 +263,36 @@ function fm_showMainPage(){	include 'main.php'; }
 function fm_showSettingsPage(){	include 'editsettings.php'; }
 function fm_showSettingsAdvancedPage(){	include 'editsettingsadv.php'; }
 
+
+if (function_exists( 'members_plugin_init' )){
+	add_filter('fm_forms_capability', 'fm_forms_capability');
+	add_filter('fm_data_capability', 'fm_data_capability');
+	add_filter('fm_settings_capability', 'fm_settings_capability');
+	add_filter( 'members_get_capabilities', 'fm_add_members_capabilities' );
+}
+
+function fm_forms_capability( $cap ) { return 'form_manager_forms'; }
+function fm_data_capability( $cap ) { return 'form_manager_data'; }
+function fm_settings_capability( $cap ) { return 'form_manager_settings'; }
+
+function fm_add_members_capabilities( $caps ) {
+	$caps[] = 'form_manager_forms';
+	$caps[] = 'form_manager_data';
+	$caps[] = 'form_manager_settings';
+	return $caps;
+}
+
 /**************************************************************/
 /******* AJAX *************************************************/
 
 //form editor 'save' button
 add_action('wp_ajax_fm_save_form', 'fm_saveFormAjax');
+global $fm_save_had_error;
 function fm_saveFormAjax(){
 	global $fmdb;
+	global $fm_save_had_error;
+	
+	$fm_save_had_error = false;
 	
 	$formInfo = fm_saveHelperGatherFormInfo();
 	
@@ -291,12 +313,15 @@ function fm_saveFormAjax(){
 	//no errors: save the form, return '1'
 	$fmdb->updateForm($_POST['id'], $formInfo);
 	
-	echo "1";
+	if(!$fm_save_had_error)
+		echo "1";
 		
 	die();
 }
 
 function fm_saveHelperGatherFormInfo(){
+	global $fm_save_had_error;
+	
 	//collect the posted information
 	$formInfo = array();
 	$formInfo['title'] = $_POST['title'];
@@ -332,6 +357,7 @@ function fm_saveHelperGatherFormInfo(){
 	else{
 		/* translators: this error is given when saving the form, if there was a problem with the list of e-mails under 'E-Mail Notifications'. */
 		_e("Error: There was a problem with the notification e-mail list.  Other settings were updated.", 'wordpress-form-manager');
+		$fm_save_had_error = true;
 	}
 		
 	//build the items list

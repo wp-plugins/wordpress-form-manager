@@ -711,7 +711,10 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	$fieldNames[] = 'user';
 	$fieldNames[] = 'user_ip';
 	foreach($formInfo['items'] as $k=>$v){
-		$label = isset($formInfo['items'][$k]) ? $formInfo['items'][$k]['label'] : $k;
+		if(!isset($formInfo['items'][$k]))							$label = $k;
+		else if(trim($formInfo['items'][$k]['nickname']) != '') 	$label = $formInfo['items'][$k]['nickname'];
+		else														$label = $formInfo['items'][$k]['label'];
+		
 		$fieldNames[] = $label;		
 	}
 	
@@ -730,7 +733,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 		}
 	}
 
-	$fp = @fopen($fname,'w') or die("Failed to open file: '".$php_errormsg."'");
+	$fp = fopen($fname,'w') or die("Failed to open file: '".$php_errormsg."'");
 	
 	//use fputcsv instead of reinventing the wheel:
 	foreach($csvRows as $csvRow){
