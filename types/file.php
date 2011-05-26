@@ -1,10 +1,12 @@
 <?php
+/* translators: file element settings */
 
 class fm_fileControl extends fm_controlBase{
 	
 	public function getTypeName(){ return "file"; }
 	
-	public function getTypeLabel(){ return "File"; }
+	/* translators: this appears in the 'Add Form Element' menu */
+	public function getTypeLabel(){ return __("File", 'wordpress-form-manager'); }
 	
 	public function showItem($uniqueName, $itemInfo){
 		return "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"".($itemInfo['extra']['max_size']*1024)."\" />".
@@ -13,8 +15,8 @@ class fm_fileControl extends fm_controlBase{
 
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "New File Upload";
-		$itemInfo['description'] = "Item Description";
+		$itemInfo['label'] = __("New File Upload", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array('max_size' => 1000);
 		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
@@ -34,20 +36,22 @@ class fm_fileControl extends fm_controlBase{
 		
 		if($_FILES[$uniqueName]['error'] > 0){
 			if($_FILES[$uniqueName]['error'] == 2)
-				$fmdb->setErrorMessage("(".$itemInfo['label'].") File upload exceeded maximum allowable size.");
+				$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("File upload exceeded maximum allowable size.", 'wordpress-form-manager'));
 			else if($_FILES[$uniqueName]['error'] == 4) // no file
 				return "";
-			$fmdb->setErrorMessage("(".$itemInfo['label'].") There was an error with the file upload.");
+			$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("There was an error with the file upload.", 'wordpress-form-manager'));
 			return false;
 		}
 		
 		$ext = pathinfo($_FILES[$uniqueName]['name'], PATHINFO_EXTENSION);
 		if(strpos($itemInfo['extra']['exclude'], $ext) !== false){
-			$fmdb->setErrorMessage("(".$itemInfo['label'].") Cannot be of type '.".$ext."'");
+			/* translators: this will be shown along with the item label and file extension, as in, "(File Upload) Cannot be of type '.txt'" */
+			$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("Cannot be of type", 'wordpress-form-manager')." '.".$ext."'");
 			return false;
 		}
 		else if(trim($itemInfo['extra']['restrict'] != "") && strpos($itemInfo['extra']['restrict'], $ext) === false){
-			$fmdb->setErrorMessage("(".$itemInfo['label'].") Can only be of types ".$itemInfo['extra']['restrict']);
+		/* translators: this will be shown along with the item label and a list of file extensions, as in, "(File Upload) Can only be of types '.txt, .doc, .pdf'" */
+			$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("Can only be of types", 'wordpress-form-manager')." ".$itemInfo['extra']['restrict']);
 			return false;
 		}
 			
@@ -73,15 +77,14 @@ class fm_fileControl extends fm_controlBase{
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
 		
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'max_size', 'Max file size (in kB)', array('value' => $itemInfo['extra']['max_size']));
-		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">Your host restricts uploads to ".ini_get('upload_max_filesize')."B</span>", '');
-		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span style=\"padding-:10px;font-weight:bold;\">File Types</span>", '');
-		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">Enter a list of extensions separated by commas, e.g. \".txt, .rtf, .doc\"</span>", '');
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'restrict', 'Only allow', array('value' => $itemInfo['extra']['restrict']));		
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'exclude', 'Do not allow', array('value' => $itemInfo['extra']['exclude']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'max_size', __('Max file size (in kB)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['max_size']));
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Your host restricts uploads to", 'wordpress-form-manager')." ".ini_get('upload_max_filesize')."B</span>", '');
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span style=\"padding-:10px;font-weight:bold;\">".__("File Types", 'wordpress-form-manager')."</span>", '');
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Enter a list of extensions separated by commas, e.g. \".txt, .rtf, .doc\"", 'wordpress-form-manager')."</span>", '');
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'restrict', __('Only allow', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['restrict']));		
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'exclude', __('Do not allow', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['exclude']));
 		
-	
 		return $arr;
 	}
 	
@@ -114,11 +117,11 @@ class fm_fileControl extends fm_controlBase{
 			var excludeExtensions = document.getElementById(itemID + '-restrict').value.toString();
 				
 			if(!restrictExtensions.match(/^(\s*\.[a-zA-Z]+\s*)?(,\s*\.[a-zA-Z]+\s*)*$/)){
-				alert(itemLabel + ": 'Only allow' must be a list of extensions separated by commas");
+				alert(itemLabel + ": <?php _e("'Only allow' must be a list of extensions separated by commas", 'wordpress-form-manager');?>");
 				return false;
 			}
 			if(!excludeExtensions.match(/^(\s*\.[a-zA-Z]+\s*)?(,\s*\.[a-zA-Z]+\s*)*$/)){
-				alert(itemLabel + ": 'Do not allow' must be a list of extensions separated by commas");
+				alert(itemLabel + ": <?php _e("'Do not allow' must be a list of extensions separated by commas", 'wordpress-form-manager');?>");
 				return false;
 			}
 			

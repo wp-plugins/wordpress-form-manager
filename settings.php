@@ -1,4 +1,5 @@
 <?php 
+/* translators: the following are general plugin settings */
 global $fm_controls;
 global $fm_form_behavior_types;
 global $fm_registered_user_only_msg;
@@ -20,11 +21,11 @@ fm_new_text_validator('email', "E-Mail", "'%s' Must be a valid E-Mail address", 
 
 //// DEFAULT FORM SETTINGS
 
-fm_set_form_defaults(array(		'title' => 				"New Form",
+fm_set_form_defaults(array(		'title' => 				__("New Form", 'wordpress-form-manager'),
 								'labels_on_top' =>		 0, 
-								'submitted_msg' => 		'Thank you! Your data has been submitted.', 
-								'submit_btn_text' => 	'Submit', 
-								'required_msg' => 		"\'%s\' is required.", 
+								'submitted_msg' => 		__('Thank you! Your data has been submitted.', 'wordpress-form-manager'), 
+								'submit_btn_text' => 	__('Submit', 'wordpress-form-manager'), 
+								'required_msg' => 		__("\'%s\' is required.", 'wordpress-form-manager'), 
 								'show_title' => 		1,
 								'show_border' => 		1,
 								'label_width' => 		200
@@ -40,11 +41,13 @@ edit				- give an 'edit' button after the previous submission summary
 overwrite			- only store the latest submission
 */
 
-$fm_form_behavior_types = array(	"Default"							=> '', 
-									"Registered users only" 			=> 'reg_user_only',
-									"Keep only most recent submission" 	=> 'reg_user_only,overwrite',
-									"Single submission"					=> 'reg_user_only,display_summ,single_submission',
-									"'User profile' style" 				=> 'reg_user_only,display_summ,edit'									
+/* translators: the following are descriptions of the different behavior types */
+
+$fm_form_behavior_types = array(	__("Default", 'wordpress-form-manager')							=> '', 
+									__("Registered users only", 'wordpress-form-manager') 			=> 'reg_user_only',
+									__("Keep only most recent submission", 'wordpress-form-manager') 	=> 'reg_user_only,overwrite',
+									__("Single submission", 'wordpress-form-manager')					=> 'reg_user_only,display_summ,single_submission',
+									__("'User profile' style", 'wordpress-form-manager') 				=> 'reg_user_only,display_summ,edit'									
 								);
 								
 $fm_controls['text']->initValidators();

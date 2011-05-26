@@ -1,18 +1,21 @@
 <?php
+/* translators: list element settings */
+
 class fm_customListControl extends fm_controlBase{
 	
 	public function getTypeName(){
 		return "custom_list";
 	}
 	
+	/* translators: this appears in the 'Add Form Element' menu */
 	public function getTypeLabel(){
-		return "List";
+		return __("List", 'wordpress-form-manager');
 	}		
 	
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "New List";
-		$itemInfo['description'] = "Item Description";
+		$itemInfo['label'] = __("New List", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array('list_type' => 'select');
 		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
@@ -126,11 +129,11 @@ class fm_customListControl extends fm_controlBase{
 		
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();		
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'list_type', 'Style', array('options' => array('select' => "Dropdown", 'list' => "List Box", 'radio' => "Radio Buttons", 'checkbox' => "Checkboxes"), 'value' => $itemInfo['extra']['list_type']));
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', 'Width (in pixels)', array('value' => $itemInfo['extra']['size']));
-		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', 'Required', array('checked'=>$itemInfo['required']));
-		$arr[] = new fm_editPanelItemMulti($uniqueName, 'options', 'List Items', array('options' => $itemInfo['extra']['options'], 'get_item_script' => 'fm_custom_list_options_panel_item', 'get_item_value_script' => 'fm_custom_list_option_get'));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'list_type', __('Style', 'wordpress-form-manager'), array('options' => array('select' => __("Dropdown", 'wordpress-form-manager'), 'list' => __("List Box", 'wordpress-form-manager'), 'radio' => __("Radio Buttons", 'wordpress-form-manager'), 'checkbox' => __("Checkboxes", 'wordpress-form-manager')), 'value' => $itemInfo['extra']['list_type']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', __('Width (in pixels)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['size']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
+		$arr[] = new fm_editPanelItemMulti($uniqueName, 'options', __('List Items', 'wordpress-form-manager'), array('options' => $itemInfo['extra']['options'], 'get_item_script' => 'fm_custom_list_options_panel_item', 'get_item_value_script' => 'fm_custom_list_option_get'));
 		return $arr;
 	}
 	

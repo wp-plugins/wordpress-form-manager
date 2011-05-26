@@ -1,4 +1,5 @@
 <?php
+/* translators: the following are recaptcha element settings */
 
 class fm_recaptchaControl extends fm_controlBase{
 	
@@ -6,19 +7,20 @@ class fm_recaptchaControl extends fm_controlBase{
 	
 	public function getTypeName(){ return "recaptcha"; }
 	
-	public function getTypeLabel(){ return "reCAPTCHA"; }
+	/* translators: this appears in the 'Add Form Element' menu */
+	public function getTypeLabel(){ return __("reCAPTCHA", 'wordpress-form-manager'); }
 	
 	public function showItem($uniqueName, $itemInfo){
 		global $fmdb;
 		$publickey = $fmdb->getGlobalSetting('recaptcha_public'); 
-		if($publickey == "") return "(No reCAPTCHA API public key found)";
+		if($publickey == "") return __("(No reCAPTCHA API public key found)", 'wordpress-form-manager');
 		
 		if(!function_exists('recaptcha_get_html'))
 			require_once('recaptcha/recaptchalib.php');		
 			
 		return "<script type=\"text/javascript\"> var RecaptchaOptions = { theme : '".$fmdb->getGlobalSetting('recaptcha_theme')."' }; </script>".
 				recaptcha_get_html($publickey).
-				(isset($_POST['recaptcha_challenge_field'])?"<br /> <em> The reCAPTCHA was incorrect. </em>":"");
+				(isset($_POST['recaptcha_challenge_field'])?"<br /> <em> ".__("The reCAPTCHA was incorrect.", 'wordpress-form-manager')." </em>":"");
 	}	
 	
 	public function processPost($uniqueName, $itemInfo){
@@ -63,13 +65,13 @@ class fm_recaptchaControl extends fm_controlBase{
 		global $fmdb;
 		$publickey = $fmdb->getGlobalSetting('recaptcha_public');
 		$privatekey = $fmdb->getGlobalSetting('recaptcha_private');
-		if($publickey == "" || $privatekey == "") return "You need reCAPTCHA API keys. <br /> Fix this in <a href=\"".get_admin_url(null, 'admin.php')."?page=fm-global-settings\">Settings</a>.";
-		return "(reCAPTCHA field)";
+		if($publickey == "" || $privatekey == "") return __("You need reCAPTCHA API keys.", 'wordpress-form-manager')." <br /> ".__("Fix this in", 'wordpress-form-manager')." <a href=\"".get_admin_url(null, 'admin.php')."?page=fm-global-settings\">".__("Settings", 'wordpress-form-manager')."</a>.";
+		return __("(reCAPTCHA field)", 'wordpress-form-manager');
 	}
 	
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();		
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
 		return $arr;
 	}
 	

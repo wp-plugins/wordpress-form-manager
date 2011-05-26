@@ -26,7 +26,7 @@ class fm_templateControlSelect extends fm_templateControlBase{
 	 	$id = $this->getVarId($option);
 		$str = "<select  id=\"".$id."\" name=\"".$id."\" >";
 		foreach($option['options'] as $k => $v){
-			$str.= "<option value=\"".$k."\" ".($k==$value?"selected=\"selected\"":"")."  >".$v."</option>";
+			$str.= "<option value=\"".$k."\" ".($k==$value?"selected=\"selected\"":"")."  >"._x($v, 'template-option', 'wordpress-form-manager')."</option>";
 		}
 		$str.= "</select>";
 		return $str;

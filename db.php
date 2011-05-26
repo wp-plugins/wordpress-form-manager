@@ -21,6 +21,8 @@ function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, 
 	$this->conn = $conn;
 	$this->cachedInfo = array();
 	$this->lastPostFailed = false;
+	
+	$this->initDefaultSettings();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -49,10 +51,18 @@ protected function setCache($formID, $key, $value){
 	if(!isset($this->cachedInfo[$formID])) $this->cachedInfo[$formID] = array($key => $value);
 	else $this->cachedInfo[$formID][$key] = $value;
 }
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //values are the form defaults
-public $formSettingsKeys = array(
+
+public $formSettingsKeys;
+public $itemKeys;
+public $globalSettings;
+
+function initDefaultSettings(){
+
+$this->formSettingsKeys = array(
 					'title' => '',
 					'submitted_msg' => '', 
 					'submit_btn_text' => '', 
@@ -73,7 +83,7 @@ public $formSettingsKeys = array(
 					'advanced_email' => ''
 					);			
 					
-public $itemKeys = array (
+$this->itemKeys = array (
 					'type' => 0,
 					'index' => 0,
 					'extra' => 0,
@@ -84,38 +94,47 @@ public $itemKeys = array (
 					'description' => 0
 					);
 
-public $globalSettings = array(
+
+$this->globalSettings = array(
 					'recaptcha_public' => '',
 					'recaptcha_private' => '',
 					'recaptcha_theme' => 'red',
-					'title' =>				"New Form",	
+					/* translators: the default name of a new form */				
+					'title' =>				__("New Form", 'wordpress-form-manager'),	
 					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
-					'required_msg' => 		"\'%s\' is required.",
+					/* translators: the default message given if a required item is left blank.  You must include a backslash before any single quotes */
+					'required_msg' => 		__("\'%s\' is required.", 'wordpress-form-manager'),
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
 					'template_form' => '',
 					'text_validator_count' => 4,
 					'text_validator_0' => array('name' => 'number',
-												'label' => 'Numbers Only',
-												'message' => "'%s' must be a valid number",
+												/* translators: the following are for the numbers only validator */
+												'label' => __('Numbers Only', 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid number", 'wordpress-form-manager'),
 												'regexp' => '/^\s*[0-9]*[\.]?[0-9]+\s*$/'
 												),
 					'text_validator_1' => array('name' => 'phone',
-												'label' => 'Phone Number',
-												'message' => "'%s' must be a valid phone number",
-												'regexp' => '/^.*[0-9]{3}.*[0-9]{3}.*[0-9]{4}.*$/'
+												/* translators: the following are for the phone number validator */
+												'label' => __('Phone Number', 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid phone number", 'wordpress-form-manager'),
+												/* translators: the regular expression for US phone numbers (XXX XXX XXXX). */
+												'regexp' => __('/^.*[0-9]{3}.*[0-9]{3}.*[0-9]{4}.*$/', 'wordpress-form-manager')
 												),
 					'text_validator_2' => array('name' => 'email',
-												'label' => "E-Mail",
-												'message' => "'%s' must be a valid E-Mail address",
+												/* translators: the following are for the e-mail validator */
+												'label' => __("E-Mail", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid E-Mail address", 'wordpress-form-manager'),
 												'regexp' => '/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/'
 												),
 					'text_validator_3' => array('name' => 'date',
-												'label' => "Date (MM/DD/YY)",
-												'message' => "'%s' must be a date (MM/DD/YY)",
+												/* translators: the following are for the date validator */
+												'label' => __("Date (MM/DD/YY)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a date (MM/DD/YY)", 'wordpress-form-manager'),
 												'regexp' => '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'
 												)
 					);
+}
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -769,6 +788,18 @@ function deleteSubmissionDataRow($formID, $data){
 	$this->query($q);
 }
 
+function updateDataSubmissionRow($formID, $timestamp, $user, $user_ip, $newData){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "UPDATE `{$dataTable}` SET";
+	$arr = array();
+	foreach($newData as $k=>$v){
+		$arr[] = "`{$k}` = '{$v}'";
+	}
+	$q.= implode(", ", $arr);
+	$q.= " WHERE `timestamp` = '{$timestamp}' AND `user` = '{$user}' AND `user_ip` = '{$user_ip}'";
+	$this->query($q);
+}
+							
 //determines if $uniqueName is a "NONE" db_type or not
 function isDataCol($formID, $uniqueName){
 	$cacheKey = $uniqueName."-type";

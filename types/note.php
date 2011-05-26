@@ -1,8 +1,11 @@
 <?php
+/* translators: the following are note element settings */
+
 class fm_noteControl extends fm_controlBase{
 	public function getTypeName(){ return "note"; }
 	
-	public function getTypeLabel(){ return "Note"; }
+	/* translators: this appears in the 'Add Form Element' menu */
+	public function getTypeLabel(){ return __("Note", 'wordpress-form-manager'); }
 	
 	public function showItem($uniqueName, $itemInfo){ return $itemInfo['extra']['content']; }
 	
@@ -45,8 +48,8 @@ class fm_noteControl extends fm_controlBase{
 	}
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "New Note";
-		$itemInfo['description'] = "Item Description";
+		$itemInfo['label'] = __("New Note", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array('content'=>'');
 		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;

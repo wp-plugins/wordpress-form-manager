@@ -54,6 +54,16 @@ fm_form_get_item_label($nickname) - get an item's label by nickname
 //////////////////////////////////////////////////////////////////////////////////////////
 
 */
+
+/* translators: the following are for the options for the default form display template */
+__("Show border:", 'wordpress-form-manager');
+__("Label position:", 'wordpress-form-manager');
+__("Labels can be placed to the left or above each field", 'wordpress-form-manager');
+_x('Left', 'template-option', 'wordpress-form-manager');
+_x('Top', 'template-option', 'wordpress-form-manager');
+__("Label width (in pixels):", 'wordpress-form-manager');
+__("Applies to checkboxes, and when labels are to the left", 'wordpress-form-manager');
+
 ?>
 <?php echo fm_form_start(); ?>
 
@@ -69,7 +79,7 @@ fm_form_get_item_label($nickname) - get an item's label by nickname
 		
 		<ul>
 			<?php while(fm_form_have_items()): fm_form_the_item(); ?>
-			<li><?php if($labelPosition == "top"): ?>
+			<li<?php if(fm_form_the_nickname() != "") echo " id=\"fm-item-".fm_form_the_nickname()."\"";?>><?php if($labelPosition == "top"): ?>
 				<label style="display:block;width:<?php echo $labelwidth;?>px;"><?php echo fm_form_the_label(); ?><?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?></label><?php echo fm_form_the_input(); ?>
 				<?php else: ?>
 				<table><tr>

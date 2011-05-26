@@ -1,4 +1,6 @@
 <?php
+/* translators: the following are used when displaying a form */
+
 include 'types.php';
 
 class fm_display_class{
@@ -19,43 +21,53 @@ var $currentItemIndex;
 //'params' is an associative array of hidden values inserted into the form
 function displayForm($formInfo, $options=array(), $values=array()){
 	global $fm_templates;
+	global $fm_controls;
 	global $fmdb;
 	
 	$templateFile = $formInfo['form_template'];
 	if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_form');
 	if($templateFile == '') $templateFile = get_option('fm-default-form-template');
 	
+	if($options['text_value_as_placeholder'] === false){
+		$placeholderSave = $fm_controls['text']->showValueAsPlaceholder;
+		$fm_controls['text']->showValueAsPlaceholder = false;
+	}
+	
 	if(file_exists($fm_templates->templatesDir.'/'.$templateFile))
-		return $this->displayFormTemplate($templateFile, $formInfo, $options, $values);
+		$str = $this->displayFormTemplate($templateFile, $formInfo, $options, $values);
 	else
-		return $this->displayFormNoTemplate($formInfo, $options, $values);
+		$str = $this->displayFormTemplate(get_option('fm-default-form-template'), $formInfo, $options, $values);
+		
+	if($options['text_value_as_placeholder'] === false){
+		$fm_controls['text']->showValueAsPlaceholder = $placeholderSave;
+	}
+	
+	return $str;
 }
 
 
-function displayFormNoTemplate($formInfo, $options=array(), $values=array()){
+//shows an unordered list of left-labeled form items, no form tags, no submit button, no validation scripts
+function displayFormBare($formInfo, $options=array(), $values=array()){
 	global $msg;
 	global $fmdb;
 	global $fm_controls;	
 	
-	$validation_required = array();
+	////////////////////////////////////////////////////////////////////////////////////////
 	
-	$formLabelWidth = (trim($formInfo['label_width']) == "")?"150":$formInfo['label_width'];
-	
-	//default div id
-	if(!isset($options['class'])) $options['class'] = 'fm-form';
-	
-	$str.= "<form enctype=\"multipart/form-data\" class=\"".$options['class']."\" method=\"post\" action=\"".$options['action']."\" name=\"fm-form-".$formInfo['ID']."\" id=\"fm-form-".$formInfo['ID']."\">\n";
-	
-	if($formInfo['show_border']==1)
-		$str.= "<fieldset>\n";
-	
-	if($formInfo['show_title']==1)
-		if($formInfo['show_border']==1)
-			$str.= "<legend>".$formInfo['title']."</legend>\n";
-		else
-			$str.= "<h3>".$formInfo['title']."</h3>\n";
-	
-	$str.= "<ul>\n";
+	$defaults = array('label_width' => '200',
+						'ul_class' => '',
+						'li_class' => '',
+						'exclude_types' => array(),
+						'include_types' => array(),
+						'display_callbacks' => array(),
+						'unique_name_suffix' => ''
+					);	
+	foreach($defaults as $key => $default)
+		if(!isset($options[$key])) $options[$key] = $default;
+		
+	///////////////////////////////////////////////////////////////////////////////////////
+		
+	$str.= "<ul".($options['ul_class'] != '' ? " class=\"".$options['ul_class']."\"" : "").">\n";
 	
 		foreach($formInfo['items'] as $item){
 			
@@ -63,80 +75,36 @@ function displayFormNoTemplate($formInfo, $options=array(), $values=array()){
 			if(isset($values[$item['unique_name']]))
 				$item['extra']['value'] = $values[$item['unique_name']];
 			
-			$str.= "<li>";
+			if(!in_array($item['type'], $options['exclude_types']) || in_array($item['type'], $options['include_types'])){
 			
-			////////////////////////////////////////////////////////////////////////////////////////
-			
-			if(($formInfo['labels_on_top']==1 && $item['type'] != 'checkbox') 
-				|| $item['type'] == 'separator' 
-				|| ($item['type'] == 'note' && trim($item['label']) == ""))
-			{
-				$str.='<label>'.$item['label'];
-				if($item['required']=='1')	$str.= '&nbsp;<em>*</em>';
-				$str.='</label>';
-				$str.=$fm_controls[$item['type']]->showItem($item['unique_name'], $item);
-			}
-			else{
-				$str.='<table><tr>';
-				$str.='<td style="width:'.$formLabelWidth.'px"><label>'.$item['label'];
-				if($item['required']=='1')	$str.= '&nbsp;<em>*</em>';
-				$str.='</label>';
-				$str.='</td>';
-				$str.='<td>'.$fm_controls[$item['type']]->showItem($item['unique_name'], $item).'</td>';
-				$str.='</tr></table>';			
-			}
-						
-			////////////////////////////////////////////////////////////////////////////////////////
-			
-			$str.= "</li>\n";
-		}
-	
-	$str.= "</ul>\n";
-	
-	///// show the submit button //////
-	$str.= "<input type=\"submit\" ".
-			"name=\"fm_form_submit\" ".
-			"class=\"submit\" ".
-			"value=\"".$formInfo['submit_btn_text']."\" ".
-			"onclick=\"return fm_validate(".$formInfo['ID'].")\" ".
-			" />\n";
-	
-	if($formInfo['show_border']==1)	
-		$str.= "</fieldset>\n";		
-	
-	//// echo the nonce ////	
-	$str.= "<input type=\"hidden\" name=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
-	$str.= "<input type=\"hidden\" name=\"fm_id\" value=\"".$formInfo['ID']."\" />\n";
-	
-	$str.= "</form>\n";
-	
-	
-	////// show the validation scripts /////
-	$str.="<!-- validation -->\n";
-	$str.="<script type=\"text/javascript\">\n";
-	foreach($formInfo['items'] as $item){
-		if($item['required'] == '1'){
-		 	$callback = $fm_controls[$item['type']]->getRequiredValidatorName();
-			if($callback != "")
-				$str.="fm_val_register('".$formInfo['ID']."', ".
-					"'".$item['unique_name']."', ".
-					"'".$callback."', ".
-					"'".format_string_for_js(sprintf($formInfo['required_msg'], $item['label']))."');\n";
-		}
-		if($item['extra']['validation'] != 'none'){
-			$callback = $fm_controls[$item['type']]->getGeneralValidatorName();
-			if($callback != ""){
-				$str.="fm_val_register('".$formInfo['ID']."', ".
-					"'".$item['unique_name']."', ".
-					"'".$callback."', ".
-					"'".format_string_for_js(sprintf($fm_controls[$item['type']]->getGeneralValidatorMessage($item['extra']['validation']), $item['label']))."', ".
-					"'".$item['extra']['validation']."');\n";
+				$str.= "<li".($options['li_class'] != '' ? " class=\"".$options['li_class']."\"" : "").">";
+				
+				////////////////////////////////////////////////////////////////////////////////////////
+				
+					$str.='<table><tr>';
+					$str.='<td style="width:'.$options['label_width'].'px"><label>'.$item['label'];
+					if($item['required']=='1')	$str.= '&nbsp;<em>*</em>';
+					$str.='</label>';
+					$str.='</td>';
+					$str.='<td>';
+					
+					reset($options['display_callbacks']);
+					if(array_key_exists($item['type'], $options['display_callbacks']))
+						$str.= call_user_func($options['display_callbacks'][$item['type']], $item['unique_name'].$options['unique_name_suffix'], $item);
+					else
+						$str.= $fm_controls[$item['type']]->showItem($item['unique_name'].$options['unique_name_suffix'], $item);
+					
+					$str.='</td>';
+					$str.='</tr></table>';			
+							
+				////////////////////////////////////////////////////////////////////////////////////////
+				
+				$str.= "</li>\n";
 			}
 		}
-	}	
 	
-	$str.="</script>\n";
-	$str.="<!-- /validation -->\n";
+	$str.= "</ul>\n";	
+	
 	return $str;
 }
 

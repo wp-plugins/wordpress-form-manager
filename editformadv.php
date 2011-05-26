@@ -1,4 +1,6 @@
 <?php
+/* translators: the following are from the form's advanced section */
+
 global $fmdb;
 global $fm_display;
 global $fm_templates;
@@ -66,18 +68,19 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 
 <div class="wrap">
 <div id="icon-edit-pages" class="icon32"></div>
-<h2><?php echo $form['title'];?> - Advanced</h2>
+<?php /* translators: This specifies the 'advanced' settings pages */ ?>
+<h2><?php echo $form['title'];?> - <?php _e("Advanced", 'wordpress-form-manager');?></h2>
 
 <div style="float:right;">
-<input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="Save Changes"  />&nbsp;&nbsp;
-<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" >Edit Form</a>
+<input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  />&nbsp;&nbsp;
+<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" ><?php _e("Edit Form", 'wordpress-form-manager');?></a>
 </div>
 
 	<div id="message-container"><?php 
 	if(isset($_POST['message']))
 		switch($_POST['message']){
-			case 1: ?><div id="message-success" class="updated"><p><strong>Settings Saved. </strong></p></div><?php break;
-			case 2: ?><div id="message-error" class="error"><p>Save failed. </p></div><?php break;
+			case 1: ?><div id="message-success" class="updated"><p><strong><?php _e("Settings Saved.", 'wordpress-form-manager');?> </strong></p></div><?php break;
+			case 2: ?><div id="message-error" class="error"><p><?php _e("Save failed.", 'wordpress-form-manager');?> </p></div><?php break;
 			default: ?>
 				<?php if(isset($_POST['message']) && trim($_POST['message']) != ""): ?>
 				<div id="message-error" class="error"><p><?php echo stripslashes($_POST['message']);?></p></div>
@@ -86,35 +89,36 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 		} 
 	?></div>
 
-<h3>Behavior</h3>
+<h3><?php _e("Behavior", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 <?php
 $behaviorList = array();
 foreach($fm_form_behavior_types as $desc => $val)
 	$behaviorList[$val] = $desc;
-helper_option_field('behaviors', "Behavior Type", $behaviorList, $form['behaviors'], "Behavior types other than 'Default' require a registered user");
+helper_option_field('behaviors', __("Behavior Type", 'wordpress-form-manager'), $behaviorList, $form['behaviors'], __("Behavior types other than 'Default' require a registered user", 'wordpress-form-manager'));
 ?>
 </table>
 
 <h3>Templates</h3>
 <table class="form-table">
 <?php 
-helper_option_field('form_template', "Form Display", array_merge(array( '' => "(use default)"), $templateList['form']), $form['form_template']);
-helper_option_field('email_template', "E-Mail Notifications", array_merge(array( '' => "(use default)"), $templateList['email']), $form['email_template']);
-helper_option_field('summary_template', "Data Summary", array_merge(array( '' => "(use default)"), $templateList['summary']), $form['summary_template']);
+/* translators: the following apply to the different kinds of templates */
+helper_option_field('form_template', __("Form Display", 'wordpress-form-manager'), array_merge(array( '' => __("(use default)", 'wordpress-form-manager')), $templateList['form']), $form['form_template']);
+helper_option_field('email_template', __("E-Mail Notifications", 'wordpress-form-manager'), array_merge(array( '' => __("(use default)", 'wordpress-form-manager')), $templateList['email']), $form['email_template']);
+helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manager'), array_merge(array( '' => __("(use default)", 'wordpress-form-manager')), $templateList['summary']), $form['summary_template']);
 ?>
 </table>
 
-<h3>Custom E-Mail Notifications</h3>
+<h3><?php _e("Custom E-Mail Notifications", 'wordpress-form-manager');?></h3>
 <table>
-<tr><td width="300px">Use custom e-mail notifications</td><td align="left"><input type="checkbox" name="use_advanced_email" <?php echo ($form['use_advanced_email'] == 1 ? "checked=\"checked\"" : ""); ?> ? /></td></tr>
-<tr><td colspan="2"><span class="description">This will override the 'E-Mail Notifications' settings in both the main editor and the plugin settings page with the information entered below</span></td></tr>
+<tr><td width="300px"><?php _e("Use custom e-mail notifications", 'wordpress-form-manager');?></td><td align="left"><input type="checkbox" name="use_advanced_email" <?php echo ($form['use_advanced_email'] == 1 ? "checked=\"checked\"" : ""); ?> ? /></td></tr>
+<tr><td colspan="2"><span class="description"><?php _e("This will override the 'E-Mail Notifications' settings in both the main editor and the plugin settings page with the information entered below", 'wordpress-form-manager');?></span></td></tr>
 </table>
 <textarea name="advanced_email" rows="15" style="width:80%" ><?php echo $form['advanced_email']; ?></textarea>
 
-<h3>Form Item Nicknames</h3>
+<h3><?php _e("Form Item Nicknames", 'wordpress-form-manager');?></h3>
 <table>
-<tr><td colspan="2"><span class="description">Giving a nickname to form items makes it easier to access their information within custom e-mail notifications and templates</span></td></tr>
+<tr><td colspan="2"><span class="description"><?php _e("Giving a nickname to form items makes it easier to access their information within custom e-mail notifications and templates", 'wordpress-form-manager');?></span></td></tr>
 </table>
 <br />
 <table class="form-table">
@@ -125,17 +129,17 @@ helper_option_field('summary_template', "Data Summary", array_merge(array( '' =>
 } ?>
 </table>
 
-<p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="Save Changes"  /></p>
+<p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  /></p>
 
 </div>
 
 </form>
 
 <?php if($fm_DEBUG): ?>
-<h3>Edit Form Definition:</h3>
+<h3><?php _e("Edit Form Definition:", 'wordpress-form-manager');?></h3>
 <form name="fm-definition-form" action="" method="post">
 	<input type="hidden" value="<?php echo $form['ID'];?>" name="fm-form-id" />
 	<textarea name="form-definition" rows="20" cols="80"><?php echo $formDef->printFormAtts($form['items']); ?></textarea>
-	<p class="submit"><input type="submit" name="submit-form-definition" class="button-primary" value="Update Form" /></p>
+	<p class="submit"><input type="submit" name="submit-form-definition" class="button-primary" value="<?php _e("Update Form", 'wordpress-form-manager');?>" /></p>
 </form>
 <?php endif; ?>

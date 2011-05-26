@@ -1,4 +1,5 @@
 <?php
+/* translators: the following are generic form element settings */
 
 class fm_controlBase{
 	
@@ -97,10 +98,10 @@ class fm_controlBase{
 	//returns an associative array keyed by the item db fields; used in the AJAX for creating a new form item in the back end / admin side
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
-		$itemInfo['description'] = "Item Description";
+		$itemInfo['label'] = __("Item Label", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array();
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = __("Item Nickname", 'wordpress-form-manager');
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";

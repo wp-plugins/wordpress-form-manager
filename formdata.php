@@ -1,10 +1,13 @@
 <?php
+/* translators: the following are from the form's data page */
 global $fmdb;
 global $fm_display;
 global $fm_controls;
 
 $itemsPerPage = 30;
 $set = isset($_REQUEST['set']) ? $_REQUEST['set'] : 0;
+
+$fm_dataDialog = "main";
 
 $form = null;
 $formData = null;
@@ -26,31 +29,128 @@ parse_str($_SERVER['QUERY_STRING'], $queryVars);
 
 //Delete data row(s):
 if(isset($_POST['fm-action-select'])){
-	if($_POST['fm-action-select'] == 'delete'){	
-		$toDelete=array();
-		$numRows = (int)$_POST['fm-num-data-rows'];
-		for($x=0;$x<$numRows;$x++){
-			if(isset($_POST['fm-checked-'.$x])){
-				$toDelete[]=$x;
+		
+	switch($_POST['fm-action-select']){
+		case "delete":
+			$toDelete = fm_data_getCheckedRows();
+			foreach($toDelete as $del){	
+				$fmdb->deleteSubmissionDataRow($form['ID'], $formData['data'][$del]);
 			}
-		}
-		foreach($toDelete as $del){	
-			$fmdb->deleteSubmissionDataRow($form['ID'], $formData['data'][$del]);
-		}		
-	}
-	else if($_POST['fm-action-select'] == 'delete_all'){
-		$fmdb->clearSubmissionData($form['ID']);	
+			break;
+		case "delete_all":
+			$fmdb->clearSubmissionData($form['ID']);	
+			break;
+		case "edit":
+			$fm_dataDialog = "edit";	
+			break;
+		case "summary":
+			$fm_dataDialog = "summary";
+			break;
 	}
 	
 	//clean up the mess we made
 	$formData = $fmdb->getFormSubmissionData($form['ID']);
 }
 
+//Edit data rows(s)
+else if(isset($_POST['fm-edit-data-ok'])){
+	$numRows = $_POST['fm-num-edit-rows'];
+	$postFailed = false;
+	
+	for($x=0;$x<$numRows;$x++){
+		$dataIndex = $_POST['fm-edit-row-'.$x];
+		
+		$newData = array();
+		$postData = array();
+		foreach($form['items'] as $item){
+			if($item['type'] != 'file'
+			&& $item['type'] != 'separator'
+			&& $item['type'] != 'note'
+			&& $item['type'] != 'recaptcha'){		
+				$processed = $fm_controls[$item['type']]->processPost($item['unique_name']."-".$x, $item);
+				if($processed === false){
+					$postFailed = true;
+				}
+				if($item['db_type'] != "NONE")						
+					$postData[$item['unique_name']] = $processed;
+			}
+		}
+		
+		$fmdb->updateDataSubmissionRow($form['ID'],
+										$formData['data'][$x]['timestamp'],
+										$formData['data'][$x]['user'],
+										$formData['data'][$x]['user_ip'],
+										$postData
+										);
+	}
+	$formData = $fmdb->getFormSubmissionData($form['ID']);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BEGIN OUTPUT
+
+switch($fm_dataDialog){
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//EDIT DIALOG
+
+case "edit":
+
+if($formData !== false){
+	$numRows = (int)$_POST['fm-num-data-rows'];
+
+	?>
+<form name="fm-main-form" id="fm-main-form" action="" method="post">
+<div class="wrap">
+	<div id="icon-edit-pages" class="icon32"></div>
+	<h2>Data: <?php echo $form['title'];?></h2>
+	<div style="float:right;">
+		<input type="submit" name="fm-edit-data-ok" value="<?php _e("Submit Changes", 'wordpress-form-manager');?>" />
+		<input type="submit" name="fm-edit-data-cancel" value="<?php _e("Cancel", 'wordpress-form-manager');?>" />		
+	</div>
+	
+	<div class="wrap">
+	<br />
+	
+	Edit data: <br />
+	<?php
+	
+	$callbacks = array( 'text' => 'fm_data_displayTextEdit',
+						'textarea' => 'fm_data_displayTextAreaEdit',
+						'file' => 'fm_data_displayFileEdit'
+					);
+	$exclude_types = array('note', 'recaptcha');
+	
+	$editRowCount = 0;
+	for($x=0;$x<$numRows;$x++){
+		if(isset($_POST['fm-checked-'.$x])){
+			echo "<div class=\"fm-data-edit-div\" >".$fm_display->displayFormBare($form, array('exclude_types' => $exclude_types, 'display_callbacks' => $callbacks, 'unique_name_suffix' => '-'.$x), $formData['data'][$x])."</div>\n";
+			echo "<input type=\"hidden\" name=\"fm-edit-row-".$editRowCount."\" value=\"".$x."\" />\n";
+			$editRowCount++;
+		}
+	}	
+	?>
+	</div>
+	
+	<input type="hidden" name="fm-num-edit-rows" value="<?php echo $editRowCount; ?>" />
+	
+	<div>
+		<div style="float:right;">		
+			<input type="submit" name="fm-edit-data-ok" value="<?php _e("Submit Changes", 'wordpress-form-manager');?>" />
+			<input type="submit" name="fm-edit-data-cancel" value="<?php _e("Cancel", 'wordpress-form-manager');?>" />		
+		</div>
+	</div>
+</div>
+	<?php
+}
+break;
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //SUMMARY DIALOG
 
-if(isset($_POST['fm-action-select']) && $_POST['fm-action-select'] == 'summary'){
+case "summary":
 
 if($formData !== false){
 	$numRows = (int)$_POST['fm-num-data-rows'];
@@ -59,16 +159,16 @@ if($formData !== false){
 	<div id="icon-edit-pages" class="icon32"></div>
 	<h2>Data: <?php echo $form['title'];?></h2>
 	<div style="float:right;">		
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="Back to Data">Back to Form Data</a>
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="<?php _e("Back to Form Data", 'wordpress-form-manager');?>"><?php _e("Back to Form Data", 'wordpress-form-manager');?></a>
 	</div>
 	
 	<div class="wrap">
 	<br />
-	Showing data summary: <br />
+	<?php _e("Data summary:", 'wordpress-form-manager');?> <br />
 	<?php
 	for($x=0;$x<$numRows;$x++){		
 		if(isset($_POST['fm-checked-'.$x])){
-			echo "<div class=\"fm-data-summary-div\" >".$fm_display->displayDataSummary($form, $formData['data'][$x], "", "", true)."</div>\n";
+			echo "<div class=\"fm-data-summary-div\" >".$fm_display->displayDataSummaryNoTemplate($form, $formData['data'][$x], "", "", true)."</div>\n";
 		}
 	}	
 	?>
@@ -76,19 +176,22 @@ if($formData !== false){
 	
 	<div>
 		<div style="float:right;">		
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="Back to Data">Back to Form Data</a>
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="Back to Data"><?php _e("Back to Form Data", 'wordpress-form-manager');?></a>
 		</div>
 	</div>
 </div>
 	<?php
 }
 
-}else{
+break;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //MAIN DIALOG
 
+
+case "main":
+default:
 
 //keep track of the max number of chars in each column so we can set the table widths appropriately
 $colMaxChars=array();
@@ -120,18 +223,19 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 	<div id="icon-edit-pages" class="icon32"></div>
 	<h2>Data: <?php echo $form['title'];?></h2>
 	<div style="float:right;">
-		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV">Download Data (.csv)</a>
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="Edit this form">Edit Form</a>
+		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?></a>
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit Form", 'wordpress-form-manager');?></a>
 	</div>
 		<div class="tablenav">			
 			<div class="alignleft actions">
 				<select name="fm-action-select" id="fm-action-select">
-				<option value="-1" selected="selected">Bulk Actions</option>
-				<option value="summary">Show Summary</option>
-				<option value="delete">Delete Selected</option>
-				<option value="delete_all">Delete All Submission Data</option>
+				<option value="-1" selected="selected"><?php _e("Bulk Actions", 'wordpress-form-manager');?></option>
+				<option value="summary"><?php _e("Show Summary", 'wordpress-form-manager');?></option>
+				<option value="delete"><?php _e("Delete Selected", 'wordpress-form-manager');?></option>
+				<option value="delete_all"><?php _e("Delete All Submission Data", 'wordpress-form-manager');?></option>
+				<option value="edit"><?php _e("Edit Selected", 'wordpress-form-manager');?></option>
 				</select>
-				<input type="submit" value="Apply" name="fm-doaction" id="fm-doaction" onclick="return fm_confirmSubmit()" class="button-secondary action" />							
+				<input type="submit" value="<?php _e("Apply", 'wordpress-form-manager');?>" name="fm-doaction" id="fm-doaction" onclick="return fm_confirmSubmit()" class="button-secondary action" />							
 				<script type="text/javascript">
 				function fm_confirmSubmit(){
 					var action = document.getElementById('fm-action-select').value;
@@ -147,13 +251,13 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					}					
 					
 					if(action == 'delete'){
-						if (selected) return confirm("Are you sure you want to delete the selected items?");
+						if (selected) return confirm("<?php _e("Are you sure you want to delete the selected items?", 'wordpress-form-manager');?>");
 						return false;
 					}
 					else if(action == 'delete_all'){
-						return confirm("This will delete all submission data for this form. Are you sure?");
+						return confirm("<?php _e("This will delete all submission data for this form. Are you sure?", 'wordpress-form-manager');?>");
 					}			
-					else if(action == 'summary') return selected;		
+					else if(action != '-1') return selected;		
 					return false;
 				}
 				</script>
@@ -181,20 +285,20 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-top" onchange="fm_dataCBColChange()"/></th>
 				<th width="130px"><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == 'timestamp' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'timestamp'))); ?>">Timestamp</a></th>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'timestamp'))); ?>"><?php _e("Timestamp", 'wordpress-form-manager');?></a></th>
 				<th width="60px"><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == 'user' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user'))); ?>">User</a></th>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user'))); ?>"><?php _e("User", 'wordpress-form-manager');?></a></th>
 				<th width="130px"><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == 'user_ip' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user_ip'))); ?>">IP Address</a></th>
+									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user_ip'))); ?>"><?php _e("IP Address", 'wordpress-form-manager');?></a></th>
 				<?php $x=1; foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
 									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>"><?php echo fm_restrictString($formItem['label'],20);?></a>
 									<?php if($formItem['type'] == 'file'): ?>
-									<a class="fm-download-link" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')">Download Files</a>
+									<a class="fm-download-link" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')"><?php _e("Download Files", 'wordpress-form-manager');?></a>
 									<?php endif; ?>
 									</th>
 					<?php endif; ?>
@@ -204,9 +308,9 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 			<tfoot>
 			<tr>
 				<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-bottom" onchange="fm_dataCBColChange()"/></th>
-				<th>Timestamp</th>
-				<th>User</th>
-				<th>IP Address</th>
+				<th><?php _e("Timestamp", 'wordpress-form-manager');?></th>
+				<th><?php _e("User", 'wordpress-form-manager');?></th>
+				<th><?php _e("IP Address", 'wordpress-form-manager');?></th>
 				<?php foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><?php echo fm_restrictString($formItem['label'],20);?></th>
@@ -223,7 +327,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<td><?php echo $dataRow['user_ip'];?></td>
 					<?php foreach($form['items'] as $formItem): ?>
 						<?php if($formItem['type'] == 'file'): ?>
-							<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="Download '<?php echo $formItem['label'];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
+							<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="<?php _e("Download", 'wordpress-form-manager');?> '<?php echo $formItem['label'];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
 						<?php elseif($formItem['db_type'] != "NONE"): ?>
 							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
 						<?php endif; ?>
@@ -240,4 +344,21 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 
 <?php 
 }
+
+// HELPERS
+function fm_data_getCheckedRows(){
+	$checked=array();
+	$numRows = (int)$_POST['fm-num-data-rows'];
+	for($x=0;$x<$numRows;$x++){
+		if(isset($_POST['fm-checked-'.$x])){
+			$checked[]=$x;
+		}
+	}
+	return $checked;
+}
+
+function fm_data_displayTextEdit($uniqueName, $itemInfo){ return "<input name=\"".$uniqueName."\" type=\"text\" value=\"".$itemInfo['extra']['value']."\" style=\"width:400px;\"/>"; }
+function fm_data_displayTextAreaEdit($uniqueName, $itemInfo){ return "<textarea style=\"width:400px;\" rows=\"5\"  name=\"".$uniqueName."\" >".$itemInfo['extra']['value']."</textarea>"; }
+function fm_data_displayFileEdit($uniqueName, $itemInfo){ return $itemInfo['extra']['value']; }
+
 ?>

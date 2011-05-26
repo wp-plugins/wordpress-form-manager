@@ -6,6 +6,7 @@ Description: Create custom forms; download entered data in .csv format; validati
 Version: 1.4.14
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
+Text Domain: wordpress-form-manager
 License: GPL2
 
   Copyright 2011 Campbell Hoffman
@@ -33,6 +34,8 @@ $fm_currentVersion = "1.4.14";
 global $fm_DEBUG;
 $fm_DEBUG = false;
 
+/* translators: the following are used for the admin interface */
+
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
 
@@ -44,16 +47,15 @@ if ( ! function_exists( 'add_action' ) ) {
 }
 // only WP 3.0+
 if ( version_compare( get_bloginfo( 'version' ), '3.0.0', '<' ) ) 
-	wp_die( 'Form Manager requires WordPress version 3.0 or higher' );
+	wp_die( __('Form Manager requires WordPress version 3.0 or higher', 'wordpress-form-manager') );
 	
 // only PHP 5.0+
 if ( version_compare(PHP_VERSION, '5.0.0', '<') ) 
-	wp_die( 'Form Manager requires PHP version 5.0 or higher' );
+	wp_die( __('Form Manager requires PHP version 5.0 or higher', 'wordpress-form-manager') );
 
 include 'helpers.php';
 
-include 'db.php'; //apparently needed for certain environments
-
+include 'db.php';
 include 'display.php';
 include 'template.php';
 include 'email.php';
@@ -160,7 +162,7 @@ add_action('admin_init', 'fm_adminInit');
 function fm_adminInit(){
 	wp_enqueue_script('scriptaculous');
 	wp_enqueue_script('scriptaculous-dragdrop');
-	
+
 	wp_enqueue_script('form-manager-js', plugins_url('/js/scripts.js', __FILE__));	
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
@@ -171,6 +173,10 @@ add_action('init', 'fm_userInit');
 function fm_userInit(){
 	global $fm_currentVersion;
 	global $fm_templates;
+	
+	if(!load_plugin_textdomain('wordpress-form-manager','/wp-content/languages/'))
+		load_plugin_textdomain('wordpress-form-manager', '', '/wp-content/plugins/wordpress-form-manager/languages/');
+		
 	//update check, since the snarky wordpress dev changed the behavior of a function based on its english name, rather than its widely accepted usage.
 	//"The perfect is the enemy of the good". 
 	$ver = get_option('fm-version');
@@ -202,21 +208,30 @@ function fm_userHead(){
 
 add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
-	$pages[] = add_object_page("Forms", "Forms", "manage_options", "fm-admin-main", 'fm_showMainPage');
-	$pages[] = add_submenu_page("fm-admin-main", "Edit", "Edit", "manage_options", "fm-edit-form", 'fm_showEditPage');
-	$pages[] = add_submenu_page("fm-admin-main", "Data", "Data", "manage_options", "fm-form-data", 'fm_showDataPage');	
+	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), "manage_options", "fm-admin-main", 'fm_showMainPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Edit", 'wordpress-form-manager'), __("Edit", 'wordpress-form-manager'), "manage_options", "fm-edit-form", 'fm_showEditPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Data", 'wordpress-form-manager'), __("Data", 'wordpress-form-manager'), "manage_options", "fm-form-data", 'fm_showDataPage');	
 	
 	//at some point, make this link go to a fresh form
 	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
 	
-	$pages[] = add_submenu_page("fm-admin-main", "Settings", "Settings", "manage_options", "fm-global-settings", 'fm_showSettingsPage');
-	$pages[] = add_submenu_page("fm-admin-main", "Advanced Settings", "Advanced Settings", "manage_options", "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Settings", 'wordpress-form-manager'), __("Settings", 'wordpress-form-manager'), "manage_options", "fm-global-settings", 'fm_showSettingsPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Advanced Settings", 'wordpress-form-manager'), __("Advanced Settings", 'wordpress-form-manager'), "manage_options", "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
-	$pages[] = add_submenu_page("fm-admin-main", "Edit Form - Advanced", "Edit Form - Advanced", "manage_options", "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Edit Form - Advanced", 'wordpress-form-manager'), __("Edit Form - Advanced", 'wordpress-form-manager'), "manage_options", "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
 	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
+		
+	$pluginName = plugin_basename(__FILE__);
+	add_filter( 'plugin_action_links_' . $pluginName, 'fm_pluginActions' );
 }
+
+function fm_pluginActions($links){ 
+	$settings_link = '<a href="'.get_admin_url(null, 'admin.php')."?page=fm-global-settings".'">' . __('Settings', 'wordpress-form-manager') . '</a>';
+	array_unshift( $links, $settings_link );
+	return $links;
+}	
 
 add_action('admin_head', 'fm_adminHead');
 function fm_adminHead(){
@@ -268,7 +283,8 @@ function fm_saveFormAjax(){
 		$fmdb->updateForm($_POST['id'], $formInfo);
 		
 		//now tell the user there was an error
-		echo "Error: the shortcode '".$formInfo['shortcode']."' is already in use. (other changes were saved successfully)";
+		printf(__("Error: the shortcode '%s' is already in use. (other changes were saved successfully)", 'wordpress-form-manager'), $formInfo['shortcode']);
+		
 		die();
 	}
 			
@@ -313,9 +329,10 @@ function fm_saveHelperGatherFormInfo(){
 			if($email != "") $temp[] = $email;
 		$formInfo['email_list'] = implode(",", $temp);
 	}
-	else
-		echo "Error: There was a problem with the notification e-mail list.  Other settings were updated.";
-		
+	else{
+		/* translators: this error is given when saving the form, if there was a problem with the list of e-mails under 'E-Mail Notifications'. */
+		_e("Error: There was a problem with the notification e-mail list.  Other settings were updated.", 'wordpress-form-manager');
+	}
 		
 	//build the items list
 	$formInfo['items'] = array();
@@ -327,7 +344,8 @@ function fm_saveHelperGatherFormInfo(){
 				if(is_valid_array_expr($item['extra']))				
 					eval("\$newExtra = ".$item['extra'].";"); 				
 				else{
-					echo "Error: Save posted an invalid array expression. <br />";
+					/* translators: This error occurs if the save script failed for some reason. */
+					_e("Error: Save posted an invalid array expression.", 'wordpress-form-manager')."<br />";
 					echo $item['extra'];
 					die();
 				}					
@@ -371,7 +389,8 @@ add_action('wp_ajax_fm_create_csv', 'fm_createCSV');
 function fm_createCSV(){
 	global $fmdb;
 	
-	$fname = sanitize_title($_POST['title'])." (".date("m-y-d h-i-s").").csv";
+	/* translators: the date format for creating the filename of a .csv file.  see http://php.net/date */
+	$fname = sanitize_title($_POST['title'])." (".date(__("m-y-d h-i-s", 'wordpress-form-manager')).").csv";
 	
 	$fmdb->writeFormSubmissionDataCSV($_POST['id'], dirname(__FILE__)."/".get_option("fm-temp-dir")."/".$fname);
 	
@@ -438,17 +457,14 @@ function fm_downloadAllFiles(){
 		die();
 	}
 	else{
-		echo "empty";
 		die();
 	}
-	
-	echo "fail";	
 	die();
 }
 
 function fm_createFileFromDB($filename, $fileInfo, $dir){
 	$fullpath = $dir.$filename;
-	$fp = @fopen($fullpath,'wb') or die("Failed to open file");
+	$fp = @fopen($fullpath,'wb') or die(__("Failed to open file", 'wordpress-form-manager'));
 	fwrite($fp, $fileInfo['contents']);
 	fclose($fp);
 }
@@ -628,7 +644,7 @@ function fm_doFormBySlug($formSlug){
 				}				
 			}
 			else
-				return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink()), $userData[0]);
+				return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'text_value_as_placeholder' => false), $userData[0]);
 		}
 	}
 	
