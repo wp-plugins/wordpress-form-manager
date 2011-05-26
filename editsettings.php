@@ -35,7 +35,7 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 	<div id="message-container"><?php 
 	if(isset($_POST['message']))
 		switch($_POST['message']){
-			case 1: ?><div id="message-success" class="updated"><p><strong<?php _e(">Settings Saved.", 'wordpress-form-manager');?> </strong></p></div><?php break;
+			case 1: ?><div id="message-success" class="updated"><p><strong><?php _e("Settings Saved.", 'wordpress-form-manager');?> </strong></p></div><?php break;
 			case 2: ?><div id="message-error" class="error"><p><?php _e("Save failed.", 'wordpress-form-manager');?> </p></div><?php break;
 			default: ?>
 				<?php if(isset($_POST['message']) && trim($_POST['message']) != ""): ?>
