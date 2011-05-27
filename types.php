@@ -13,7 +13,8 @@ $fm_controlTypes = array('default' => 'fm_controlBase',
 						'custom_list' => 'fm_customListControl',
 						'separator' => 'fm_separatorControl',
 						'note' => 'fm_noteControl',
-						'recaptcha' => 'fm_recaptchaControl'
+						'recaptcha' => 'fm_recaptchaControl',
+						'file' => 'fm_fileControl'
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,7 @@ include 'types/checkbox.php';
 include 'types/list.php';
 include 'types/note.php';
 include 'types/recaptcha.php';
+include 'types/file.php';
 
 //'panel' helpers
 include 'types/panelhelper.php';

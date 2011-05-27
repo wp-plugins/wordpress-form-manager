@@ -1,9 +1,25 @@
 <?php
+/* translators: checkbox element settings */
 
 class fm_checkboxControl extends fm_controlBase{
 	public function getTypeName(){ return "checkbox"; }
+	
+	/* translators: this appears in the 'Add Form Element' menu */
+	public function getTypeLabel(){ return __("Checkbox", 'wordpress-form-manager'); }
+	
+	public function itemDefaults(){
+		$itemInfo = array();
+		$itemInfo['label'] = __("New Checkbox", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
+		$itemInfo['extra'] = array();
+		$itemInfo['nickname'] = '';
+		$itemInfo['required'] = 0;
+		$itemInfo['validator'] = "";
+		$ItemInfo['validation_msg'] = "";
+		$itemInfo['db_type'] = "VARCHAR( 10 )";
 		
-	public function getTypeLabel(){ return "Checkbox"; }
+		return $itemInfo;
+	}
 	
 	public function showItem($uniqueName, $itemInfo){
 		$elem=array('type' => 'checkbox',
@@ -27,9 +43,9 @@ class fm_checkboxControl extends fm_controlBase{
 	
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'value', 'Checked by Default', array('checked'=>$itemInfo['extra']['value']));
-		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', 'Required', array('checked'=>$itemInfo['required']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'value', __('Checked by Default', 'wordpress-form-manager'), array('checked'=>$itemInfo['extra']['value']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		return $arr;
 	}
 	
