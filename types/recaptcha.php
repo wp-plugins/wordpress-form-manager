@@ -37,10 +37,10 @@ class fm_recaptchaControl extends fm_controlBase{
 									$_POST["recaptcha_challenge_field"],
 									$_POST["recaptcha_response_field"]);
 		
-		if (!$resp->is_valid) {
-		// What happens when the CAPTCHA was entered incorrectly
-		$this->err = $resp->error;
-			return false;
+		if (!$resp->is_valid === false) {
+			// What happens when the CAPTCHA was entered incorrectly
+			$this->err = $resp->error;
+				return false;
 		} 
 		$this->err = false;
 		return "";
