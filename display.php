@@ -196,6 +196,10 @@ protected function displayFormScripts($formInfo, $options=array()){
 
 function displayDataSummary($type, $formInfo, $data){
 	global $fmdb;
+	global $fm_templates;
+	
+	$templateFile = "";
+	
 	if($type == 'email'){
 		$templateFile = $formInfo['email_template'];
 		if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_email');
@@ -206,8 +210,13 @@ function displayDataSummary($type, $formInfo, $data){
 		if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_summary');
 		if($templateFile == '') $templateFile = get_option('fm-default-summary-template');
 	}
+	else if($fm_templates->isTemplate($type.".php"))	
+		$templateFile = $type.".php";
 	
-	return $this->displayDataSummaryTemplate($templateFile, $formInfo, $data);
+	if($templateFile != "")
+		return $this->displayDataSummaryTemplate($templateFile, $formInfo, $data);
+	
+	return "The template '".$type."' was not found.";	
 }
 
 function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "", $userAndTimestamp = false){
@@ -242,8 +251,8 @@ function displayDataSummaryTemplate($template, $formInfo, $data){
 	$this->currentItemIndex = -1;
 	
 	//strip slashes from the data
-	foreach($this->currentFormData as $k=>$v)
-		$this->currentFormData[$k] = stripslashes($v);
+	//foreach($this->currentFormData as $k=>$v)
+	//	$this->currentFormData[$k] = stripslashes($v);
 	
 	ob_start();
 	

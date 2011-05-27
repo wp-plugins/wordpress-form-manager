@@ -26,6 +26,9 @@ if(isset($_POST['submit-form-settings'])){
 	$formInfo['summary_template'] = $_POST['summary_template'];
 	$formInfo['use_advanced_email'] = ($_POST['use_advanced_email']=="on"?1:0);
 	$formInfo['advanced_email'] = $_POST['advanced_email'];
+	$formInfo['publish_post'] = ($_POST['publish_post']=="on"?1:0);
+	$formInfo['publish_post_category'] = $_POST['publish_post_category'];
+	$formInfo['publish_post_title'] = $_POST['publish_post_title'];
 	
 	$formInfo['items'] = $form['items'];
 	foreach($form['items'] as $index => $item){
@@ -111,7 +114,7 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 
 <h3><?php _e("Custom E-Mail Notifications", 'wordpress-form-manager');?></h3>
 <table>
-<tr><td width="300px"><?php _e("Use custom e-mail notifications", 'wordpress-form-manager');?></td><td align="left"><input type="checkbox" name="use_advanced_email" <?php echo ($form['use_advanced_email'] == 1 ? "checked=\"checked\"" : ""); ?> ? /></td></tr>
+<tr><td width="350px"><?php _e("Use custom e-mail notifications", 'wordpress-form-manager');?></td><td align="left"><input type="checkbox" name="use_advanced_email" <?php echo ($form['use_advanced_email'] == 1 ? "checked=\"checked\"" : ""); ?> ? /></td></tr>
 <tr><td colspan="2"><span class="description"><?php _e("This will override the 'E-Mail Notifications' settings in both the main editor and the plugin settings page with the information entered below", 'wordpress-form-manager');?></span></td></tr>
 </table>
 <textarea name="advanced_email" rows="15" style="width:80%" ><?php echo $form['advanced_email']; ?></textarea>
@@ -127,6 +130,13 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 	if($item['type'] != 'separator' && $item['type'] != 'note' && $item['type'] != 'recaptcha')
 		helper_text_field($item['unique_name'].'-nickname', $item['label'], $item['nickname']);
 } ?>
+</table>
+
+<h3><?php _e("Publish Submitted Data", 'wordpress-form-manager');?></h3>
+<table class="form-table">
+<?php helper_checkbox_field('publish_post', __("Publish submissions as posts", 'wordpress-form-manager'), ($form['publish_post'] == 1)); ?> 
+<tr><th scope="row"><label><?php _e("Post category", 'wordpress-form-manager'); ?></label></th><td><?php wp_dropdown_categories(array('hide_empty' => 0, 'name' => 'publish_post_category', 'hierarchical' => true, 'selected' => $form['publish_post_category'])); ?></td></tr>
+<?php helper_text_field('publish_post_title', __("Post title", 'wordpress-form-manager'), htmlspecialchars($form['publish_post_title']), "Include '%s' where you would like the form title to appear"); ?>
 </table>
 
 <p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  /></p>

@@ -38,9 +38,16 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
   
 
 = Changes: =
+= 1.4.16 =
+* Publish submitted data to posts
+* Show a table of all submissions within a post
+* Fixed IE download issues
+* Fixed Unicode issues with CSV / ZIP downloads
+* Integration with WP-SlimStat
+
 = 1.4.15 =
 * Fixed 'show summary' error
-* Fixed CSS download with international characters
+* Fixed CSV download with international characters
 * Admins can edit posted data
 * Minor interface changes
 * Compatibility for internationalization added

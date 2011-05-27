@@ -4,6 +4,8 @@ global $fmdb;
 global $fm_display;
 global $fm_controls;
 
+global $fm_SLIMSTAT_EXISTS;
+
 $itemsPerPage = 30;
 $set = isset($_REQUEST['set']) ? $_REQUEST['set'] : 0;
 
@@ -274,10 +276,11 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 			<div style="float:right;">
 				Page: &nbsp;&nbsp;
 				<?php for($x=0;$x<$numDataPages;$x++): ?>
-				<a href="<?php 
-					echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('set' => $x)));
-					?>">
-					<?php echo $x+1; ?></a>&nbsp;
+					<?php if($set == $x): ?>
+						<strong><?php echo $x+1; ?>&nbsp;</strong>
+					<?php else: ?>
+						<a href="<?php echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('set' => $x)));?>"> <?php echo $x+1; ?></a>&nbsp;
+					<?php endif; ?>
 				<?php endfor; ?>
 			</div>			
 		</div>
@@ -302,7 +305,12 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 									<?php echo (trim($formItem['nickname']) != "" ? $formItem['nickname'] : fm_restrictString($formItem['label'],20));?>
 									</a>
 									<?php if($formItem['type'] == 'file'): ?>
-									<a class="fm-download-link" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')"><?php _e("Download Files", 'wordpress-form-manager');?></a>
+									<div style="margin-top:8px"><a id="<?php echo $formItem['unique_name'];?>-download" class="button-primary" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')"><?php _e("Download Files", 'wordpress-form-manager');?></a>																	
+									</div>
+									<div style="position:absolute;">
+										<div id="<?php echo $formItem['unique_name'];?>-working" style="visibility:hidden;position:relative;top:-17px;margin-bottom:-17px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;Working...</div>
+										<a style="visibility:hidden;position:relative;top:-17px;text-decoration:underline;" id="<?php echo $formItem['unique_name'];?>-link" href="#">&nbsp;</a>
+									</div>
 									<?php endif; ?>
 									</th>
 					<?php endif; ?>
@@ -328,10 +336,12 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<td><input type="checkbox" name="fm-checked-<?php echo $index;?>" id="fm-checked-<?php echo $index++;?>"/></td>
 					<td><?php echo $dataRow['timestamp'];?></td>
 					<td><?php echo $dataRow['user'];?></td>
-					<td><?php echo $dataRow['user_ip'];?></td>
+					<td><?php if($fm_SLIMSTAT_EXISTS): echo fm_get_slimstat_IP_link($queryVars, $dataRow['user_ip']); ?>
+						<?php else: echo $dataRow['user_ip']; endif; ?>
+					</td>
 					<?php foreach($form['items'] as $formItem): ?>
 						<?php if($formItem['type'] == 'file'): ?>
-							<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="<?php _e("Download", 'wordpress-form-manager');?> '<?php echo $formItem['label'];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
+							<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="<?php _e("Download", 'wordpress-form-manager');?> '<?php echo $dataRow[$formItem['unique_name']];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
 						<?php elseif($formItem['db_type'] != "NONE"): ?>
 							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
 						<?php endif; ?>

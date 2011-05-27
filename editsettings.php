@@ -45,22 +45,22 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 		} 
 	?></div>
 
-<h3>Global E-Mail Notifications</h3>
+<h3><?php _e("Global E-Mail Notifications");?></h3>
 <table class="form-table">
 <tr><td colspan="2"><?php _e("These settings will be applied to every form you create.", 'wordpress-form-manager');?></td></tr>
 <?php helper_checkbox_field('email_admin', __("Send to Administrator", 'wordpress-form-manager')." (".get_option('admin_email').")", ($fm_globalSettings['email_admin'] == "YES")); ?>
 <?php helper_checkbox_field('email_reg_users', __("Registered Users", 'wordpress-form-manager'), ($fm_globalSettings['email_reg_users'] == "YES"), __("A confirmation e-mail will be sent to a registered user only when they submit a form", 'wordpress-form-manager')); ?>
 </table>
 
-<h3>Default Form Settings</h3>
+<h3><?php _e("Default Form Settings");?></h3>
 <table class="form-table">
 <?php helper_text_field('title', __("Form Title", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['title'])); ?>
 <?php helper_text_field('submitted_msg', __("Submit Acknowledgment", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['submitted_msg'])); ?>
 <?php helper_text_field('required_msg', __("Required Item Message", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['required_msg']), __("This is displayed when a user fails to input a required item.  Include '%s' in the message where you would like the item's label to appear.", 'wordpress-form-manager')); ?>
 </table>
 
-<h3>reCAPTCHA Settings</h3>
-<span class="description">API Keys for reCAPTCHA can be acquired (for free) by visiting <a target="_blank" href="https://www.google.com/recaptcha">www.google.com/recaptcha</a>.</span>
+<h3><?php _e("reCAPTCHA Settings");?></h3>
+<span class="description"><?php _e("API Keys for reCAPTCHA can be acquired (for free) by visiting");?> <a target="_blank" href="https://www.google.com/recaptcha">www.google.com/recaptcha</a>.</span>
 <table class="form-table">
 <?php helper_text_field('recaptcha_public', __("reCAPTCHA Public Key", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['recaptcha_public'])); ?>
 <?php helper_text_field('recaptcha_private', __("reCAPTCHA Private Key", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['recaptcha_private'])); ?>

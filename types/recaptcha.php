@@ -46,7 +46,6 @@ class fm_recaptchaControl extends fm_controlBase{
 		return "";
 	}
 	
-
 	public function itemDefaults(){
 		$itemInfo = array();
 		$itemInfo['label'] = "New reCAPTCHA";

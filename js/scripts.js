@@ -169,6 +169,8 @@ function fm_dataCBColChange(){
 
 function fm_downloadCSV(){
 	document.getElementById('csv-working').style.visibility = 'visible';
+	document.getElementById('fm-csv-download-link').innerHTML = "";
+	
 	var data = {
 		action: 'fm_create_csv',
 		id: document.getElementById('form-id').value,
@@ -199,13 +201,18 @@ function fm_downloadFile(_itemID, _timestamp, _user, _user_ip){
 }
 
 function fm_downloadAllFiles(_itemID){
+	document.getElementById(_itemID + '-download').style.visibility = 'hidden';
+	document.getElementById(_itemID + '-working').style.visibility = 'visible';
+	
 	var data = {
 		action: 'fm_download_all_files',
 		id: document.getElementById('form-id').value,
 		itemid: _itemID			
 	}
 	
-	jQuery.post(ajaxurl, data, function(response){
+	jQuery.post(ajaxurl, data, function(response){		
+		document.getElementById(_itemID + '-working').style.visibility = 'hidden';
+	
 		switch(response){
 			case "empty":
 				alert("There are no files to download");
@@ -213,7 +220,9 @@ function fm_downloadAllFiles(_itemID){
 			case "fail":
 				alert("Unable to create .ZIP file");
 			default:
-				window.open(response,'Download');
+				document.getElementById(_itemID + "-link").style.visibility = 'visible';
+				document.getElementById(_itemID + "-link").href = response;
+				document.getElementById(_itemID + "-link").innerHTML = "Click here to download";
 		}
 	});
 }

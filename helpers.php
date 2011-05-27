@@ -97,6 +97,10 @@ function fm_get_user_IP(){
 	return $IPAddr;
 }
 
+function fm_get_slimstat_IP_link($queryVars, $ipAddr){
+	return "<a href=\"".get_admin_url(null, 'index.php')."?".http_build_query(array_merge($queryVars, array('page' => 'wp-slimstat/view/index.php', 'slimpanel' => 4, 'ip' => $ipAddr, 'ip-op' => 'equal', 'direction' => 'DESC')))."\">".$ipAddr."</a>";
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Custom shortcode processor
 

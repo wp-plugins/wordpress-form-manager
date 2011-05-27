@@ -80,7 +80,10 @@ $this->formSettingsKeys = array(
 					'template_values' => '',
 					'show_summary' => 0,
 					'use_advanced_email' => false,
-					'advanced_email' => ''
+					'advanced_email' => '',
+					'publish_post' => 0,
+					'publish_post_category' => '',
+					'publish_post_title' => '%s Submission'
 					);			
 					
 $this->itemKeys = array (
@@ -172,6 +175,9 @@ function setupFormManager(){
 		show_summary		- whether or not to show a summary of the submitted data along with the submission acknowledgment
 		use_advanced_email	- whether or not to override the 'E-Mail Notifications' settings on the main form editor
 		advanced_email		- the advanced email settings, a block of text defining e-mails, headers, etc.
+		publish_post		- whether or not to publish form submissions to a post category
+		publish_post_category - the post category to publish submissions to
+		publish_post_title 	- the title of published posts
 	*/	
 	
 	
@@ -196,6 +202,9 @@ function setupFormManager(){
 		`show_summary` BOOL DEFAULT '0' NOT NULL,
 		`use_advanced_email` BOOL DEFAULT '0' NOT NULL,
 		`advanced_email` TEXT DEFAULT '' NOT NULL,
+		`publish_post` BOOL DEFAULT '0' NOT NULL,
+		`publish_post_category` TEXT DEFAULT '' NOT NULL,
+		`publish_post_title` TEXT DEFAULT '' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -733,21 +742,36 @@ function writeFormSubmissionDataCSV($formID, $fname){
 		}
 	}
 
-	$fp = fopen($fname,'w') or die("Failed to open file: '".$php_errormsg."'");
+	//use the stream capture to get the CSV formatted data, since we need to mess with the encoding later
+	ob_start();
+	
+	$fp = fopen("php://output",'w');
 	
 	//use fputcsv instead of reinventing the wheel:
 	foreach($csvRows as $csvRow){
-		fputcsv($fp, $csvRow);	
+		fputcsv($fp, $csvRow, chr(9));	
 	}
+	
+	fclose($fp);
+		
+	$str = ob_get_contents();
+	ob_end_clean();
+	
+	
+	//Properly encode the CSV so Excel can open it: Credit for this goes to someone called Eugene Murai
+	$fp = fopen($fname, 'w') or die("Failed to open file: '".$php_errormsg."'");
+	
+	$tmp = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
+	$write = fwrite( $fp, $tmp );	
 	
 	fclose($fp);
 }
 
-function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $endIndex = 30){
+function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){
 	global $fm_controls;
 	
 	$formInfo = $this->getForm($formID);	
-	$postData = $this->getFormSubmissionDataRaw($formID, $orderBy, $ord, $startIndex, $endIndex);
+	$postData = $this->getFormSubmissionDataRaw($formID, $orderBy, $ord, $startIndex, $numItems);
 	$postCount = $this->getSubmissionDataNumRows($formID);
 	
 	if($postData === false) return false;
@@ -763,12 +787,12 @@ function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $
 	return $dataInfo;
 }
 
-function getFormSubmissionDataRaw($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $endIndex = 30){
+function getFormSubmissionDataRaw($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){
 	$dataTable = $this->getDataTableName($formID);
-	if($startIndex == 0 && $endIndex == 0)
+	if( $numItems == 0 )
 		$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord}";
 	else
-		$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord} LIMIT {$startIndex}, {$endIndex}";
+		$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord} LIMIT {$startIndex}, {$numItems}";
 	$res = $this->query($q);
 	if(mysql_num_rows($res) == 0) return array();
 	$data=array();
@@ -818,6 +842,7 @@ function isDataCol($formID, $uniqueName){
 	return ($type != "NONE");	
 }
 
+function getSubmissionDataCount($formID){ return $this->getSubmissionDataNumRows($formID); }
 function getSubmissionDataNumRows($formID){
 	$dataTable = $this->getDataTableName($formID);
 	$q = "SELECT COUNT(*) FROM `{$dataTable}`";

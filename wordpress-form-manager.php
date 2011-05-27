@@ -29,10 +29,13 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.15";
+$fm_currentVersion = "1.4.16";
 
 global $fm_DEBUG;
+global $fm_SLIMSTAT_EXISTS;
+
 $fm_DEBUG = false;
+$fm_SLIMSTAT_EXISTS = false;
 
 /* translators: the following are used for the admin interface */
 
@@ -74,6 +77,7 @@ update_option("fm-query-table-prefix", "fm_queries");
 update_option("fm-default-form-template", "fm-form-default.php");
 update_option("fm-default-summary-template", "fm-summary-default.php");
 update_option("fm-temp-dir", "tmp");
+update_option("fm-data-shortcode", "formdata");
 
 global $wpdb;
 global $fmdb;
@@ -136,6 +140,7 @@ function fm_uninstall(){
 	delete_option('fm-default-summary-template');
 	delete_option('fm-version');
 	delete_option('fm-temp-dir');
+	delete_option('fm-data-shortcode');
 }
 register_uninstall_hook(__FILE__,'fm_uninstall');
 
@@ -160,6 +165,8 @@ function fm_cleanCSVData(){
 
 add_action('admin_init', 'fm_adminInit');
 function fm_adminInit(){
+	global $fm_SLIMSTAT_EXISTS;
+	
 	wp_enqueue_script('scriptaculous');
 	wp_enqueue_script('scriptaculous-dragdrop');
 
@@ -167,6 +174,8 @@ function fm_adminInit(){
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');	
+	
+	if(get_option('slimstat_secret') !==  false) $fm_SLIMSTAT_EXISTS = true;
 }
 
 add_action('init', 'fm_userInit');
@@ -335,7 +344,7 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['required_msg'] = $_POST['required_msg'];
 	$formInfo['template_values'] = $_POST['template_values'];	
 	$formInfo['show_summary'] = ($_POST['show_summary']=="true"?1:0);
-	$formInfo['email_user_field'] = $_POST['email_user_field'];
+	$formInfo['email_user_field'] = $_POST['email_user_field'];	
 	
 	//build the notification email list
 	$emailList = explode(",", $_POST['email_list']);
@@ -416,13 +425,30 @@ function fm_createCSV(){
 	global $fmdb;
 	
 	/* translators: the date format for creating the filename of a .csv file.  see http://php.net/date */
-	$fname = sanitize_title($_POST['title'])." (".date(__("m-y-d h-i-s", 'wordpress-form-manager')).").csv";
+	$fname = $_POST['title']." (".date(__("m-y-d h-i-s", 'wordpress-form-manager')).").csv";
 	
-	$fmdb->writeFormSubmissionDataCSV($_POST['id'], dirname(__FILE__)."/".get_option("fm-temp-dir")."/".$fname);
+	$CSVFileFullPath = dirname(__FILE__)."/".get_option("fm-temp-dir")."/".sanitize_title($fname);
 	
-	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__).$fname;
+	$fmdb->writeFormSubmissionDataCSV($_POST['id'], $CSVFileFullPath);
+	
+	$fp = fopen(dirname(__FILE__)."/".get_option("fm-temp-dir")."/"."download.php", "w");	
+	fwrite($fp, fm_createDownloadFileContents($CSVFileFullPath, $fname));	
+	fclose($fp);
+	
+	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__)."download.php";
 	
 	die();
+}
+
+function fm_createDownloadFileContents($localFileName, $downloadFileName){
+	$str = "";
+	
+	$str.= "<?php\n";
+	$str.= "header('Content-Disposition: attachment; filename=\"".$downloadFileName."\"');\n";
+	$str.= "readfile('".$localFileName."');\n";
+	$str.= "?>";
+ 
+	return $str;
 }
 
 //Download an uploaded file
@@ -475,11 +501,15 @@ function fm_downloadAllFiles(){
 	
 	if(sizeof($files) > 0){
 	
-		$zipFileName = sanitize_title($formInfo['title']." - ".$itemLabel).".zip";
-		$zipFullPath =  $tmpDir.$zipFileName;	
+		$zipFileName = $formInfo['title']." - ".$itemLabel.".zip";
+		$zipFullPath =  $tmpDir.sanitize_title($zipFileName);	
 		fm_createZIP($files, $zipFullPath); 
 		 
-		echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$zipFileName;
+		$fp = fopen(dirname(__FILE__)."/".get_option("fm-temp-dir")."/"."download.php", "w");	
+		fwrite($fp, fm_createDownloadFileContents($zipFullPath, $zipFileName));	
+		fclose($fp); 
+		
+		echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__)."download.php";
 		die();
 	}
 	else{
@@ -544,9 +574,86 @@ function fm_shortcodeHandler($atts){
 	return fm_doFormBySlug($atts[0]);
 }
 
+add_shortcode(get_option('fm-data-shortcode'), 'fm_dataShortcodeHandler');
+function fm_dataShortcodeHandler($atts){
+	$formSlug = $atts[0];
+	
+	$atts = shortcode_atts(array(
+		'orderby' => 'timestamp',
+		'order' => 'desc',
+		'dataperpage' => 30,
+		'template' => 'fm-summary-multi'
+		), $atts);
+		
+	return fm_doDataListBySlug($formSlug, $atts['template'], $atts['orderby'], $atts['order'], $atts['dataperpage']);	
+}
 
 /**************************************************************/
 /******* API **************************************************/
+
+//takes a form's slug as a string, returns paginated 
+function fm_doDataListBySlug($formSlug, $template, $orderBy = 'timestamp', $ord = 'DESC', $dataPerPage = 30){
+	global $fmdb;
+	
+	parse_str($_SERVER['QUERY_STRING'], $queryVars);
+	
+	$formID = $fmdb->getFormID($formSlug);
+	if($formID === false) return "(form ".(trim($formSlug)!=""?"'{$formSlug}' ":"")."not found)";
+	
+	$currentPage = (isset($_REQUEST['fm-data-page']) ? $_REQUEST['fm-data-page'] : 0);
+	$currentStartIndex = $currentPage * $dataPerPage;
+	
+	$submissionCount = $fmdb->getSubmissionDataCount($formID);
+	$numPages = ceil($submissionCount / $dataPerPage);
+	$pageLinkStr = "";
+	
+	$pageRoot = get_permalink();
+	$pageRoot = substr($pageRoot, 0, strpos($pageRoot, "?"));
+	
+	// navigation 
+	$pageLinkStr = "";
+	if($numPages > 1){
+		$pageLinkStr = "<p class=\"fm-data-nav\">";
+		if($currentPage != 0)
+			$pageLinkStr.= "<a href=\"".$pageRoot."?".http_build_query(array_merge($queryVars, array('fm-data-page' => ($currentPage - 1))))."\"><</a>&nbsp;";
+		for($x=0;$x<$numPages;$x++){
+			if($currentPage == $x)
+				$pageLinkStr.= "<strong>".($x+1)."&nbsp;</strong>";
+			else
+				$pageLinkStr.= "<a href=\"".$pageRoot."?".http_build_query(array_merge($queryVars, array('fm-data-page' => $x)))."\">".($x+1)."</a>&nbsp;";		
+		}
+		if($currentPage != ($numPages - 1))
+			$pageLinkStr.= "<a href=\"".$pageRoot."?".http_build_query(array_merge($queryVars, array('fm-data-page' => ($currentPage + 1))))."\">></a>&nbsp;";
+		$pageLinkStr.= "</p>";
+	}
+	
+	// summaries
+	$summaries = fm_getFormDataSummaries($formID, $template, $orderBy, $ord, $currentStartIndex, $dataPerPage);
+	$summaryListStr = '<p class="fm-data">'.implode('</p><p class="fm-data">', $summaries).'</p>';
+	
+	// put it all together
+	return  $pageLinkStr.
+			$summaryListStr.
+			$pageLinkStr;
+}
+
+//takes a form's slug as a string, returns an array of strings containing formatted data summaries, using the 'summary' template.
+function fm_getFormDataSummaries($formID, $template, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){
+	global $fmdb;
+	global $fm_display;
+	
+	$formInfo = $fmdb->getForm($formID);
+	
+	$formData = $fmdb->getFormSubmissionDataRaw($formID, $orderBy, strtoupper($ord), $startIndex, $numItems);
+	
+	
+	$strArray = array();
+	foreach($formData as $dataRow){
+		$strArray[] = $fm_display->displayDataSummary($template, $formInfo, $dataRow);
+	}
+	
+	return $strArray;	
+}
 
 //takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior), processes posts, etc.
 function fm_doFormBySlug($formSlug){
@@ -634,6 +741,22 @@ function fm_doFormBySlug($formSlug){
 					wp_mail($email['to'], $email['subject'], $email['message'], $headerStr);
 				}
 			}
+			
+			//publish the submission as a post, if the form is set to do so
+			if($formInfo['publish_post'] == 1){
+				// Create post object
+				 $my_post = array(
+					 'post_title' => sprintf($formInfo['publish_post_title'], $formInfo['title']),
+					 'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
+					 'post_status' => 'publish',
+					 'post_author' => 1,
+					 'post_category' => array($formInfo['publish_post_category'])
+				  );
+				
+				// Insert the post into the database
+				  wp_insert_post( $my_post );
+			}			
+			
 			//display the acknowledgment of a successful submission
 			if(!isset($formBehaviors['display_summ']))
 				return '<p>'.$formInfo['submitted_msg'].'</p>'.
@@ -679,4 +802,9 @@ function fm_doFormBySlug($formSlug){
 }
 
 set_include_path($fm_oldIncludePath);
+
+/**************************************************************/
+/******* HELPERS **********************************************/
+
+
 ?>
