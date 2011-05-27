@@ -21,12 +21,12 @@ if($userName != ""){
 On: <strong><?php echo date("M j, Y @ g:i A", strtotime(fm_summary_the_timestamp())); ?></strong> <br />
 IP: <strong><?php echo fm_summary_the_IP(); ?></strong> <br />
 <?php /* The code below displays each form element, in order, along with the submitted data. */ ?>
-<ul>
+<ul id="fm-summary-multi">
 <?php while(fm_summary_have_items()): fm_summary_the_item(); ?>
 	<?php if(fm_summary_the_type() == 'separator'): ?>
 		<hr />
 	<?php elseif(fm_summary_has_data()): ?>
-		<li><?php echo fm_summary_the_label();?>: <strong><?php echo fm_summary_the_value();?></strong></li>
+		<li<?php if(fm_summary_the_nickname() != "") echo " id=\"fm-item-".fm_summary_the_nickname()."\"";?>><?php echo fm_summary_the_label();?>: <strong><?php echo fm_summary_the_value();?></strong></li>
 	<?php endif; ?>
 <?php endwhile; ?>
 </ul>
