@@ -1147,7 +1147,7 @@ function getFormItems($formID){
 function getFormItem($uniqueName){
 	$q = "SELECT * FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
 	$res = $this->query($q);
-	if(mysql_num_rows($res)==0)	return null;
+	if(mysql_num_rows($res)==0)	return false;
 	$row = $this->unpackItem(mysql_fetch_assoc($res));
 	mysql_free_result($res);
 	return $row;

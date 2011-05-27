@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.15
+Version: 1.4.16
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -597,8 +597,17 @@ function fm_doDataListBySlug($formSlug, $template, $orderBy = 'timestamp', $ord 
 	
 	parse_str($_SERVER['QUERY_STRING'], $queryVars);
 	
+	// make sure the slug is valid
 	$formID = $fmdb->getFormID($formSlug);
-	if($formID === false) return "(form ".(trim($formSlug)!=""?"'{$formSlug}' ":"")."not found)";
+	if($formID === false) return "(form ".(trim($formSlug)!=""?"'{$formSlug}' ":"")."not found".")";
+	
+	// see if 'orderby' is a valid unique name
+	$orderByItem = $fmdb->getFormItem($orderBy);
+	if($orderByItem === false) // not a valid unique name, but could be a nickname
+		$orderByItem = $fmdb->getItemByNickname($formID, $orderBy);
+	if($orderByItem === false) return "(orderby) ".$orderBy." not found";
+	
+	$orderBy = $orderByItem['unique_name'];
 	
 	$currentPage = (isset($_REQUEST['fm-data-page']) ? $_REQUEST['fm-data-page'] : 0);
 	$currentStartIndex = $currentPage * $dataPerPage;
