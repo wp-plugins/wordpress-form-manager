@@ -82,7 +82,7 @@ function displayFormBare($formInfo, $options=array(), $values=array()){
 				////////////////////////////////////////////////////////////////////////////////////////
 				
 					$str.='<table><tr>';
-					$str.='<td style="width:'.$options['label_width'].'px"><label>'.$item['label'];
+					$str.='<td style="width:'.$options['label_width'].'px"><label>'.(trim($item['nickname']) == "" ? $item['label'] : $item['nickname']);
 					if($item['required']=='1')	$str.= '&nbsp;<em>*</em>';
 					$str.='</label>';
 					$str.='</td>';

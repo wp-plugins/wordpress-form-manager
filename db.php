@@ -84,7 +84,7 @@ $this->formSettingsKeys = array(
 					'publish_post' => 0,
 					'publish_post_category' => '',
 					'publish_post_title' => '%s Submission'
-					);			
+					);
 					
 $this->itemKeys = array (
 					'type' => 0,
@@ -785,6 +785,18 @@ function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $
 	$dataInfo['data'] = $postData;
 	$dataInfo['count'] = $postCount;
 	return $dataInfo;
+}
+
+// returns all the form rows, but only the timestamp, user, and IP address columns
+function getFormSubmissionUserData($formID){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "SELECT `timestamp`, `user`, `user_ip` FROM `{$dataTable}`";
+	$data = array();
+	$res = $this->query($q);
+	while($row = mysql_fetch_assoc($res))
+		$data[] =  $row;
+	mysql_free_result($res);
+	return $data;
 }
 
 function getFormSubmissionDataRaw($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){

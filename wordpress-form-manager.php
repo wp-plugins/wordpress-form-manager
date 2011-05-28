@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.16
+Version: 1.4.17
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,15 +29,17 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.16";
+$fm_currentVersion = "1.4.17";
 
 global $fm_DEBUG;
-global $fm_SLIMSTAT_EXISTS;
-
 $fm_DEBUG = false;
-$fm_SLIMSTAT_EXISTS = false;
 
-/* translators: the following are used for the admin interface */
+// flags for other plugins we want to integrate with
+global $fm_SLIMSTAT_EXISTS;
+global $fm_MEMBERS_EXISTS;
+
+$fm_SLIMSTAT_EXISTS = false;
+$fm_MEMBERS_EXISTS = false;
 
 /**************************************************************/
 /******* HOUSEKEEPING *****************************************/
@@ -183,7 +185,7 @@ function fm_userInit(){
 	global $fm_currentVersion;
 	global $fm_templates;
 	
-	load_plugin_textdomain('wordpress-form-manager', 'wp-content/plugins/wordpress-form-manager/languages');
+	load_plugin_textdomain('wordpress-form-manager', false, dirname(plugin_basename(__FILE__)).'/languages/' );
 		
 	//update check, since the snarky wordpress dev changed the behavior of a function based on its english name, rather than its widely accepted usage.
 	//"The perfect is the enemy of the good". 
@@ -216,7 +218,7 @@ function fm_userHead(){
 
 add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
-	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-admin-main", 'fm_showMainPage');
+	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), apply_filters('fm_main_capability', 'manage_options'), "fm-admin-main", 'fm_showMainPage');
 	$pages[] = add_submenu_page("fm-admin-main", __("Edit", 'wordpress-form-manager'), __("Edit", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-edit-form", 'fm_showEditPage');
 	$pages[] = add_submenu_page("fm-admin-main", __("Data", 'wordpress-form-manager'), __("Data", 'wordpress-form-manager'), apply_filters('fm_data_capability', 'manage_options'), "fm-form-data", 'fm_showDataPage');	
 	
@@ -224,9 +226,9 @@ function fm_setupAdminMenu(){
 	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
 	
 	$pages[] = add_submenu_page("fm-admin-main", __("Settings", 'wordpress-form-manager'), __("Settings", 'wordpress-form-manager'), apply_filters('fm_settings_capability', 'manage_options'), "fm-global-settings", 'fm_showSettingsPage');
-	$pages[] = add_submenu_page("fm-admin-main", __("Advanced Settings", 'wordpress-form-manager'), __("Advanced Settings", 'wordpress-form-manager'), apply_filters('fm_settings_capability', 'manage_options'), "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Advanced Settings", 'wordpress-form-manager'), __("Advanced Settings", 'wordpress-form-manager'), apply_filters('fm_settings_advanced_capability', 'manage_options'), "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
-	$pages[] = add_submenu_page("fm-admin-main", __("Edit Form - Advanced", 'wordpress-form-manager'), __("Edit Form - Advanced", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Edit Form - Advanced", 'wordpress-form-manager'), __("Edit Form - Advanced", 'wordpress-form-manager'), apply_filters('fm_forms_advanced_capability', 'manage_options'), "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
 	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
@@ -246,13 +248,16 @@ function fm_adminHead(){
 	global $submenu;	
 	
 	//we don't actually want all the pages to show up in the menu, but having slugs for pages makes things easy
-	//unset($submenu['fm-admin-main'][0]);
-	unset($submenu['fm-admin-main'][1]); //Edit
-	unset($submenu['fm-admin-main'][2]); //Data
 	
-	unset($submenu['fm-admin-main'][4]); //Advanced settings
-	
-	unset($submenu['fm-admin-main'][5]); //Edit Form Advanced
+	$toUnset = array('fm-edit-form',
+						'fm-form-data',
+						'fm-edit-form-advanced'
+						);
+						
+	foreach($submenu['fm-admin-main'] as $index => $submenuItem)
+		if(in_array($submenuItem[2], $toUnset, true))
+			unset($submenu['fm-admin-main'][$index]);	
+
 }
 
 //only show this stuff when viewing a plugin page, since some of it is messy
@@ -272,22 +277,40 @@ function fm_showMainPage(){	include 'main.php'; }
 function fm_showSettingsPage(){	include 'editsettings.php'; }
 function fm_showSettingsAdvancedPage(){	include 'editsettingsadv.php'; }
 
+// capabilities
 
 if (function_exists( 'members_plugin_init' )){
+	$fm_MEMBERS_EXISTS = true;
+	
+	add_filter('fm_main_capability', 'fm_main_capability');
 	add_filter('fm_forms_capability', 'fm_forms_capability');
+	add_filter('fm_forms_advanced_capability', 'fm_forms_advanced_capability');
 	add_filter('fm_data_capability', 'fm_data_capability');
 	add_filter('fm_settings_capability', 'fm_settings_capability');
-	add_filter( 'members_get_capabilities', 'fm_add_members_capabilities' );
+	add_filter('fm_settings_advanced_capability', 'fm_settings_advanced_capability');
+	
+	add_filter('members_get_capabilities', 'fm_add_members_capabilities' ); 
 }
 
+function fm_main_capability( $cap ) { return 'form_manager_main'; }
 function fm_forms_capability( $cap ) { return 'form_manager_forms'; }
+function fm_forms_advanced_capability( $cap ) { return 'form_manager_forms_advanced'; }
 function fm_data_capability( $cap ) { return 'form_manager_data'; }
 function fm_settings_capability( $cap ) { return 'form_manager_settings'; }
+function fm_settings_advanced_capability( $cap ) { return 'form_manager_settings_advanced'; }
 
 function fm_add_members_capabilities( $caps ) {
+	$caps[] = 'form_manager_main';
 	$caps[] = 'form_manager_forms';
+	$caps[] = 'form_manager_forms_advanced';
 	$caps[] = 'form_manager_data';
 	$caps[] = 'form_manager_settings';
+	$caps[] = 'form_manager_settings_advanced';
+	$caps[] = 'form_manager_delete_forms';
+	$caps[] = 'form_manager_add_forms';
+	$caps[] = 'form_manager_edit_data';
+	$caps[] = 'form_manager_delete_data';
+	
 	return $caps;
 }
 

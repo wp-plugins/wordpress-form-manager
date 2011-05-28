@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.16
+Stable tag: 1.4.17
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -35,9 +35,16 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
 
 `[form form-1]`  
 
-  
+= Languages =
+Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 
-= Changes: =
+== Changelog ==
+= 1.4.17 =
+* Italian language support (Thanks to [Andrea Bersi](http://www.andreabersi.com))
+* Specify custom theme for reCAPTCHA
+* Fixed problems when trying to edit submission data
+* Added more capabilites to the Members plugin
+
 = 1.4.16 =
 * Publish submitted data to posts
 * Show a table of all submissions within a post

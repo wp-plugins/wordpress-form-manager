@@ -5,6 +5,7 @@ global $fm_display;
 global $fm_controls;
 
 global $fm_SLIMSTAT_EXISTS;
+global $fm_MEMBERS_EXISTS;
 
 $itemsPerPage = 30;
 $set = isset($_REQUEST['set']) ? $_REQUEST['set'] : 0;
@@ -34,28 +35,32 @@ if(isset($_POST['fm-action-select'])){
 		
 	switch($_POST['fm-action-select']){
 		case "delete":
-			$toDelete = fm_data_getCheckedRows();
-			foreach($toDelete as $del){	
-				$fmdb->deleteSubmissionDataRow($form['ID'], $formData['data'][$del]);
+			if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data')){
+				$toDelete = fm_data_getCheckedRows();
+				foreach($toDelete as $del)
+					$fmdb->deleteSubmissionDataRow($form['ID'], $formData['data'][$del]);				
 			}
+			//clean up the mess we made
+			$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
 			break;
 		case "delete_all":
-			$fmdb->clearSubmissionData($form['ID']);	
+			if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data'))
+				$fmdb->clearSubmissionData($form['ID']);
+			//clean up the mess we made
+			$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
 			break;
 		case "edit":
-			$fm_dataDialog = "edit";	
+			if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data'))
+				$fm_dataDialog = "edit";	
 			break;
 		case "summary":
 			$fm_dataDialog = "summary";
 			break;
 	}
-	
-	//clean up the mess we made
-	$formData = $fmdb->getFormSubmissionData($form['ID']);
 }
 
 //Edit data rows(s)
-else if(isset($_POST['fm-edit-data-ok'])){
+else if((!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')) && isset($_POST['fm-edit-data-ok'])){
 	$numRows = $_POST['fm-num-edit-rows'];
 	$postFailed = false;
 	
@@ -79,13 +84,14 @@ else if(isset($_POST['fm-edit-data-ok'])){
 		}
 		
 		$fmdb->updateDataSubmissionRow($form['ID'],
-										$formData['data'][$x]['timestamp'],
-										$formData['data'][$x]['user'],
-										$formData['data'][$x]['user_ip'],
+										$formData['data'][$dataIndex]['timestamp'],
+										$formData['data'][$dataIndex]['user'],
+										$formData['data'][$dataIndex]['user_ip'],
 										$postData
 										);
 	}
-	$formData = $fmdb->getFormSubmissionData($form['ID']);
+	//clean up the mess we made
+	$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,17 +233,24 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 	<div style="float:right;">
 		
 		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?></a>
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit Form", 'wordpress-form-manager');?></a><br />
-		<div id="csv-working" style="visibility:hidden;padding-top:10px;margin-bottom:-20px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;Working...</div><a href="#" id="fm-csv-download-link"></a>
+		<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_forms')): ?>
+		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit Form", 'wordpress-form-manager');?></a>
+		<?php endif; ?>
+		<br />
+		<div id="csv-working" style="visibility:hidden;padding-top:10px;margin-bottom:-20px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;<?php _e("Working...", 'wordpress-form-manager');?></div><a href="#" id="fm-csv-download-link"></a>
 	</div>
 		<div class="tablenav">			
 			<div class="alignleft actions">
 				<select name="fm-action-select" id="fm-action-select">
 				<option value="-1" selected="selected"><?php _e("Bulk Actions", 'wordpress-form-manager');?></option>
 				<option value="summary"><?php _e("Show Summary", 'wordpress-form-manager');?></option>
+				<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data')): ?>
 				<option value="delete"><?php _e("Delete Selected", 'wordpress-form-manager');?></option>
 				<option value="delete_all"><?php _e("Delete All Submission Data", 'wordpress-form-manager');?></option>
+				<?php endif; ?>
+				<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')): ?>
 				<option value="edit"><?php _e("Edit Selected", 'wordpress-form-manager');?></option>
+				<?php endif; ?>
 				</select>
 				<input type="submit" value="<?php _e("Apply", 'wordpress-form-manager');?>" name="fm-doaction" id="fm-doaction" onclick="return fm_confirmSubmit()" class="button-secondary action" />							
 				<script type="text/javascript">
@@ -308,7 +321,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 									<div style="margin-top:8px"><a id="<?php echo $formItem['unique_name'];?>-download" class="button-primary" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')"><?php _e("Download Files", 'wordpress-form-manager');?></a>																	
 									</div>
 									<div style="position:absolute;">
-										<div id="<?php echo $formItem['unique_name'];?>-working" style="visibility:hidden;position:relative;top:-17px;margin-bottom:-17px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;Working...</div>
+										<div id="<?php echo $formItem['unique_name'];?>-working" style="visibility:hidden;position:relative;top:-17px;margin-bottom:-17px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;<?php _e("Working...", 'wordpress-form-manager');?></div>
 										<a style="visibility:hidden;position:relative;top:-17px;text-decoration:underline;" id="<?php echo $formItem['unique_name'];?>-link" href="#">&nbsp;</a>
 									</div>
 									<?php endif; ?>
@@ -371,7 +384,7 @@ function fm_data_getCheckedRows(){
 	return $checked;
 }
 
-function fm_data_displayTextEdit($uniqueName, $itemInfo){ return "<input name=\"".$uniqueName."\" type=\"text\" value=\"".$itemInfo['extra']['value']."\" style=\"width:400px;\"/>"; }
+function fm_data_displayTextEdit($uniqueName, $itemInfo){ return "<input name=\"".$uniqueName."\" type=\"text\" value=\"".htmlspecialchars($itemInfo['extra']['value'])."\" style=\"width:400px;\"/>"; }
 function fm_data_displayTextAreaEdit($uniqueName, $itemInfo){ return "<textarea style=\"width:400px;\" rows=\"5\"  name=\"".$uniqueName."\" >".$itemInfo['extra']['value']."</textarea>"; }
 function fm_data_displayFileEdit($uniqueName, $itemInfo){ return $itemInfo['extra']['value']; }
 

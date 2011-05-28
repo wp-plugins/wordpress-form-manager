@@ -5,6 +5,8 @@ global $fmdb;
 global $fm_globalSettings;
 global $fm_templates;
 
+global $fm_MEMBERS_EXISTS;
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
@@ -122,8 +124,6 @@ function fm_getManagedListCount(ulID){
 <div class="wrap">
 <div id="icon-edit-pages" class="icon32"></div>
 <h2><?php _e("Form Manager Settings - Advanced", 'wordpress-form-manager');?></h2>
-
-<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-global-settings";?>" ><?php _e("Settings", 'wordpress-form-manager');?></a>
 
 	<div id="message-container"><?php 
 	if(isset($_POST['message']))

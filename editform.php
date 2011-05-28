@@ -8,6 +8,8 @@ global $fm_form_behavior_types;
 global $fm_templates;
 global $fm_template_controls;
 
+global $fm_MEMBERS_EXISTS;
+
 $form = null;
 if($_REQUEST['id']!="")
 	$form = $fmdb->getForm($_REQUEST['id']);
@@ -121,13 +123,15 @@ if(isset($_POST['message']))
 		<h3 class='hndle'><span><?php _e("Submission Data", 'wordpress-form-manager');?></span></h3>
 		<div class="inside">
 			<div class="submitbox" id="submitpost">			
-				<div id="minor-publishing">						
+				<div id="minor-publishing">
+					<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data')): ?>
 					<div id="minor-publishing-actions">						
 						<div id="preview-action">		
 							<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" ><?php _e("View Data", 'wordpress-form-manager');?></a>	
 						</div>					
 						<div class="clear"></div>			
-					</div>				
+					</div>	
+					<?php endif; ?>			
 					<div id="misc-publishing-actions">					
 						<div class="misc-pub-section"><?php /* translators: the number of submissions for a form */ _e("Submission count:", 'wordpress-form-manager');?> <strong><?php echo $fmdb->getSubmissionDataNumRows($form['ID']);?></strong></div>					
 						<div class="misc-pub-section misc-pub-section-last"><?php /* translators: label for the date of the most recent submission */ _e("Last submission:", 'wordpress-form-manager');?> <strong><?php $sub = $fmdb->getLastSubmission($form['ID']); echo $sub['timestamp'];?></strong></div>					
@@ -187,8 +191,10 @@ if(isset($_POST['message']))
 				</div>	
 			</div>
 		</div>	
-
+	
+		<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_forms_advanced')): ?>
 		<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form-advanced&id=".$form['ID'];?>" ><?php _e("Advanced Settings", 'wordpress-form-manager');?></a>
+		<?php endif; ?>
 		
 	</div><!-- side-info-column -->
 </div><!-- poststuff -->
@@ -318,7 +324,7 @@ if(isset($_POST['message']))
 				<label><?php _e("Submit acknowledgement message:", 'wordpress-form-manager');?>
 				<span class="small"><?php _e("This is displayed after the form has been submitted", 'wordpress-form-manager');?></span>
 				</label>
-					<input type="text" id="submitted_msg" value="<?php echo $form['submitted_msg'];?>" />
+					<input type="text" id="submitted_msg" value="<?php echo htmlspecialchars($form['submitted_msg']);?>" />
 			</div>
 			<div class="fm-admin-field-wrap">								
 				<label><?php _e("Show summary with acknowledgment:", 'wordpress-form-manager');?>
@@ -328,13 +334,13 @@ if(isset($_POST['message']))
 			</div>			
 			<div class="fm-admin-field-wrap">
 				<label><?php _e("Submit button label:", 'wordpress-form-manager');?></label>
-					<input type="text" id="submit_btn_text" value="<?php echo $form['submit_btn_text'];?>"/>
+					<input type="text" id="submit_btn_text" value="<?php echo htmlspecialchars($form['submit_btn_text']);?>"/>
 			</div>
 			<div class="fm-admin-field-wrap">								
 				<label><?php _e("Required item message:", 'wordpress-form-manager');?>
 				<span class="small"><?php _e("This is shown if a user leaves a required item blank.  The item's label will appear in place of '%s'.", 'wordpress-form-manager');?></span>
 				</label>
-					<input type="text" id="required_msg" value="<?php echo $form['required_msg'];?>" />
+					<input type="text" id="required_msg" value="<?php echo htmlspecialchars($form['required_msg']);?>" />
 			</div>
 		</div>
 		</div>

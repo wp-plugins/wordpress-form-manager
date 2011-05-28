@@ -7,7 +7,7 @@ global $fm_templates;
 global $fm_form_behavior_types;
 
 global $fm_DEBUG;
-
+global $fm_MEMBERS_EXISTS;
 
 include 'formdefinition.php';
 
@@ -39,8 +39,9 @@ if(isset($_POST['submit-form-settings'])){
 
 
 // Process an updated form definition
+if($fm_DEBUG) $formDef = new fm_form_definition_class(); 
 if($fm_DEBUG && isset($_POST['form-definition'])){	
-	$formDef = new fm_form_definition_class(); 
+	
 	
 	$formInfo = $formDef->createFormInfo($_POST['form-definition']);	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
@@ -76,7 +77,9 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 
 <div style="float:right;">
 <input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  />&nbsp;&nbsp;
+<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_forms')): ?>
 <a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" ><?php _e("Edit Form", 'wordpress-form-manager');?></a>
+<?php endif; ?>
 </div>
 
 	<div id="message-container"><?php 
@@ -125,7 +128,7 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 </table>
 <br />
 <table class="form-table">
-<tr><th><strong>Item Label</strong></th><th><strong>Nickname</strong></th></tr>
+<tr><th><strong><?php _e("Item Label", 'wordpress-form-manager');?></strong></th><th><strong><?php _e("Nickname", 'wordpress-form-manager');?></strong></th></tr>
 <?php foreach($form['items'] as $item){
 	if($item['type'] != 'separator' && $item['type'] != 'note' && $item['type'] != 'recaptcha')
 		helper_text_field($item['unique_name'].'-nickname', $item['label'], $item['nickname']);
@@ -136,7 +139,7 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 <table class="form-table">
 <?php helper_checkbox_field('publish_post', __("Publish submissions as posts", 'wordpress-form-manager'), ($form['publish_post'] == 1)); ?> 
 <tr><th scope="row"><label><?php _e("Post category", 'wordpress-form-manager'); ?></label></th><td><?php wp_dropdown_categories(array('hide_empty' => 0, 'name' => 'publish_post_category', 'hierarchical' => true, 'selected' => $form['publish_post_category'])); ?></td></tr>
-<?php helper_text_field('publish_post_title', __("Post title", 'wordpress-form-manager'), htmlspecialchars($form['publish_post_title']), "Include '%s' where you would like the form title to appear"); ?>
+<?php helper_text_field('publish_post_title', __("Post title", 'wordpress-form-manager'), htmlspecialchars($form['publish_post_title']), __("Include '%s' where you would like the form title to appear", 'wordpress-form-manager')); ?>
 </table>
 
 <p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  /></p>

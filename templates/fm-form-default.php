@@ -56,6 +56,7 @@ fm_form_get_item_label($nickname) - get an item's label by nickname
 */
 
 /* translators: the following are for the options for the default form display template */
+__("Show form title:", 'wordpress-form-manager');
 __("Show border:", 'wordpress-form-manager');
 __("Label position:", 'wordpress-form-manager');
 __("Labels can be placed to the left or above each field", 'wordpress-form-manager');
