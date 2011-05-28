@@ -1,6 +1,11 @@
 <?php 
+/* translators: the following are from the advanced advanced settings page (for the plugin) */
+
 global $fmdb;
 global $fm_globalSettings;
+global $fm_templates;
+
+global $fm_MEMBERS_EXISTS;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
@@ -38,16 +43,44 @@ if(isset($_POST['submit-settings'])){
 		update_option('fm-shortcode', $newShortcode);
 		add_shortcode($newShortcode, 'fm_shortcodeHandler');
 	}
+	
+	////////////////////////////////////////////////////////////////////////////////////
+	//Process template settings
+	
+	$fmdb->setGlobalSetting('template_form', $_POST['template_form']);
+	$fmdb->setGlobalSetting('template_email', $_POST['template_email']);
+	$fmdb->setGlobalSetting('template_summary', $_POST['template_summary']);
+}
+elseif(isset($_POST['remove-template'])){
+	$fm_templates->removeTemplate($_POST['remove-template-filename']);	
+}
+else if(isset($_POST['reset-templates'])){
+	$fm_templates->resetTemplates();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 $fm_globalSettings = $fmdb->getGlobalSettings();
+
+/////////////////////////////////////////////////////////////////////////////////////
+// Load the templates
+
+$templateList = $fm_templates->getTemplateFilesByType();
+$templateFiles = $fm_templates->getTemplateList();
 
 ?>
 <script type="text/javascript">
 function fm_saveSettingsAdvanced(){
 	document.getElementById('validator-list-count').value = fm_getManagedListCount('validator-list');
 	return true;
+}
+
+function fm_submitRemoveTemplate(templateName, templateFile){
+	document.getElementById('remove-template-filename').value = templateFile;
+	return confirm("<?php /* translators: this will be followed by the name of the template to be removed */ _e("Are you sure you want to remove", 'wordpress-form-manager');?> '" + templateName + "' ?");
+}
+
+function fm_resetTemplatesSubmit(){
+	return confirm("<?php _e("Are you sure? All templates other than the default will be removed.", 'wordpress-form-manager');?>");
 }
 
 /***************************************************************/
@@ -90,13 +123,13 @@ function fm_getManagedListCount(ulID){
 
 <div class="wrap">
 <div id="icon-edit-pages" class="icon32"></div>
-<h2>Form Manager Settings - Advanced</h2>
+<h2><?php _e("Form Manager Settings - Advanced", 'wordpress-form-manager');?></h2>
 
 	<div id="message-container"><?php 
 	if(isset($_POST['message']))
 		switch($_POST['message']){
-			case 1: ?><div id="message-success" class="updated"><p><strong>Settings Saved. </strong></p></div><?php break;
-			case 2: ?><div id="message-error" class="error"><p>Save failed. </p></div><?php break;
+			case 1: ?><div id="message-success" class="updated"><p><strong><?php _e("Settings Saved.", 'wordpress-form-manager');?> </strong></p></div><?php break;
+			case 2: ?><div id="message-error" class="error"><p><?php _e("Save failed.", 'wordpress-form-manager');?> </p></div><?php break;
 			default: ?>
 				<?php if(isset($_POST['message']) && trim($_POST['message']) != ""): ?>
 				<div id="message-error" class="error"><p><?php echo stripslashes($_POST['message']);?></p></div>
@@ -105,13 +138,13 @@ function fm_getManagedListCount(ulID){
 		} 
 	?></div>
 
-<h3>Text Validators</h3>
+<h3><?php _e("Text Validators", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 	<table border=0>
 	<tr>
-		<td style="width:200px;"><strong>Name</strong></td>
-		<td style="width:200px;"><strong>Error Message</strong></td>
-		<td style="width:400px;"><strong>Regular Expression</strong></td>
+		<td style="width:200px;"><strong><?php _e("Name", 'wordpress-form-manager');?></strong></td>
+		<td style="width:200px;"><strong><?php _e("Error Message", 'wordpress-form-manager');?></strong></td>
+		<td style="width:400px;"><strong><?php _e("Regular Expression", 'wordpress-form-manager');?></strong></td>
 	</tr>
 	</table>
 	<ul id="validator-list" style="padding-bottom:20px;">		
@@ -145,11 +178,30 @@ function fm_getManagedListCount(ulID){
 <br />
 <h3>Shortcode</h3>
 <table class="form-table">
-<?php helper_text_field('shortcode', "Plugin shortcode", get_option('fm-shortcode')); ?>
+<?php helper_text_field('shortcode', __("Plugin Shortcode", 'wordpress-form-manager'), get_option('fm-shortcode')); ?>
 </table>
 
+<h3>Display Templates</h3>
+<table class="form-table">
+<?php helper_option_field('template_form', __("Default Form Template", 'wordpress-form-manager'), $templateList['form'], $fm_globalSettings['template_form']); ?>
+<?php helper_option_field('template_email', __("Default E-Mail Template", 'wordpress-form-manager'), $templateList['email'], $fm_globalSettings['template_email']); ?>
+<?php helper_option_field('template_summary', __("Default Summary Template", 'wordpress-form-manager'), $templateList['summary'], $fm_globalSettings['template_summary']); ?>
+</table>
+<input type="submit" class="preview button" name="reset-templates" value="<?php _e("Reset Templates", 'wordpress-form-manager');?>" onclick="return fm_resetTemplatesSubmit()" />
+<table class="form-table">
+<?php foreach($templateFiles as $file=>$template): ?>
+<tr>
+	<th scope="row"><label style="width:400px;">
+	<?php echo $template['template_name'];?> <br /> 
+	<?php echo $file; ?>
+	</label></th>
+<td><input type="submit" name="remove-template" value="<?php _e("Remove", 'wordpress-form-manager');?>"  onclick="return fm_submitRemoveTemplate('<?php echo $template['template_name'];?>', '<?php echo $file;?>')" /></td></tr>
+<?php endforeach; ?>
+</table>
+
+<input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />
 
 </div>
 
-<p class="submit"><input type="submit" name="submit-settings" id="submit" class="button-primary" value="Save Changes" onclick="return fm_saveSettingsAdvanced()" /></p>
+<p class="submit"><input type="submit" name="submit-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>" onclick="return fm_saveSettingsAdvanced()" /></p>
 </form>

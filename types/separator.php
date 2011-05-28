@@ -1,8 +1,11 @@
 <?php
+/* translators: the following are separator element settings */
+
 class fm_separatorControl extends fm_controlBase{
 	public function getTypeName(){ return "separator"; }
 	
-	public function getTypeLabel(){ return "Separator"; }
+	/* translators: this appears in the 'Add Form Element' menu */
+	public function getTypeLabel(){ return __("Separator", 'wordpress-form-manager'); }
 	
 	public function showItem($uniqueName, $itemInfo){ return "<hr />"; }
 	
@@ -10,7 +13,7 @@ class fm_separatorControl extends fm_controlBase{
 	
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
 		return $arr;
 	}
 	
@@ -35,10 +38,10 @@ class fm_separatorControl extends fm_controlBase{
 	
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
-		$itemInfo['description'] = "Item Description";
+		$itemInfo['label'] = __("New Separator", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array();
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
