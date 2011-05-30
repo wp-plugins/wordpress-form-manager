@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.19
+Stable tag: 1.4.20
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -39,6 +39,9 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
 Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 
 == Changelog ==
+= 1.4.20 =
+* Fixed install error
+
 = 1.4.19 =
 * Added auto-redirect option
 
@@ -214,4 +217,4 @@ Method 2: Download the source code for the plugin, and upload the 'wordpress-for
 
 == Frequently Asked Questions ==
 
-Please visit [www.campbellhoffman.com/form-manager-faq/] for FAQ and tutorials.
+Please visit [www.campbellhoffman.com/form-manager-faq/](http://www.campbellhoffman.com/form-manager-faq/) for FAQ and tutorials.
