@@ -1,0 +1,217 @@
+=== WordPress Form Manager ===
+Contributors: hoffcamp
+Donate link: http://www.campbellhoffman.com/
+Tags: form, forms
+Requires at least: 3.0.0
+Tested up to: 3.1.1
+Stable tag: 1.4.19
+
+Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
+
+== Description ==
+
+Form Manager is a tool for creating forms to collect and download data from visitors to your WordPress site, and keeps track of time/date and registered users as well.  Forms are added to posts or pages using a simple shortcode format, or can be added to your theme with a simple API. 
+
+= Features =
+* validation
+* required fields
+* custom acknowledgments
+* e-mail notifications.   
+
+= Supported field types =
+
+* text field
+* text area
+* dropdown
+* radio buttons
+* checkbox / checkbox list
+* multiline select
+* reCAPTCHA
+
+Subtitles and notes can also be added to the form in any location.
+
+= Publishing a Form =
+Forms are placed within posts or pages.  For example, if your form's slug is 'form-1', put the following within a post or page: 
+
+`[form form-1]`  
+
+= Languages =
+Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
+
+== Changelog ==
+= 1.4.19 =
+* Added auto-redirect option
+
+= 1.4.18 =
+* Added fm_getFormID() to API, returns a form's ID number from a slug
+* Fixed bug in formdata shortcode 'orderby' attribute
+* Fixed reCAPTCHA bug
+* Added support for placeholders in non HTML 5 browsers
+
+= 1.4.17 =
+* Italian language support (Thanks to [Andrea Bersi](http://www.andreabersi.com))
+* Specify custom theme for reCAPTCHA
+* Fixed problems when trying to edit submission data
+* Added more capabilites to the Members plugin
+
+= 1.4.16 =
+* Publish submitted data to posts
+* Show a table of all submissions within a post
+* Fixed IE download issues
+* Fixed Unicode issues with CSV / ZIP downloads
+* Integration with WP-SlimStat
+
+= 1.4.15 =
+* Fixed 'show summary' error
+* Fixed CSV download with international characters
+* Admins can edit posted data
+* Minor interface changes
+* Compatibility for internationalization added
+* CSS class names for each form item
+* Custom capabilities, integration with the Members plugin
+
+= 1.4.14 =
+* Fixed install error
+
+= 1.4.13 =
+* Minor bug fixes
+
+= 1.4.12 =
+* Added 'template reset' in advanced settings
+
+= 1.4.11 =
+* Minor bug fixes
+
+= 1.4.10 =
+* Minor bug fixes
+
+= 1.4.9 =
+* Added e-mail notification customization to 'Advanced' form settings
+
+= 1.4.8 =
+* Fixed install error for 1.4.7
+
+= 1.4.7 =
+* Fixed e-mail list
+
+= 1.4.6 =
+* Added text entry for list options
+* Moved 'Templates' and 'Behavior' to a new 'Advanced' settings page for forms
+
+= 1.4.5 =
+* Fixed summary template formatting
+
+= 1.4.4 =
+* Added file upload form element
+* Save script bug fixes
+
+= 1.4.3 =
+* Added IP address to submission data
+* Fixed the summary template timestamp label
+
+= 1.4.2 = 
+* Fixed e-mail list bug
+
+= 1.4.1 =
+* Fixed saved bug
+
+= 1.4.0 =
+* Templates for e-mail notifications and form display, similar to WordPress theme functionality
+* HTML 5 placeholders in supported browsers
+* E-mail notification conflict with certain hosts
+* Fixed 'list' option bug when creating a new list
+
+= 1.3.15 =
+* Fixed asterisks appearing below labels
+* Fixed include bug with XAMPP
+
+= 1.3.14 =
+* Added reCAPTCHA color scheme option in settings
+* Fixed conflict with other plugins using Google RECAPTCHA
+
+= 1.3.13 =
+* Changed upgrade mechanism
+
+= 1.3.12 =
+* Added 'required item message' to form editor
+* Fixed upgrade from 1.3.3 and older
+
+= 1.3.11 =
+* Full Unicode support
+* Added date validator for text fields
+
+= 1.3.10 =
+* Added API stable fm_doFormBySlug($formSlug) to show forms within templates
+* Admin can change plugin's shortcode in 'Advanced Settings'
+
+= 1.3.9 =
+* Fixed form behavior selection bug
+
+= 1.3.8 =
+* Fixed possible style conflict with Kubric (Default) theme
+
+= 1.3.7 =
+* Fixed 'fm_settiings' table install error
+
+= 1.3.6 =
+* Advanced settings page
+* Custom text validators using regular expressions
+
+= 1.3.5 =
+* E-mail notifications for registered users
+* Admin and registered user e-mail notifications are now a global rather than per form setting.
+
+= 1.3.4 =
+* Added e-mail notification for user input (acknowledgment e-mail)
+* Changed editor interface
+
+= 1.3.3 =
+* Adjusted for register_activation_hook() change
+* Fixed some CSS style names likely to have conflicts
+
+= 1.3.2 =
+* Added reCAPTCHA field
+* Added Settings page
+* Multiple forms per page
+* Fixed CSV data double quote bug
+* Improved acknowledgement formatting
+
+= 1.3.1 =
+* Fixed 'Single submission' behavior bug
+* Items in form editor update when 'done' is clicked
+* Fixed list option editor bug
+
+= 1.3.0 =
+* Added form behaviors for registered users
+* Cleaned up data page
+* Added data summary to data page
+
+= 1.2.10 =
+* Rearranged editor sections
+* Fixed checkbox list 'required' test
+* Added single checkbox 'requried' test
+
+= 1.2.9 = 
+* Fixed .csv download bug
+
+= 1.2.8 =
+* Added e-mail notifications. 
+
+= 1.2.5 =
+* Fixes multisite edit/data page bug. 
+
+= 1.2.4 =
+* Fixes an installation error when starting with a fresh plugin install.
+
+
+*** I am starting work on version 2.  If you have suggestions or requests, please let me know! ***
+
+== Installation ==
+
+Method 1: Activate the 'WordPress Form Manager' plugin through the 'Plugins' menu in WordPress.  
+
+Method 2: Download the source code for the plugin, and upload the 'wordpress-form-manager' directory to the '/wp-content/plugins/' directory.
+
+== Frequently Asked Questions ==
+
+Please visit [www.campbellhoffman.com/form-manager-faq/] for FAQ and tutorials.
