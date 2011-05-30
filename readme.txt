@@ -214,4 +214,4 @@ Method 2: Download the source code for the plugin, and upload the 'wordpress-for
 
 == Frequently Asked Questions ==
 
-Please visit [www.campbellhoffman.com/form-manager-faq/] for FAQ and tutorials.
+Please visit [http://www.campbellhoffman.com/form-manager-faq/] for FAQ and tutorials.
