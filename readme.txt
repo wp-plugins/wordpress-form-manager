@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.18
+Stable tag: 1.4.19
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -39,6 +39,9 @@ Forms are placed within posts or pages.  For example, if your form's slug is 'fo
 Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 
 == Changelog ==
+= 1.4.19 =
+* Added auto-redirect option
+
 = 1.4.18 =
 * Added fm_getFormID() to API, returns a form's ID number from a slug
 * Fixed bug in formdata shortcode 'orderby' attribute

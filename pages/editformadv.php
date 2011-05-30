@@ -9,8 +9,6 @@ global $fm_form_behavior_types;
 global $fm_DEBUG;
 global $fm_MEMBERS_EXISTS;
 
-include 'formdefinition.php';
-
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 

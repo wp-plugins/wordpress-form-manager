@@ -34,6 +34,9 @@ function fm_saveForm(){
 				show_summary: document.getElementById('show_summary').checked,
 				email_list: document.getElementById('email_list').value,
 				email_user_field: document.getElementById('email_user_field').value,
+				auto_redirect: document.getElementById('auto_redirect').checked,
+				auto_redirect_page: document.getElementById('auto_redirect_page').value,
+				auto_redirect_timeout: document.getElementById('auto_redirect_timeout').value,
 				template_values: { },
 				items: fm_getFormItems('form-list')
 		};	

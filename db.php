@@ -83,7 +83,10 @@ $this->formSettingsKeys = array(
 					'advanced_email' => '',
 					'publish_post' => 0,
 					'publish_post_category' => '',
-					'publish_post_title' => '%s Submission'
+					'publish_post_title' => '%s Submission',
+					'auto_redirect' => 0,
+					'auto_redirect_page' => 0,
+					'auto_redirect_timeout' => 5
 					);
 					
 $this->itemKeys = array (
@@ -178,6 +181,9 @@ function setupFormManager(){
 		publish_post		- whether or not to publish form submissions to a post category
 		publish_post_category - the post category to publish submissions to
 		publish_post_title 	- the title of published posts
+		auto_redirect		- whether or not to do the automatic redirect
+		auto_redirect_page	- the page / post ID of the page to go to after (timeout) seconds
+		auto_redirect_timeout - the timeout for the automatic redirect
 	*/	
 	
 	
@@ -205,6 +211,9 @@ function setupFormManager(){
 		`publish_post` BOOL DEFAULT '0' NOT NULL,
 		`publish_post_category` TEXT DEFAULT '' NOT NULL,
 		`publish_post_title` TEXT DEFAULT '' NOT NULL,
+		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
+		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
+		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 

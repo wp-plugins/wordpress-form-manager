@@ -28,22 +28,11 @@ function displayForm($formInfo, $options=array(), $values=array()){
 	if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_form');
 	if($templateFile == '') $templateFile = get_option('fm-default-form-template');
 	
-	/*
-	if($options['text_value_as_placeholder'] === false){
-		$placeholderSave = $fm_controls['text']->showValueAsPlaceholder;
-		$fm_controls['text']->showValueAsPlaceholder = false;
-	}*/
-	
 	if(file_exists($fm_templates->templatesDir.'/'.$templateFile))
 		$str = $this->displayFormTemplate($templateFile, $formInfo, $options, $values);
 	else
 		$str = $this->displayFormTemplate(get_option('fm-default-form-template'), $formInfo, $options, $values);
-	
-	/*
-	if($options['text_value_as_placeholder'] === false){
-		$fm_controls['text']->showValueAsPlaceholder = $placeholderSave;
-	}*/
-	
+
 	return $str;
 }
 
@@ -146,10 +135,6 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 	
 	$str = ob_get_contents();
 	ob_end_clean();
-		
-	////// show the validation scripts /////
-	//if($formInfo['behaviors'] == 'reg_user_only,display_summ,edit')
-	//	$options['use_placeholders'] = false;
 		
 	$str.= $this->displayFormScripts($formInfo, $options);
 	

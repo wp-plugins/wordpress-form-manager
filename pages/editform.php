@@ -191,6 +191,45 @@ if(isset($_POST['message']))
 				</div>	
 			</div>
 		</div>	
+		
+		<!-------------------------------------------------------------------------------------------------- -->
+
+		<div id="tagsdiv-post_tag" class="postbox " >
+			<h3 class='hndle'><span><?php _e("Auto Redirect", 'wordpress-form-manager');?></span></h3>
+			
+			<div class="inside">
+				<div class="tagsdiv" id="post_tag">
+				  <div class="jaxtag">
+						<div class="ajaxtag">
+							<p class="howto" style="margin-top:0px"><?php _e("Automatically redirect the user after a successful form submission", 'wordpress-form-manager'); ?></p>
+							<p>
+							<label><?php _e("Enable automatic redirect", 'wordpress-form-manager'); ?>:</label>
+							<input type="checkbox" id="auto_redirect" <?php echo ($form['auto_redirect']==1?"checked=\"checked\"":"");?> />								
+							</p>
+							
+							<p>
+							<label><?php _e("Desination page", 'wordpress-form-manager');?>:</label>
+								<?php 
+									$pages = get_pages(array('post_type' => 'page')); 
+									$posts = get_posts(array('post_type' => 'post'));
+									$pages = array_merge($pages, $posts);?>
+								<select name="auto_redirect_page" id="auto_redirect_page">
+								<?php foreach($pages as $page): ?>
+									<option value="<?php echo $page->ID;?>" <?php echo ($form['auto_redirect_page'] == $page->ID ? "selected=\"selected\"" : ""); ?>><?php echo $page->post_title; ?></option>
+								<?php endforeach; ?>
+								</select>		
+							</p>
+							
+							<p>
+							<label><?php _e("Timeout (seconds)", 'wordpress-form-manager'); ?>:</label>
+								<input type="text" id="auto_redirect_timeout" name="auto_redirect_timeout" value="<?php echo $form['auto_redirect_timeout'];?>" size="4"/>
+							</p>
+						
+						</div>						
+					</div>					
+				</div>	
+			</div>
+		</div>	
 	
 		<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_forms_advanced')): ?>
 		<a class="preview button" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form-advanced&id=".$form['ID'];?>" ><?php _e("Advanced Settings", 'wordpress-form-manager');?></a>
@@ -331,7 +370,7 @@ if(isset($_POST['message']))
 				<span class="small"><?php _e("A summary of the submitted data will be shown along with the acknowledgment message", 'wordpress-form-manager');?></span>
 				</label>
 					<input type="checkbox" id="show_summary" <?php echo ($form['show_summary']==1?"checked=\"checked\"":"");?> />
-			</div>			
+			</div>
 			<div class="fm-admin-field-wrap">
 				<label><?php _e("Submit button label:", 'wordpress-form-manager');?></label>
 					<input type="text" id="submit_btn_text" value="<?php echo htmlspecialchars($form['submit_btn_text']);?>"/>

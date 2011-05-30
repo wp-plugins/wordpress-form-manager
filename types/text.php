@@ -7,7 +7,6 @@ class fm_textControl extends fm_controlBase{
 	
 	function __construct(){
 		$this->validators = array();
-		//$this->showValueAsPlaceholder = true;
 	}
 	
 	public function getTypeName(){ return "text"; }
@@ -22,11 +21,7 @@ class fm_textControl extends fm_controlBase{
 											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),									
 											'style' => "width:".$itemInfo['extra']['size']."px;"								
 											)
-					);
-		/*if($this->showValueAsPlaceholder)
-			$elem['attributes']
-		else
-			$elem['attributes']['value'] = htmlspecialchars($itemInfo['extra']['value']); */
+					);	
 			
 		return fe_getElementHTML($elem);
 	}	
