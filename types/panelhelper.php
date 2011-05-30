@@ -43,7 +43,7 @@ class fm_editPanelItemMultiText extends fm_editPanelItemBase{
 
 class fm_editPanelTextArea extends fm_editPanelItemBase{
 	function getPanelItemInner(){
-		return "<textarea rows=\"".$this->options['rows']."\" cols=\"".$this->options['cols']."\" id=\"{$this->uniqueName}-{$this->itemName}\" >".$this->options['value']."</textarea>";
+		return "<textarea rows=\"".$this->options['rows']."\" cols=\"".$this->options['cols']."\" id=\"{$this->uniqueName}-{$this->itemName}\" >".htmlspecialchars($this->options['value'])."</textarea>";
 	}
 }
 
@@ -59,7 +59,7 @@ class fm_editPanelItemDropdown extends fm_editPanelItemBase{
 	function getPanelItemInner(){
 		$str="<select id=\"{$this->uniqueName}-{$this->itemName}\">";
 		foreach($this->options['options'] as $k=>$v){
-			if($this->options['value'] == $k) $str.="<option value=\"{$k}\" selected=\"selected\">{$v}</option>";
+			if($this->options['value'] == $k) $str.="<option value=\"{$k}\" selected=\"selected\">".htmlspecialchars($v)."</option>";
 			else $str.="<option value=\"{$k}\">{$v}</option>";
 		}
 		$str.="</select>";
@@ -69,9 +69,16 @@ class fm_editPanelItemDropdown extends fm_editPanelItemBase{
 
 class fm_editPanelItemMulti extends fm_editPanelItemBase{
 	function getPanelItemInner(){
+		$str.="<table>";
+		/* translators: this is for the list element options */
+		$str.="<tr><td><input type=\"button\" value=\"".__("Enter Items as Text", 'wordpress-form-manager')."\" onclick=\"js_multi_item_text_entry('multi-panel-{$this->uniqueName}','".$this->options['get_item_value_script']."','".$this->options['get_item_script']."')\"/></td></tr>";
+		$str.="</table>";
 		$str.="<ul id=\"multi-panel-{$this->uniqueName}\">";
 		$str.="</ul>";
-		$str.="<table><tr><td><input type=\"button\" value=\"Add\" onclick=\"js_multi_item_add('multi-panel-{$this->uniqueName}','".$this->options['get_item_script']."','')\"/></td></tr></table>";		
+		$str.="<table><tr><td>";
+		$str.="<input type=\"button\" value=\"".__("Add", 'wordpress-form-manager')."\" onclick=\"js_multi_item_add('multi-panel-{$this->uniqueName}','".$this->options['get_item_script']."','')\"/>";
+		$str.="</td></tr>";		
+		$str.="</table>";
 		$str.="<script type=\"text/javascript\">";
 		$str.="js_multi_item_create('multi-panel-{$this->uniqueName}');";
 		if(is_array($this->options['options']) && sizeof($this->options['options'])>0){
@@ -80,6 +87,14 @@ class fm_editPanelItemMulti extends fm_editPanelItemBase{
 		}
 		$str.="</script>";
 		return $str;
+	}
+}
+
+class fm_editPanelItemNote extends fm_editPanelItemBase{
+	function getPanelItem(){
+		return "<tr><td colspan=\"2\">".
+				$this->itemLabel.
+				"</td></tr>";
 	}
 }
 ?>

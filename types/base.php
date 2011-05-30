@@ -1,4 +1,5 @@
 <?php
+/* translators: the following are generic form element settings */
 
 class fm_controlBase{
 	
@@ -45,6 +46,12 @@ class fm_controlBase{
 		return "";
 	}
 	
+	//returns the name of a javascript function called when saving the form.  If the function returns false, that means the save failed; otherwise, it should return true.
+	//The save validators are responsible for displaying any alerts
+	public function getSaveValidatorName(){
+		return "";
+	}
+	
 	//this function is called in the header; you can place scripts here (like whatever getShowHideCallbackName() returns)  etc. 
 	protected function showExtraScripts(){}
 	
@@ -75,7 +82,7 @@ class fm_controlBase{
 	public function getGeneralValidatorMessage($type){
 		return "";
 	}
-	
+		
 	//called when processing a submission from the user version of the form; $itemInfo is an associative array of the db row defining the form item
 	public function processPost($uniqueName, $itemInfo){
 		if($_POST[$uniqueName] != null)
@@ -91,10 +98,10 @@ class fm_controlBase{
 	//returns an associative array keyed by the item db fields; used in the AJAX for creating a new form item in the back end / admin side
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
-		$itemInfo['description'] = "Item Description";
+		$itemInfo['label'] = __("Item Label", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array();
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = __("Item Nickname", 'wordpress-form-manager');
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
@@ -112,7 +119,7 @@ class fm_controlBase{
 	///////////////////////////////////////////////////////////////////////////
 	
 	public function showScripts(){
-		$this->showExtraScripts();		
+		$this->showExtraScripts();	
 		$this->showPanelScript();
 	}
 	protected function getPanelScriptName(){
@@ -157,6 +164,9 @@ class fm_controlBase{
 			};
 			return newItem;
 		}
+		<?php if($this->getSaveValidatorName() != ""):?>
+		fm_registerSaveValidator('<?php echo $this->getTypeName(); ?>', '<?php echo $this->getSaveValidatorName();?>');
+		<?php endif; ?>
 		</script><?php		
 	}
 		
@@ -164,7 +174,7 @@ class fm_controlBase{
 		$str="";
 		$str.="<table class=\"editor-item\">".
 				"<tr>".
-				"<td class=\"editor-item-label\"><label id=\"{$uniqueName}-edit-label\">".$itemInfo['label']."</label><span id=\"{$uniqueName}-edit-required\" >".(($itemInfo['required']=='1')?'<em>*</em>':"")."</span></td>".
+				"<td class=\"editor-item-label\"><label id=\"{$uniqueName}-edit-label\">".($itemInfo['label']==""?"&nbsp;":htmlspecialchars($itemInfo['label']))."</label><span id=\"{$uniqueName}-edit-required\" >".(($itemInfo['required']=='1')?'<em>*</em>':"")."</span></td>".
 				"<td class=\"editor-item-main\">".$this->editItem($uniqueName, $itemInfo)."</td>".
 				"</tr>";	
 		$str.="</table>";	

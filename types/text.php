@@ -1,33 +1,43 @@
 <?php
+/* translators: the following are text element settings */
 
 class fm_textControl extends fm_controlBase{
 	var $validators;
+	var $showValueAsPlaceholder;
 	
 	function __construct(){
 		$this->validators = array();
+		//$this->showValueAsPlaceholder = true;
 	}
+	
 	public function getTypeName(){ return "text"; }
 	
-	public function getTypeLabel(){ return "Text"; }
+	/* translators: this appears in the 'Add Form Element' menu */
+	public function getTypeLabel(){ return __("Text", 'wordpress-form-manager'); }
 	
 	public function showItem($uniqueName, $itemInfo){
 		$elem=array('type' => 'text',
 					'attributes' => array('name' => $uniqueName,
-											'id'=> $uniqueName,
-											'value'=> htmlspecialchars($itemInfo['extra']['value']),
-											'style' => "width:".$itemInfo['extra']['size']."px;"											
+											'id'=> $uniqueName,	
+											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),									
+											'style' => "width:".$itemInfo['extra']['size']."px;"								
 											)
-					);											
+					);
+		/*if($this->showValueAsPlaceholder)
+			$elem['attributes']
+		else
+			$elem['attributes']['value'] = htmlspecialchars($itemInfo['extra']['value']); */
+			
 		return fe_getElementHTML($elem);
 	}	
 	
 	//returns an associative array keyed by the item db fields; used in the AJAX for creating a new form item in the back end / admin side
 	public function itemDefaults(){
 		$itemInfo = array();
-		$itemInfo['label'] = "Item Label";
-		$itemInfo['description'] = "Item Description";
+		$itemInfo['label'] = __("New Text", 'wordpress-form-manager');
+		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array('size' => '300');
-		$itemInfo['nickname'] = "Item Nickname";
+		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
@@ -42,11 +52,11 @@ class fm_textControl extends fm_controlBase{
 	
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', 'Default Value', array('value' => $itemInfo['extra']['value']));
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', 'Width (in pixels)', array('value' => $itemInfo['extra']['size']));
-		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', 'Required', array('checked'=>$itemInfo['required']));
-		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'validation', 'Validation', array('options' => array_merge(array('none' => "..."), $this->getValidatorList()), 'value' => $itemInfo['extra']['validation']));		
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', __('Placeholder', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['value']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', __('Width (in pixels)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['size']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
+		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'validation', __('Validation', 'wordpress-form-manager'), array('options' => array_merge(array('none' => "..."), $this->getValidatorList()), 'value' => $itemInfo['extra']['validation']));		
 		return $arr;
 	}
 	
