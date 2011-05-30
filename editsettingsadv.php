@@ -195,7 +195,7 @@ function fm_getManagedListCount(ulID){
 	<?php echo $template['template_name'];?> <br /> 
 	<?php echo $file; ?>
 	</label></th>
-<td><input type="submit" name="remove-template" value="<?php _e("Remove", 'wordpress-form-manager');?>"  onclick="return fm_submitRemoveTemplate('<?php echo $template['template_name'];?>', '<?php echo $file;?>')" /></td></tr>
+<td><input type="submit" name="remove-template" value="<?php _e("Remove", 'wordpress-form-manager');?>"  onclick="return fm_submitRemoveTemplate('<?php echo format_string_for_js($template['template_name']);?>', '<?php echo $file;?>')" /></td></tr>
 <?php endforeach; ?>
 </table>
 

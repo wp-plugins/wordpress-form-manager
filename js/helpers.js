@@ -31,14 +31,41 @@ function fm_supports_placeholder(){
 	return placeholderSupport;
 }
 
-function fm_fix_placeholders(force){
-	if(!force)force = false;
-	if(!fm_supports_placeholder() || force){
+function fm_add_placeholders(){
+	if(!fm_supports_placeholder()){
 		for(var i=0;i<fm_form_items.length;i++){
 			if(fm_form_items[i].type == 'text'){
 				var textItem = document.getElementById('fm-form-' + fm_form_items[i].formID)[fm_form_items[i].itemID];
 				textItem.value = fm_form_items[i].extra.placeholder;
-			}
+				textItem.ph_hasEdit = false;
+				textItem.ph_thePlaceholder = fm_form_items[i].extra.placeholder;
+				textItem.onfocus = fm_simulate_placeholder_onfocus;
+				textItem.onblur = fm_simulate_placeholder_onblur;
+				textItem.onchange = fm_simulate_placeholder_onchange;
+			}	
+		}
+	}
+}
+
+function fm_simulate_placeholder_onfocus(){
+	if(!this.ph_hasEdit)
+		this.value = '';
+}
+function fm_simulate_placeholder_onblur(){
+	if(this.value == "") this.ph_hasEdit = false;
+	if(!this.ph_hasEdit)
+		this.value = this.ph_thePlaceholder;
+}
+function fm_simulate_placeholder_onchange(){
+	this.ph_hasEdit = true;
+}	
+
+
+function fm_remove_placeholders(){	
+	for(var i=0;i<fm_form_items.length;i++){
+		if(fm_form_items[i].type == 'text'){
+			var textItem = document.getElementById('fm-form-' + fm_form_items[i].formID)[fm_form_items[i].itemID];
+			textItem.value = fm_form_items[i].extra.placeholder;
 		}
 	}
 }

@@ -18,7 +18,7 @@ class fm_recaptchaControl extends fm_controlBase{
 		if(!function_exists('recaptcha_get_html'))
 			require_once('recaptcha/recaptchalib.php');		
 			
-		return "<script type=\"text/javascript\"> var RecaptchaOptions = { theme : '".$fmdb->getGlobalSetting('recaptcha_theme')."' }; </script>".
+		return "<script type=\"text/javascript\"> var RecaptchaOptions = { theme : '".$fmdb->getGlobalSetting('recaptcha_theme')."', tabindex : 100 }; </script>".
 				recaptcha_get_html($publickey).
 				(isset($_POST['recaptcha_challenge_field'])?"<br /> <em> ".__("The reCAPTCHA was incorrect.", 'wordpress-form-manager')." </em>":"");
 	}	
@@ -37,7 +37,8 @@ class fm_recaptchaControl extends fm_controlBase{
 									$_POST["recaptcha_challenge_field"],
 									$_POST["recaptcha_response_field"]);
 		
-		if (!$resp->is_valid === false) {
+		//return false;
+		if (!$resp->is_valid === true) {
 			// What happens when the CAPTCHA was entered incorrectly
 			$this->err = $resp->error;
 				return false;

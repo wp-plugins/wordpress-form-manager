@@ -187,7 +187,7 @@ protected function getTemplateFiles($dir){
 	if($handle = opendir($dir)){
 		$arr = array();
 		while(($file = readdir($handle)) !== false){
-			if($file != "." && $file != "..")
+			if($file != "." && $file != ".." && is_file($dir."/".$file))
 				$arr[$file] = $file;
 		}
 		closedir($handle);		
@@ -199,7 +199,7 @@ protected function getTemplateFiles($dir){
 function removeTemplate($filename){
 	global $fmdb;
 	$fullpath = $this->templatesDir.'/'.$filename;
-	if(file_exists($fullpath)) unlink($fullpath);
+	if(is_file($fullpath)) unlink($fullpath);
 	$fmdb->removeTemplate($filename);
 }
 

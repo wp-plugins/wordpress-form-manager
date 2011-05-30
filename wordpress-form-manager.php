@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.17
+Version: 1.4.18
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.17";
+$fm_currentVersion = "1.4.18";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -625,12 +625,17 @@ function fm_doDataListBySlug($formSlug, $template, $orderBy = 'timestamp', $ord 
 	if($formID === false) return "(form ".(trim($formSlug)!=""?"'{$formSlug}' ":"")."not found".")";
 	
 	// see if 'orderby' is a valid unique name
-	$orderByItem = $fmdb->getFormItem($orderBy);
-	if($orderByItem === false) // not a valid unique name, but could be a nickname
-		$orderByItem = $fmdb->getItemByNickname($formID, $orderBy);
-	if($orderByItem === false) return "(orderby) ".$orderBy." not found";
-	
-	$orderBy = $orderByItem['unique_name'];
+	if($orderBy != 'timestamp' &&
+		$orderBy != 'user' &&
+		$orderBy != 'user_ip'){
+		
+		$orderByItem = $fmdb->getFormItem($orderBy);
+		if($orderByItem === false) // not a valid unique name, but could be a nickname
+			$orderByItem = $fmdb->getItemByNickname($formID, $orderBy);
+		if($orderByItem === false) return "(orderby) ".$orderBy." not found";
+		
+		$orderBy = $orderByItem['unique_name'];
+	}
 	
 	$currentPage = (isset($_REQUEST['fm-data-page']) ? $_REQUEST['fm-data-page'] : 0);
 	$currentStartIndex = $currentPage * $dataPerPage;
@@ -687,6 +692,11 @@ function fm_getFormDataSummaries($formID, $template, $orderBy = 'timestamp', $or
 	return $strArray;	
 }
 
+function fm_getFormID($formSlug){
+	global $fmdb;
+	return $fmdb->getFormID($formSlug);
+}
+
 //takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior), processes posts, etc.
 function fm_doFormBySlug($formSlug){
 	global $fm_display;
@@ -723,7 +733,7 @@ function fm_doFormBySlug($formSlug){
 		if($fmdb->processFailed()){			
 			return '<em>'.$fmdb->getErrorMessage().'</em>'.
 					$output.
-					$fm_display->displayForm($formInfo, array('action' => get_permalink()), $postData);
+					$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'use_placeholders' => false), $postData);
 		}
 		else{
 			// send email notifications
@@ -769,7 +779,7 @@ function fm_doFormBySlug($formSlug){
 				foreach($emails as $email){
 					$headerStr = "";
 					foreach($email['headers'] as $header => $value)
-						$headerStr = $header.": ".$value."\r\n";
+						$headerStr.= $header.": ".$value."\r\n";
 					wp_mail($email['to'], $email['subject'], $email['message'], $headerStr);
 				}
 			}
@@ -825,7 +835,7 @@ function fm_doFormBySlug($formSlug){
 				}				
 			}
 			else
-				return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'text_value_as_placeholder' => false), $userData[0]);
+				return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'use_placeholders' => false), $userData[0]);
 		}
 	}
 	

@@ -73,13 +73,11 @@ $found = false;
 	<th scope="row"><label for="recaptcha_theme"><?php _e("Color Scheme", 'wordpress-form-manager');?></label></th>
 	<td>
 		<select name="recaptcha_theme" type="text" id="recaptcha_theme"/>
-			<option value="">...</option>
 		<?php foreach($options as $k=>$v): ?>
 			<option value="<?php echo $k;?>" <?php echo ($value==$k)?"selected=\"selected\"":"";?> ><?php echo $v;?></option>
 			<?php if($value == $k): $found = true; endif; ?>
 		<?php endforeach; ?>
-		</select>
-		<input type="text" name="recaptcha_theme_custom" id="recaptcha_theme_custom" value="<?php echo ($found ? "" :  $fm_globalSettings['recaptcha_theme']);?>" size="10"/>
+		</select>		
 	</td>
 </tr>
 </table>

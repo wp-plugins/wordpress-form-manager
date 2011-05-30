@@ -62,13 +62,14 @@ class fm_advanced_email_class{
 		$atts = $attParser->getAttributes($def['headers']);
 		$def['to'] = $atts['To'];
 		$def['subject'] = $atts['Subject'];
+	
 		unset($atts['To']);
 		unset($atts['Subject']);
 		$def['headers'] = $atts;
 		
 		return $def;
 	}
-	
+		
 	function emailShortcodeCallback($matches){		
 		global $current_user;
 		global $fmdb;

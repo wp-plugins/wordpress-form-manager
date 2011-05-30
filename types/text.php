@@ -7,7 +7,7 @@ class fm_textControl extends fm_controlBase{
 	
 	function __construct(){
 		$this->validators = array();
-		$this->showValueAsPlaceholder = true;
+		//$this->showValueAsPlaceholder = true;
 	}
 	
 	public function getTypeName(){ return "text"; }
@@ -18,14 +18,15 @@ class fm_textControl extends fm_controlBase{
 	public function showItem($uniqueName, $itemInfo){
 		$elem=array('type' => 'text',
 					'attributes' => array('name' => $uniqueName,
-											'id'=> $uniqueName,											
-											'style' => "width:".$itemInfo['extra']['size']."px;"											
+											'id'=> $uniqueName,	
+											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),									
+											'style' => "width:".$itemInfo['extra']['size']."px;"								
 											)
 					);
-		if($this->showValueAsPlaceholder)
-			$elem['attributes']['placeholder'] = htmlspecialchars($itemInfo['extra']['value']);
+		/*if($this->showValueAsPlaceholder)
+			$elem['attributes']
 		else
-			$elem['attributes']['value'] = htmlspecialchars($itemInfo['extra']['value']);
+			$elem['attributes']['value'] = htmlspecialchars($itemInfo['extra']['value']); */
 			
 		return fe_getElementHTML($elem);
 	}	

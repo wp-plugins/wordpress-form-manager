@@ -43,7 +43,7 @@ class fm_editPanelItemMultiText extends fm_editPanelItemBase{
 
 class fm_editPanelTextArea extends fm_editPanelItemBase{
 	function getPanelItemInner(){
-		return "<textarea rows=\"".$this->options['rows']."\" cols=\"".$this->options['cols']."\" id=\"{$this->uniqueName}-{$this->itemName}\" >".$this->options['value']."</textarea>";
+		return "<textarea rows=\"".$this->options['rows']."\" cols=\"".$this->options['cols']."\" id=\"{$this->uniqueName}-{$this->itemName}\" >".htmlspecialchars($this->options['value'])."</textarea>";
 	}
 }
 
@@ -59,7 +59,7 @@ class fm_editPanelItemDropdown extends fm_editPanelItemBase{
 	function getPanelItemInner(){
 		$str="<select id=\"{$this->uniqueName}-{$this->itemName}\">";
 		foreach($this->options['options'] as $k=>$v){
-			if($this->options['value'] == $k) $str.="<option value=\"{$k}\" selected=\"selected\">{$v}</option>";
+			if($this->options['value'] == $k) $str.="<option value=\"{$k}\" selected=\"selected\">".htmlspecialchars($v)."</option>";
 			else $str.="<option value=\"{$k}\">{$v}</option>";
 		}
 		$str.="</select>";

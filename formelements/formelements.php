@@ -20,7 +20,7 @@ array definition:
 
 //textarea
 function fe_getTextareaHTML($elementDef){
-	return "<textarea ".fe_getAttributeString($elementDef['attributes']).">".$elementDef['default']."</textarea>";
+	return "<textarea ".fe_getAttributeString($elementDef['attributes']).">".htmlspecialchars($elementDef['default'])."</textarea>";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -33,8 +33,8 @@ function fe_getRadioHTML($elementDef){
 	//multiple radio options
 	$arr=array();
 	foreach($elementDef['options'] as $k=>$v){
-		$arr[] = "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." value=\"{$k}\" ".
-				((isset($elementDef['value']) && $elementDef['value']==$v)?'checked':'')."/>&nbsp;&nbsp;{$v}";
+		$arr[] = "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." value=\"".htmlspecialchars($k)."\" ".
+				((isset($elementDef['value']) && $elementDef['value']==$v)?'checked':'')."/>&nbsp;&nbsp;".htmlspecialchars($v)."";
 	}
 	$str = implode($elementDef['separator'],$arr);
 	return $str;
@@ -51,8 +51,8 @@ function fe_getSelectHTML($elementDef){
 	$default = (isset($elementDef['value'])?$elementDef['value']:"");
 	$str="<select ".fe_getAttributeString($elementDef['attributes'])." >";
 	foreach($elementDef['options'] as $k=>$v){
-		if($v==$default) 	$str.="<option value=\"{$k}\" selected=\"selected\">{$v}</option>";
-		else				$str.="<option value=\"{$k}\">{$v}</option>";
+		if($v==$default) 	$str.="<option value=\"".htmlspecialchars($k)."\" selected=\"selected\">".htmlspecialchars($v)."</option>";
+		else				$str.="<option value=\"".htmlspecialchars($k)."\">".htmlspecialchars($v)."</option>";
 	}
 	$str.="</select>";	
 	return $str;
@@ -84,7 +84,7 @@ function fe_getCheckboxListHTML($elementDef){
 	if(!(isset($elementDef['options']) && is_array($elementDef['options']))) return "";
 	$arr=array();
 	foreach($elementDef['options'] as $k=>$v){
-		$arr[] = "<input type=\"checkbox\" ".fe_getAttributeString($elementDef['attributes'])." id=\"{$k}\" name=\"{$k}\" ".($vals[$k]?'checked':'')."/>&nbsp;&nbsp;{$v}";
+		$arr[] = "<input type=\"checkbox\" ".fe_getAttributeString($elementDef['attributes'])." id=\"".htmlspecialchars($k)."\" name=\"".htmlspecialchars($k)."\" ".($vals[$k]?'checked':'')."/>&nbsp;&nbsp;".htmlspecialchars($v)."";
 	}
 	$str = implode($elementDef['separator'],$arr);
 	return $str;

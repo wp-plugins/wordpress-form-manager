@@ -174,7 +174,7 @@ class fm_controlBase{
 		$str="";
 		$str.="<table class=\"editor-item\">".
 				"<tr>".
-				"<td class=\"editor-item-label\"><label id=\"{$uniqueName}-edit-label\">".($itemInfo['label']==""?"&nbsp;":$itemInfo['label'])."</label><span id=\"{$uniqueName}-edit-required\" >".(($itemInfo['required']=='1')?'<em>*</em>':"")."</span></td>".
+				"<td class=\"editor-item-label\"><label id=\"{$uniqueName}-edit-label\">".($itemInfo['label']==""?"&nbsp;":htmlspecialchars($itemInfo['label']))."</label><span id=\"{$uniqueName}-edit-required\" >".(($itemInfo['required']=='1')?'<em>*</em>':"")."</span></td>".
 				"<td class=\"editor-item-main\">".$this->editItem($uniqueName, $itemInfo)."</td>".
 				"</tr>";	
 		$str.="</table>";	

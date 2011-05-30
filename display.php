@@ -28,19 +28,21 @@ function displayForm($formInfo, $options=array(), $values=array()){
 	if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_form');
 	if($templateFile == '') $templateFile = get_option('fm-default-form-template');
 	
+	/*
 	if($options['text_value_as_placeholder'] === false){
 		$placeholderSave = $fm_controls['text']->showValueAsPlaceholder;
 		$fm_controls['text']->showValueAsPlaceholder = false;
-	}
+	}*/
 	
 	if(file_exists($fm_templates->templatesDir.'/'.$templateFile))
 		$str = $this->displayFormTemplate($templateFile, $formInfo, $options, $values);
 	else
 		$str = $this->displayFormTemplate(get_option('fm-default-form-template'), $formInfo, $options, $values);
-		
+	
+	/*
 	if($options['text_value_as_placeholder'] === false){
 		$fm_controls['text']->showValueAsPlaceholder = $placeholderSave;
-	}
+	}*/
 	
 	return $str;
 }
@@ -146,7 +148,9 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 	ob_end_clean();
 		
 	////// show the validation scripts /////
-	
+	//if($formInfo['behaviors'] == 'reg_user_only,display_summ,edit')
+	//	$options['use_placeholders'] = false;
+		
 	$str.= $this->displayFormScripts($formInfo, $options);
 	
 	return $str;
@@ -182,10 +186,11 @@ protected function displayFormScripts($formInfo, $options=array()){
 	foreach($formInfo['items'] as $item){
 		$str.="fm_register_form_item('".$formInfo['ID']."', '".$item['unique_name']."', '".$item['type']."', {placeholder: '".$item['extra']['value']."'});\n";
 	}
-	if($formInfo['behaviors'] == 'reg_user_only,display_summ,edit')
-		$str.="fm_fix_placeholders(true);\n";
+	
+	if(isset($options['use_placeholders']) && $options['use_placeholders'] === false)
+		$str.="fm_remove_placeholders();\n"; //this will convert placeholders into values; used to re-populate a form after a bad submission, for user profile style, etc., where the 'value' field needs to be the fields' value rather than a placeholder
 	else
-		$str.="fm_fix_placeholders();\n";
+		$str.="fm_add_placeholders();\n"; //this will make sure the placeholder functionality is simulated in browsers that do not support HTML 5 'placeholder' attribute in text fields
 	
 	$str.="</script>\n";
 	return $str;
@@ -249,10 +254,6 @@ function displayDataSummaryTemplate($template, $formInfo, $data){
 	$this->currentFormInfo = $formInfo;
 	$this->currentFormData = $data;
 	$this->currentItemIndex = -1;
-	
-	//strip slashes from the data
-	//foreach($this->currentFormData as $k=>$v)
-	//	$this->currentFormData[$k] = stripslashes($v);
 	
 	ob_start();
 	

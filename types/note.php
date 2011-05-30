@@ -7,9 +7,9 @@ class fm_noteControl extends fm_controlBase{
 	/* translators: this appears in the 'Add Form Element' menu */
 	public function getTypeLabel(){ return __("Note", 'wordpress-form-manager'); }
 	
-	public function showItem($uniqueName, $itemInfo){ return $itemInfo['extra']['content']; }
+	public function showItem($uniqueName, $itemInfo){ return htmlspecialchars($itemInfo['extra']['content']); }
 	
-	public function editItem($uniqueName, $itemInfo){ return "<span id=\"{$uniqueName}-edit-value\" >".fm_restrictString($itemInfo['extra']['content'], 25)."</span>"; }
+	public function editItem($uniqueName, $itemInfo){ return "<span id=\"{$uniqueName}-edit-value\" >".htmlspecialchars(fm_restrictString($itemInfo['extra']['content'], 25))."</span>"; }
 	
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
