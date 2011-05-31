@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.20
+Version: 1.4.21
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -341,6 +341,11 @@ function fm_dataShortcodeHandler($atts){
 
 include 'api.php';
 
+/* ANDREA : include php for create TinyMCE Button */
+include 'tinymce.php';
+
+
+//set the include path back to whatever it was before:
 set_include_path($fm_oldIncludePath);
 
 ?>
