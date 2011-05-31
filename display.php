@@ -176,6 +176,8 @@ protected function displayFormScripts($formInfo, $options=array()){
 		$str.="fm_remove_placeholders();\n"; //this will convert placeholders into values; used to re-populate a form after a bad submission, for user profile style, etc., where the 'value' field needs to be the fields' value rather than a placeholder
 	else
 		$str.="fm_add_placeholders();\n"; //this will make sure the placeholder functionality is simulated in browsers that do not support HTML 5 'placeholder' attribute in text fields
+		
+	$str.="fm_simulate_HTML5();\n"; //simulate HTML5 behaviors other than 'placeholder'
 	
 	$str.="</script>\n";
 	return $str;
