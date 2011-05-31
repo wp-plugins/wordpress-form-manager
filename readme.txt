@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.21
+Stable tag: 1.4.20
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -41,6 +41,7 @@ Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 == Changelog ==
 = 1.4.21 =
 * Added 'maximum length' attribute for text inputs
+* Added tinyMCE button
 
 = 1.4.20 =
 * Fixed install error
