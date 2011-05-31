@@ -42,7 +42,7 @@ function fm_add_placeholders(){
 				textItem.onfocus = fm_simulate_placeholder_onfocus;
 				textItem.onblur = fm_simulate_placeholder_onblur;
 				textItem.onchange = fm_simulate_placeholder_onchange;
-			}	
+			}
 		}
 	}
 }
@@ -68,4 +68,8 @@ function fm_remove_placeholders(){
 			textItem.value = fm_form_items[i].extra.placeholder;
 		}
 	}
+}
+
+function fm_simulate_HTML5(){
+	
 }
