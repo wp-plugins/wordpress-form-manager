@@ -213,7 +213,7 @@ function setupFormManager(){
 		`publish_post_title` TEXT DEFAULT '' NOT NULL,
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
-		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL
+		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
