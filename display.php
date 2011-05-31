@@ -128,16 +128,33 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 			${$varName} = $value;
 		}
 	
+	$str = "";
+	
+	// set up the environment for any scripts that might be part of the template
+	$str.= '<script type="text/javascript">';
+	$str.= 'fm_current_form = '.$formInfo['ID'].';';
+	$str.= $this->registerFormItemScript($formInfo, $options);
+	$str.= '</script>';
+	
 	ob_start();	
 	
 	// load the template
 	include $fm_templates->templatesDir."/".$template;	
 	
-	$str = ob_get_contents();
+	$str.= ob_get_contents();
 	ob_end_clean();
 		
+	// show the support scripts, validation, etc.
 	$str.= $this->displayFormScripts($formInfo, $options);
 	
+	return $str;
+}
+
+protected function registerFormItemScript($formInfo, $options=array()){
+	$str.="// register form items \n";
+	foreach($formInfo['items'] as $item){
+		$str.="fm_register_form_item('".$formInfo['ID']."', '".$item['unique_name']."', '".$item['nickname']."', '".$item['type']."', {placeholder: '".$item['extra']['value']."'});\n";
+	}
 	return $str;
 }
 
@@ -166,11 +183,6 @@ protected function displayFormScripts($formInfo, $options=array()){
 			}
 		}
 	}	
-	
-	$str.="// register form items \n";
-	foreach($formInfo['items'] as $item){
-		$str.="fm_register_form_item('".$formInfo['ID']."', '".$item['unique_name']."', '".$item['type']."', {placeholder: '".$item['extra']['value']."'});\n";
-	}
 	
 	if(isset($options['use_placeholders']) && $options['use_placeholders'] === false)
 		$str.="fm_remove_placeholders();\n"; //this will convert placeholders into values; used to re-populate a form after a bad submission, for user profile style, etc., where the 'value' field needs to be the fields' value rather than a placeholder

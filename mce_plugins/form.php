@@ -35,6 +35,7 @@ $results = $fmdb->getFormList();
 <head>
 	<title>Form Manager</title>
 	<script type="text/javascript" src="tiny_mce_popup.js"></script>
+	<script type="text/javascript">var fm_shortcode = '<?php echo get_option('fm-shortcode');?>';</script>
 	<script type="text/javascript" src="rule.js"></script>
 </head>
 <body> 

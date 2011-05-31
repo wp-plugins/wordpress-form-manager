@@ -9,7 +9,7 @@ var WPformManagerDialog = {
 		var x = select_form.selectedIndex;
 		var form_=select_form.options[x].value;
 	
-		h='[form '+form_+']';
+		h='[' + fm_shortcode + ' '+form_+']';
 	
 
 		ed.execCommand("mceInsertContent", false, h);
