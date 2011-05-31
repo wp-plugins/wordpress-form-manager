@@ -41,7 +41,7 @@ Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 == Changelog ==
 = 1.4.21 =
 * Added 'maximum length' attribute for text inputs
-* Added tinyMCE button
+* Added tinyMCE button. (Many thanks to [Andrea Bersi](http://www.andreabersi.com))
 
 = 1.4.20 =
 * Fixed install error
