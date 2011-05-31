@@ -31,7 +31,9 @@ Form Manager is a tool for creating forms to collect and download data from visi
 Subtitles and notes can also be added to the form in any location.
 
 = Publishing a Form =
-Forms are placed within posts or pages.  For example, if your form's slug is 'form-1', put the following within a post or page: 
+Forms are placed within posts or pages.  Look for the Form Manager button in your post editor towards the right.  
+
+You can also type in shortcodes yourself.  For example, if your form's slug is 'form-1', put the following within a post or page: 
 
 `[form form-1]`  
   
