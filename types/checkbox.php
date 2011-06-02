@@ -24,9 +24,10 @@ class fm_checkboxControl extends fm_controlBase{
 	public function showItem($uniqueName, $itemInfo){
 		$elem=array('type' => 'checkbox',
 					'attributes' => array('name' => $uniqueName,
-											'id'=> $uniqueName											
+											'id'=> $uniqueName,
+											'style'=> ($itemInfo['extra']['position'] == "right" ? "float:right;" : "")
 											),
-					'checked'=> ($itemInfo['extra']['value']=="yes")
+					'checked'=> ($itemInfo['extra']['value']=="yes")				
 					);											
 		return fe_getElementHTML($elem);
 	}	
@@ -44,6 +45,7 @@ class fm_checkboxControl extends fm_controlBase{
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'position', __('Position', 'wordpress-form-manager'), array('options' => array('left' => __("Left", 'wordpress-form-manager'), 'right' => __("Right", 'wordpress-form-manager')), 'value' => $itemInfo['extra']['position']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'value', __('Checked by Default', 'wordpress-form-manager'), array('checked'=>$itemInfo['extra']['value']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		return $arr;
@@ -51,7 +53,7 @@ class fm_checkboxControl extends fm_controlBase{
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
-		$opt['extra'] = "\"array('value' => '\" + ".$this->checkboxScriptHelper('value',array('onValue'=>'checked', 'offValue'=>""))." + \"')\"";
+		$opt['extra'] = "\"array('value' => '\" + ".$this->checkboxScriptHelper('value',array('onValue'=>'checked', 'offValue'=>""))." + \"', 'position' => '\" + fm_fix_str(fm_get_item_value(itemID, 'position')) + \"')\"";
 		$opt['required'] = $this->checkboxScriptHelper('required');
 		return $opt;
 	}

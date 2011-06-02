@@ -192,7 +192,7 @@ function fm_doFormBySlug($formSlug){
 			//show the automatic redirection script
 			if($formInfo['auto_redirect']==1){
 				$output.=	"<script language=\"javascript\"><!--\n".
-							"setTimeout('location.replace(\"".get_permalink($formInfo['auto_redirect_page'])."\")', ".($formInfo['auto_redirect_timeout']*1000).");\n"\.
+							"setTimeout('location.replace(\"".get_permalink($formInfo['auto_redirect_page'])."\")', ".($formInfo['auto_redirect_timeout']*1000).");\n".
 							"//-->\n".
 							"</script>\n";
 			}
