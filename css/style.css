@@ -177,6 +177,14 @@ hr.edit-panel-sep{
 	margin-bottom:10px;
 }
 
+#fm-editor-tabs-wrap{
+	margin-top:15px;
+	border-bottom:1px solid #CCCCCC;
+}
+.fm-editor-tab{
+	
+}
+
 /******************************************/
 /* Data summary */
 

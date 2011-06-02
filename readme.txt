@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.22
+Stable tag: 1.4.23
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -31,7 +31,7 @@ Form Manager is a tool for creating forms to collect and download data from visi
 Subtitles and notes can also be added to the form in any location.
 
 = Publishing a Form =
-Forms are placed within posts or pages.  Look for the Form Manager button in your post editor towards the right.  
+Forms are placed within posts or pages.  Look for the Form Manager button in your post editor towards the right (Thanks to [Andrea Bersi](http://www.andreabersi.com).  
 
 You can also type in shortcodes yourself.  For example, if your form's slug is 'form-1', put the following within a post or page: 
 
@@ -40,9 +40,15 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
   
 <br />
 = Languages =
-<img src = "http://photos1.blogger.com/img/43/1633/320/13539953_0384ccecf9.jpg" height="20" type="image" width="30"> Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
+Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 
 == Changelog ==
+= 1.4.23 =
+* Editor/Data/Advanced for forms now uses a 'tabbed' interface
+* Added database check for troubleshooting
+* Added checkbox positioning option
+* Added more specific capabilities for Members plugin
+
 = 1.4.22 =
 * Notes can display HTML
 

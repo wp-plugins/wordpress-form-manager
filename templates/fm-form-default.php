@@ -3,6 +3,7 @@
 Template Name: Form Manager Default
 Template Description: The default dislplay template for forms
 Template Type: form
+
 option: $showFormTitle, checkbox
 	label: Show form title:
 	default: checked
@@ -18,6 +19,7 @@ option: $labelWidth, text
 	label: Label width (in pixels):
 	description: Applies to checkboxes, and when labels are to the left
 	default: 200
+
 	
 //////////////////////////////////////////////////////////////////////////////////////////
 

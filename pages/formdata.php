@@ -228,14 +228,10 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 <input type="hidden" value="" name="message" id="message-post" />
 
 <div class="wrap">
-	<div id="icon-edit-pages" class="icon32"></div>
-	<h2>Data: <?php echo $form['title'];?></h2>
-	<div style="float:right;">
+	<div style="float:right;padding-top:10px;">
 		
 		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?></a>
-		<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_forms')): ?>
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit Form", 'wordpress-form-manager');?></a>
-		<?php endif; ?>
+		
 		<br />
 		<div id="csv-working" style="visibility:hidden;padding-top:10px;margin-bottom:-20px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;<?php _e("Working...", 'wordpress-form-manager');?></div><a href="#" id="fm-csv-download-link"></a>
 	</div>

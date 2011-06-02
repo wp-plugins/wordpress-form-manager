@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.22
+Version: 1.4.23
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.22";
+$fm_currentVersion = "1.4.23";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -219,9 +219,9 @@ function fm_userHead(){
 
 add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
-	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), apply_filters('fm_main_capability', 'manage_options'), "fm-admin-main", 'fm_showMainPage');
+	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), apply_filters('fm_main_capability', 'manage_options'), "fm-admin-main", 'fm_showMainPage', plugins_url('/mce_plugins/formmanager.png', __FILE__));
 	$pages[] = add_submenu_page("fm-admin-main", __("Edit", 'wordpress-form-manager'), __("Edit", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-edit-form", 'fm_showEditPage');
-	$pages[] = add_submenu_page("fm-admin-main", __("Data", 'wordpress-form-manager'), __("Data", 'wordpress-form-manager'), apply_filters('fm_data_capability', 'manage_options'), "fm-form-data", 'fm_showDataPage');	
+	//$pages[] = add_submenu_page("fm-admin-main", __("Data", 'wordpress-form-manager'), __("Data", 'wordpress-form-manager'), apply_filters('fm_data_capability', 'manage_options'), "fm-form-data", 'fm_showDataPage');	
 	
 	//at some point, make this link go to a fresh form
 	//$pages[] = add_submenu_page("fm-admin-main", "Add New", "Add New", "manage_options", "fm-add-new", 'fm_showMainPage');
@@ -229,7 +229,7 @@ function fm_setupAdminMenu(){
 	$pages[] = add_submenu_page("fm-admin-main", __("Settings", 'wordpress-form-manager'), __("Settings", 'wordpress-form-manager'), apply_filters('fm_settings_capability', 'manage_options'), "fm-global-settings", 'fm_showSettingsPage');
 	$pages[] = add_submenu_page("fm-admin-main", __("Advanced Settings", 'wordpress-form-manager'), __("Advanced Settings", 'wordpress-form-manager'), apply_filters('fm_settings_advanced_capability', 'manage_options'), "fm-global-settings-advanced", 'fm_showSettingsAdvancedPage');
 	
-	$pages[] = add_submenu_page("fm-admin-main", __("Edit Form - Advanced", 'wordpress-form-manager'), __("Edit Form - Advanced", 'wordpress-form-manager'), apply_filters('fm_forms_advanced_capability', 'manage_options'), "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
+	//$pages[] = add_submenu_page("fm-admin-main", __("Edit Form - Advanced", 'wordpress-form-manager'), __("Edit Form - Advanced", 'wordpress-form-manager'), apply_filters('fm_forms_advanced_capability', 'manage_options'), "fm-edit-form-advanced", 'fm_showEditAdvancedPage');
 	
 	foreach($pages as $page)
 		add_action('admin_head-'.$page, 'fm_adminHeadPluginOnly');
@@ -250,10 +250,12 @@ function fm_adminHead(){
 	
 	//we don't actually want all the pages to show up in the menu, but having slugs for pages makes things easy
 	
-	$toUnset = array('fm-edit-form',
+	/*$toUnset = array('fm-edit-form',
 						'fm-form-data',
 						'fm-edit-form-advanced'
-						);
+						); */
+						
+	$toUnset = array('fm-edit-form');
 						
 	foreach($submenu['fm-admin-main'] as $index => $submenuItem)
 		if(in_array($submenuItem[2], $toUnset, true))
@@ -311,6 +313,8 @@ function fm_add_members_capabilities( $caps ) {
 	$caps[] = 'form_manager_add_forms';
 	$caps[] = 'form_manager_edit_data';
 	$caps[] = 'form_manager_delete_data';
+	$caps[] = 'form_manager_nicknames';
+	$caps[] = 'form_manager_conditions';
 	
 	return $caps;
 }
