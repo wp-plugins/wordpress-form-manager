@@ -207,7 +207,7 @@ function fm_getManagedListCount(ulID){
 
 <h3>Database Check</h3>
 <table class="form-table">
-<tr><th scope="row"><label>Check the Form Manager database:</label></th><td><input type="submit" name="check-db" class="button secondary" value="Go" /></td></tr>
+<tr><th scope="row"><label><?php _e("Check the Form Manager database", 'wordpress-form-manager');?>:</label></th><td><input type="submit" name="check-db" class="button secondary" value="<?php _e("Go",'wordpress-form-manager');?> /></td></tr>
 </table>
 
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />
