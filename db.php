@@ -216,7 +216,7 @@ function setupFormManager(){
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
 		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
-		`conditions` TEXT DEFAULT '' NOT NULL,  
+		`conditions` TEXT DEFAULT '' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -771,7 +771,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	
 	
 	//Properly encode the CSV so Excel can open it: Credit for this goes to someone called Eugene Murai
-	$fp = fopen($fname, 'w') or die("Failed to open file: '".$php_errormsg."'");
+	$fp = fopen($fname, 'w') or die(__("Failed to open file", 'wordpress-form-manager').": '".$php_errormsg."'");
 	
 	$tmp = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
 	$write = fwrite( $fp, $tmp );	

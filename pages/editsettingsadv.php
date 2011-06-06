@@ -132,7 +132,7 @@ function fm_getManagedListCount(ulID){
 <h2><?php _e("Form Manager Settings - Advanced", 'wordpress-form-manager');?></h2>
 
 	<div id="message-container"><?php 
-	if(isset($_POST['message']))
+	if(isset($_POST['message']) && isset($_POST['submit-settings']))
 		switch($_POST['message']){
 			case 1: ?><div id="message-success" class="updated"><p><strong><?php _e("Settings Saved.", 'wordpress-form-manager');?> </strong></p></div><?php break;
 			case 2: ?><div id="message-error" class="error"><p><?php _e("Save failed.", 'wordpress-form-manager');?> </p></div><?php break;
@@ -207,7 +207,7 @@ function fm_getManagedListCount(ulID){
 
 <h3>Database Check</h3>
 <table class="form-table">
-<tr><th scope="row"><label><?php _e("Check the Form Manager database", 'wordpress-form-manager');?>:</label></th><td><input type="submit" name="check-db" class="button secondary" value="<?php _e("Go",'wordpress-form-manager');?> /></td></tr>
+<tr><th scope="row"><label><?php _e("Check the Form Manager database", 'wordpress-form-manager'); ?>:</label></th><td><input type="submit" name="check-db" class="button secondary" value="<?php _e("Go",'wordpress-form-manager');?>" /></td></tr>
 </table>
 
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />

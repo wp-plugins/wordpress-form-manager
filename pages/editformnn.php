@@ -43,12 +43,12 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <div class="wrap" style="padding-top:15px;">
 
 <div style="float:right;">
+<input type="submit" name="cancel" class="button secondary" value="<?php _e("Cancel Changes", 'wordpress-form-manager');?>" />
 <input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  />&nbsp;&nbsp;
-
 </div>
 
 	<div id="message-container"><?php 
-	if(isset($_POST['message']))
+	if(isset($_POST['message']) && isset($_POST['submit-form-settings']))
 		switch($_POST['message']){
 			case 1: ?><div id="message-success" class="updated"><p><strong><?php _e("Settings Saved.", 'wordpress-form-manager');?> </strong></p></div><?php break;
 			case 2: ?><div id="message-error" class="error"><p><?php _e("Save failed.", 'wordpress-form-manager');?> </p></div><?php break;
@@ -72,7 +72,10 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 } ?>
 </table>
 
-<p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  /></p>
+<p class="submit">
+<input type="submit" name="cancel" class="button secondary" value="<?php _e("Cancel Changes", 'wordpress-form-manager');?>" />
+<input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  />
+</p>
 
 </div>
 

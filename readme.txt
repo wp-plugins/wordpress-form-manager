@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -44,6 +44,9 @@ Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 Nederlands (nl_NL) - [Sander Kolthof](www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.1 =
+* Fixed script loading bug in certain environments
+
 = 1.5.0 =
 * Added conditional behavior, e.g., only show certain items based on the values of other items
 * Dutch language support (Thanks to [Sander Kolthof](www.fullcirclemedia.nl))

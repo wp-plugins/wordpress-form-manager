@@ -67,12 +67,12 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <div class="wrap">
 
 <div style="float:right;">
+<input type="submit" name="cancel" class="button secondary" value="<?php _e("Cancel Changes", 'wordpress-form-manager');?>" />
 <input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  />&nbsp;&nbsp;
-
 </div>
 
 	<div id="message-container"><?php 
-	if(isset($_POST['message']))
+	if(isset($_POST['message']) && isset($_POST['submit-form-settings']))
 		switch($_POST['message']){
 			case 1: ?><div id="message-success" class="updated"><p><strong><?php _e("Settings Saved.", 'wordpress-form-manager');?> </strong></p></div><?php break;
 			case 2: ?><div id="message-error" class="error"><p><?php _e("Save failed.", 'wordpress-form-manager');?> </p></div><?php break;
@@ -118,7 +118,10 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 <?php helper_text_field('publish_post_title', __("Post title", 'wordpress-form-manager'), htmlspecialchars($form['publish_post_title']), __("Include '%s' where you would like the form title to appear", 'wordpress-form-manager')); ?>
 </table>
 
-<p class="submit"><input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  /></p>
+<p class="submit">
+<input type="submit" name="cancel" class="button secondary" value="<?php _e("Cancel Changes", 'wordpress-form-manager');?>" />
+<input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  />
+</p>
 
 </div>
 
