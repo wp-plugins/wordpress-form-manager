@@ -86,7 +86,8 @@ $this->formSettingsKeys = array(
 					'publish_post_title' => '%s Submission',
 					'auto_redirect' => 0,
 					'auto_redirect_page' => 0,
-					'auto_redirect_timeout' => 5
+					'auto_redirect_timeout' => 5,
+					'conditions' => ''
 					);
 					
 $this->itemKeys = array (
@@ -184,6 +185,7 @@ function setupFormManager(){
 		auto_redirect		- whether or not to do the automatic redirect
 		auto_redirect_page	- the page / post ID of the page to go to after (timeout) seconds
 		auto_redirect_timeout - the timeout for the automatic redirect
+		conditions			- associative array structure, specifying form interface behavior conditions (e.g., only show elements if other elements have certain values)
 	*/	
 	
 	
@@ -213,7 +215,8 @@ function setupFormManager(){
 		`publish_post_title` TEXT DEFAULT '' NOT NULL,
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
-		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL
+		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
+		`conditions` TEXT DEFAULT '' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -768,7 +771,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	
 	
 	//Properly encode the CSV so Excel can open it: Credit for this goes to someone called Eugene Murai
-	$fp = fopen($fname, 'w') or die("Failed to open file: '".$php_errormsg."'");
+	$fp = fopen($fname, 'w') or die(__("Failed to open file", 'wordpress-form-manager').": '".$php_errormsg."'");
 	
 	$tmp = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
 	$write = fwrite( $fp, $tmp );	
@@ -1405,6 +1408,143 @@ function getDataTableName($formID){
 	}
 	return $dataTable;
 }
+
+// database consistency check; returns a string telling what was checked and the results
+function consistencyCheck(){
+	
+	//first see if the basic tables exist
+	$tbls = array($this->formsTable, $this->itemsTable, $this->templatesTable, $this->settingsTable);
+	$names = array('Forms', 'Items', 'Templates', 'Settings');
+	$found = array();
+	
+	for($x=0;$x<sizeof($tbls);$x++){
+		echo  $names[$x]." table (".$tbls[$x].")... ";
+		if($this->tableExists($tbls[$x])){
+			echo  "OK\n";
+			$found[$x] = true;
+		}else{
+			echo "FAIL\n";
+			$found[$x] = false;
+		}
+	}	
+	
+	// do the table checks	
+	if($found[0]){
+		echo  "Forms table...\n";
+	
+		//make sure a data table exists for each form
+		$q = "SELECT `ID`, `data_table` FROM `".$this->formsTable."` WHERE `ID` > 0";
+		$res = $this->query($q);
+		while($row = mysql_fetch_assoc($res)){
+			echo  "Form ".$row['ID']." for data table: ";
+			$q = "SHOW TABLES LIKE '".$row['data_table']."'";
+			if(mysql_num_rows($this->query($q)) == 1)
+				echo  "OK\n";
+			else
+				echo  "FAIL\n";
+		}
+		mysql_free_result($res);		
+		
+		//no duplicate form IDs or slugs
+		echo  "For duplicate IDs and slugs...\n";
+		$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` > 0";
+		$res = $this->query($q);
+		$ids = array();
+		$slugs = array();
+		while($row = mysql_fetch_assoc($res)){
+			$ids[] = $row['ID'];
+			$slugs[] = $row['shortcode'];
+		}		
+		mysql_free_result($res);
+		
+		sort($ids);
+		sort($slugs);
+		$fail = false;
+		$last = $ids[0];
+		for($x=1;$x<sizeof($ids);$x++){
+			if($last == $ids[$x]){
+				" DUPLICATE ID FOUND (".$ids[$x].")\n";
+				$fail = true;
+			}			
+			$last = $ids[$x];
+		}
+		$last = $slugs[$x];
+		for($x=1;$x<sizeof($slugs);$x++){
+			if($last == $slugs[$x]){
+				" DUPLICATE SLUG FOUND (".$slugs[$x].")\n";
+				$fail = true;
+			}
+			$last = $slugs[$x];
+		}
+		if(!$fail) echo  "OK\n";
+	}
+	
+	//list of entries in the items table
+	if($found[1] && $found[0]){
+		echo  "Items table...\n";
+		echo "Checking form IDs exists...\n";
+		$q = "SELECT * FROM `".$this->itemsTable."`";
+		$res = $this->query($q);
+		$items = array();
+		$err = false;
+		while($row = mysql_fetch_assoc($res)){
+			$items[] = $row;
+			if(!in_array($row['ID'], $ids)){
+				echo  $row['unique_name'].": nonexistent form ".$row['ID']."\n";
+				$err = true;
+			}
+		}
+		mysql_free_result($res);
+		if(!$err)
+			echo  "OK\n";
+		
+		echo "Checking unique names...\n";
+		$last = $items[0]['unique_name'];
+		$err = false;
+		for($x=1;$x<sizeof($items);$x++){
+			if($last == $items[$x]['unique_name']){
+				$err = true;
+				echo  "Duplicate: ".$last."\n";
+			}			
+		}
+		if(!$err)
+			echo "SLUGS OK\n";
+	}
+	
+	//list of entries in the templates table
+	if($found[2]){
+		echo  "Templates entries: \n";
+		$q = "SELECT `title`, `filename`, `modified` FROM `".$this->templatesTable."`";
+		$res = $this->query($q);
+		if(mysql_num_rows($res) > 0){
+			while($row = mysql_fetch_assoc($res)){
+				echo " Title: ".$row['title']."  Filename: ".$row['filename']."  Modified: ".$row['modified']."\n";
+			}
+			mysql_free_result($res);
+		}
+	}
+	
+	//list of entries in the settings table
+	if($found[3]){
+		echo  "Settings entries: \n";
+		$q = "SELECT * FROM `".$this->settingsTable."`";
+		$res = $this->query($q);
+		while($row = mysql_fetch_assoc($res)){
+			echo " Name: ".$row['setting_name']."  Value: ".$row['setting_value']."\n";
+		}
+		mysql_fetch_assoc($res);
+	}
+	
+	echo "Done.\n";
+}
+
+function tableExists($tableName){
+	$q = "SHOW TABLES LIKE '".$this->formsTable."'";
+	$res = mysql_query($q);
+	if(mysql_num_rows($res) == 0) return false;
+	return true;		
+}
+
 
 }
 

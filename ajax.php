@@ -190,6 +190,7 @@ function fm_downloadFile(){
 add_action('wp_ajax_fm_download_all_files', 'fm_downloadAllFiles');
 function fm_downloadAllFiles(){
 	global $fmdb;
+	global $fm_controls;
 	
 	$tmpDir =  dirname(__FILE__)."/".get_option("fm-temp-dir")."/";
 	
@@ -197,18 +198,27 @@ function fm_downloadAllFiles(){
 	$itemID = $_POST['itemid'];
 	
 	$formInfo = $fmdb->getForm($formID);
-	foreach($formInfo['items'] as $item)
-		if($item['unique_name'] == $itemID)
+	
+	foreach($formInfo['items'] as $item){
+		if($item['unique_name'] == $itemID){
 			$itemLabel = $item['label'];
-			
+			$fileItem = $item;
+		}
+	}
+	
 	$formData = $fmdb->getFormSubmissionDataRaw($formID, 'timestamp', 'DESC', 0, 0);
 	$files = array();
 	foreach($formData as $dataRow){
 		$fileInfo = unserialize($dataRow[$itemID]);
-		if(sizeof($fileInfo) > 1){			
-			$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
-			$files[] = $tmpDir.$fname;
-			fm_createFileFromDB($fname, $fileInfo, $tmpDir);
+		if(sizeof($fileInfo) > 1){		
+			if(!isset($fileInfo['upload_dir'])){
+				$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
+				$files[] = $tmpDir.$fname;
+				fm_createFileFromDB($fname, $fileInfo, $tmpDir);
+			}
+			else{
+				$files[] = $fm_controls['file']->parseUploadDir($fileItem['extra']['upload_dir']).$fileInfo['filename'];
+			}
 		}
 	}
 	

@@ -146,9 +146,9 @@ else: ?>
 						<div class="row-actions">
 						<?php if(!$fm_MEMBERS_EXISTS): ?>
 							<span class='edit'>
-							<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit", 'wordpress-form-manager');?></a> | 
-							<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form-advanced&id=".$form['ID'];?>" title="<?php _e("Advanced form settings", 'wordpress-form-manager');?>"><?php _e("Advanced", 'wordpress-form-manager');?></a> | 
-							<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="<?php _e("View form data", 'wordpress-form-manager');?>"><?php _e("Data", 'wordpress-form-manager');?></a> | 
+							<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=design&id=".$form['ID'];?>" title="<?php _e("Edit this form", 'wordpress-form-manager');?>"><?php _e("Edit", 'wordpress-form-manager');?></a> | 
+							<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=advanced&id=".$form['ID'];?>" title="<?php _e("Advanced form settings", 'wordpress-form-manager');?>"><?php _e("Advanced", 'wordpress-form-manager');?></a> | 
+							<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=data&id=".$form['ID'];?>" title="<?php _e("View form data", 'wordpress-form-manager');?>"><?php _e("Data", 'wordpress-form-manager');?></a> | 
 							<a href="#" title="<?php _e("Delete this form", 'wordpress-form-manager');?>" onClick="fm_deleteFormClick('<?php echo $form['ID'];?>');return false"><?php _e("Delete", 'wordpress-form-manager');?></a>
 							</span>
 						<?php else: ?>
@@ -156,11 +156,11 @@ else: ?>
 							<?php $editOptions = array(); ?>
 							<?php 
 							if(current_user_can('form_manager_forms'))
-								$editOptions[] = "<a href=\"".get_admin_url(null, 'admin.php')."?page=fm-edit-form&id=".$form['ID']."\" title=\"".__("Edit this form", 'wordpress-form-manager')."\">".__("Edit", 'wordpress-form-manager')."</a>";
+								$editOptions[] = "<a href=\"".get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=design&id=".$form['ID']."\" title=\"".__("Edit this form", 'wordpress-form-manager')."\">".__("Edit", 'wordpress-form-manager')."</a>";
 							if(current_user_can('form_manager_forms_advanced'))
-								$editOptions[] = "<a href=\"".get_admin_url(null, 'admin.php')."?page=fm-edit-form-advanced&id=".$form['ID']."\" title=\"".__("Advanced form settings", 'wordpress-form-manager')."\">".__("Advanced", 'wordpress-form-manager')."</a>";							
+								$editOptions[] = "<a href=\"".get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=advanced&id=".$form['ID']."\" title=\"".__("Advanced form settings", 'wordpress-form-manager')."\">".__("Advanced", 'wordpress-form-manager')."</a>";							
 							if(current_user_can('form_manager_data'))
-								$editOptions[] = "<a href=\"".get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID']."\" title=\"".__("View form data", 'wordpress-form-manager')."\">".__("Data", 'wordpress-form-manager')."</a>";
+								$editOptions[] = "<a href=\"".get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=data&id=".$form['ID']."\" title=\"".__("View form data", 'wordpress-form-manager')."\">".__("Data", 'wordpress-form-manager')."</a>";
 							if(current_user_can('form_manager_delete_forms'))
 								$editOptions[] = "<a href=\"#\" title=\"".__("Delete this form", 'wordpress-form-manager')."\" onClick=\"fm_deleteFormClick('".$form['ID']."');return false\">".__("Delete", 'wordpress-form-manager')."</a>";
 								
