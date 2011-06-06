@@ -168,14 +168,16 @@ function fm_cleanCSVData(){
 
 add_action('admin_init', 'fm_adminInit');
 function fm_adminInit(){
-	global $fm_SLIMSTAT_EXISTS;
-	
+	global $fm_SLIMSTAT_EXISTS;	
+	if(get_option('slimstat_secret') !==  false) $fm_SLIMSTAT_EXISTS = true;
+}
+
+add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts');
+function fm_adminEnqueueScripts(){
 	wp_enqueue_script('form-manager-js', plugins_url('/js/scripts.js', __FILE__), array('scriptaculous'));	
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');	
-	
-	if(get_option('slimstat_secret') !==  false) $fm_SLIMSTAT_EXISTS = true;
 }
 
 add_action('init', 'fm_userInit');
@@ -196,7 +198,7 @@ function fm_userInit(){
 	
 	$fm_templates->initTemplates();
 	
-	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__), array('scriptaculous'));
+	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__));
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');
@@ -341,6 +343,26 @@ function fm_dataShortcodeHandler($atts){
 		
 	return fm_doDataListBySlug($formSlug, $atts['template'], $atts['orderby'], $atts['order'], $atts['dataperpage']);	
 }
+
+/**************************************************************/
+/******* HELPERS **********************************************/
+
+//schedule the deletion of a file download
+
+function fm_deleteTemporaryFile($filename){
+	//for now, just clear the directory.
+	$dir = dirname(__FILE__)."/".get_option("fm-temp-dir");	
+	if($handle = opendir($dir)){
+		while(($file = readdir($handle)) !== false){
+			if($file != "." && $file != ".." && is_file($dir."/".$file))
+				unlink($dir."/".$file);
+		}
+		closedir($handle);		
+	}
+}
+add_action('fm_delete_temporary_file', 'fm_deleteTemporaryFile');
+
+/**************************************************************/
 
 include 'api.php';
 
