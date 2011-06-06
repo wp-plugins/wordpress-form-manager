@@ -71,7 +71,12 @@ class fm_fileControl extends fm_controlBase{
 	public function parseData($uniqueName, $itemInfo, $data){
 		if(trim($data) == "") return "";
 		$fileInfo = unserialize($data);
-		return $fileInfo['filename']." (".((int)($fileInfo['size']/1024))." kB)";
+		if($fileInfo['size'] < 1024)
+			$sizeStr = $fileInfo['size']." B";
+		else
+			$sizeStr = ((int)($fileInfo['size']/1024))." kB";
+			
+		return $fileInfo['filename']." (".$sizeStr.")";
 	}
 	
 	public function getPanelItems($uniqueName, $itemInfo){
