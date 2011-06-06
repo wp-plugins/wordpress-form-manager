@@ -57,9 +57,7 @@ class fm_customListControl extends fm_controlBase{
 											),
 						'value' => $itemInfo['extra']['value'],	
 						'options' => $itemInfo['extra']['options']
-						);
-			if($itemInfo['required'] == "1")
-				$elem['options'] = array_merge(array('-1' => "..."), $elem['options']);
+						);			
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';								
 			return fe_getElementHTML($elem);

@@ -114,7 +114,7 @@ function fm_doFormBySlug($formSlug){
 		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
 		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login, 'user_ip' => fm_get_user_IP()), $overwrite);			
 		foreach($formInfo['items'] as $item){
-			if($item['type'] != 'file')
+			//if($item['type'] != 'file')
 				$postData[$item['unique_name']] = stripslashes($postData[$item['unique_name']]);
 		}
 			

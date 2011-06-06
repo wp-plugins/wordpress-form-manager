@@ -27,7 +27,7 @@ class fm_checkboxControl extends fm_controlBase{
 											'id'=> $uniqueName,
 											'style'=> ($itemInfo['extra']['position'] == "right" ? "float:right;" : "")
 											),
-					'checked'=> ($itemInfo['extra']['value']=="yes")				
+					'checked'=> ($itemInfo['extra']['value']=='checked')				
 					);											
 		return fe_getElementHTML($elem);
 	}	
@@ -46,7 +46,7 @@ class fm_checkboxControl extends fm_controlBase{
 		$arr=array();
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
 		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'position', __('Position', 'wordpress-form-manager'), array('options' => array('left' => __("Left", 'wordpress-form-manager'), 'right' => __("Right", 'wordpress-form-manager')), 'value' => $itemInfo['extra']['position']));
-		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'value', __('Checked by Default', 'wordpress-form-manager'), array('checked'=>$itemInfo['extra']['value']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'value', __('Checked by Default', 'wordpress-form-manager'), array('checked'=>($itemInfo['extra']['value']=='checked')));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		return $arr;
 	}

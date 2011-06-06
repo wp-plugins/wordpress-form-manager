@@ -21,6 +21,12 @@ $pages = array( array('sec' => 'design',
 					'capability' => 'form_manager_nicknames',
 					'page' => 'editformnn.php'
 				),
+				array('sec' => 'conditions',
+					'title' => __("Conditional behavior", 'wordpress-form-manager'),
+					'linktext' => __("Conditions", 'wordpress-form-manager'),
+					'capability' => 'form_manager_nicknames',
+					'page' => 'editformcond.php'
+				),
 				array('sec' => 'advanced',
 					'title' => __("Advanced form settings", 'wordpress-form-manager'),
 					'linktext' => __("Advanced", 'wordpress-form-manager'),

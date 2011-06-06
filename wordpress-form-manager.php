@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.4.23
+Version: 1.5.0
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.4.23";
+$fm_currentVersion = "1.5.0";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -55,8 +55,8 @@ if ( version_compare( get_bloginfo( 'version' ), '3.0.0', '<' ) )
 	wp_die( __('Form Manager requires WordPress version 3.0 or higher', 'wordpress-form-manager') );
 	
 // only PHP 5.0+
-if ( version_compare(PHP_VERSION, '5.0.0', '<') ) 
-	wp_die( __('Form Manager requires PHP version 5.0 or higher', 'wordpress-form-manager') );
+if ( version_compare(PHP_VERSION, '5.2.0', '<') ) 
+	wp_die( __('Form Manager requires PHP version 5.2 or higher', 'wordpress-form-manager') );
 
 include 'helpers.php';
 
@@ -199,8 +199,7 @@ function fm_userInit(){
 	
 	$fm_templates->initTemplates();
 	
-	wp_enqueue_script('form-manager-js-helpers', plugins_url('/js/helpers.js', __FILE__));
-	wp_enqueue_script('form-manager-js-validation', plugins_url('/js/validation.js', __FILE__));
+	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__));
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');
@@ -305,12 +304,13 @@ function fm_settings_advanced_capability( $cap ) { return 'form_manager_settings
 function fm_add_members_capabilities( $caps ) {
 	$caps[] = 'form_manager_main';
 	$caps[] = 'form_manager_forms';
+	$caps[] = 'form_manager_delete_forms';
+	$caps[] = 'form_manager_add_forms';
 	$caps[] = 'form_manager_forms_advanced';
 	$caps[] = 'form_manager_data';
 	$caps[] = 'form_manager_settings';
 	$caps[] = 'form_manager_settings_advanced';
-	$caps[] = 'form_manager_delete_forms';
-	$caps[] = 'form_manager_add_forms';
+	
 	$caps[] = 'form_manager_edit_data';
 	$caps[] = 'form_manager_delete_data';
 	$caps[] = 'form_manager_nicknames';
@@ -326,11 +326,13 @@ include 'ajax.php';
 
 add_shortcode(get_option('fm-shortcode'), 'fm_shortcodeHandler');
 function fm_shortcodeHandler($atts){
+	if(!isset($atts[0])) return sprintf(__("Form Manager: shortcode must include a form slug.  For example, something like '%s'", 'wordpress-form-manager'), "[form form-1]");
 	return fm_doFormBySlug($atts[0]);
 }
 
 add_shortcode(get_option('fm-data-shortcode'), 'fm_dataShortcodeHandler');
 function fm_dataShortcodeHandler($atts){
+	if(!isset($atts[0])) return sprintf(__("Form Manager: shortcode must include a form slug.  For example, something like '%s'", 'wordpress-form-manager'), "[formdata form-1]");
 	$formSlug = $atts[0];
 	
 	$atts = shortcode_atts(array(

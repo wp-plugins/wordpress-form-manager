@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.23
+Stable tag: 1.5.0
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -41,8 +41,15 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 <br />
 = Languages =
 Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
+Nederlands (nl_NL) - [Sander Kolthof](www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.0 =
+* Added conditional behavior, e.g., only show certain items based on the values of other items
+* Dutch language support (Thanks to [Sander Kolthof](www.fullcirclemedia.nl))
+* Fixed '0 kB' summary bug
+* Fixed checkbox default value bug
+
 = 1.4.23 =
 * Editor/Data/Advanced for forms now uses a 'tabbed' interface
 * Added database check for troubleshooting

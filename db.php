@@ -86,7 +86,8 @@ $this->formSettingsKeys = array(
 					'publish_post_title' => '%s Submission',
 					'auto_redirect' => 0,
 					'auto_redirect_page' => 0,
-					'auto_redirect_timeout' => 5
+					'auto_redirect_timeout' => 5,
+					'conditions' => ''
 					);
 					
 $this->itemKeys = array (
@@ -184,6 +185,7 @@ function setupFormManager(){
 		auto_redirect		- whether or not to do the automatic redirect
 		auto_redirect_page	- the page / post ID of the page to go to after (timeout) seconds
 		auto_redirect_timeout - the timeout for the automatic redirect
+		conditions			- associative array structure, specifying form interface behavior conditions (e.g., only show elements if other elements have certain values)
 	*/	
 	
 	
@@ -214,6 +216,7 @@ function setupFormManager(){
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
 		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
+		`conditions` TEXT DEFAULT '' NOT NULL,  
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
