@@ -64,6 +64,7 @@ class fm_checkboxControl extends fm_controlBase{
 	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
+		
 		function fm_<?php echo $this->getTypeName(); ?>_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;

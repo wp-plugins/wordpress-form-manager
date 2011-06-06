@@ -619,5 +619,4 @@ function fm_summary_get_value($uniqueName){
 	global $fm_display;
 	return $fm_display->currentFormData[$uniqueName];
 }
-
 ?>

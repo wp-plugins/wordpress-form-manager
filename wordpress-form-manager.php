@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.1
+Version: 1.5.2
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.5.1";
+$fm_currentVersion = "1.5.2";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -347,9 +347,9 @@ function fm_dataShortcodeHandler($atts){
 /**************************************************************/
 /******* HELPERS **********************************************/
 
-//schedule the deletion of a file download
+//allow scheduling of clearing the temporary directory
 
-function fm_deleteTemporaryFile($filename){
+function fm_deleteTemporaryFiles($filename){
 	//for now, just clear the directory.
 	$dir = dirname(__FILE__)."/".get_option("fm-temp-dir");	
 	if($handle = opendir($dir)){
@@ -360,7 +360,7 @@ function fm_deleteTemporaryFile($filename){
 		closedir($handle);		
 	}
 }
-add_action('fm_delete_temporary_file', 'fm_deleteTemporaryFile');
+add_action('fm_delete_temporary_file', 'fm_deleteTemporaryFiles');
 
 /**************************************************************/
 

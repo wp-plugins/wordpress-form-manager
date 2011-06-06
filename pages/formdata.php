@@ -348,13 +348,19 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<td><?php if($fm_SLIMSTAT_EXISTS): echo fm_get_slimstat_IP_link($queryVars, $dataRow['user_ip']); ?>
 						<?php else: echo $dataRow['user_ip']; endif; ?>
 					</td>
-					<?php foreach($form['items'] as $formItem): ?>
-						<?php if($formItem['type'] == 'file'): ?>
-							<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="<?php _e("Download", 'wordpress-form-manager');?> '<?php echo $dataRow[$formItem['unique_name']];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
-						<?php elseif($formItem['db_type'] != "NONE"): ?>
+					<?php 
+					foreach($form['items'] as $formItem){
+						if($formItem['type'] == 'file'){
+							if(strpos($dataRow[$formItem['unique_name']],"</a>") === false):?>
+								<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="<?php _e("Download", 'wordpress-form-manager');?> '<?php echo $dataRow[$formItem['unique_name']];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
+							<?php else: ?>
+								<td><?php echo $dataRow[$formItem['unique_name']]; ?></td>
+							<?php endif; /* end if file */ 
+						}else if($formItem['db_type'] != "NONE"){ ?>
 							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
-						<?php endif; ?>
-					<?php endforeach; ?>					
+						<?php } /* end if data type other than file */
+					} /* end foreach */ 
+					?>
 				</tr>
 			<?php endforeach; ?>
 			<input type="hidden" name="fm-num-data-rows" id="fm-num-data-rows" value="<?php echo $index;?>" />
