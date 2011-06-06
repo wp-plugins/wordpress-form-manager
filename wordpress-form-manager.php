@@ -196,7 +196,7 @@ function fm_userInit(){
 	
 	$fm_templates->initTemplates();
 	
-	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__));
+	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__), array('scriptaculous'));
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');
