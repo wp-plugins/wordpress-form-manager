@@ -79,7 +79,7 @@ $this->formSettingsKeys = array(
 					'summary_template' => '',
 					'template_values' => '',
 					'show_summary' => 0,
-					'use_advanced_email' => false,
+					'use_advanced_email' => 0,
 					'advanced_email' => '',
 					'publish_post' => 0,
 					'publish_post_category' => '',
@@ -191,32 +191,32 @@ function setupFormManager(){
 	
 	$sql = "CREATE TABLE `".$this->formsTable."` (
 		`ID` INT DEFAULT '0' NOT NULL,
-		`title` TEXT DEFAULT '' NOT NULL,
-		`submitted_msg` TEXT NOT NULL DEFAULT '',
+		`title` TEXT NOT NULL,
+		`submitted_msg` TEXT NOT NULL,
 		`submit_btn_text` VARCHAR( 32 ) DEFAULT '' NOT NULL,
-		`required_msg` TEXT DEFAULT '' NOT NULL,
+		`required_msg` TEXT NOT NULL,
 		`data_table` VARCHAR( 32 ) DEFAULT '' NOT NULL,
-		`action` TEXT DEFAULT '' NOT NULL,
+		`action` TEXT NOT NULL,
 		`data_index` VARCHAR( 32 ) DEFAULT '' NOT NULL,
 		`shortcode` VARCHAR( 64 ) DEFAULT '' NOT NULL,
 		`type` VARCHAR( 32 ) DEFAULT '' NOT NULL,
-		`email_list` TEXT DEFAULT '' NOT NULL,
+		`email_list` TEXT NOT NULL,
 		`behaviors` VARCHAR( 256 ) DEFAULT '' NOT NULL,
 		`email_user_field` VARCHAR( 64 ) DEFAULT '' NOT NULL,
 		`form_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`email_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`summary_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
-		`template_values` TEXT DEFAULT '' NOT NULL,
+		`template_values` TEXT NOT NULL,
 		`show_summary` BOOL DEFAULT '0' NOT NULL,
 		`use_advanced_email` BOOL DEFAULT '0' NOT NULL,
-		`advanced_email` TEXT DEFAULT '' NOT NULL,
+		`advanced_email` TEXT NOT NULL,
 		`publish_post` BOOL DEFAULT '0' NOT NULL,
-		`publish_post_category` TEXT DEFAULT '' NOT NULL,
-		`publish_post_title` TEXT DEFAULT '' NOT NULL,
+		`publish_post_category` TEXT NOT NULL,
+		`publish_post_title` TEXT NOT NULL,
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
 		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
-		`conditions` TEXT DEFAULT '' NOT NULL,
+		`conditions` TEXT NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -245,13 +245,13 @@ function setupFormManager(){
 	$sql = "CREATE TABLE `".$this->itemsTable."` ( 
 				`ID` INT NOT NULL ,							
 				`index` INT NOT NULL ,
-				`unique_name` VARCHAR( 64 ) NOT NULL ,
-				`type` VARCHAR( 32 ) NOT NULL ,
+				`unique_name` VARCHAR( 64 ) DEFAULT '' NOT NULL ,
+				`type` VARCHAR( 32 ) DEFAULT '' NOT NULL ,
 				`extra` TEXT NOT NULL ,
 				`nickname` TEXT NOT NULL ,
 				`label` TEXT NOT NULL ,
 				`required` BOOL NOT NULL ,
-				`db_type` VARCHAR( 32 ) NOT NULL ,
+				`db_type` VARCHAR( 32 ) DEFAULT '' NOT NULL ,
 				`description` TEXT NOT NULL ,
 				INDEX ( `ID` ) ,
 				UNIQUE (`unique_name`)
@@ -266,7 +266,7 @@ function setupFormManager(){
 		`title` TEXT NOT NULL,
 		`filename` TEXT NOT NULL,
 		`content` TEXT NOT NULL,
-		`status` VARCHAR( 32 ) NOT NULL,
+		`status` VARCHAR( 32 ) DEFAULT '' NOT NULL,
 		`modified` BIGINT NOT NULL
 		) ".$charset_collate.";";
 	
@@ -1096,8 +1096,8 @@ function createDataTable($formInfo, $dataTable){
 		
 	$q = "CREATE TABLE `{$dataTable}` (".
 		"`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,".
-		"`user` VARCHAR( 64 ) NOT NULL ,".
-		"`user_ip` VARCHAR( 64 ) NOT NULL";
+		"`user` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
+		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL";
 			
 	if(isset($formInfo['items']) && sizeof($formInfo['items'])>0){
 		$itemArr = array();
