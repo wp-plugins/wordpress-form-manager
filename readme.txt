@@ -41,7 +41,7 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 <br />
 = Languages =
 * Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
-* Nederlands (nl_NL) - [Sander Kolthof](www.fullcirclemedia.nl)
+* Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
 = 1.5.2 =
