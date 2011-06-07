@@ -50,6 +50,12 @@ if(isset($_POST['submit-settings'])){
 	$fmdb->setGlobalSetting('template_form', $_POST['template_form']);
 	$fmdb->setGlobalSetting('template_email', $_POST['template_email']);
 	$fmdb->setGlobalSetting('template_summary', $_POST['template_summary']);
+	
+	////////////////////////////////////////////////////////////////////////////////////
+	//Other
+	
+	update_option('fm-enable-mce-button', $_POST['enable_mce_button']?"YES":"");
+	
 }
 elseif(isset($_POST['remove-template'])){
 	$fm_templates->removeTemplate($_POST['remove-template-filename']);	
@@ -208,6 +214,11 @@ function fm_getManagedListCount(ulID){
 <h3>Database Check</h3>
 <table class="form-table">
 <tr><th scope="row"><label><?php _e("Check the Form Manager database", 'wordpress-form-manager'); ?>:</label></th><td><input type="submit" name="check-db" class="button secondary" value="<?php _e("Go",'wordpress-form-manager');?>" /></td></tr>
+</table>
+
+<h3>Post/Page Editor</h3>
+<table class="form-table">
+<?php helper_checkbox_field('enable_mce_button', __("Enable the editor button", 'wordpress-form-manager'), (get_option('fm-enable-mce-button') == "YES")); ?>
 </table>
 
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />

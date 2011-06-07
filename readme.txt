@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -44,6 +44,9 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.3 =
+* Added an option to disable the TinyMCE button in the 'Advanced' settings page
+
 = 1.5.2 =
 * Files can be uploaded to a directory of your choosing
 * Links in summaries / e-mails to uploaded files, if they are in a directory

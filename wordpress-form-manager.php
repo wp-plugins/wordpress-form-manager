@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.2
+Version: 1.5.3
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.5.2";
+$fm_currentVersion = "1.5.3";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -69,8 +69,11 @@ include 'formdefinition.php';
 /**************************************************************/
 /******* PLUGIN OPTIONS ***************************************/
 
-if(get_option('fm-shortcode') === false) 
+if(get_option('fm-shortcode') === false)
 	update_option("fm-shortcode", "form");
+if(get_option('fm-enable-mce-button') === false)
+	update_option("fm-enable-mce-button", "YES");
+	
 update_option("fm-forms-table-name", "fm_forms");
 update_option("fm-items-table-name", "fm_items");
 update_option("fm-settings-table-name", "fm_settings");
@@ -144,6 +147,7 @@ function fm_uninstall(){
 	delete_option('fm-version');
 	delete_option('fm-temp-dir');
 	delete_option('fm-data-shortcode');
+	delete_option('fm-enable-mce-button');
 }
 register_uninstall_hook(__FILE__,'fm_uninstall');
 
@@ -245,13 +249,6 @@ function fm_pluginActions($links){
 add_action('admin_head', 'fm_adminHead');
 function fm_adminHead(){
 	global $submenu;	
-	
-	//we don't actually want all the pages to show up in the menu, but having slugs for pages makes things easy
-	
-	/*$toUnset = array('fm-edit-form',
-						'fm-form-data',
-						'fm-edit-form-advanced'
-						); */
 						
 	$toUnset = array('fm-edit-form');
 						
@@ -367,7 +364,8 @@ add_action('fm_delete_temporary_file', 'fm_deleteTemporaryFiles');
 include 'api.php';
 
 /* ANDREA : include php for create TinyMCE Button */
-include 'tinymce.php';
+if(get_option('fm-enable-mce-button') == "YES")
+	include 'tinymce.php';
 
 
 //set the include path back to whatever it was before:
