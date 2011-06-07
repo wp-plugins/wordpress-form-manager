@@ -114,7 +114,7 @@ function fm_doFormBySlug($formSlug){
 		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
 		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login, 'user_ip' => fm_get_user_IP()), $overwrite);			
 		foreach($formInfo['items'] as $item){
-			if($item['type'] != 'file')
+			//if($item['type'] != 'file')
 				$postData[$item['unique_name']] = stripslashes($postData[$item['unique_name']]);
 		}
 			
@@ -192,7 +192,7 @@ function fm_doFormBySlug($formSlug){
 			//show the automatic redirection script
 			if($formInfo['auto_redirect']==1){
 				$output.=	"<script language=\"javascript\"><!--\n".
-							"setTimeout('location.replace(\"".get_permalink($formInfo['auto_redirect_page'])."\")', ".($formInfo['auto_redirect_timeout']*1000).");\n"\.
+							"setTimeout('location.replace(\"".get_permalink($formInfo['auto_redirect_page'])."\")', ".($formInfo['auto_redirect_timeout']*1000).");\n".
 							"//-->\n".
 							"</script>\n";
 			}
