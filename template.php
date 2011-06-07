@@ -7,7 +7,7 @@ class fm_templateControlBase{
 	
 	function getEditor($value, $option){
 		$id = $this->getVarId($option);
-		return "<input type=\"text\" id=\"".$id."\" name=\"".$id."\" value=\"".$value."\"/>";
+		return "<input type=\"text\" id=\"".$id."\" name=\"".$id."\" value=\"".htmlspecialchars($value)."\"/>";
 	}	
 	
 	function parseStoredValue($value, $option){
