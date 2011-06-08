@@ -710,7 +710,7 @@ function insertSubmissionData($dataTable, $postData){
 
 function writeFormSubmissionDataCSV($formID, $fname){
 	$formInfo = $this->getForm($formID);
-	$data = $this->getFormSubmissionData($formID);
+	$data = $this->getFormSubmissionData($formID, 'timestamp', 'DESC', 0, 0);
 	
 	$data = $data['data'];
 	//store the lines in an array
@@ -862,7 +862,7 @@ function isDataCol($formID, $uniqueName){
 		mysql_free_result($res);
 		$type = $row['db_type'];
 		$this->setCache($formID, $cacheKey, $type);
-	}	
+	}
 	return ($type != "NONE");	
 }
 
@@ -1102,7 +1102,7 @@ function createDataTable($formInfo, $dataTable){
 	if(isset($formInfo['items']) && sizeof($formInfo['items'])>0){
 		$itemArr = array();
 		foreach($formInfo['items'] as $item)
-			$itemArr[] = "`".$item['unique_name']."` ".($item['db_type']==""||!isset($item['db_type'])?"TEXT":$item['db_type'])." NOT NULL";			
+			$itemArr[] = "`".$item['unique_name']."` ".($item['db_type']==""||!isset($item['db_type'])?"TEXT":stripslashes($item['db_type']))." NOT NULL";			
 		$itemArr[] = "PRIMARY KEY (`timestamp`)";
 		$q.=", ".implode(", ",$itemArr);
 	}
@@ -1137,7 +1137,7 @@ function changeUniqueName($old, $new){
 	mysql_free_result($res);	
 	if($n==0) return -2;
 	$formID = $row['ID'];
-	$dbType = $row['db_type'];
+	$dbType = stripslashes($row['db_type']);
 	
 	//do the swap
 	$q = "UPDATE `".$this->itemsTable."` SET `unique_name` = '".$new."' WHERE `unique_name` = '".$old."' LIMIT 1;";
@@ -1212,7 +1212,7 @@ function createFormItem($formID, $uniqueName, $itemInfo){
 
 function createFormItemDataField($formID, $uniqueName, $itemInfo){	
 	$dataTable = $this->getDataTableName($formID);		
-	$q = "ALTER TABLE `".$dataTable."` ADD `".$uniqueName."` ".$itemInfo['db_type']." NOT NULL";
+	$q = "ALTER TABLE `".$dataTable."` ADD `".$uniqueName."` ".stripslashes($itemInfo['db_type'])." NOT NULL";
 	$this->query($q);
 }
 
@@ -1239,7 +1239,7 @@ function updateFormItem($formID, $uniqueName, $itemInfo){
 		$formInfo = $this->getFormSettings($formID);
 		$isIndex = ($formInfo['data_index'] == $uniqueName);
 		if($isIndex) $this->removeDataFieldIndex($formID); //remove it and add it again; this would happen anyway, but we also have to deal with the 'text' and 'blob' prefix issue; better to just remove the index and use our own safe index adding function after we change the field type
-		$this->updateDataFieldType($formID, $uniqueName, $itemInfo['db_type']);	
+		$this->updateDataFieldType($formID, $uniqueName, stripslashes($itemInfo['db_type']));	
 		if($isIndex) $this->setDataFieldIndex($formID, $uniqueName, false);
 	}
 }
@@ -1369,10 +1369,12 @@ function packItem($item){
 		$item['extra'] = array();
 		
 	foreach($item as $k=>$v){
-		if($k != 'extra' || !is_array($item['extra']))
-			$item[$k] = addslashes($item[$k]);
-		else		
-			$item['extra'] = addslashes(serialize($item['extra']));
+		if($k == 'extra' && is_array($item['extra']))
+			$item['extra'] = addslashes(serialize($item['extra']));	
+		elseif($k == 'db_type')
+			$item[$k] = $item[$k]; //do nothing
+		else
+			$item[$k] = addslashes($item[$k]);			
 	}
 	return $item;
 }

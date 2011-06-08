@@ -16,7 +16,7 @@ class fm_checkboxControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "VARCHAR( 10 )";
+		$itemInfo['db_type'] = "VARCHAR( 10 ) DEFAULT ''";
 		
 		return $itemInfo;
 	}
@@ -34,8 +34,8 @@ class fm_checkboxControl extends fm_controlBase{
 	
 	public function processPost($uniqueName, $itemInfo){
 		if(isset($_POST[$uniqueName]))
-			return $_POST[$uniqueName]=="on"?"yes":"no";
-		return "no";
+			return $_POST[$uniqueName]=="on"?__("yes",'wordpress-form-manager'):__("no",'wordpress-form-manager');
+		return __("no",'wordpress-form-manager');
 	}
 	
 	public function editItem($uniqueName, $itemInfo){

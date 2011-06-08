@@ -52,6 +52,65 @@ function fm_getNewConditionHTML(conditionInfo){
 	
 	return str;
 }
+
+function fm_getTestHTML(id, testInfo, index){
+	var str = "";
+	var itemID = "";
+	var test = "";
+	var connective = ( index == 0 ? "" : "and" );
+	var val = "";
+	if(testInfo != false){						
+		itemID = testInfo.unique_name;
+		test = testInfo.test;
+		connective = testInfo.connective;
+		val = testInfo.val;		
+	}
+		
+	str += '<table><tr>';
+	
+	str += '<td id="' + id + '-condition-td-' + index + '"'; 
+	if(connective == ""){ str += ' style="visibility:hidden;"';} 
+	str += '>' + fm_getSelect(id + '-test-connective-' + index, ['and', 'or'], ['AND', 'OR'], connective) + '</td>';
+	
+	str += '<td>' + fm_getItemSelect(id + '-test-itemID-' + index, itemID) + '</td>';
+	str += '<td>' + fm_getTestSelect(id + '-test-' + index, test) + '</td>';
+	var textID = id + '-test-val-' + index;
+	str += '<td><input type="text" size="20" id="' + textID + '" name="' + textID + '" class="test-value-input" value="' + val + '"/></td>';
+	str += '<td><a class="edit-form-button" onclick="fm_removeTest(\'' + id + '\', \'' + index + '\')" >&nbsp;&nbsp;&nbsp;delete</a></td>';
+	str += '</tr></table>';
+	
+	return str;
+}
+
+function fm_getItemHTML(id, itemID, index){
+	return '<table><tr><td>' + fm_getAllItemsSelect(id + '-item-' + index, itemID) + '</td><td><a class="edit-form-button" onclick="fm_removeItem(\'' + id + '\', \'' + index + '\')">delete</a></td></tr></table>';
+}
+
+function fm_getRuleSelect(id, rule){
+	var str = "";
+	
+	var ruleKeys = 		['none', 'onlyshowif', 'showif', 'hideif', 'requireonlyif', 'addrequireif', 'removerequireif'];
+	var ruleNames = 	['(Choose a rule type)', 'Only show elements if...', 'Show elements if...', 'Hide elements if...', 'Require elements only if...', 'Require elements if...', 'Do not require elements if...'];
+
+	str += fm_getSelect(id, ruleKeys, ruleNames, rule);
+	
+	return str;
+}
+
+function fm_getTestSelect(id, test){
+	var keys = 	['', 'eq', 'neq', 'lt', 'gt', 'lteq', 'gteq', 'isempty', 'nisempty', 'checked', 'unchecked'];
+	var names =	['...', 'equals', 'does not equal', 'is less than', 'is greater than',  'is less than or equal to', 'is greater than or equal to', 'is empty', 'is not empty', 'is checked', 'is not checked'];
+	
+	return fm_getSelect(id, keys, names, test);
+}
+
+
+function fm_getCheckboxTestSelect(id, test){
+	var keys = ['', 'checked', 'unchecked'];
+	var names = ['...', 'is checked', 'is not checked'];
+	
+	return fm_getSelect(id, keys, names, test);
+}
 </script>
 <?php
 /* translators: the following are from the form's advanced section */
@@ -156,13 +215,10 @@ if(isset($_POST['message']) && isset($_POST['submit-form-settings']))
 <script type="text/javascript">
 <?php 
 foreach($form['items'] as $item){
-	if($item['type'] != 'note' && 
-		$item['type'] != 'separator' &&
-		$item['type'] != 'recaptcha'){
 		?>
 fm_register_form_item(<?php echo json_encode($item);?>);
 		<?php
-	}
+	
 }
 
 if(is_array($form['conditions'])){

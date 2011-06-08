@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.4
+Version: 1.5.6
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.5.4";
+$fm_currentVersion = "1.5.6";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -54,9 +54,14 @@ if ( ! function_exists( 'add_action' ) ) {
 if ( version_compare( get_bloginfo( 'version' ), '3.0.0', '<' ) ) 
 	wp_die( __('Form Manager requires WordPress version 3.0 or higher', 'wordpress-form-manager') );
 	
-// only PHP 5.0+
+// only PHP 5.2+
 if ( version_compare(PHP_VERSION, '5.2.0', '<') ) 
 	wp_die( __('Form Manager requires PHP version 5.2 or higher', 'wordpress-form-manager') );
+
+// only MySQL 5.0.3 or greater
+if(isset($wpdb))
+	if ( version_compare($wpdb->db_version(), '5.0.3', '<') ) 
+		wp_die( __('Form manager requires MySQL version 5.0.3 or higher', 'wordpress-form-manager') );
 
 include 'helpers.php';
 
@@ -179,7 +184,7 @@ function fm_adminInit(){
 add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts');
 function fm_adminEnqueueScripts(){
 	wp_enqueue_script('form-manager-js', plugins_url('/js/scripts.js', __FILE__), array('scriptaculous'));	
-	
+
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');	
 }
@@ -201,7 +206,7 @@ function fm_userInit(){
 	include 'settings.php';
 	
 	$fm_templates->initTemplates();
-	
+
 	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__));
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
@@ -251,10 +256,11 @@ function fm_adminHead(){
 	global $submenu;	
 						
 	$toUnset = array('fm-edit-form');
-						
-	foreach($submenu['fm-admin-main'] as $index => $submenuItem)
-		if(in_array($submenuItem[2], $toUnset, true))
-			unset($submenu['fm-admin-main'][$index]);	
+	
+	if(isset($submenu['fm-admin-main']) && is_array($submenu['fm-admin-main']))				
+		foreach($submenu['fm-admin-main'] as $index => $submenuItem)
+			if(in_array($submenuItem[2], $toUnset, true))
+				unset($submenu['fm-admin-main'][$index]);	
 
 }
 
@@ -268,7 +274,7 @@ function fm_adminHeadPluginOnly(){
 	}
 }
 
-function fm_showEditPage(){	include 'pages/editform.php'; }
+function fm_showEditPage(){ include 'pages/editform.php'; }
 function fm_showEditAdvancedPage(){	include 'pages/editformadv.php'; }
 function fm_showDataPage(){	include 'pages/formdata.php'; }
 function fm_showMainPage(){	include 'pages/main.php'; }

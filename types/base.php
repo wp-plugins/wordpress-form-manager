@@ -105,7 +105,7 @@ class fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "VARCHAR(1000) DEFAULT ''";
 		
 		return $itemInfo;
 	}

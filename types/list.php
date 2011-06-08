@@ -21,7 +21,7 @@ class fm_customListControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "VARCHAR(255) DEFAULT ''";
 		
 		return $itemInfo;
 	}

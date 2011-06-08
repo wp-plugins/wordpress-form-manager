@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.5.4
+Stable tag: 1.5.6
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -44,6 +44,11 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.6 =
+* Fixed permissions bug
+* Fixed CSV download bug
+* Added separators, notes, and recaptchas to the items you can show/hide with conditions.
+
 = 1.5.4 =
 * Fixed install issues on certain platforms.  Thanks to Metin Kale. 
 
