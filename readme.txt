@@ -1,7 +1,7 @@
 === WordPress Form Manager ===
 Contributors: hoffcamp
 Donate link: http://www.campbellhoffman.com/
-Tags: form, forms
+Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.1.1
 Stable tag: 1.5.8
@@ -17,6 +17,7 @@ Form Manager is a tool for creating forms to collect and download data from visi
 * required fields
 * custom acknowledgments
 * e-mail notifications.   
+* form display templates
 
 = Supported field types =
 
@@ -26,6 +27,7 @@ Form Manager is a tool for creating forms to collect and download data from visi
 * radio buttons
 * checkbox / checkbox list
 * multiline select
+* file upload
 * reCAPTCHA
 
 Subtitles and notes can also be added to the form in any location.
