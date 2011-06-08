@@ -128,56 +128,183 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 			${$varName} = $value;
 		}
 	
+	$str = "";
+	
+	// set up the environment for any scripts that might be part of the template
+	$str.= $this->getPreTemplateScripts($formInfo, $options);
+	
 	ob_start();	
 	
 	// load the template
 	include $fm_templates->templatesDir."/".$template;	
 	
-	$str = ob_get_contents();
+	$str.= ob_get_contents();
 	ob_end_clean();
 		
-	$str.= $this->displayFormScripts($formInfo, $options);
+	// show the support scripts, validation, etc.
+	$str.= $this->getPostTemplateScripts($formInfo, $options);
 	
 	return $str;
 }
 
-protected function displayFormScripts($formInfo, $options=array()){
+
+// should prepare the environment for any 'note' scripts (run before the template)
+protected function getPreTemplateScripts($formInfo, $options=array()){
 	global $fm_controls;
 	
-	$str.="<script type=\"text/javascript\">\n";
-	$str.="// validation\n";
+	$str.= '<script type="text/javascript">';
+	$str.= 'fm_current_form = '.$formInfo['ID'].';';
 	foreach($formInfo['items'] as $item){
-		if($item['required'] == '1'){
-		 	$callback = $fm_controls[$item['type']]->getRequiredValidatorName();
-			if($callback != "")
-				$str.="fm_val_register('".$formInfo['ID']."', ".
-					"'".$item['unique_name']."', ".
-					"'".$callback."', ".
-					"'".format_string_for_js(sprintf($formInfo['required_msg'], $item['label']))."');\n";
-		}
-		if($item['extra']['validation'] != 'none'){
-			$callback = $fm_controls[$item['type']]->getGeneralValidatorName();
-			if($callback != ""){
-				$str.="fm_val_register('".$formInfo['ID']."', ".
-					"'".$item['unique_name']."', ".
-					"'".$callback."', ".
-					"'".format_string_for_js(sprintf($fm_controls[$item['type']]->getGeneralValidatorMessage($item['extra']['validation']), $item['label']))."', ".
-					"'".$item['extra']['validation']."');\n";
-			}
-		}
-	}	
-	
-	$str.="// register form items \n";
-	foreach($formInfo['items'] as $item){
-		$str.="fm_register_form_item('".$formInfo['ID']."', '".$item['unique_name']."', '".$item['type']."', {placeholder: '".$item['extra']['value']."'});\n";
+		$item['required_callback'] = $fm_controls[$item['type']]->getRequiredValidatorName();
+		$item['required_msg'] = sprintf($formInfo['required_msg'], $item['label']);
+		$item['validation_callback'] = $fm_controls[$item['type']]->getGeneralValidatorName();
+		$item['validation_msg'] = sprintf($fm_controls[$item['type']]->getGeneralValidatorMessage($item['extra']['validation']), $item['label']);
+		$item['validation_type'] = $item['extra']['validation'];
+		$str.= "fm_register_form_item('".$formInfo['ID']."', ".json_encode($item).");\n";
 	}
+	$str.= '</script>';
+	return $str;
+}
+
+
+protected function getPostTemplateScripts($formInfo, $options=array()){
+	$str.= '<script type="text/javascript">';	
 	
+	//assign event handlers, etc.
+	$str.='fm_register_form('.$formInfo['ID'].');';
+	
+	//below is a workaround: the 'default value' for a text item is displayed as a placeholder.  In some instances, this should be an actual value in the field.  The script below takes care of this.	
 	if(isset($options['use_placeholders']) && $options['use_placeholders'] === false)
 		$str.="fm_remove_placeholders();\n"; //this will convert placeholders into values; used to re-populate a form after a bad submission, for user profile style, etc., where the 'value' field needs to be the fields' value rather than a placeholder
 	else
 		$str.="fm_add_placeholders();\n"; //this will make sure the placeholder functionality is simulated in browsers that do not support HTML 5 'placeholder' attribute in text fields
+
+	//condition handlers
 	
-	$str.="</script>\n";
+	$str.= $this->getConditionHandlerScripts($formInfo);
+
+	$str.= '</script>';
+	return $str;
+}
+
+protected function getConditionHandlerScripts($formInfo){
+
+	if(!is_array($formInfo['conditions'])) return "";
+	
+	//build an array of the item types and nicknames
+	$itemTypes = array();
+	$itemNames = array();
+	foreach($formInfo['items'] as $item){
+		$itemTypes[$item['unique_name']] = $item['type'];
+		$itemNames[$item['unique_name']] = ($item['nickname'] != "" ? $item['nickname'] : $item['unique_name']);
+	}
+	
+	$itemDependents = array();
+
+	$str = "";
+	$str.= "var temp;\n";
+	//loop through each condition, making a javascript function to test if the condition is satisfied
+	foreach($formInfo['conditions'] as $condition){
+		$fn = str_replace('-', '_', $condition['id']);
+		$str.="function ".$fn."(){\n";
+		
+		//first figure out how to get the value from the item, based on its type
+		for($x=0;$x<sizeof($condition['tests']);$x++){
+			$test = $condition['tests'][$x];
+			$str.="var t".$x." = ";
+			switch($itemTypes[$test['unique_name']]){				
+				case 'checkbox':
+					$str.= "document.getElementById('".$test['unique_name']."').checked;\n";
+					break;
+				case 'custom_list':
+					$str.= "\"\"; var x".$x." = document.getElementById('".$test['unique_name']."').selectedIndex;\n";
+					$str.= "t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
+					break;
+				case 'text':
+				case 'textarea':
+				case 'file':
+					$str.= "document.getElementById('".$test['unique_name']."').value;\n";
+					break;
+				default:
+					$str.= "false;\n";
+			}
+		}
+		
+		//now do the logical tests
+		$str.="var res = (";
+		for($x=0;$x<sizeof($condition['tests']);$x++){
+			$test = $condition['tests'][$x];
+			if($x>0) $str.= ($test['connective'] == 'and' ? " && " : " || ");
+			switch($test['test']){
+				case "eq": 			$str.= "t".$x." == '".$test['val']."'"; 
+					break;
+				case "neq":			$str.= "t".$x." != '".$test['val']."'"; 
+					break;
+				case "lt":			$str.= "(t".$x." < ".$test['val']." && t".$x." !== '')"; 
+					break;
+				case "gt":			$str.= "t".$x." > ".$test['val']." && t".$x." !== '')"; 
+					break;
+				case "lteq":		$str.= "t".$x." <= ".$test['val']." && t".$x." !== '')"; 
+					break;
+				case "gteq":		$str.= "t".$x." >= ".$test['val']." && t".$x." !== '')"; 
+					break;
+				case "isempty":		$str.= "t".$x." === ''";
+					break;
+				case "nisempty":	$str.= "t".$x." !== ''";
+					break;
+				case "checked": 	$str.= "t".$x;
+					break;
+				case "unchecked": 	$str.= "!t".$x;
+					break;
+			}
+		}
+		$str.=");\n";
+		
+		//last do the action corresponding to the condition on the listed items
+		foreach($condition['items'] as $item){
+			switch($condition['rule']){
+				case "onlyshowif":
+					$str.= "document.getElementById('fm-item-".$itemNames[$item]."').style.display = res ? 'block' : 'none';\n";	
+					break;
+				case "showif":
+					$str.= "if(res) document.getElementById('fm-item-".$itemNames[$item]."').style.display = 'block';\n";
+					break;
+				case "hideif":
+					$str.= "if(res) document.getElementById('fm-item-".$itemNames[$item]."').style.display = 'none';\n";
+					break;
+				case "requireonlyif":
+					$str.= "fm_set_required('".$item."', (res ? 1 : 0));\n";
+					break;	
+				case "addrequireif":
+					$str.= "if(res) fm_set_required('".$item."', 1);\n";
+					break;
+				case "removerequireif":
+					$str.= "if(res) fm_set_required('".$item."', 0);\n";
+					break;
+			}
+		}
+		
+		$str.="}\n";
+		
+		//this keeps track of which test functions we create depend on which items, so we can make an onchange event appropriately. 
+		foreach($condition['tests'] as $test){
+			if(!isset($itemDependents[$itemNames[$test['unique_name']]])) $itemDependents[$itemNames[$test['unique_name']]] = array();
+			$itemDependents[$itemNames[$test['unique_name']]][] = $fn;
+		}
+		
+		//make sure the form displays according to the conditions initially, so run the tests in order
+		$str.= $fn."();\n";
+	}
+		
+	//now set the onchange event handlers
+	foreach($itemDependents as $uniqueName => $itemDeps){
+		$str.= "document.getElementById('fm-item-".$uniqueName."').onchange = function(){ ";
+		foreach($itemDeps as $dep){
+			$str.= $dep."();\n";
+		}
+		$str.= "}\n";
+	}
+
 	return $str;
 }
 
@@ -332,7 +459,6 @@ function fm_form_the_submit_btn(){
 			"name=\"fm_form_submit\" ".
 			"class=\"submit\" ".
 			"value=\"".$fm_display->currentFormInfo['submit_btn_text']."\" ".
-			"onclick=\"return fm_validate(".$fm_display->currentFormInfo['ID'].")\" ".
 			" />\n";
 }
 
@@ -368,7 +494,10 @@ function fm_form_the_input(){
 		$item['extra']['value'] = $fm_display->currentFormValues[$item['unique_name']];				
 	return $fm_controls[$item['type']]->showItem($item['unique_name'], $item);
 }
-
+function fm_form_the_ID(){
+	global $fm_display;
+	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['unique_name'];
+}
 function fm_form_is_separator(){
 	return (fm_form_item_type() == 'separator');
 }
@@ -493,5 +622,4 @@ function fm_summary_get_value($uniqueName){
 	global $fm_display;
 	return $fm_display->currentFormData[$uniqueName];
 }
-
 ?>

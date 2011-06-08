@@ -21,7 +21,7 @@ class fm_customListControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "VARCHAR(255) DEFAULT ''";
 		
 		return $itemInfo;
 	}
@@ -57,9 +57,7 @@ class fm_customListControl extends fm_controlBase{
 											),
 						'value' => $itemInfo['extra']['value'],	
 						'options' => $itemInfo['extra']['options']
-						);
-			if($itemInfo['required'] == "1")
-				$elem['options'] = array_merge(array('-1' => "..."), $elem['options']);
+						);			
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';								
 			return fe_getElementHTML($elem);

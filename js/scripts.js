@@ -16,7 +16,7 @@ function fm_deleteFormClick(formID){
 function fm_saveForm(){
 	var doSave = true;
 	if(fm_itemsWereDeleted){
-		doSave = confirm("There may be data associated with the form item(s) you removed.  Are you sure you want to save?");
+		doSave = confirm(fm_I18n.save_with_deleted_items);
 	}
 	
 	if(doSave){
@@ -84,7 +84,7 @@ function fm_getItemValue(id, val){
 }
 
 function fm_loadFields(){
-	return confirm("Any unsaved changes will be lost. Are you sure?");
+	return confirm(fm_I18n.unsaved_changes);
 }
 
 function fm_initEditor(){
@@ -184,7 +184,7 @@ function fm_downloadCSV(){
 		//window.open(encodeURI(response),'Download');
 		document.getElementById('csv-working').style.visibility = 'hidden';
 		document.getElementById('fm-csv-download-link').href = encodeURI(response);
-		document.getElementById('fm-csv-download-link').innerHTML = "Click here to download";
+		document.getElementById('fm-csv-download-link').innerHTML = fm_I18n.click_here_to_download;
 	});	
 }
 
@@ -218,14 +218,14 @@ function fm_downloadAllFiles(_itemID){
 	
 		switch(response){
 			case "empty":
-				alert("There are no files to download");
+				alert(fm_I18n.there_are_no_files);
 				break;
 			case "fail":
-				alert("Unable to create .ZIP file");
+				alert(fm_I18n.unable_to_create_zip);
 			default:
 				document.getElementById(_itemID + "-link").style.visibility = 'visible';
 				document.getElementById(_itemID + "-link").href = response;
-				document.getElementById(_itemID + "-link").innerHTML = "Click here to download";
+				document.getElementById(_itemID + "-link").innerHTML = fm_I18n.click_here_to_download;
 		}
 	});
 }
@@ -248,7 +248,7 @@ function js_multi_item_add(ulID,callback,val){
 	var newLI = document.createElement('li');
 	var newItemID = ulID + '-item-' + js_multi_item_count[ulID];
 	eval("var HTML = " + callback + "('" + ulID + "', '" + newItemID + "', val);");
-	newLI.innerHTML = "<table><tr><td><a class=\"handle-" + ulID + "\" style=\"cursor: move;\">move</a></td><td>" + HTML + "</td><td><a onclick=\"js_multi_item_remove('" + newItemID + "')\">delete</a></td></tr></table>";
+	newLI.innerHTML = "<table><tr><td><a class=\"handle-" + ulID + "\" style=\"cursor: move;\">" + fm_I18n.move_button + "</a></td><td>" + HTML + "</td><td><a onclick=\"js_multi_item_remove('" + newItemID + "')\">" + fm_I18n.delete_button + "</a></td></tr></table>";
 	newLI.id = newItemID;
 	UL.appendChild(newLI);
 	js_multi_item_count[ulID]++;
@@ -303,7 +303,7 @@ function js_multi_item_text_entry(ulID, getcallback, setcallback){
 		if(x>0) listItemsText += ", ";		
 		listItemsText += listItems[x];
 	}
-	var newListItemsText = prompt("Enter items separated by commas", listItemsText);
+	var newListItemsText = prompt(fm_I18n.enter_items_separated_by_commas, listItemsText);
 	
 	var neverHappens = "@%#$*&))("
 	newListItemsText = newListItemsText.replace(/\\,/, neverHappens);
@@ -316,4 +316,405 @@ function js_multi_item_text_entry(ulID, getcallback, setcallback){
 		tempStr = jQuery.trim(newListItems[x].replace(neverHappens, ","));
 		js_multi_item_add(ulID, setcallback, tempStr);	
 	}
+}
+
+/////////////////////////////////////////////////////
+//// CONDITIONS EDITOR //////////////////////////////
+
+var fm_conditions = [];
+var fm_next_new_ID = 0;
+
+function fm_initConditionEditor(){
+	Sortable.create('fm-conditions',{handles:$$('a.handle')});
+}
+
+
+function fm_newCondition(){
+	conditionInfo = fm_getNewConditionInfo('new-' + fm_next_new_ID++);
+	fm_addCondition(conditionInfo);
+}
+function fm_addCondition(conditionInfo){			
+	var listUL = document.getElementById('fm-conditions');
+	var newLI = document.createElement('li');	
+	
+	newLI.className = "edit-form-menu-item postbox";	
+	newLI.innerHTML = fm_getNewConditionHTML(conditionInfo);	
+	newLI.id = 'fm-condition-' + conditionInfo.id;	
+	listUL.appendChild(newLI);	
+	
+	fm_initConditionBox(conditionInfo);	
+	fm_initConditionEditor();		
+}
+
+function fm_getNewConditionInfo(id){
+	var newCondition = {
+		id: id,
+		rule: '',
+		tests: [],
+		items: []
+	};
+	return newCondition;
+}
+
+function fm_showHideCondition(id){
+	Effect.toggle(id + '-div', 'Blind', {duration:0.1});
+	var str = document.getElementById(id + '-showhide').innerHTML;
+	if(str == 'show')
+		document.getElementById(id + '-showhide').innerHTML = fm_I18n.hide_button;
+	else
+		document.getElementById(id + '-showhide').innerHTML = fm_I18n.show_button;
+}
+
+function fm_removeCondition(id){
+	var LI = document.getElementById('fm-condition-' + id);
+	LI.parentNode.removeChild(LI);
+}
+
+function fm_removeTest(id, index){
+	var LI = document.getElementById(id + '_test_li_' + index);
+	LI.parentNode.removeChild(LI);
+	fm_fixConnectives(document.getElementById(id + '-tests'), id);
+}
+
+function fm_removeItem(id, index){
+	var LI = document.getElementById(id + '_item_li_' + index);
+	LI.parentNode.removeChild(LI);
+}
+
+
+function fm_addConditionTest(id){
+	var listUL = document.getElementById(id + '-tests');
+	var newLI = document.createElement('li');
+	var count = document.getElementById(id + '-test-count').value++;
+	
+	newLI.className = "postbox condition-test";	
+	newLI.id = id + '_test_li_' + count;
+	newLI.innerHTML = fm_getTestHTML(id, false, count);
+	
+	listUL.appendChild(newLI);
+	
+	Sortable.create(id + '-tests', {onUpdate: function(el){fm_fixConnectives(el,id);}});
+}
+function fm_fixConnectives(el,condID){
+	var str = "";
+	var id = el.childNodes[0].id.toString();
+	var index = id.substr(id.indexOf('_test_li_') + 9);
+	
+	document.getElementById(condID + '-condition-td-' + index).style.visibility = 'hidden';
+	for(var x=1;x<el.childNodes.length;x++){
+		id = el.childNodes[x].id.toString();
+		index = id.substr(id.indexOf('_test_li_') + 9);
+		document.getElementById(condID + '-condition-td-' + index).style.visibility = 'visible';
+	}
+}
+
+function fm_initConditionBox(conditionInfo){
+	document.getElementById('fm-condition-' + conditionInfo.id).onchange = function(){ fm_conditionBoxOnChange(conditionInfo); }
+	
+	Sortable.create(conditionInfo.id + '-tests', {onUpdate: function(el){fm_fixConnectives(el,conditionInfo.id);}});
+	Sortable.create(conditionInfo.id + '-items');
+	fm_fixConnectives(document.getElementById(conditionInfo.id + '-tests'), conditionInfo.id);
+}
+function fm_conditionBoxOnChange(conditionInfo){
+	var currTestLI;
+	var id;
+	var index;
+	var type;
+	var test;
+	var testUL = document.getElementById(conditionInfo.id + '-tests');		
+
+	for(var y=0;y<testUL.childNodes.length;y++){
+		currTestLI = testUL.childNodes[y];
+		id = currTestLI.id;			
+		index = id.substr(id.indexOf('_test_li_') + 9);
+		type = fm_getItemType(document.getElementById(conditionInfo.id + '-test-itemID-' + index).value);
+		testSelect = document.getElementById(conditionInfo.id + '-test-' + index);
+		test = testSelect.value;
+		
+		switch(type){
+			case 'checkbox':
+				if(document.getElementById(conditionInfo.id + '-test-' + index).options[1].value != 'checked'){
+					jQuery(testSelect).after(fm_getCheckboxTestSelect(conditionInfo.id + '-test-' + index, '')).remove();					
+				}
+				break;
+			default:
+				if(document.getElementById(conditionInfo.id + '-test-' + index).options[1].value == 'checked'){
+					jQuery(testSelect).after(fm_getTestSelect(conditionInfo.id + '-test-' + index, '')).remove();					
+				}
+		}
+	}
+}
+
+/*
+
+	str += '<td>' + fm_getItemSelect(id + '-test-itemID-' + index, itemID) + '</td>';
+	str += '<td>' + fm_getTestSelect(id + '-test-' + index, test) + '</td>';
+*/
+
+function fm_addConditionItem(id){
+	var listUL = document.getElementById(id + '-items');
+	var newLI = document.createElement('li');
+	
+	var count = document.getElementById(id + '-item-count').value++;
+	
+	newLI.className = "condition-item";
+	newLI.innerHTML = fm_getItemHTML(id, '', count);
+	newLI.id = id + '_item_li_' + count;
+	
+	listUL.appendChild(newLI);
+	
+	Sortable.create(id + '-items');
+}
+
+/* 
+
+Rule types:
+
+onlyshowif - only show the listed elements if X
+showif - set the listed elements to 'show' if X
+hideif - set the listed elements to 'hide' if X
+addrequireif - make the listed elements required if X
+removerequireif - make the listed elements not required if X
+requiregroup - a list of elements collectively considered required, as in only one of the group needs to be populated
+
+eq
+neq
+lt
+gt
+lteq
+gteq
+checked
+unchecked
+*/ 
+
+
+/* helpers */
+
+
+
+function fm_getNewConditionHTML(conditionInfo){
+	var str = ""
+	var temp;
+	
+	str += '<table class="condition-buttons">';
+	
+	str += '<tr><td class="condition-move"><a class="handle edit-form-button">' + fm_I18n.move_button + '</a></td>';
+	
+	str += '<td>' + fm_getRuleSelect(conditionInfo.id + '-rule', conditionInfo.rule) + '</td><td><a class="edit-form-button" id="' + conditionInfo.id + '-showhide" onclick="fm_showHideCondition(\'' + conditionInfo.id + '\')">' + fm_I18n.hide_button + '</a></td><td><a class="edit-form-button" onclick="fm_removeCondition(\'' + conditionInfo.id + '\')">' + fm_I18n.delete_button + '</a></td></tr>';
+	
+	str += '</table>';
+	str += '<div id="' + conditionInfo.id + '-div">';
+	str += '<table>';
+	
+	str += '<tr><td>';
+		str += '<div class="condition-tests-div">';
+		str += '<ul id="' + conditionInfo.id + '-tests' + '" class="condition-test-list">';
+			
+			for(var x=0;x<conditionInfo.tests.length;x++){
+				str += '<li class="postbox condition-test" id="' + conditionInfo.id + '_test_li_' + x + '">' + fm_getTestHTML(conditionInfo.id, conditionInfo.tests[x], x) + '</li>';
+//alert('bar');
+			}
+			
+			if(conditionInfo.tests.length == 0)
+				str += '<li class="postbox condition-test" id="' + conditionInfo.id + '_test_li_' + x + '">' + fm_getTestHTML(conditionInfo.id, false, x) + '</li>';
+
+		str += '</ul>';
+		str += '<input type="button" class="button secondary" value="' + fm_I18n.add_test + '" onclick="fm_addConditionTest(\'' + conditionInfo.id + '\')"/>';
+		str += '<input type="hidden" name="' + conditionInfo.id + '-test-count" id="' + conditionInfo.id + '-test-count" value="' + (conditionInfo.tests.length + 1) + '" />';
+		str += '<input type="hidden" name="' + conditionInfo.id + '-test-order" id="' + conditionInfo.id + '-test-order" value="" />';
+		str += '</div>';
+		
+		str += '<div class="condition-items-div">';
+		str += fm_I18n.applies_to + ':';
+		str += '<ul id="' + conditionInfo.id + '-items' + '" class="condition-item-list">';
+			for(var x=0;x<conditionInfo.items.length;x++)
+				str += '<li class="condition-item" id="' + conditionInfo.id + '_item_li_' + x + '">' + fm_getItemHTML(conditionInfo.id, conditionInfo.items[x], x) + '</li>';
+				
+			if(conditionInfo.items.length == 0)
+				str += '<li class="condition-item" id="' + conditionInfo.id + '_item_li_' + x + '">' + fm_getItemHTML(conditionInfo.id, false, x) + '</li>';			
+
+		str += '</ul>';
+		str += '<input type="button" class="button secondary" value="' + fm_I18n.add_item + '" onclick="fm_addConditionItem(\'' + conditionInfo.id + '\')"/>';
+		str += '<input type="hidden" name="' + conditionInfo.id + '-item-count" id="' + conditionInfo.id + '-item-count" value="' + (conditionInfo.items.length + 1) + '" />';
+		str += '</div>';
+		
+	str += '</td></tr>'
+	
+	str += '</table>';
+	str += '</div>';
+	
+	return str;
+}
+
+function fm_getTestHTML(id, testInfo, index){
+	var str = "";
+	var itemID = "";
+	var test = "";
+	var connective = ( index == 0 ? "" : "and" );
+	var val = "";
+	if(testInfo != false){						
+		itemID = testInfo.unique_name;
+		test = testInfo.test;
+		connective = testInfo.connective;
+		val = testInfo.val;		
+	}
+		
+	str += '<table><tr>';
+	
+	str += '<td id="' + id + '-condition-td-' + index + '"'; 
+	if(connective == ""){ str += ' style="visibility:hidden;"';} 
+	str += '>' + fm_getSelect(id + '-test-connective-' + index, ['and', 'or'], [fm_I18n.and_connective, fm_I18n.or_connective], connective) + '</td>';
+	
+	str += '<td>' + fm_getItemSelect(id + '-test-itemID-' + index, itemID) + '</td>';
+	if(fm_getItemType(itemID) == 'checkbox')
+		str += '<td>' + fm_getCheckboxTestSelect(id + '-test-' + index, test) + '</td>';
+	else
+		str += '<td>' + fm_getTestSelect(id + '-test-' + index, test) + '</td>';
+	var textID = id + '-test-val-' + index;
+	str += '<td><input type="text" size="20" id="' + textID + '" name="' + textID + '" class="test-value-input" value="' + val + '"/></td>';
+	str += '<td><a class="edit-form-button" onclick="fm_removeTest(\'' + id + '\', \'' + index + '\')" >&nbsp;&nbsp;&nbsp;' + fm_I18n.delete_button + '</a></td>';
+	str += '</tr></table>';
+	
+	return str;
+}
+
+function fm_getItemHTML(id, itemID, index){
+	return '<table><tr><td>' + fm_getAllItemsSelect(id + '-item-' + index, itemID) + '</td><td><a class="edit-form-button" onclick="fm_removeItem(\'' + id + '\', \'' + index + '\')">' + fm_I18n.delete_button + '</a></td></tr></table>';
+}
+
+function fm_getRuleSelect(id, rule){
+	var str = "";
+	
+	var ruleKeys = 		['none', 'onlyshowif', 'showif', 'hideif', 'requireonlyif', 'addrequireif', 'removerequireif'];
+	var ruleNames = 	[fm_I18n.choose_a_rule_type, fm_I18n.only_show_elements_if, fm_I18n.show_elements_if, fm_I18n.hide_elements_if, fm_I18n.only_require_elements_if, fm_I18n.require_elements_if, fm_I18n.do_not_require_elements_if];
+
+	str += fm_getSelect(id, ruleKeys, ruleNames, rule);
+	
+	return str;
+}
+
+function fm_getTestSelect(id, test){
+	var keys = 	['', 'eq', 'neq', 'lt', 'gt', 'lteq', 'gteq', 'isempty', 'nisempty'];
+	var names =	[fm_I18n.empty_test, fm_I18n.equals, fm_I18n.does_not_equal, fm_I18n.is_less_than, fm_I18n.is_greater_than, fm_I18n.is_lt_or_equal_to, fm_I18n.is_gt_or_equal_to, fm_I18n.is_empty, fm_I18n.is_not_empty];
+	
+	return fm_getSelect(id, keys, names, test);
+}
+
+function fm_getCheckboxTestSelect(id, test){
+	var keys = 	['', 'checked', 'unchecked'];
+	var names =	[fm_I18n.empty_test, fm_I18n.is_checked, fm_I18n.is_not_checked];
+	
+	return fm_getSelect(id, keys, names, test);
+}
+
+function fm_getItemSelect(id, itemID){
+	var itemIDs = [''];
+	var itemNames = ['...'];
+	for(var x=0;x<fm_form_items.length;x++){
+		if(fm_form_items[x].type != 'separator' &&
+			fm_form_items[x].type != 'note' &&
+			fm_form_items[x].type != 'recaptcha'){
+				itemIDs.push(fm_form_items[x].unique_name);
+				if(fm_form_items[x].nickname != "")
+					itemNames.push(fm_form_items[x].nickname);
+				else
+					itemNames.push(fm_form_items[x].label);
+			}
+	}
+	
+	return fm_getSelect(id, itemIDs, itemNames, itemID);
+}
+
+function fm_getAllItemsSelect(id, itemID){
+	var itemIDs = [''];
+	var itemNames = ['...'];
+	for(var x=0;x<fm_form_items.length;x++){		
+		itemIDs.push(fm_form_items[x].unique_name);
+		if(fm_form_items[x].nickname != "")
+			itemNames.push(fm_form_items[x].nickname);
+		else
+			itemNames.push(fm_form_items[x].label);
+	}
+	
+	return fm_getSelect(id, itemIDs, itemNames, itemID);
+}
+
+function fm_getSelect(id, keys, names, selected){
+	var str = "";
+	str += '<select id="' + id + '" name="' + id + '">';	
+	for(var x=0;x<keys.length;x++){
+		str += '<option value="' + keys[x] + '"';
+		if(keys[x] == selected) str += ' selected="selected" ';
+		str += '>' + names[x] + '</option>';
+	}
+	str += '</select>';
+	return str;
+}
+
+/* functions to register form items with javascript */
+
+var fm_form_items = [];
+
+function fm_register_form_item(itemInfo){
+	fm_form_items.push(itemInfo);
+}
+
+function fm_getItemType(itemID){
+	for(var x=0;x<fm_form_items.length;x++){
+		if(fm_form_items[x].unique_name == itemID || fm_form_items[x].nickname == itemID) 
+			return fm_form_items[x].type;
+	}
+}
+
+
+/* save script */
+
+function fm_saveConditions(){
+	var mainUL = document.getElementById('fm-conditions');
+	
+	var str = "";
+	var IDstr = "";
+	
+	var currCondID;
+	var currCondTestUL;
+	var currTestLI;
+	
+	var testIDs;
+	var id;
+	
+	for(var x=0;x<mainUL.childNodes.length;x++){
+						//prefix is 'fm-condition-'
+		currCondID = mainUL.childNodes[x].id.substr(13);
+		if(x>0) IDstr += ",";
+		IDstr += currCondID;
+		
+		currTestUL = document.getElementById(currCondID + '-tests');
+		
+		str = "";
+		for(var y=0;y<currTestUL.childNodes.length;y++){
+			currTestLI = currTestUL.childNodes[y];
+			id = currTestLI.id;
+			if(y>0) str += ",";
+			str += id.substr(id.indexOf('_test_li_') + 9);
+		}
+		
+		document.getElementById(currCondID + '-test-order').value = str;
+	}
+	document.getElementById('fm-conditions-ids').value = IDstr;	
+	
+	return true;
+}
+
+
+////////////////////////////////////////////////////////////
+//// HELPERS ///////////////////////////////////////////////
+
+function fm_trim(str){
+	return str.replace(/^\s+|\s+$/g,"");
+}
+function fm_fix_str(str){
+	return str.replace(/[\\]/g,'\\\\\\\\').replace(/[']/g,'\\\\\\$&');
+}
+function fm_htmlEntities(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
