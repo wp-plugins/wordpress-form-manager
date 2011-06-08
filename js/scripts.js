@@ -16,7 +16,7 @@ function fm_deleteFormClick(formID){
 function fm_saveForm(){
 	var doSave = true;
 	if(fm_itemsWereDeleted){
-		doSave = confirm(fm_I18n.save_with_deleted_items);
+		doSave = confirm("There may be data associated with the form item(s) you removed.  Are you sure you want to save?");
 	}
 	
 	if(doSave){
