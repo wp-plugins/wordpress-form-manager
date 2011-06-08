@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.4
+Version: 1.5.7
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.5.6";
+$fm_currentVersion = "1.5.7";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -130,6 +130,8 @@ function fm_install(){
 	$fmdb->fixCollation();		
 	
 	$fmdb->updateDataTables();
+	
+	$fmdb->fixDBTypeBug();
 		
 	update_option('fm-version', $fm_currentVersion);			
 }  
@@ -184,6 +186,9 @@ function fm_adminInit(){
 add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts');
 function fm_adminEnqueueScripts(){
 	wp_enqueue_script('form-manager-js', plugins_url('/js/scripts.js', __FILE__), array('scriptaculous'));	
+	
+	//wp_localize_script('form-manager-js', 'fm_I18n', array(		'save_with_deleted_items' => __("There may be &&& associated with the form item(s) you removed.  Are you sure you want to save?", 'wordpress-form-manager')
+	//													) ); 
 
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');	

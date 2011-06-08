@@ -411,6 +411,18 @@ function fixTemplatesTableModified(){
 	}
 	mysql_free_result($res);	
 }
+
+function fixDBTypeBug(){
+	$q = "SELECT `unique_name`, `db_type` FROM `".$this->itemsTable."` WHERE `db_type` LIKE '%DEFAULT%'";
+	$res = $this->query($q);
+	while($row = mysql_fetch_assoc($res)){
+		$dbType = $row['db_type'];
+		$dbType = substr($dbType, 0, strpos($dbType, 'DEFAULT') + 7)." \'\'";
+		$q = "UPDATE `".$this->itemsTable."` SET `db_type` = '".$dbType."' WHERE `unique_name` = '".$row['unique_name']."'";
+		$this->query($q);
+	}
+	mysql_free_result($res);
+}
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
@@ -462,8 +474,11 @@ function storeTemplate($filename, $title, $content, $modified){
 			"`modified` = '".addslashes($modified)."'";
 	$this->query($q);
 }
-function getTemplate($filename){
-	$q = "SELECT * FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
+function getTemplate($filename, $content = true){
+	if($content)
+		$q = "SELECT * FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
+	else
+		$q = "SELECT `title`, `filename`, `status`, `modified` FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
 	$res = $this->query($q);
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);
@@ -1227,8 +1242,13 @@ function updateFormItem($formID, $uniqueName, $itemInfo){
 					
 	$toUpdate = array_intersect_key($itemInfo,$this->itemKeys);
 	$strArr=array();
-	foreach($toUpdate as $k=>$v)
-		$strArr[] = "`{$k}` = '".$itemInfo[$k]."'";
+	foreach($toUpdate as $k=>$v){
+		if($k == 'db_type')
+			$strArr[] = "`{$k}` = '".addslashes($itemInfo[$k])."'";
+		else
+			$strArr[] = "`{$k}` = '".$itemInfo[$k]."'";
+		
+	}
 	$q = "UPDATE `".$this->itemsTable."` SET ".implode(", ",$strArr)." WHERE `unique_name` = '".$uniqueName."'";
 
 	$this->query($q);

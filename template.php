@@ -126,7 +126,7 @@ function initTemplates(){
 	//replace any 'lost' templates (this is primarily to keep template files across an update)
 	foreach($dbTemplates as $dbFile => $dbTemp){
 		$dbFile = trim($dbFile);
-		$templateInfo = $fmdb->getTemplate($dbFile);
+		$templateInfo = $fmdb->getTemplate($dbFile, false);
 		if(isset($files[$dbFile])){ // file exists on disk
 			unset($files[$dbFile]);		//unset the file; the list of files will be used later to load in new files	
 			$filemtime = filemtime($this->templatesDir.'/'.$dbFile);
@@ -140,6 +140,7 @@ function initTemplates(){
 		}
 		else{	// file does not exist on disk
 			//echo $dbFile." recreated<br />";
+			$templateInfo = $fmdb->getTemplate($dbFile);
 			
 			$fp = fopen($this->templatesDir."/".$dbFile, "w");
 			fwrite($fp, $templateInfo['content']);
