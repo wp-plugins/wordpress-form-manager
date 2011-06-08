@@ -112,7 +112,7 @@ if($formData !== false){
 <form name="fm-main-form" id="fm-main-form" action="" method="post">
 <div class="wrap">
 	<div id="icon-edit-pages" class="icon32"></div>
-	<h2>Data: <?php echo $form['title'];?></h2>
+	<h2><?php _e("Data", 'wordpress-form-manager');?>: <?php echo $form['title'];?></h2>
 	<div style="float:right;">
 		<input type="submit" name="fm-edit-data-ok" value="<?php _e("Submit Changes", 'wordpress-form-manager');?>" />
 		<input type="submit" name="fm-edit-data-cancel" value="<?php _e("Cancel", 'wordpress-form-manager');?>" />		
@@ -121,7 +121,7 @@ if($formData !== false){
 	<div class="wrap">
 	<br />
 	
-	Edit data: <br />
+	<?php _e("Edit data", 'wordpress-form-manager');?>: <br />
 	<?php
 	
 	$callbacks = array( 'text' => 'fm_data_displayTextEdit',
@@ -165,10 +165,7 @@ if($formData !== false){
 	?>
 <div class="wrap">
 	<div id="icon-edit-pages" class="icon32"></div>
-	<h2>Data: <?php echo $form['title'];?></h2>
-	<div style="float:right;">		
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="<?php _e("Back to Form Data", 'wordpress-form-manager');?>"><?php _e("Back to Form Data", 'wordpress-form-manager');?></a>
-	</div>
+	<h2><?php _e("Data", 'wordpress-form-manager');?>: <?php echo $form['title'];?></h2>
 	
 	<div class="wrap">
 	<br />
@@ -180,13 +177,8 @@ if($formData !== false){
 		}
 	}	
 	?>
-	</div>
+	</div>	
 	
-	<div>
-		<div style="float:right;">		
-		<a class="button-secondary action" href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-form-data&id=".$form['ID'];?>" title="Back to Data"><?php _e("Back to Form Data", 'wordpress-form-manager');?></a>
-		</div>
-	</div>
 </div>
 	<?php
 }

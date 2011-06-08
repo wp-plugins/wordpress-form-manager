@@ -129,6 +129,8 @@ else: ?>
 				<th scope="col" class="manage-column column-cb check-column">&nbsp;</th>
 				<th><?php _e("Name", 'wordpress-form-manager');?></th>
 				<th><?php _e("Slug", 'wordpress-form-manager');?></th>
+				<th><?php _e("Submission count", 'wordpress-form-manager');?></th>
+				<th><?php _e("Last Submission", 'wordpress-form-manager');?></th>
 			</tr>
 			</thead>
 			<tfoot>
@@ -136,6 +138,8 @@ else: ?>
 				<th scope="col" class="manage-column column-cb check-column">&nbsp;</th>
 				<th><?php _e("Name", 'wordpress-form-manager');?></th>
 				<th><?php _e("Slug", 'wordpress-form-manager');?></th>
+				<th><?php _e("Submission count", 'wordpress-form-manager');?></th>
+				<th><?php _e("Last Submission", 'wordpress-form-manager');?></th>
 			</tr>
 			</tfoot>
 			<?php	 foreach($formList as $form): ?>
@@ -171,6 +175,8 @@ else: ?>
 						<?php endif; ?>
 					</td>
 					<td><?php echo $form['shortcode'];?></td>
+					<td><?php echo $fmdb->getSubmissionDataNumRows($form['ID']);?></td>
+					<td><?php $sub = $fmdb->getLastSubmission($form['ID']); echo $sub['timestamp'];?></td>
 				</tr>
 			<?php endforeach; ?>			
 			<input type="hidden" value="" id="fm-action" name="fm-action"/>

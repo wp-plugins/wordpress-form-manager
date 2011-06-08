@@ -212,11 +212,7 @@ protected function getConditionHandlerScripts($formInfo){
 		for($x=0;$x<sizeof($condition['tests']);$x++){
 			$test = $condition['tests'][$x];
 			$str.="var t".$x." = ";
-			switch($itemTypes[$test['unique_name']]){
-				case 'text':
-				case 'textarea':
-					$str.= "document.getElementById('".$test['unique_name']."').value;\n";
-					break;
+			switch($itemTypes[$test['unique_name']]){				
 				case 'checkbox':
 					$str.= "document.getElementById('".$test['unique_name']."').checked;\n";
 					break;
@@ -224,6 +220,13 @@ protected function getConditionHandlerScripts($formInfo){
 					$str.= "\"\"; var x".$x." = document.getElementById('".$test['unique_name']."').selectedIndex;\n";
 					$str.= "t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
 					break;
+				case 'text':
+				case 'textarea':
+				case 'file':
+					$str.= "document.getElementById('".$test['unique_name']."').value;\n";
+					break;
+				default:
+					$str.= "false;\n";
 			}
 		}
 		

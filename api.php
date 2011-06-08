@@ -93,7 +93,7 @@ function fm_doFormBySlug($formSlug){
 	global $fm_registered_user_only_msg;
 		
 	$formID = $fmdb->getFormID($formSlug);
-	if($formID === false) return "(form ".(trim($formSlug)!=""?"'{$formSlug}' ":"")."not found)";
+	if($formID === false) return sprintf(__("(form  %s not found)", 'wordpress-form-manager'), (trim($formSlug)!=""?"'{$formSlug}' ":""));
 	
 	$output = "";
 	

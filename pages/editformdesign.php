@@ -122,8 +122,8 @@ if(isset($_POST['message']))
 			<div class="submitbox" id="submitpost">			
 				<div id="minor-publishing">			
 					<div id="misc-publishing-actions">					
-						<div class="misc-pub-section"><?php /* translators: the number of submissions for a form */ _e("Submission count:", 'wordpress-form-manager');?> <strong><?php echo $fmdb->getSubmissionDataNumRows($form['ID']);?></strong></div>					
-						<div class="misc-pub-section misc-pub-section-last"><?php /* translators: label for the date of the most recent submission */ _e("Last submission:", 'wordpress-form-manager');?> <strong><?php $sub = $fmdb->getLastSubmission($form['ID']); echo $sub['timestamp'];?></strong></div>					
+						<div class="misc-pub-section"><?php /* translators: the number of submissions for a form */ _e("Submission count", 'wordpress-form-manager');?>:<strong><?php echo $fmdb->getSubmissionDataNumRows($form['ID']);?></strong></div>					
+						<div class="misc-pub-section misc-pub-section-last"><?php /* translators: label for the date of the most recent submission */ _e("Last submission", 'wordpress-form-manager');?>:<strong><?php $sub = $fmdb->getLastSubmission($form['ID']); echo $sub['timestamp'];?></strong></div>					
 					</div>
 					<div class="clear"></div>
 				</div>				

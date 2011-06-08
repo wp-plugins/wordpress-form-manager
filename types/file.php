@@ -60,17 +60,18 @@ class fm_fileControl extends fm_controlBase{
 			$handle = fopen($filename, "rb");
 			$contents = fread($handle, filesize($filename));
 			fclose($handle);
-			
-			$saveVal = array('filename' => basename($_FILES[$uniqueName]['name']),
+		
+			$saveVal = array('filename' => $_FILES[$uniqueName]['name'],
 								'contents' => $contents,
 								'size' => $_FILES[$uniqueName]['size']);
+								
 			return addslashes(serialize($saveVal));
 		}
 		else{
 			//make sure to add a trailing slash if this was forgotten.
 			$uploadDir = $this->parseUploadDir($itemInfo['extra']['upload_dir']);
 			$pathInfo = pathinfo($_FILES[$uniqueName]['name']);
-			$newFileName = $pathInfo['filename'].' ('.date('m-d-y-h-i-s').').'.$pathInfo['extension'];
+			$newFileName = substr($_FILES[$uniqueName]['name'], 0, (-1*(strlen($pathInfo['extension'])+1))).' ('.date('m-d-y-h-i-s').').'.$pathInfo['extension'];
 			
 			move_uploaded_file($_FILES[$uniqueName]['tmp_name'], $uploadDir.$newFileName);
 			$saveVal = array('filename' => $newFileName,

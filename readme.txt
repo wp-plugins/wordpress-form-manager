@@ -44,6 +44,13 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.8 =
+* Improved conditions editor
+* Fixed bug when uploading files with Unicode file names
+* Added some missing internationalization handles
+* Conditions can apply to 'file' inputs
+* Added submission information to the main page
+
 = 1.5.7 =
 * Fixed a bug when updating a form element's nickname
 

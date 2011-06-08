@@ -169,7 +169,7 @@ function fm_getManagedListCount(ulID){
 				"<input type=\"text\" value=\"" + value.message + "\" name=\"" + itemID + "-message\" style=\"width:200px;\" />" + 
 				"<input type=\"text\" value=\"" + value.regexp + "\" name=\"" + itemID + "-regexp\" style=\"width:400px;\" />" + 
 				"<input type=\"hidden\" value=\"" + value.name + "\" name=\"" + itemID + "-name\" />" +
-				"&nbsp;&nbsp;<a onclick=\"fm_removeManagedListItem('" + itemID + "')\" style=\"cursor: pointer\">delete</a>";
+				"&nbsp;&nbsp;<a onclick=\"fm_removeManagedListItem('" + itemID + "')\" style=\"cursor: pointer\"><?php _e("delete", 'wordpress-form-manager');?></a>";
 	}
 	<?php 
 	$validators = $fmdb->getTextValidators(); 
@@ -188,12 +188,12 @@ function fm_getManagedListCount(ulID){
 </table>
 <br />
 <br />
-<h3>Shortcode</h3>
+<h3><?php _e("Shortcode", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 <?php helper_text_field('shortcode', __("Plugin Shortcode", 'wordpress-form-manager'), get_option('fm-shortcode')); ?>
 </table>
 
-<h3>Display Templates</h3>
+<h3><?php _e("Display Templates", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 <?php helper_option_field('template_form', __("Default Form Template", 'wordpress-form-manager'), $templateList['form'], $fm_globalSettings['template_form']); ?>
 <?php helper_option_field('template_email', __("Default E-Mail Template", 'wordpress-form-manager'), $templateList['email'], $fm_globalSettings['template_email']); ?>
@@ -211,12 +211,12 @@ function fm_getManagedListCount(ulID){
 <?php endforeach; ?>
 </table>
 
-<h3>Database Check</h3>
+<h3><?php _e("Database Check", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 <tr><th scope="row"><label><?php _e("Check the Form Manager database", 'wordpress-form-manager'); ?>:</label></th><td><input type="submit" name="check-db" class="button secondary" value="<?php _e("Go",'wordpress-form-manager');?>" /></td></tr>
 </table>
 
-<h3>Post/Page Editor</h3>
+<h3><?php _e("Post/Page Editor", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 <?php helper_checkbox_field('enable_mce_button', __("Enable the editor button", 'wordpress-form-manager'), (get_option('fm-enable-mce-button') == "YES")); ?>
 </table>
