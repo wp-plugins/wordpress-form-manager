@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.5.7
+Stable tag: 1.5.8
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
