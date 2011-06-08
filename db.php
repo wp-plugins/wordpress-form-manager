@@ -388,15 +388,23 @@ function updateDataTables(){
 		$q = "SHOW COLUMNS FROM `".$dataTable."`";
 		$res = $this->query($q);
 		$found = false;
-		while($row = mysql_fetch_assoc($res))
+		$postIDfound = false;
+		while($row = mysql_fetch_assoc($res)){
 			if($row['Field'] == 'user_ip')
 				$found = true;
+			if($row['Field'] == 'post_id')
+				$postIDfound = true;
+		}
 		mysql_free_result($res);
 		
 		if(!$found){
-			$q = "ALTER TABLE `".$dataTable."` ADD `user_ip` VARCHAR( 64 ) NOT NULL";
+			$q = "ALTER TABLE `".$dataTable."` ADD `user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL";
 			$this->query($q);
-		}		
+		}
+		if(!$postIDfound){
+			$q = "ALTER TABLE `".$dataTable."` ADD `post_id` INT DEFAULT '0' NOT NULL";
+			$this->query($q);
+		}
 	}
 }
 
@@ -783,11 +791,10 @@ function writeFormSubmissionDataCSV($formID, $fname){
 		
 	$str = ob_get_contents();
 	ob_end_clean();
-	
-	
-	//Properly encode the CSV so Excel can open it: Credit for this goes to someone called Eugene Murai
+
 	$fp = fopen($fname, 'w') or die(__("Failed to open file", 'wordpress-form-manager').": '".$php_errormsg."'");
 	
+	//Properly encode the CSV so Excel can open it: Credit for this goes to someone called Eugene Murai
 	$tmp = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
 	$write = fwrite( $fp, $tmp );	
 	
@@ -864,6 +871,16 @@ function updateDataSubmissionRow($formID, $timestamp, $user, $user_ip, $newData)
 	$q.= implode(", ", $arr);
 	$q.= " WHERE `timestamp` = '{$timestamp}' AND `user` = '{$user}' AND `user_ip` = '{$user_ip}'";
 	$this->query($q);
+}
+
+function dataHasPublishedSubmissions($formID){
+	$hasPosts = false;
+	$dataTable = $this->getDataTableName($formID);
+	$q = "SELECT COUNT(*) FROM `{$dataTable}` WHERE `post_id` > 0";
+	$res = $this->query($q);
+	$row = mysql_fetch_array($res);
+	mysql_free_result($res);
+	return $row[0] > 0;	
 }
 							
 //determines if $uniqueName is a "NONE" db_type or not
@@ -1112,7 +1129,8 @@ function createDataTable($formInfo, $dataTable){
 	$q = "CREATE TABLE `{$dataTable}` (".
 		"`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,".
 		"`user` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
-		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL";
+		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
+		"`post_id` INT DEFAULT '0' NOT NULL";
 			
 	if(isset($formInfo['items']) && sizeof($formInfo['items'])>0){
 		$itemArr = array();

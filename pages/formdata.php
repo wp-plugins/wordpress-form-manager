@@ -24,6 +24,8 @@ if($form != null){
 	$numDataPages = ceil($formData['count'] / $itemsPerPage);
 }
 
+$hasPosts = $fmdb->dataHasPublishedSubmissions($form['ID']);
+
 // PARSE THE QUERY STRING
 parse_str($_SERVER['QUERY_STRING'], $queryVars);
 
@@ -298,6 +300,9 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				<th width="130px"><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == 'user_ip' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
 									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user_ip'))); ?>"><?php _e("IP Address", 'wordpress-form-manager');?></a></th>
+				<?php if($hasPosts): ?>
+					<th><?php _e("Post", 'wordpress-form-manager');?></th>
+				<?php endif; ?>
 				<?php $x=1; foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><a class="edit-form-button" href="<?php
@@ -324,6 +329,9 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 				<th><?php _e("Timestamp", 'wordpress-form-manager');?></th>
 				<th><?php _e("User", 'wordpress-form-manager');?></th>
 				<th><?php _e("IP Address", 'wordpress-form-manager');?></th>
+				<?php if($hasPosts): ?>
+					<th><?php _e("Post", 'wordpress-form-manager');?></th>
+				<?php endif; ?>
 				<?php foreach($form['items'] as $formItem): ?>
 					<?php if($formItem['db_type'] != "NONE"): ?>
 						<th><?php echo fm_restrictString($formItem['label'],20);?></th>
@@ -340,6 +348,9 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<td><?php if($fm_SLIMSTAT_EXISTS): echo fm_get_slimstat_IP_link($queryVars, $dataRow['user_ip']); ?>
 						<?php else: echo $dataRow['user_ip']; endif; ?>
 					</td>
+					<?php if($hasPosts): ?>
+						<td><?php if($dataRow['post_id'] > 0): ?><a href="<?php echo get_permalink($dataRow['post_id']);?>"><?php echo get_the_title($dataRow['post_id']);?></a><?php else: echo "&nbsp;"; endif;?></td>
+					<?php endif; ?>
 					<?php 
 					foreach($form['items'] as $formItem){
 						if($formItem['type'] == 'file'){

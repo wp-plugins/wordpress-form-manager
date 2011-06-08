@@ -174,16 +174,19 @@ function fm_doFormBySlug($formSlug){
 			//publish the submission as a post, if the form is set to do so
 			if($formInfo['publish_post'] == 1){
 				// Create post object
-				 $my_post = array(
-					 'post_title' => sprintf($formInfo['publish_post_title'], $formInfo['title']),
-					 'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
-					 'post_status' => 'publish',
-					 'post_author' => 1,
-					 'post_category' => array($formInfo['publish_post_category'])
-				  );
+				$newPost = array(
+					'post_title' => sprintf($formInfo['publish_post_title'], $formInfo['title']),
+					'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
+					'post_status' => 'publish',
+					'post_author' => 1,
+					'post_category' => array($formInfo['publish_post_category'])
+				);
 				
 				// Insert the post into the database
-				  wp_insert_post( $my_post );
+				$postID = wp_insert_post($newPost, false);
+				if($postID != 0){					
+					$fmdb->updateDataSubmissionRow($formInfo['ID'], $postData['timestamp'], $postData['user'], $postData['user_ip'], array('post_id' => $postID));
+				}
 			}			
 			
 			//display the acknowledgment of a successful submission
