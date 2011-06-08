@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.19
+Stable tag: 1.5.7
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -31,14 +31,62 @@ Form Manager is a tool for creating forms to collect and download data from visi
 Subtitles and notes can also be added to the form in any location.
 
 = Publishing a Form =
-Forms are placed within posts or pages.  For example, if your form's slug is 'form-1', put the following within a post or page: 
+Forms are placed within posts or pages.  Look for the Form Manager button in your post editor towards the right (Thanks to [Andrea Bersi](http://www.andreabersi.com)).  
+
+You can also type in shortcodes yourself.  For example, if your form's slug is 'form-1', put the following within a post or page: 
 
 `[form form-1]`  
-
+  
+  
+<br />
 = Languages =
-Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
+* Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
+* Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.7 =
+* Fixed a bug when updating a form element's nickname
+
+= 1.5.6 =
+* Fixed permissions bug
+* Fixed CSV download bug
+* Added separators, notes, and recaptchas to the items you can show/hide with conditions.
+
+= 1.5.4 =
+* Fixed install issues on certain platforms.  Thanks to Metin Kale. 
+
+= 1.5.3 =
+* Added an option to disable the TinyMCE button in the 'Advanced' settings page
+
+= 1.5.2 =
+* Files can be uploaded to a directory of your choosing
+* Links in summaries / e-mails to uploaded files, if they are in a directory
+
+= 1.5.1 =
+* Fixed script loading bug in certain environments
+
+= 1.5.0 =
+* Added conditional behavior, e.g., only show certain items based on the values of other items
+* Dutch language support (Thanks to [Sander Kolthof](www.fullcirclemedia.nl))
+* Fixed '0 kB' summary bug
+* Fixed checkbox default value bug
+
+= 1.4.23 =
+* Editor/Data/Advanced for forms now uses a 'tabbed' interface
+* Added database check for troubleshooting
+* Added checkbox positioning option
+* Added more specific capabilities for Members plugin
+
+= 1.4.22 =
+* Notes can display HTML
+
+= 1.4.21 =
+* Added 'maximum length' attribute for text inputs
+* Added tinyMCE button. (Many thanks to [Andrea Bersi](http://www.andreabersi.com))
+
+= 1.4.20 =
+* Fixed install error
+
 = 1.4.19 =
 * Added auto-redirect option
 
@@ -214,4 +262,4 @@ Method 2: Download the source code for the plugin, and upload the 'wordpress-for
 
 == Frequently Asked Questions ==
 
-Please visit [www.campbellhoffman.com/form-manager-faq/] for FAQ and tutorials.
+Please visit [www.campbellhoffman.com/form-manager-faq/](http://www.campbellhoffman.com/form-manager-faq/) for FAQ and tutorials.
