@@ -264,7 +264,7 @@ function fm_userHead(){
 add_action('admin_menu', 'fm_setupAdminMenu');
 function fm_setupAdminMenu(){
 	$pages[] = add_object_page(__("Forms", 'wordpress-form-manager'), __("Forms", 'wordpress-form-manager'), apply_filters('fm_main_capability', 'manage_options'), "fm-admin-main", 'fm_showMainPage', plugins_url('/mce_plugins/formmanager.png', __FILE__));
-	$pages[] = add_submenu_page("fm-admin-main", __("Edit", 'wordpress-form-manager'), __("Edit", 'wordpress-form-manager'), apply_filters('fm_forms_capability', 'manage_options'), "fm-edit-form", 'fm_showEditPage');
+	$pages[] = add_submenu_page("fm-admin-main", __("Edit", 'wordpress-form-manager'), __("Edit", 'wordpress-form-manager'), apply_filters('fm_main_capability', 'manage_options'), "fm-edit-form", 'fm_showEditPage');
 	//$pages[] = add_submenu_page("fm-admin-main", __("Data", 'wordpress-form-manager'), __("Data", 'wordpress-form-manager'), apply_filters('fm_data_capability', 'manage_options'), "fm-form-data", 'fm_showDataPage');	
 	
 	//at some point, make this link go to a fresh form
