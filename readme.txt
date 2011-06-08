@@ -44,6 +44,9 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.7 =
+* Fixed a bug when updating a form element's nickname
+
 = 1.5.6 =
 * Fixed permissions bug
 * Fixed CSV download bug
