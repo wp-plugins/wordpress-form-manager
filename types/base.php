@@ -105,9 +105,13 @@ class fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "NONE";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "";
 	}
 	
 	//item keys that are handled in the 'panel'
@@ -128,7 +132,10 @@ class fm_controlBase{
 	protected function extraScriptHelper($items){
 		$str = "\"array(";
 		foreach($items as $k=>$v){
-			$items[$k] = "'{$k}'=>'\" + fm_fix_str(fm_get_item_value(itemID, '{$v}')) + \"'";
+			if(strpos($v, "cb:") !== false)
+				$items[$k] = "'{$k}'=>'\" + ".$this->checkboxScriptHelper(substr($v,3), array('onValue'=>'checked', 'offValue'=>""))." + \"'";
+			else
+				$items[$k] = "'{$k}'=>'\" + fm_fix_str(fm_get_item_value(itemID, '{$v}')) + \"'";
 		}
 		$str.=implode(", ",$items);
 		$str.= ")\"";
