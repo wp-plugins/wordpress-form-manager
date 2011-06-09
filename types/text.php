@@ -37,9 +37,13 @@ class fm_textControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "VARCHAR(1000) DEFAULT ''";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "VARCHAR(1000) DEFAULT ''";
 	}
 	
 	public function editItem($uniqueName, $itemInfo){

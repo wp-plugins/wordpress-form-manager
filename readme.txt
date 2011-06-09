@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.5.9
+Stable tag: 1.5.10
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -46,6 +46,11 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.10 =
+* Added a 'table' view for the form data display shortcode
+* Fixed the timezone for timestamps
+* Added options to change data table column types
+
 = 1.5.9 =
 * Added links to published submissions in the data page
 

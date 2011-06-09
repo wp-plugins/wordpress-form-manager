@@ -65,7 +65,7 @@ function createFormInfo($inputStr){
 		$newItem['nickname'] = "";
 		$newItem['label'] = $parsed['label'];			
 		$newItem['required'] = "";
-		$newItem['db_type'] = "TEXT";
+		$newItem['db_type'] = "DATA";
 		$newItem['description'] = "";
 		$newItem = array_merge($newItem, call_user_func(array($this, "parseItem_".$parsed['type']), $parsed));
 		$formInfo['items'][] = $newItem;
@@ -189,7 +189,7 @@ function parseItem_file($item){
 							'exclude' => $item['exclude'],
 							'max_size' => $item['max-size']
 							);
-	$newItem['db_type'] = "LONGBLOB";
+	$newItem['db_type'] = "DATA";
 	return $newItem;
 }
 

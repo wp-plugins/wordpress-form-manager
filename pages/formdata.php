@@ -80,7 +80,7 @@ else if((!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')) && i
 				if($processed === false){
 					$postFailed = true;
 				}
-				if($item['db_type'] != "NONE")						
+				if($fmdb->isDataCol($item['unique_name']))						
 					$postData[$item['unique_name']] = $processed;
 			}
 		}
@@ -304,7 +304,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<th><?php _e("Post", 'wordpress-form-manager');?></th>
 				<?php endif; ?>
 				<?php $x=1; foreach($form['items'] as $formItem): ?>
-					<?php if($formItem['db_type'] != "NONE"): ?>
+					<?php if($fmdb->isDataCol($formItem['unique_name'])): ?>
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
 									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>">
@@ -333,7 +333,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<th><?php _e("Post", 'wordpress-form-manager');?></th>
 				<?php endif; ?>
 				<?php foreach($form['items'] as $formItem): ?>
-					<?php if($formItem['db_type'] != "NONE"): ?>
+					<?php if($fmdb->isDataCol($formItem['unique_name'])): ?>
 						<th><?php echo fm_restrictString($formItem['label'],20);?></th>
 					<?php endif; ?>
 				<?php endforeach; ?>
@@ -359,7 +359,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 							<?php else: ?>
 								<td><?php echo $dataRow[$formItem['unique_name']]; ?></td>
 							<?php endif; /* end if file */ 
-						}else if($formItem['db_type'] != "NONE"){ ?>
+						}else if($fmdb->isDataCol($formItem['unique_name'])){ ?>
 							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
 						<?php } /* end if data type other than file */
 					} /* end foreach */ 

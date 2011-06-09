@@ -29,6 +29,22 @@ if(isset($_POST['submit-form-settings'])){
 	$formInfo['publish_post_title'] = $_POST['publish_post_title'];	
 	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
+	
+	
+	$fmdb->showerr = false;
+	$itemTypeErr = array();
+	foreach($form['items'] as $item){
+		if($fmdb->isDataCol($item['unique_name']) 
+			&& $_POST[$item['unique_name']."-dbtype-prev"] != $_POST[$item['unique_name']."-dbtype"]){			
+			$fmdb->updateDataType($form['ID'], $item['unique_name'], stripslashes($_POST[$item['unique_name']."-dbtype"]));
+			if(mysql_errno())
+				$itemTypeErr[$item['unique_name']] = mysql_error();
+			else
+				$itemTypeErr[$item['unique_name']] = false;
+		}
+	}
+	$fmdb->showerr = true;
+
 }
 
 
@@ -118,9 +134,29 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 <?php helper_text_field('publish_post_title', __("Post title", 'wordpress-form-manager'), htmlspecialchars($form['publish_post_title']), __("Include '%s' where you would like the form title to appear", 'wordpress-form-manager')); ?>
 </table>
 
+<h3><?php _e("Submission Data", 'wordpress-form-manager'); ?></h3>
+<table class="form-table">
+<?php
+foreach($form['items'] as $item){
+	if($fmdb->isDataCol($item['unique_name'])){
+		$dbType = $fmdb->getDataType($item['unique_name']);
+		helper_text_field($item['unique_name']."-dbtype", ($item['nickname'] != "" ? $item['nickname'] : $item['label']), $dbType);
+		if(isset($itemTypeErr[$item['unique_name']]) && $itemTypeErr['unique_name'] !== false){
+			?>
+			<tr><td colspan="2"><em style="color:#FF0000;font-weight:bold;"><?php echo $itemTypeErr[$item['unique_name']];?></em></td></tr>
+			<?php
+		}
+		?>
+		<input type="hidden" name="<?php echo $item['unique_name']."-dbtype-prev"; ?>" id="<?php echo $item['unique_name']."-dbtype-prev"; ?>" value="<?php echo htmlspecialchars($dbType); ?>" />
+		<?php
+	}
+}
+?>
+</table>
+
 <p class="submit">
 <input type="submit" name="cancel" class="button secondary" value="<?php _e("Cancel Changes", 'wordpress-form-manager');?>" />
-<input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>"  />
+<input type="submit" name="submit-form-settings" id="submit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager'); ?>"  />
 </p>
 
 </div>
@@ -132,6 +168,6 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 <form name="fm-definition-form" action="" method="post">
 	<input type="hidden" value="<?php echo $form['ID'];?>" name="fm-form-id" />
 	<textarea name="form-definition" rows="20" cols="80"><?php echo $formDef->printFormAtts($form['items']); ?></textarea>
-	<p class="submit"><input type="submit" name="submit-form-definition" class="button-primary" value="<?php _e("Update Form", 'wordpress-form-manager');?>" /></p>
+	<p class="submit"><input type="submit" name="submit-form-definition" class="button-primary" value="<?php _e("Update Form", 'wordpress-form-manager'); ?>" /></p>
 </form>
 <?php endif; ?>

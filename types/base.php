@@ -105,9 +105,13 @@ class fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "VARCHAR(1000) DEFAULT ''";
+		$itemInfo['db_type'] = "NONE";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "";
 	}
 	
 	//item keys that are handled in the 'panel'

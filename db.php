@@ -6,6 +6,7 @@ public $formsTable;
 public $itemsTable;
 public $settingsTable;
 public $templatesTable;
+public $showerr;
 public $conn;
 
 
@@ -21,7 +22,7 @@ function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, 
 	$this->conn = $conn;
 	$this->cachedInfo = array();
 	$this->lastPostFailed = false;
-	
+	$this->showerr = true;
 	$this->initDefaultSettings();
 }
 
@@ -30,7 +31,8 @@ function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, 
 
 function query($q){
 	//echo '<p>'.$q.'</p>';
-	$res = mysql_query($q, $this->conn) or die(mysql_error());
+	$res = mysql_query($q, $this->conn);
+	if($this->showerr && mysql_errno()) die(mysql_error());
 	return $res;
 }
 
@@ -251,7 +253,7 @@ function setupFormManager(){
 				`nickname` TEXT NOT NULL ,
 				`label` TEXT NOT NULL ,
 				`required` BOOL NOT NULL ,
-				`db_type` VARCHAR( 32 ) DEFAULT '' NOT NULL ,
+				`db_type` VARCHAR( 16 ) DEFAULT '' NOT NULL ,
 				`description` TEXT NOT NULL ,
 				INDEX ( `ID` ) ,
 				UNIQUE (`unique_name`)
@@ -421,13 +423,14 @@ function fixTemplatesTableModified(){
 }
 
 function fixDBTypeBug(){
-	$q = "SELECT `unique_name`, `db_type` FROM `".$this->itemsTable."` WHERE `db_type` LIKE '%DEFAULT%'";
+	$q = "SELECT `unique_name`, `db_type` FROM `".$this->itemsTable."`";
 	$res = $this->query($q);
 	while($row = mysql_fetch_assoc($res)){
 		$dbType = $row['db_type'];
-		$dbType = substr($dbType, 0, strpos($dbType, 'DEFAULT') + 7)." \'\'";
-		$q = "UPDATE `".$this->itemsTable."` SET `db_type` = '".$dbType."' WHERE `unique_name` = '".$row['unique_name']."'";
-		$this->query($q);
+		if(trim($dbType) != "NONE"){
+			$q = "UPDATE `".$this->itemsTable."` SET `db_type` = 'DATA' WHERE `unique_name` = '".$row['unique_name']."'";
+			$this->query($q);
+		}
 	}
 	mysql_free_result($res);
 }
@@ -683,7 +686,7 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 		if($processed === false){
 			$this->lastPostFailed = true;
 		}
-		if($item['db_type'] != "NONE")						
+		if($this->isDataCol($item['unique_name']))						
 			$postData[$item['unique_name']] = $processed;
 	}
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
@@ -725,6 +728,7 @@ function getErrorUniqueName(){
 function insertSubmissionData($dataTable, $postData){
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
+	$postData['timestamp'] = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
 	foreach($postData as $k=>$v)
 		$arr[] = "`{$k}` = '".$v."'";
 	$q .= implode(",",$arr);
@@ -745,7 +749,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	//index form fields by unique_name, remove fields with no data
 	$newItems = array();
 	foreach($formInfo['items'] as $item){
-		if($item['db_type'] != "NONE")
+		if($this->isDataCol($item['unique_name']))
 			$newItems[$item['unique_name']] = $item;
 	}
 	$formInfo['items'] = $newItems;
@@ -883,10 +887,9 @@ function dataHasPublishedSubmissions($formID){
 	return $row[0] > 0;	
 }
 							
-//determines if $uniqueName is a "NONE" db_type or not
-function isDataCol($formID, $uniqueName){
-	$cacheKey = $uniqueName."-type";
-	$type = $this->getCache($formID, $cacheKey);
+function isDataCol($uniqueName){
+	$cacheKey = $uniqueName."-is-data";
+	$type = $this->getCache(1, $cacheKey);
 	if($type == null){
 		$q = "SELECT `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '{$uniqueName}'";
 		$res = $this->query($q);
@@ -896,6 +899,66 @@ function isDataCol($formID, $uniqueName){
 		$this->setCache($formID, $cacheKey, $type);
 	}
 	return ($type != "NONE");	
+}
+
+function getDataType($uniqueName){
+	$cacheKey = $uniqueName."-type";
+	$fullType = $this->getCache(1, $cacheKey);
+	if($fullType == null){
+		$q = "SELECT `ID`, `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
+		$res = $this->query($q);		
+		$row = mysql_fetch_assoc($res);		
+		mysql_free_result($res);
+		
+		if($row['db_type'] == "NONE") return "NONE";
+		
+		$dataTable = $this->getDataTableName($row['ID']);
+		
+		$q = "SHOW FULL COLUMNS FROM `{$dataTable}` LIKE '".$uniqueName."'";
+		$res = $this->query($q);		
+		$row = mysql_fetch_assoc($res);		
+		mysql_free_result($res);
+		
+		//VARCHAR( 1000 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'doop'
+		if($row['Collation'] == "")
+			$charCollate = "";
+		else{
+			$q = "SHOW COLLATION LIKE '".$row['Collation']."'";
+			$res = $this->query($q);
+			$collRow = mysql_fetch_assoc($res);
+			mysql_free_result($res);
+			$charCollate = " CHARACTER SET ".$collRow['Charset']." COLLATE ".$row['Collation'];	
+		}
+		
+		switch($row['Type']){
+			case 'text':
+			case 'tinytext':
+			case 'mediumtext':
+			case 'longtext':
+			case 'blob':
+			case 'tinyblob':
+			case 'mediumblob':
+			case 'longblob':
+				$default = "";
+				break;
+			default:
+				$default = " DEFAULT '".$row['Default']."'";
+		}
+
+		$null = ($row['Null'] == "NO" ? " NOT NULL" : " NULL");
+		
+		$fullType = $row['Type'].$charCollate.$null.$default;
+						
+		$fullType = trim($fullType);
+		$this->setCache($formID, $cacheKey, $fullType);
+	}
+	return $fullType;
+}
+
+function updateDataType($formID, $uniqueName, $newType){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "ALTER TABLE `".$dataTable."` CHANGE `".$uniqueName."` `".$uniqueName."` ".$newType;
+	$this->query($q);
 }
 
 function getSubmissionDataCount($formID){ return $this->getSubmissionDataNumRows($formID); }
@@ -1131,14 +1194,6 @@ function createDataTable($formInfo, $dataTable){
 		"`user` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
 		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
 		"`post_id` INT DEFAULT '0' NOT NULL";
-			
-	if(isset($formInfo['items']) && sizeof($formInfo['items'])>0){
-		$itemArr = array();
-		foreach($formInfo['items'] as $item)
-			$itemArr[] = "`".$item['unique_name']."` ".($item['db_type']==""||!isset($item['db_type'])?"TEXT":stripslashes($item['db_type']))." NOT NULL";			
-		$itemArr[] = "PRIMARY KEY (`timestamp`)";
-		$q.=", ".implode(", ",$itemArr);
-	}
 	$q.= ") ".$charset_collate.";";
 	$this->query($q);
 }
@@ -1152,39 +1207,6 @@ function dataTablePrefix(){
 //////////////////////////////////////////////////////////////////
 // Items
 
-
-//change a 'unique_name' for a particular form item. Fails if duplicate, or of 'old' name does not exist
-function changeUniqueName($old, $new){
-	//first verify that the new name doesn't already exist
-	$q = "SELECT `unique_name` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$new."'";
-	$res = $this->query($q);
-	$n = mysql_num_rows($res);
-	mysql_free_result($res);	
-	if($n>0) return -1;
-	
-	//now make sure the old name exists
-	$q = "SELECT `unique_name`, `ID`, `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$old."'";
-	$res =$this->query($q);
-	$n = mysql_num_rows($res);
-	$row = mysql_fetch_assoc($res);
-	mysql_free_result($res);	
-	if($n==0) return -2;
-	$formID = $row['ID'];
-	$dbType = stripslashes($row['db_type']);
-	
-	//do the swap
-	$q = "UPDATE `".$this->itemsTable."` SET `unique_name` = '".$new."' WHERE `unique_name` = '".$old."' LIMIT 1;";
-	$this->query($q);
-	
-	if($dbType!="NONE") $this->changeDataFieldName($old, $new, $formID, $dbType);
-	return true;
-}
-
-function changeDataFieldName($old, $new, $formID, $dbType){
-	$dataTable = $this->getDataTableName($formID);	
-	$q = "ALTER TABLE `".$dataTable."` CHANGE `".$old."` `".$new."` ".$dbType;
-	$this->query($q);
-}
 
 //returns an indexed array of all items in a form
 function getFormItems($formID){
@@ -1222,8 +1244,8 @@ function createFormItem($formID, $uniqueName, $itemInfo){
 		$itemInfo['index'] = $row['index'] + 1;
 		mysql_free_result($res);
 	}
-		//now add the item to the items table
-	if(!isset($itemInfo['db_type'])) $itemInfo['db_type'] = 'TEXT';
+	
+	//now add the item to the items table
 	$itemInfo = $this->packItem($itemInfo);
 
 	$ignoreKeys = array();
@@ -1240,12 +1262,14 @@ function createFormItem($formID, $uniqueName, $itemInfo){
 	$this->query($q);
 	
 	//add a field to the data table
-	if($itemInfo['db_type'] != "NONE") $this->createFormItemDataField($formID, $uniqueName, $itemInfo);
+	if($this->isDataCol($itemInfo['unique_name'])) $this->createFormItemDataField($formID, $uniqueName, $itemInfo);
 }	
 
 function createFormItemDataField($formID, $uniqueName, $itemInfo){	
-	$dataTable = $this->getDataTableName($formID);		
-	$q = "ALTER TABLE `".$dataTable."` ADD `".$uniqueName."` ".stripslashes($itemInfo['db_type'])." NOT NULL";
+	global $fm_controls;
+	
+	$dataTable = $this->getDataTableName($formID);
+	$q = "ALTER TABLE `".$dataTable."` ADD `".$uniqueName."` ".($fm_controls[$itemInfo['type']]->getColumnType())." NOT NULL";
 	$this->query($q);
 }
 
@@ -1261,41 +1285,10 @@ function updateFormItem($formID, $uniqueName, $itemInfo){
 	$toUpdate = array_intersect_key($itemInfo,$this->itemKeys);
 	$strArr=array();
 	foreach($toUpdate as $k=>$v){
-		if($k == 'db_type')
-			$strArr[] = "`{$k}` = '".addslashes($itemInfo[$k])."'";
-		else
-			$strArr[] = "`{$k}` = '".$itemInfo[$k]."'";
-		
+		$strArr[] = "`{$k}` = '".$itemInfo[$k]."'";		
 	}
 	$q = "UPDATE `".$this->itemsTable."` SET ".implode(", ",$strArr)." WHERE `unique_name` = '".$uniqueName."'";
 
-	$this->query($q);
-	
-	//check if the db_type was updated
-	if(isset($itemInfo['db_type']) && $itemInfo['db_type'] != "NONE"){
-		//check if this is the table's index
-		$formInfo = $this->getFormSettings($formID);
-		$isIndex = ($formInfo['data_index'] == $uniqueName);
-		if($isIndex) $this->removeDataFieldIndex($formID); //remove it and add it again; this would happen anyway, but we also have to deal with the 'text' and 'blob' prefix issue; better to just remove the index and use our own safe index adding function after we change the field type
-		$this->updateDataFieldType($formID, $uniqueName, stripslashes($itemInfo['db_type']));	
-		if($isIndex) $this->setDataFieldIndex($formID, $uniqueName, false);
-	}
-}
-
-function updateDataFieldType($formID, $uniqueName, $newType){
-	$dataTable = $this->getDataTableName($formID);
-	$q = "ALTER TABLE `".$dataTable."` MODIFY `".$uniqueName."` ".$newType;
-	$this->query($q);
-}
-
-function setDataFieldIndex($formID, $uniqueName, $remove=true){
-	global $msg;
-	$indexItem = $this->getFormItem($uniqueName);
-	$dbType = $indexItem['db_type'];
-	$dataTable = $this->getDataTableName($formID);
-	if($remove) $this->removeDataFieldIndex($formID);
-	$prefixStr = (strtolower($dbType) == "text" || strtolower($dbType) == "blob")?"(10)":"";
-	$q = "ALTER TABLE `".$dataTable."` ADD INDEX (`".$uniqueName."`{$prefixStr})";
 	$this->query($q);	
 }
 
@@ -1408,9 +1401,7 @@ function packItem($item){
 		
 	foreach($item as $k=>$v){
 		if($k == 'extra' && is_array($item['extra']))
-			$item['extra'] = addslashes(serialize($item['extra']));	
-		elseif($k == 'db_type')
-			$item[$k] = $item[$k]; //do nothing
+			$item['extra'] = addslashes(serialize($item['extra']));
 		else
 			$item[$k] = addslashes($item[$k]);			
 	}

@@ -22,9 +22,13 @@ class fm_fileControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "LONGBLOB";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "LONGBLOB";
 	}
 
 	public function editItem($uniqueName, $itemInfo){

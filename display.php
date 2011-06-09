@@ -348,7 +348,7 @@ function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "
 		$str.= "<li><span class=\"fm-data-summary-label\">Timestamp:&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['timestamp']."</span></li>\n";
 	}
 	foreach($formInfo['items'] as $item){
-		if($item['db_type'] != "NONE")
+		if($fmdb->isDataCol($item['unique_name']))
 			$str.= "<li><span class=\"fm-data-summary-label\">".$item['label'].":&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$fm_controls[$item['type']]->parseData($item['unique_name'], $item, $data[$item['unique_name']])."</span></li>\n";
 	}
 	$str.= "</ul>\n";
@@ -564,7 +564,8 @@ function fm_summary_the_type(){
 
 function fm_summary_has_data(){
 	global $fm_display;
-	return $fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['db_type'] != "NONE";
+	global $fmdb;
+	return $fmdb->isDataCol($fm_display->currentFormInfo['items'][$fm_display->currentItemIndex]['unique_name']);
 }
 
 function fm_summary_the_value(){

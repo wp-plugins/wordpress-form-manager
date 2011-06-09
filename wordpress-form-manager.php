@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.9
+Version: 1.5.10
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.5.9";
+$fm_currentVersion = "1.5.10";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -197,29 +197,29 @@ function fm_adminEnqueueScripts(){
 																'enter_items_separated_by_commas' => __("Enter items separated by commas", 'wordpress-form-manager'),
 																'hide_button' => __("hide", 'wordpress-form-manager'),
 																'show_button' => __("show", 'wordpress-form-manager'),
-																'add_test' => __("Add Test", 'conditions', 'wordpress-form-manager'),
-																'add_item' => __("Add Item", 'conditions', 'wordpress-form-manager'),
-																'applies_to' => __("Applies to", 'conditions', 'wordpress-form-manager'),
-																'and_connective' => __("AND", 'conditions', 'wordpress-form-manager'),
-																'or_connective' => __("OR", 'conditions', 'wordpress-form-manager'),
-																'choose_a_rule_type' => __("(Choose a rule type)", 'conditions', 'wordpress-form-manager'),
+																'add_test' => __("Add Test", 'wordpress-form-manager'),
+																'add_item' => __("Add Item", 'wordpress-form-manager'),
+																'applies_to' => __("Applies to", 'wordpress-form-manager'),
+																'and_connective' => __("AND", 'wordpress-form-manager'),
+																'or_connective' => __("OR", 'wordpress-form-manager'),
+																'choose_a_rule_type' => __("(Choose a rule type)",'wordpress-form-manager'),
 																'only_show_elements_if' => __("Only show elements if...", 'wordpress-form-manager'),
-																'show_elements_if' => __("Show elements if...", 'conditions', 'wordpress-form-manager'),
-																'hide_elements_if' => __("Hide elements if...", 'conditions', 'wordpress-form-manager'),
-																'only_require_elements_if' => __("Only require elements if...", 'conditions', 'wordpress-form-manager'),
-																'require_elements_if' => __("Require elements if", 'conditions', 'wordpress-form-manager'),
+																'show_elements_if' => __("Show elements if...", 'wordpress-form-manager'),
+																'hide_elements_if' => __("Hide elements if...", 'wordpress-form-manager'),
+																'only_require_elements_if' => __("Only require elements if...", 'wordpress-form-manager'),
+																'require_elements_if' => __("Require elements if", 'wordpress-form-manager'),
 																'do_not_require_elements_if' => __("Do not require elements if", 'wordpress-form-manager'),
-																'empty_test' => __("...", 'conditions', 'wordpress-form-manager'),
-																'equals' => __("equals", 'conditions', 'wordpress-form-manager'),
-																'does_not_equal' => __("does not equal", 'conditions', 'wordpress-form-manager'),
-																'is_less_than' => __("is less than", 'conditions', 'wordpress-form-manager'),
-																'is_greater_than' => __("is greater than", 'conditions', 'wordpress-form-manager'),
-																'is_lt_or_equal_to' => __("is less than or equal to", 'conditions', 'wordpress-form-manager'),
-																'is_gt_or_equal_to' => __("is greater than or equal to", 'conditions', 'wordpress-form-manager'),
-																'is_empty' => __("is empty", 'conditions', 'wordpress-form-manager'),
-																'is_not_empty' => __("is not empty", 'conditions', 'wordpress-form-manager'),
-																'is_checked' => __("is checked", 'conditions', 'wordpress-form-manager'),
-																'is_not_checked' => __("is not checked", 'conditions', 'wordpress-form-manager')
+																'empty_test' => __("...", 'wordpress-form-manager'),
+																'equals' => __("equals", 'wordpress-form-manager'),
+																'does_not_equal' => __("does not equal", 'wordpress-form-manager'),
+																'is_less_than' => __("is less than", 'wordpress-form-manager'),
+																'is_greater_than' => __("is greater than",'wordpress-form-manager'),
+																'is_lt_or_equal_to' => __("is less than or equal to", 'wordpress-form-manager'),
+																'is_gt_or_equal_to' => __("is greater than or equal to", 'wordpress-form-manager'),
+																'is_empty' => __("is empty", 'wordpress-form-manager'),
+																'is_not_empty' => __("is not empty", 'wordpress-form-manager'),
+																'is_checked' => __("is checked", 'wordpress-form-manager'),
+																'is_not_checked' => __("is not checked", 'wordpress-form-manager')
 															) ); 
 
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
@@ -374,6 +374,11 @@ function fm_dataShortcodeHandler($atts){
 	if(!isset($atts[0])) return sprintf(__("Form Manager: shortcode must include a form slug.  For example, something like '%s'", 'wordpress-form-manager'), "[formdata form-1]");
 	$formSlug = $atts[0];
 	
+	$showTable = false;
+	foreach($atts as $att)
+		if($att == 'table')
+			$showTable = true;
+				
 	$atts = shortcode_atts(array(
 		'orderby' => 'timestamp',
 		'order' => 'desc',
@@ -381,7 +386,11 @@ function fm_dataShortcodeHandler($atts){
 		'template' => 'fm-summary-multi'
 		), $atts);
 		
-	return fm_doDataListBySlug($formSlug, $atts['template'], $atts['orderby'], $atts['order'], $atts['dataperpage']);	
+	if($showTable)
+		return fm_doDataTableBySlug($formSlug, $atts['template'], $atts['orderby'], $atts['order'], $atts['dataperpage']);
+	else
+		return fm_doDataListBySlug($formSlug, $atts['template'], $atts['orderby'], $atts['order'], $atts['dataperpage']);
+	
 }
 
 /**************************************************************/

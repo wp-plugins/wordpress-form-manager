@@ -21,9 +21,13 @@ class fm_customListControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "VARCHAR(255) DEFAULT ''";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "VARCHAR (255) DEFAULT ''";
 	}
 	
 	public function showItem($uniqueName, $itemInfo){

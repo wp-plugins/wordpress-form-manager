@@ -16,9 +16,13 @@ class fm_checkboxControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "VARCHAR( 10 ) DEFAULT ''";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "VARCHAR( 10 ) DEFAULT ''";
 	}
 	
 	public function showItem($uniqueName, $itemInfo){
