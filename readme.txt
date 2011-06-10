@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.5.10
+Stable tag: 1.5.11
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -43,7 +43,7 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 <br />
 = Languages =
 
-* Español (es_ES) - [Eduardo Aranda](http://sinetiks.com)
+* Espa–ol (es_ES) - [Eduardo Aranda](http://sinetiks.com)
 * Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 

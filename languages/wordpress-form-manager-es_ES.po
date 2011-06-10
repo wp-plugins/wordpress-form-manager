@@ -1080,7 +1080,7 @@ msgstr "No se puede crear el archivo .ZIP"
 
 #: wordpress-form-manager.php:195
 msgid "move"
-msgstr "Eliminar"
+msgstr "Mover"
 
 #: wordpress-form-manager.php:197
 msgid "Enter items separated by commas"
@@ -1090,9 +1090,13 @@ msgstr "Escribe una lista de direcciones de correo electrónico separadas por co
 msgid "hide"
 msgstr "Blanco"
 
+#: types.php:49
+msgid "Hide"
+msgstr "Blanco"
+
 #: wordpress-form-manager.php:199
-msgid "show"
-msgstr "mostrar"
+msgid "Show"
+msgstr "Mostrar"
 
 #: wordpress-form-manager.php:200
 msgid "Add Test"
