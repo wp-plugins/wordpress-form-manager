@@ -342,3 +342,85 @@ table.condition-buttons td{
 .fm-form input.submit{
 	float:right;
 }
+
+.fm-form #ajax-loading{
+	float:right;
+}
+
+/******************************************************************/
+/* WIDGET */
+
+
+.fm-form-widget fieldset{	
+	border: 1px solid #000;
+	padding:10px 10px 10px 10px;
+}
+
+.fm-form-widget h3{
+	font-weight:bold;
+}
+
+.fm-form-widget legend{
+	font-size:15px;
+	margin:10px 10px 10px 10px;
+}
+
+.fm-form-widget em{
+	color:#FF0000;
+	font-weight:bold;
+	font-style: normal;
+}
+.fm-form-widget .separator{
+	font-size:15px;
+	font-weight:bold;
+	margin-top:10px;
+}
+
+.fm-form-widget label{
+	text-align: left; 
+	margin-right: 0.5em;
+	display:block; 
+}
+
+.fm-form-widget input{
+	margin:3px 0px 0px 0px;
+	padding:0px 0px 0px 0px;
+}
+
+.fm-form-widget input[type='checkbox']{
+	margin-top:5px;
+}
+
+.fm-form-widget table, .fm-form-widget tr, .fm-form-widget td{
+	border:none !important;
+	margin:0px !important;
+	padding:0px !important;
+	vertical-align:top;
+}
+
+.fm-form-widget select{
+	margin:0px 0px 0px 0px;
+	padding:0px 0px 0px 0px;
+}
+
+.fm-form-widget ul li:before{
+	content:inherit; 
+}
+
+.fm-form-widget li{
+	margin-left:-15px !important;
+}
+
+.fm-form-widget li{
+	list-style:none !important;
+	margin:0px 0px 5px 0px;
+	padding:0px 0px 0px 0px;
+}
+
+.fm-form-widget li.content{	
+	margin-bottom:10px;
+}
+
+.fm-form-widget input.submit{
+	float:right;
+}

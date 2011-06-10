@@ -11,16 +11,48 @@ function fm_register_form_item(formID, itemDef){
 //adds the appropriate event handlers to the form: 'fm_submit_onclick' becomes the onclick event handler for any item with the name 'fm_form_submit'
 function fm_register_form(formID){
 	var formElement = document.getElementById('fm-form-' + formID);
-	var submitButtons = document.getElementsByName('fm_form_submit');
-	for(x=0;x<submitButtons.length;x++){
-		submitButtons[x].onclick = function(){ return fm_submit_onclick(formID); }		
-	}
+	var submitButton = formElement['fm_form_submit'];
+	//submitButton.onclick = function(){ return fm_submit_onclick_ajax(formID, formSlug); }
+	submitButton.onclick = function(){ return fm_submit_onclick(formID); }
+	fm_registered_forms[formID] = false;
 }
 
 function fm_submit_onclick(formID){
 	if(!fm_check_required_items(formID)) return false;
 	if(!fm_check_text_validation(formID)) return false;
 	return true;
+}
+
+function fm_submit_onclick_ajax(formID, formSlug){
+	if(fm_registered_forms[formID]) return false;
+	fm_registered_forms[formID] = true;
+	
+	if(!fm_check_required_items(formID)) return false;
+	if(!fm_check_text_validation(formID)) return false;
+	
+	var data = {
+		action: 'fm_post_form',
+		slug: formSlug,
+		fm_id: document.getElementById('fm-form-' + formID)['fm_id'].value,
+		fm_nonce: document.getElementById('fm-form-' + formID)['fm_nonce'].value
+	};		
+	var temp;
+	
+	for(var x=0;x<fm_registered_form_items.length;x++){
+		if(fm_registered_form_items[x].formID == formID){
+			eval("temp = " + fm_registered_form_items[x].getter_script + "(\'" + formID + "\', \'" + fm_registered_form_items[x].unique_name + "\');");
+			data[fm_registered_form_items[x].unique_name] = temp;
+		}
+	}
+	
+	var ajaxurl = fm_user_I18n.ajaxurl;
+	
+	jQuery.post(ajaxurl, data, function(response){
+		var formEL = document.getElementById('fm-form-' + formID);
+		jQuery(formEL).after(response).remove();
+	});
+	
+	return false;
 }
 
 /* Validation checks */

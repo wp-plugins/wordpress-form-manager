@@ -160,6 +160,8 @@ protected function getPreTemplateScripts($formInfo, $options=array()){
 		$item['validation_callback'] = $fm_controls[$item['type']]->getGeneralValidatorName();
 		$item['validation_msg'] = sprintf($fm_controls[$item['type']]->getGeneralValidatorMessage($item['extra']['validation']), $item['label']);
 		$item['validation_type'] = $item['extra']['validation'];
+		$item['getter_script'] = $fm_controls[$item['type']]->getElementValueGetterName();
+		
 		$str.= "fm_register_form_item('".$formInfo['ID']."', ".json_encode($item).");\n";
 	}
 	$str.= '</script>';
@@ -344,8 +346,8 @@ function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "
 	$str.= $before;
 	$str.= "<ul>\n";
 	if($userAndTimestamp){
-		$str.= "<li><span class=\"fm-data-summary-label\">User:&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['user']."</span></li>\n";
-		$str.= "<li><span class=\"fm-data-summary-label\">Timestamp:&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['timestamp']."</span></li>\n";
+		$str.= "<li><span class=\"fm-data-summary-label\">".__("User",'wordpress-form-manager').":&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['user']."</span></li>\n";
+		$str.= "<li><span class=\"fm-data-summary-label\">".__("Timestamp",'wordpress-form-manager').":&nbsp;&nbsp;</span><span class=\"fm-data-summary-value\">".$data['timestamp']."</span></li>\n";
 	}
 	foreach($formInfo['items'] as $item){
 		if($fmdb->isDataCol($item['unique_name']))
@@ -395,8 +397,8 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 	$str = "<table class=\"editor-item-table\">".
 			"<tr>".	
 			"<td class=\"editor-item-container\">".$control->showEditorItem($uniqueName, $itemInfo)."</td>".
-			"<td class=\"editor-item-buttons\"><a class=\"edit-form-button\" onclick=\"fm_showEditDivCallback('{$uniqueName}','".$control->getShowHideCallbackName()."')\" id=\"{$uniqueName}-edit\"/>edit</a></td>".
-			"<td class=\"editor-item-buttons\">"."<a class=\"edit-form-button\" onclick=\"fm_deleteItem('{$uniqueName}')\">delete</a>"."</td>".
+			"<td class=\"editor-item-buttons\"><a class=\"edit-form-button\" onclick=\"fm_showEditDivCallback('{$uniqueName}','".$control->getShowHideCallbackName()."')\" id=\"{$uniqueName}-edit\"/>".__("Edit",'wordpress-form-manager')."</a></td>".
+			"<td class=\"editor-item-buttons\">"."<a class=\"edit-form-button\" onclick=\"fm_deleteItem('{$uniqueName}')\">".__("Delete",'wordpress-form-manager')."</a>"."</td>".
 			"</tr>".
 			"</table>".
 			"<input type=\"hidden\" id=\"{$uniqueName}-type\" value=\"{$type}\" />";
@@ -428,14 +430,13 @@ function fm_form_action(){
 }
 function fm_form_end(){
 	global $fm_display;
-	$str = fm_form_hidden();
-	$str.= "</form>\n";
+	$str = "</form>\n";
 	echo $str;
 }
 function fm_form_hidden(){
 	global $fm_display;
-	$str = "<input type=\"hidden\" name=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
-	$str.= "<input type=\"hidden\" name=\"fm_id\" value=\"".$fm_display->currentFormInfo['ID']."\" />\n";	
+	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
+	$str.= "<input type=\"hidden\" name=\"fm_id\" id=\"fm_id\" value=\"".$fm_display->currentFormInfo['ID']."\" />\n";	
 	return $str;
 }
 
@@ -457,6 +458,7 @@ function fm_form_the_submit_btn(){
 	global $fm_display;
 	return "<input type=\"submit\" ".
 			"name=\"fm_form_submit\" ".
+			"id=\"fm_form_submit\" ".
 			"class=\"submit\" ".
 			"value=\"".$fm_display->currentFormInfo['submit_btn_text']."\" ".
 			" />\n";

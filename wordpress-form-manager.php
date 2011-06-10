@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path(dirname(__FILE__).'/');
 
 global $fm_currentVersion;
-$fm_currentVersion = "1.5.10";
+$fm_currentVersion = "1.5.11";
 
 global $fm_DEBUG;
 $fm_DEBUG = false;
@@ -94,6 +94,8 @@ global $wpdb;
 global $fmdb;
 global $fm_display;
 global $fm_templates;
+
+load_plugin_textdomain('wordpress-form-manager', false, dirname(plugin_basename(__FILE__)).'/languages/' );
 
 $fmdb = new fm_db_class($wpdb->prefix.get_option('fm-forms-table-name'),
 					$wpdb->prefix.get_option('fm-items-table-name'),
@@ -230,8 +232,6 @@ add_action('init', 'fm_userInit');
 function fm_userInit(){
 	global $fm_currentVersion;
 	global $fm_templates;
-	
-	load_plugin_textdomain('wordpress-form-manager', false, dirname(plugin_basename(__FILE__)).'/languages/' );
 		
 	//update check, since the snarky wordpress dev changed the behavior of a function based on its english name, rather than its widely accepted usage.
 	//"The perfect is the enemy of the good". 
@@ -243,8 +243,9 @@ function fm_userInit(){
 	include 'settings.php';
 	
 	$fm_templates->initTemplates();
-
-	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__));
+	
+	wp_enqueue_script('form-manager-js-user', plugins_url('/js/userscripts.js', __FILE__), array('jquery'));
+	wp_localize_script('form-manager-js-user', 'fm_user_I18n', array( 	'ajaxurl' => admin_url('admin-ajax.php')));
 	
 	wp_register_style('form-manager-css', plugins_url('/css/style.css', __FILE__));
 	wp_enqueue_style('form-manager-css');
@@ -414,6 +415,7 @@ add_action('fm_delete_temporary_file', 'fm_deleteTemporaryFiles');
 /**************************************************************/
 
 include 'api.php';
+
 
 /* ANDREA : include php for create TinyMCE Button */
 if(get_option('fm-enable-mce-button') == "YES")

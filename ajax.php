@@ -3,6 +3,13 @@
 /**************************************************************/
 /******* AJAX *************************************************/
 
+//post form data
+add_action('wp_ajax_fm_post_form', 'fm_postFormAjax');
+function fm_postFormAjax(){
+	echo fm_doFormBySlug($_POST['slug']);	
+	die();
+}
+
 //form editor 'save' button
 add_action('wp_ajax_fm_save_form', 'fm_saveFormAjax');
 global $fm_save_had_error;

@@ -42,11 +42,15 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
   
 <br />
 = Languages =
+
 * Español (es_ES) - [Eduardo Aranda](http://sinetiks.com)
 * Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 
 == Changelog ==
+= 1.5.11 =
+* Fixed internationalization for certain parts of the plugin
+
 = 1.5.10 =
 * Added a 'table' view for the form data display shortcode
 * Fixed the timezone for timestamps

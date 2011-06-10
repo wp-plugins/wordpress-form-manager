@@ -1,6 +1,7 @@
 <?php
 /**************************************************************/
 /******* API **************************************************/
+
 function fm_doPaginatedSummariesBySlugCallback($formSlug, $template, $callback, $orderBy = 'timestamp', $ord = 'DESC', $dataPerPage = 30, $options=array()){
 	global $fmdb;
 	
@@ -153,7 +154,7 @@ function fm_getFormID($formSlug){
 //takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior), processes posts, etc.
 
 
-function fm_doFormBySlug($formSlug){
+function fm_doFormBySlug($formSlug, $options = array()){
 	global $fm_display;
 	global $fmdb;
 	global $current_user;
@@ -256,12 +257,12 @@ function fm_doFormBySlug($formSlug){
 				}				
 			}
 			else
-				return $output.$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'use_placeholders' => false), $userData[0]);
+				return $output.$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)), $userData[0]);
 		}
 	}
 	
 	//if we got this far, just display the form
-	return $fm_display->displayForm($formInfo, array('action' => get_permalink()));
+	return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink())));
 }
 
 function fm_helper_parseBehaviors($behaviorString){

@@ -52,6 +52,11 @@ class fm_controlBase{
 		return "";
 	}
 	
+	//returns the name of a javascript function to get the value of the form element
+	public function getElementValueGetterName(){
+		return "fm_base_get_value";
+	}
+	
 	//this function is called in the header; you can place scripts here (like whatever getShowHideCallbackName() returns)  etc. 
 	protected function showExtraScripts(){}
 	
@@ -62,6 +67,9 @@ class fm_controlBase{
 		<script type="text/javascript">
 		function fm_base_required_validator(formID, itemID){
 			return (fm_trim(document.getElementById('fm-form-' + formID)[itemID].value) != "");
+		}
+		function fm_base_get_value(formID, itemID){
+			return fm_trim(document.getElementById('fm-form-' + formID)[itemID].value);
 		}
 		</script>
 		<?php

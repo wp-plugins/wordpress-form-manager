@@ -359,7 +359,7 @@ function fm_getNewConditionInfo(id){
 function fm_showHideCondition(id){
 	Effect.toggle(id + '-div', 'Blind', {duration:0.1});
 	var str = document.getElementById(id + '-showhide').innerHTML;
-	if(str == 'show')
+	if(str == fm_I18n.show_button)
 		document.getElementById(id + '-showhide').innerHTML = fm_I18n.hide_button;
 	else
 		document.getElementById(id + '-showhide').innerHTML = fm_I18n.show_button;

@@ -44,14 +44,14 @@ function fm_showControlScripts(){
 		var editDiv = document.getElementById(itemID + '-edit-div');
 		var editClick = document.getElementById(itemID + '-edit');
 				
-		if(editClick.innerHTML == 'edit'){
+		if(editClick.innerHTML == '<?php _e("Edit", 'wordpress-form-manager');?>'){
 			if(callback != "") eval(callback + '(itemID,false);');
-			editClick.innerHTML = 'done';
+			editClick.innerHTML = '<?php _e("Hide", 'wordpress-form-manager');?>';
 			Effect.BlindDown(itemID + '-edit-div', { duration: 0.2 });
 		}
 		else{
 			if(callback != "") eval(callback + '(itemID,true);');
-			editClick.innerHTML = 'edit';
+			editClick.innerHTML = '<?php _e("Edit", 'wordpress-form-manager');?>';
 			Effect.BlindUp(itemID + '-edit-div', { duration: 0.2 });
 		}	
 	}

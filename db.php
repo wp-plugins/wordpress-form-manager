@@ -67,7 +67,7 @@ function initDefaultSettings(){
 $this->formSettingsKeys = array(
 					'title' => '',
 					'submitted_msg' => '', 
-					'submit_btn_text' => '', 
+					'submit_btn_text' => __('Submit', 'wordpress-form-manager'), 
 					'required_msg' => '', 
 					'action' => '',
 					'data_index' => '',
@@ -85,7 +85,7 @@ $this->formSettingsKeys = array(
 					'advanced_email' => '',
 					'publish_post' => 0,
 					'publish_post_category' => '',
-					'publish_post_title' => '%s Submission',
+					'publish_post_title' => __('%s Submission', 'wordpress-form-manager'),
 					'auto_redirect' => 0,
 					'auto_redirect_page' => 0,
 					'auto_redirect_timeout' => 5,
@@ -110,7 +110,7 @@ $this->globalSettings = array(
 					'recaptcha_theme' => 'red',
 					/* translators: the default name of a new form */				
 					'title' =>				__("New Form", 'wordpress-form-manager'),	
-					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
+					'submitted_msg' => 		__('Thank you! Your data has been submitted.', 'wordpress-form-manager'), 
 					/* translators: the default message given if a required item is left blank.  You must include a backslash before any single quotes */
 					'required_msg' => 		__("\'%s\' is required.", 'wordpress-form-manager'),
 					'email_admin' => "YES",

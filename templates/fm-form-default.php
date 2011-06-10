@@ -96,7 +96,7 @@ __("Applies to checkboxes, and when labels are to the left", 'wordpress-form-man
 		</ul>
 		
 		<div>
-		<input type="submit" name="<?php echo fm_form_submit_btn_name();?>" class="submit" value="<?php echo fm_form_submit_btn_text();?>" onclick="return <?php echo fm_form_submit_btn_script();?>" />		
+		<?php echo fm_form_the_submit_btn(); ?>		
 		</div>
 		
 	<?php if($showBorder): ?></fieldset><?php endif; ?>
