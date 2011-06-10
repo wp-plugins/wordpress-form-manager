@@ -52,6 +52,11 @@ class fm_controlBase{
 		return "";
 	}
 	
+	//returns the name of a javascript function to get the value of the form element
+	public function getElementValueGetterName(){
+		return "fm_base_get_value";
+	}
+	
 	//this function is called in the header; you can place scripts here (like whatever getShowHideCallbackName() returns)  etc. 
 	protected function showExtraScripts(){}
 	
@@ -62,6 +67,9 @@ class fm_controlBase{
 		<script type="text/javascript">
 		function fm_base_required_validator(formID, itemID){
 			return (fm_trim(document.getElementById('fm-form-' + formID)[itemID].value) != "");
+		}
+		function fm_base_get_value(formID, itemID){
+			return fm_trim(document.getElementById('fm-form-' + formID)[itemID].value);
 		}
 		</script>
 		<?php
@@ -105,9 +113,13 @@ class fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "NONE";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "";
 	}
 	
 	//item keys that are handled in the 'panel'
@@ -128,7 +140,10 @@ class fm_controlBase{
 	protected function extraScriptHelper($items){
 		$str = "\"array(";
 		foreach($items as $k=>$v){
-			$items[$k] = "'{$k}'=>'\" + fm_fix_str(fm_get_item_value(itemID, '{$v}')) + \"'";
+			if(strpos($v, "cb:") !== false)
+				$items[$k] = "'{$k}'=>'\" + ".$this->checkboxScriptHelper(substr($v,3), array('onValue'=>'checked', 'offValue'=>""))." + \"'";
+			else
+				$items[$k] = "'{$k}'=>'\" + fm_fix_str(fm_get_item_value(itemID, '{$v}')) + \"'";
 		}
 		$str.=implode(", ",$items);
 		$str.= ")\"";

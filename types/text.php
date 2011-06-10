@@ -19,7 +19,8 @@ class fm_textControl extends fm_controlBase{
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,	
 											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),									
-											'style' => "width:".$itemInfo['extra']['size']."px;"								
+											'style' => "width:".$itemInfo['extra']['size']."px;",
+											'maxlength' => $itemInfo['extra']['maxlength']								
 											)
 					);	
 			
@@ -36,9 +37,13 @@ class fm_textControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "VARCHAR(1000) DEFAULT ''";
 	}
 	
 	public function editItem($uniqueName, $itemInfo){
@@ -50,6 +55,7 @@ class fm_textControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', __('Placeholder', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['value']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', __('Width (in pixels)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['size']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'maxlength', __('Max characters', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['maxlength']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'validation', __('Validation', 'wordpress-form-manager'), array('options' => array_merge(array('none' => "..."), $this->getValidatorList()), 'value' => $itemInfo['extra']['validation']));		
 		return $arr;
@@ -57,7 +63,7 @@ class fm_textControl extends fm_controlBase{
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
-		$opt['extra'] = $this->extraScriptHelper(array('value'=>'value', 'size'=>'size', 'validation'=>'validation'));
+		$opt['extra'] = $this->extraScriptHelper(array('value'=>'value', 'size'=>'size', 'validation'=>'validation', 'maxlength'=>'maxlength'));
 		$opt['required'] = $this->checkboxScriptHelper('required');		
 		return $opt;
 	}

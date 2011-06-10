@@ -27,9 +27,13 @@ class fm_textareaControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "TEXT";
 	}
 	
 	public function editItem($uniqueName, $itemInfo){

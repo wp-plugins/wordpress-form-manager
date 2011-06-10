@@ -22,9 +22,13 @@ class fm_fileControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "LONGBLOB";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "LONGBLOB";
 	}
 
 	public function editItem($uniqueName, $itemInfo){
@@ -55,23 +59,60 @@ class fm_fileControl extends fm_controlBase{
 			return false;
 		}
 			
-				
-		$filename = $_FILES[$uniqueName]['tmp_name'];			
-		$handle = fopen($filename, "rb");
-		$contents = fread($handle, filesize($filename));
-		fclose($handle);
+		if(trim($itemInfo['extra']['upload_dir']) == ""){ //keep the upload in the form manager database
+			$filename = $_FILES[$uniqueName]['tmp_name'];			
+			$handle = fopen($filename, "rb");
+			$contents = fread($handle, filesize($filename));
+			fclose($handle);
 		
-		$saveVal = array('filename' => basename($_FILES[$uniqueName]['name']),
-							'contents' => $contents,
-							'size' => $_FILES[$uniqueName]['size']);
-		return addslashes(serialize($saveVal));
-		
+			$saveVal = array('filename' => $_FILES[$uniqueName]['name'],
+								'contents' => $contents,
+								'size' => $_FILES[$uniqueName]['size']);
+								
+			return addslashes(serialize($saveVal));
+		}
+		else{
+			//make sure to add a trailing slash if this was forgotten.
+			$uploadDir = $this->parseUploadDir($itemInfo['extra']['upload_dir']);
+			$pathInfo = pathinfo($_FILES[$uniqueName]['name']);
+			$newFileName = substr($_FILES[$uniqueName]['name'], 0, (-1*(strlen($pathInfo['extension'])+1))).' ('.date('m-d-y-h-i-s').').'.$pathInfo['extension'];
+			
+			move_uploaded_file($_FILES[$uniqueName]['tmp_name'], $uploadDir.$newFileName);
+			$saveVal = array('filename' => $newFileName,
+								'contents' => '',
+								'upload_dir' => true,
+								'size' => $_FILES[$uniqueName]['size']);
+			return addslashes(serialize($saveVal));
+		}	
 	}
 	
 	public function parseData($uniqueName, $itemInfo, $data){
 		if(trim($data) == "") return "";
 		$fileInfo = unserialize($data);
-		return $fileInfo['filename']." (".((int)($fileInfo['size']/1024))." kB)";
+		if($fileInfo['size'] < 1024)
+			$sizeStr = $fileInfo['size']." B";
+		else
+			$sizeStr = ((int)($fileInfo['size']/1024))." kB";
+			
+		if(!isset($fileInfo['upload_dir'])) 
+			return $fileInfo['filename']." (".$sizeStr.")";
+		elseif(trim($itemInfo['extra']['upload_url']) == "")
+			return $fileInfo['filename']." (".$sizeStr.")<!-- </a> -->";
+		else{
+			$uploadURL = $this->parseUploadURL($itemInfo['extra']['upload_url']);
+			return '<a class="fm-download-link" href="'.$uploadURL.$fileInfo['filename'].'">'.$fileInfo['filename'].' ('.$sizeStr.')'.'</a>';
+		}
+	}
+	
+	public function parseUploadDir($dir){
+		$dir = str_replace("%doc_root%", $_SERVER['DOCUMENT_ROOT'], $dir);
+		if(substr($dir, -1) != "/" && substr($dir, -1) != "\\") $dir.="/";			
+		return $dir;
+	}
+	
+	public function parseUploadURL($url){
+		if(substr($url, -1) != "/") $url.="/";	
+		return $url;
 	}
 	
 	public function getPanelItems($uniqueName, $itemInfo){
@@ -80,17 +121,24 @@ class fm_fileControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'max_size', __('Max file size (in kB)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['max_size']));
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Your host restricts uploads to", 'wordpress-form-manager')." ".ini_get('upload_max_filesize')."B</span>", '');
-		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span style=\"padding-:10px;font-weight:bold;\">".__("File Types", 'wordpress-form-manager')."</span>", '');
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span style=\"font-weight:bold;\">".__("File Types", 'wordpress-form-manager')."</span>", '');
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Enter a list of extensions separated by commas, e.g. \".txt, .rtf, .doc\"", 'wordpress-form-manager')."</span>", '');
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'restrict', __('Only allow', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['restrict']));		
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'exclude', __('Do not allow', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['exclude']));
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<div style=\"font-weight:bold;padding-top:10px;\">".__("Uploads", 'wordpress-form-manager')."</div>", '');
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'upload_dir', __('Upload directory', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['upload_dir']));
+		if(trim($itemInfo['extra']['upload_dir']) != "" && !is_dir($this->parseUploadDir($itemInfo['extra']['upload_dir'])))
+			$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" >".__("<em>This does not appear to be a valid directory</em>", 'wordpress-form-manager')."</span>", '');	
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<div class=\"fm-small\" style\"padding-bottom:15px;\">".__("Using an upload directory will allow you to post links to uploaded files.  Otherwise, Form Manager will manage the uploaded files for you in the database.", 'wordpress-form-manager')."</div>", '');
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'upload_url', __('Upload URL', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['upload_url']));
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("This will be the base URL used for links to the uploaded files.  If left blank, no links will be generated.", 'wordpress-form-manager')."</span>", '');
 		
 		return $arr;
 	}
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
-		$opt['extra'] = $this->extraScriptHelper(array('restrict' => 'restrict', 'exclude' => 'exclude', 'max_size' => 'max_size'));
+		$opt['extra'] = $this->extraScriptHelper(array('restrict' => 'restrict', 'exclude' => 'exclude', 'max_size' => 'max_size', 'upload_dir' => 'upload_dir', 'upload_url' => 'upload_url' ));
 		return $opt;
 	}
 	
