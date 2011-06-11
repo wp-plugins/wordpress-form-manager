@@ -35,8 +35,7 @@ function fm_saveFormAjax() {
 		
 		//now tell the user there was an error
 		printf(
-			__("Error: the shortcode '%s' is already in use. " . 
-			"(other changes were saved successfully)", 'wordpress-form-manager'), 
+			__("Error: the shortcode '%s' is already in use. (other changes were saved successfully)", 'wordpress-form-manager'), 
 			$formInfo[ 'shortcode' ]
 			);
 		

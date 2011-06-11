@@ -217,8 +217,7 @@ function fm_adminEnqueueScripts() {
 		'fm_I18n', 
 		array(
 			'save_with_deleted_items' => 
-				__("There may be (data) associated with the form item(s) you removed.  " .
-				"Are you sure you want to save?", 'wordpress-form-manager'),
+				__("There may be (data) associated with the form item(s) you removed.  Are you sure you want to save?", 'wordpress-form-manager'),
 			'unsaved_changes' => 
 				__("Any unsaved changes will be lost. Are you sure?", 'wordpress-form-manager'),
 			'click_here_to_download' => 
@@ -464,8 +463,7 @@ add_shortcode( get_option( 'fm-shortcode' ), 'fm_shortcodeHandler' );
 function fm_shortcodeHandler( $atts ) {
 	if ( !isset( $atts[ 0 ] ) ) {
 		return sprintf(
-			__("Form Manager: shortcode must include a form slug.  " .
-			"For example, something like '%s'", 'wordpress-form-manager'), 
+			__("Form Manager: shortcode must include a form slug.  For example, something like '%s'", 'wordpress-form-manager'), 
 			"[form form-1]"
 			);
 	}
@@ -476,8 +474,7 @@ add_shortcode( get_option( 'fm-data-shortcode' ), 'fm_dataShortcodeHandler' );
 function fm_dataShortcodeHandler( $atts ) {
 	if ( !isset( $atts[ 0 ] ) ) {
 		return sprintf(
-			__("Form Manager: shortcode must include a form slug.  " .
-			"For example, something like '%s'", 'wordpress-form-manager'), 
+			__("Form Manager: shortcode must include a form slug.  For example, something like '%s'", 'wordpress-form-manager'), 
 			"[formdata form-1]"
 			);
 	}
