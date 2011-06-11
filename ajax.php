@@ -4,17 +4,17 @@
 /******* AJAX *************************************************/
 
 //post form data
-add_action('wp_ajax_fm_post_form', 'fm_postFormAjax');
-function fm_postFormAjax(){
-	echo fm_doFormBySlug($_POST['slug']);	
+add_action( 'wp_ajax_fm_post_form', 'fm_postFormAjax' );
+function fm_postFormAjax() {
+	echo fm_doFormBySlug( $_POST[ 'slug' ] );	
 	die();
 }
 
 //form editor 'save' button
-add_action('wp_ajax_fm_save_form', 'fm_saveFormAjax');
+add_action( 'wp_ajax_fm_save_form', 'fm_saveFormAjax' );
 global $fm_save_had_error;
 
-function fm_saveFormAjax(){
+function fm_saveFormAjax() {
 	global $fmdb;
 	global $fm_save_had_error;
 	
@@ -23,21 +23,28 @@ function fm_saveFormAjax(){
 	$formInfo = fm_saveHelperGatherFormInfo();
 	
 	//check if the shortcode is a duplicate
-	$scID = $fmdb->getFormID($formInfo['shortcode']);
-	if(!($scID == false || $scID == $_POST['id'] || trim($formInfo['shortcode']) == "")){
+	$scID = $fmdb->getFormID( $formInfo[ 'shortcode' ] );
+	if( !( $scID == false 
+			|| $scID == $_POST[ 'id' ] 
+			|| trim( $formInfo[ 'shortcode' ] ) == "" ) 
+		) {
 		//get the old shortcode
-		$formInfo['shortcode'] = $fmdb->getFormShortcode($_POST['id']);			
+		$formInfo[ 'shortcode' ] = $fmdb->getFormShortcode( $_POST[ 'id' ] );			
 		//save the rest of the form
-		$fmdb->updateForm($_POST['id'], $formInfo);
+		$fmdb->updateForm( $_POST[ 'id' ], $formInfo );
 		
 		//now tell the user there was an error
-		printf(__("Error: the shortcode '%s' is already in use. (other changes were saved successfully)", 'wordpress-form-manager'), $formInfo['shortcode']);
+		printf(
+			__("Error: the shortcode '%s' is already in use. " . 
+			"(other changes were saved successfully)", 'wordpress-form-manager'), 
+			$formInfo[ 'shortcode' ]
+			);
 		
 		die();
 	}
 			
 	//no errors: save the form, return '1'
-	$fmdb->updateForm($_POST['id'], $formInfo);
+	$fmdb->updateForm( $_POST[ 'id' ], $formInfo );
 	
 	if(!$fm_save_had_error)
 		echo "1";
