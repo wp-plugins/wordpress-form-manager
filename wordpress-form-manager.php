@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.11
+Version: 1.5.12
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.5.11";
+$fm_currentVersion = 		"1.5.12";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -480,6 +480,8 @@ function fm_dataShortcodeHandler( $atts ) {
 	}
 	$formSlug = $atts[ 0 ];
 	
+	$options = $atts;
+	
 	$showTable = false;
 	foreach ( $atts as $att )
 		if ( $att == 'table' )
@@ -490,7 +492,13 @@ function fm_dataShortcodeHandler( $atts ) {
 			'orderby' => 'timestamp',
 			'order' => 'desc',
 			'dataperpage' => 30,
-			'template' => 'fm-summary-multi'
+			'template' => 'fm-summary-multi',
+			'row_height' => 'auto',
+			'row_class' => '',
+			'col_width' => 'auto',
+			'col_class' => '',
+			'show' => '',
+			'hide' => '',
 			), 
 		$atts
 		);
@@ -501,7 +509,8 @@ function fm_dataShortcodeHandler( $atts ) {
 			$atts[ 'template' ],
 			$atts[ 'orderby' ],
 			$atts[ 'order' ],
-			$atts[ 'dataperpage' ]
+			$atts[ 'dataperpage' ],
+			$options
 			);
 	} else {
 		return fm_doDataListBySlug(

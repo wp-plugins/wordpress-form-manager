@@ -884,7 +884,8 @@ function dataHasPublishedSubmissions($formID){
 	$res = $this->query($q);
 	$row = mysql_fetch_array($res);
 	mysql_free_result($res);
-	return $row[0] > 0;	
+	if($row[0] > 0) return  true;
+	return false;
 }
 							
 function isDataCol($uniqueName){

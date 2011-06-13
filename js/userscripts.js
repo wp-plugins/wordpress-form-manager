@@ -8,6 +8,28 @@ function fm_register_form_item(formID, itemDef){
 	fm_registered_form_items.push(itemDef);
 }
 
+// returns the 'registered' information about the form element, essentially the DB entry
+function fm_get_form_item_info(itemID){
+	for(var x=0;x<fm_registered_form_items.length;x++){
+		if(fm_registered_form_items[x].unique_name == itemID
+			|| fm_registered_form_items[x].nickname == itemID){
+			return fm_registered_form_items[x];
+		}
+	}
+}
+
+//returns the form element (unless it is a checkbox/radio list)
+function fm_get_form_item(itemID){
+	var itemInfo = fm_get_form_item_info(itemID);
+	return document.getElementById('fm-form-' + itemInfo.ID)[itemInfo.unique_name];
+}
+
+//the same as the above, but for checkbox/radio lists
+function fm_get_form_item_indexed(itemID, index){
+	var itemInfo = fm_get_form_item_info(itemID);
+	return document.getElementById('fm-form-' + itemInfo.ID)[itemInfo.unique_name + '-' + index];
+}	
+
 //adds the appropriate event handlers to the form: 'fm_submit_onclick' becomes the onclick event handler for any item with the name 'fm_form_submit'
 function fm_register_form(formID){
 	var formElement = document.getElementById('fm-form-' + formID);
@@ -171,6 +193,7 @@ function fm_remove_placeholders(){
 		}
 	}
 }
+
 
 function fm_simulate_HTML5(){
 	

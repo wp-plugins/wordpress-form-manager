@@ -2,6 +2,13 @@
 /**************************************************************/
 /******* API **************************************************/
 
+//the attributes that can be specified per item.  The attribute takes the name (item nickname)_(att)
+// so width becomes (item nickname)_width, with a default value of 'auto'.
+$fm_tablePerItemAttributes = array(
+	'width' => 'auto',
+	'class' => '',
+);
+
 function fm_doPaginatedSummariesBySlugCallback($formSlug, $template, $callback, $orderBy = 'timestamp', $ord = 'DESC', $dataPerPage = 30, $options=array()){
 	global $fmdb;
 	
@@ -69,26 +76,47 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 	global $fm_display;
 	global $fm_controls;
 	
+	$showcols = isset($options['show']) ? explode(',', $options['show']) : false;
+	$hidecols = isset($options['hide']) ? explode(',', $options['hide']) : false;
+	
 	$formInfo = $fmdb->getForm($formID);
-	
 	$formData = $fmdb->getFormSubmissionData($formID, $orderBy, strtoupper($ord), $startIndex, $numItems);
-	
+	$atts = fm_helper_extractColumnAtts($formInfo, $options);
 	$hasPosts = $fmdb->dataHasPublishedSubmissions($formInfo['ID']);
 	
-	$str = '<table class="fm-data">';
+	$str = "";
+//	$str .= '<pre>'.print_r($options,true).'</pre>';
+//	$str .= '<pre>'.print_r($atts,true).'</pre>';
+	$str .= '<table class="fm-data">';
 	
 	$tbllbl = '<tr>';
-		$tbllbl.= '<th id="fm-item-header-timestamp">'.__("Timestamp", 'wordpress-form-manager').'</th>';
-		$tbllbl.= '<th id="fm-item-header-user">'.__("User", 'wordpress-form-manager').'</th>';
-		if($hasPosts)
-			$tbllbl.= '<th id="fm-item-header-post">'.__("Post", 'wordpress-form-manager').'</th>';	
+		$class = "";
+		if(isset($options['col_class']))
+			$class = $options['col_class'];
+		
+		$universalCols = array(
+			'timestamp' => __("Timestamp", 'wordpress-form-manager'), 
+			'user' => __("User", 'wordpress-form-manager'),
+			'post' => __("Post", 'wordpress-form-manager'),
+		);
+		
+		if($hasPosts === false) unset($universalCols['post']);
+		
+		foreach($universalCols as $col => $lbl){
+			if (fm_helper_is_shown_col($showcols, $hidecols, $col)){
+				$tbllbl.= '<th id="fm-item-header-'.$col.'" style="width:'.(isset($atts[$col.'_width']) ? $atts[$col.'_width'] : $atts['col_width']).';" '
+					.'" class="'.$class.' '.$atts[$col.'_class'].'">'
+					.$lbl.'</th>';
+			}
+		}	
 		
 		foreach($formInfo['items'] as $item){
 			if($fmdb->isDataCol($item['unique_name'])){
-				if($item['nickname'] != "")
-					$tbllbl.= '<th id="fm-item-header-'.$item['nickname'].'">'.$item['nickname'].'</th>';				
-				else
-					$tbllbl.= '<th id="fm-item-header-'.$item['label'].'">'.$item['label'].'</th>';
+				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
+				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
+						$width = ' width="'.$atts[$item['nickname'].'_width'].'"';										
+						$tbllbl.= '<th id="fm-item-header-'.$lbl.'"'.$width.'>'.$item['nickname'].'</th>';
+				}
 			}
 		}
 	$tbllbl.= '</tr>';
@@ -97,23 +125,30 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 	$str.= '<tfoot>'.$tbllbl.'</tfoot>';
 	
 	foreach($formData['data'] as $dataRow){
-		$str.= '<tr>';
-		$str.= '<td>'.$dataRow['timestamp'].'</td>';
-		$str.= '<td>'.$dataRow['user'].'</td>';
-		if($hasPosts){
+		$height = (isset($options['row_height'])) ? ' style="height:'.$options['row_height'].';"' : '';
+		$class = (isset($options['row_class'])) ? ' class="'.$options['row_class'].'"' : '';
+			
+		$str .= '<tr'.$height.$class.'>';
+		
+		if(fm_helper_is_shown_col($showcols, $hidecols, 'timestamp'))
+			$str.= '<td class="fm-item-cell-timestamp">'.$dataRow['timestamp'].'</td>';
+		if(fm_helper_is_shown_col($showcols, $hidecols, 'user'))
+			$str.= '<td class="fm-item-cell-user">'.$dataRow['user'].'</td>';
+		if($hasPosts && fm_helper_is_shown_col($showcols, $hidecols, 'post')){
 			if($dataRow['post_id'] > 0)
-				$str.= '<td><a href="'.get_permalink($dataRow['post_id']).'">'.get_the_title($dataRow['post_id']).'</a></td>';
+				$str.= '<td class="fm-item-cell-post"><a href="'.get_permalink($dataRow['post_id']).'">'.get_the_title($dataRow['post_id']).'</a></td>';
 			else
-				$str.= '<td>&nbsp;</td>';
+				$str.= '<td class="fm-item-cell-post">&nbsp;</td>';
 		}
 			
 		foreach($formInfo['items'] as $item){
-			if($fmdb->isDataCol($item['unique_name'])){				
+			$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];
+			if($fmdb->isDataCol($item['unique_name']) && fm_helper_is_shown_col($showcols, $hidecols, $lbl)){				
 				$tmp = $dataRow[$item['unique_name']];
 				if($item['type'] == 'file')	
-					$str.= '<td>'.$tmp.'</td>';
+					$str.= '<td id="fm-item-cell'.$lbl.'">'.$tmp.'</td>';
 				else
-					$str.= '<td>'.fm_restrictString($tmp, 75).'</td>';
+					$str.= '<td id="fm-item-cell'.$lbl.'">'.fm_restrictString($tmp, 75).'</td>';
 			}		
 		}
 		$str.= '</tr>';
@@ -122,6 +157,38 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 	$str.= '</table>';
 	
 	return $str;
+}
+
+function fm_helper_extractColumnAtts($formInfo, $options){
+	global $fm_tablePerItemAttributes;
+	$colAtts = array();
+	
+	foreach($fm_tablePerItemAttributes as $att => $val){
+		$colAtts['timestamp_'.$att] = $val;
+		$colAtts['user_'.$att] = $val;
+		$colAtts['post_'.$att] = $val;
+	}
+			
+	foreach($formInfo['items'] as $item){
+		if($item['nickname'] != ""){
+			foreach($fm_tablePerItemAttributes as $att => $val){
+				$colAtts[$item['nickname'].'_'.$att] = $val;
+			}
+		}
+	}
+	
+	$atts = shortcode_atts( $colAtts, $options );
+	return $atts;
+}
+
+function fm_helper_is_shown_col($showcols, $hidecols, $lbl){
+	$lbl = trim($lbl);
+	if (($showcols !== false && in_array($lbl, $showcols))
+		|| ($hidecols !== false && !in_array($lbl, $hidecols))
+		|| ($showcols === false && $hidecols === false)) {
+		return true;
+	}
+	return false;
 }
 
 //takes a form's slug as a string, returns paginated 
