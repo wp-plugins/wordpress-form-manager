@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are note element settings */
 
 class fm_noteControl extends fm_controlBase{
 	public function getTypeName(){ return "note"; }
@@ -34,6 +33,7 @@ class fm_noteControl extends fm_controlBase{
 	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
+//<![CDATA[
 		function fm_note_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
@@ -42,7 +42,8 @@ class fm_noteControl extends fm_controlBase{
 				document.getElementById(itemID + '-edit-value').innerHTML = noteStr;
 			}
 		}
-		</script>
+//]]>
+</script>
 		<?php
 	}
 	

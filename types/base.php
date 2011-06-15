@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are generic form element settings */
 
 class fm_controlBase{
 	
@@ -57,28 +56,15 @@ class fm_controlBase{
 		return "fm_base_get_value";
 	}
 	
-	//this function is called in the header; you can place scripts here (like whatever getShowHideCallbackName() returns)  etc. 
+	//this function is called in the admin header; you can place scripts here (like whatever getShowHideCallbackName() returns)  etc. 
 	protected function showExtraScripts(){}
 	
 	//called when displaying the user form; used for validation scripts, etc.
-	public function showUserScripts(){
-		if($this->getTypeName() == "basic"){
-		?>
-		<script type="text/javascript">
-		function fm_base_required_validator(formID, itemID){
-			return (fm_trim(document.getElementById('fm-form-' + formID)[itemID].value) != "");
-		}
-		function fm_base_get_value(formID, itemID){
-			return fm_trim(document.getElementById('fm-form-' + formID)[itemID].value);
-		}
-		</script>
-		<?php
-		}
-	}
+	public function showUserScripts(){}
 	
 	//called when displaying a required form item in the user form; returns the name of a javascript function that should return 'true' only if the input is not blank
 	public function getRequiredValidatorName(){ 
-		if($this->getTypeName() == "basic") return 'fm_base_required_validator';  //this validator is defined in fm_showControlScripts()
+		if($this->getTypeName() == "basic") return 'fm_base_required_validator';
 		return "";
 	}
 	
@@ -172,7 +158,8 @@ class fm_controlBase{
 		foreach($items as $k=>$v){
 			$items[$k] = "'{$k}': {$v}";
 		}		
-		?><script type="text/javascript">		
+?><script type="text/javascript">
+//<![CDATA[
 		function <?php echo $this->getPanelScriptName();?>(itemID, index){
 			var newItem = {
 				<?php echo implode(",\n",$items);?>
@@ -182,7 +169,8 @@ class fm_controlBase{
 		<?php if($this->getSaveValidatorName() != ""):?>
 		fm_registerSaveValidator('<?php echo $this->getTypeName(); ?>', '<?php echo $this->getSaveValidatorName();?>');
 		<?php endif; ?>
-		</script><?php		
+//]]>
+</script><?php		
 	}
 		
 	public function showEditorItem($uniqueName, $itemInfo){

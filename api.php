@@ -104,9 +104,12 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 		
 		foreach($universalCols as $col => $lbl){
 			if (fm_helper_is_shown_col($showcols, $hidecols, $col)){
-				$tbllbl.= '<th id="fm-item-header-'.$col.'" style="width:'.(isset($atts[$col.'_width']) ? $atts[$col.'_width'] : $atts['col_width']).';" '
-					.'" class="'.$class.' '.$atts[$col.'_class'].'">'
-					.$lbl.'</th>';
+				$tbllbl.= '<th class="fm-item-header-'.$col.'" style="width:'.(isset($atts[$col.'_width']) ? $atts[$col.'_width'] : $atts['col_width']).';" ';
+				$tmp = $class.' '.$atts[$col.'_class'];
+				if(trim($tmp) != "") {
+					$tbllbl.= ' class="'.$tmp.'"';
+				}
+				$tbllbl.= '>'.$lbl.'</th>';
 			}
 		}	
 		
@@ -114,8 +117,8 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 			if($fmdb->isDataCol($item['unique_name'])){
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
 				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
-						$width = ' width="'.$atts[$item['nickname'].'_width'].'"';										
-						$tbllbl.= '<th id="fm-item-header-'.$lbl.'"'.$width.'>'.$item['nickname'].'</th>';
+						$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
+						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$item['nickname'].'</th>';
 				}
 			}
 		}
@@ -146,9 +149,9 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 			if($fmdb->isDataCol($item['unique_name']) && fm_helper_is_shown_col($showcols, $hidecols, $lbl)){				
 				$tmp = $dataRow[$item['unique_name']];
 				if($item['type'] == 'file')	
-					$str.= '<td id="fm-item-cell'.$lbl.'">'.$tmp.'</td>';
+					$str.= '<td class="fm-item-cell-'.$lbl.'">'.$tmp.'</td>';
 				else
-					$str.= '<td id="fm-item-cell'.$lbl.'">'.fm_restrictString($tmp, 75).'</td>';
+					$str.= '<td class="fm-item-cell-'.$lbl.'">'.fm_restrictString($tmp, 75).'</td>';
 			}		
 		}
 		$str.= '</tr>';
@@ -244,7 +247,11 @@ function fm_doFormBySlug($formSlug, $options = array()){
 	$userDataCount = $fmdb->getUserSubmissionCount($formID, $current_user->user_login);
 	
 	//process the data submission
-	if($_POST['fm_id'] == $formID && (wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') && ($userDataCount == 0 || !isset($formBehaviors['single_submission'])))){
+	if($_POST['fm_id'] == $formID 
+		&& (wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') 
+			&& ($userDataCount == 0 || !isset($formBehaviors['single_submission']))
+			)
+		){
 		// process the post
 		get_currentuserinfo();	
 		

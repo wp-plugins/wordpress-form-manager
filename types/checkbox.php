@@ -1,5 +1,4 @@
 <?php
-/* translators: checkbox element settings */
 
 class fm_checkboxControl extends fm_controlBase{
 	public function getTypeName(){ return "checkbox"; }
@@ -63,13 +62,13 @@ class fm_checkboxControl extends fm_controlBase{
 	}
 	
 	public function getShowHideCallbackName(){
-		return "fm_".$this->getTypeName()."_show_hide";
+		return "fm_checkbox_show_hide";
 	}
 	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
-		
-		function fm_<?php echo $this->getTypeName(); ?>_show_hide(itemID, isDone){
+//<![CDATA[
+		function fm_checkbox_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 				document.getElementById(itemID + '-edit-value').checked = document.getElementById(itemID + '-value').checked;
@@ -79,21 +78,12 @@ class fm_checkboxControl extends fm_controlBase{
 					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
 		}
-		</script>
-		<?php
+//]]>
+</script><?php
 	}
 	
 	public function getRequiredValidatorName(){ 
 		return "fm_checkbox_required_validator";
-	}	
-	public function showUserScripts(){		
-		?>
-		<script type="text/javascript">
-		function fm_checkbox_required_validator(formID, itemID){
-			return document.getElementById('fm-form-' + formID)[itemID].checked;
-		}
-		</script>
-		<?php
 	}
 		
 	protected function getPanelKeys(){

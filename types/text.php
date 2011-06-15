@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are text element settings */
 
 class fm_textControl extends fm_controlBase{
 	var $validators;
@@ -19,11 +18,12 @@ class fm_textControl extends fm_controlBase{
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,	
 											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),									
-											'style' => "width:".$itemInfo['extra']['size']."px;",
-											'maxlength' => $itemInfo['extra']['maxlength']								
+											'style' => "width:".$itemInfo['extra']['size']."px;",							
 											)
-					);	
-			
+					);
+		if(trim($itemInfo['extra']['maxlength']) != "")
+			$elem['attributes']['maxlength'] = $itemInfo['extra']['maxlength'];
+		
 		return fe_getElementHTML($elem);
 	}	
 	
@@ -69,7 +69,7 @@ class fm_textControl extends fm_controlBase{
 	}
 	
 	public function getShowHideCallbackName(){
-		return "fm_".$this->getTypeName()."_show_hide";
+		return "fm_text_show_hide";
 	}
 	
 	public function getRequiredValidatorName(){ 
@@ -86,7 +86,8 @@ class fm_textControl extends fm_controlBase{
 	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
-		function fm_<?php echo $this->getTypeName(); ?>_show_hide(itemID, isDone){
+//<![CDATA[
+		function fm_text_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 				document.getElementById(itemID + '-edit-value').value = document.getElementById(itemID + '-value').value;
@@ -95,13 +96,15 @@ class fm_textControl extends fm_controlBase{
 				else
 					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
-		}		
-		</script>
+		}
+//]]>
+</script>
 		<?php
 	}
 	
 	public function showUserScripts(){
 		?><script type="text/javascript">
+//<![CDATA[
 		function fm_text_validation(formID, itemID, valType){
 			var itemValue = document.getElementById('fm-form-' + formID)[itemID].value.toString();
 			if(fm_trim(itemValue) == "") return true;
@@ -113,7 +116,8 @@ class fm_textControl extends fm_controlBase{
 			}
 			return false;
 		}
-		</script><?php
+//]]>
+</script><?php
 	}
 
 	protected function getPanelKeys(){

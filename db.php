@@ -705,7 +705,9 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 			$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
 			$this->query($q);
 		}
-		$this->insertSubmissionData($dataTable, $postData);
+		if($this->insertSubmissionData($formID, $dataTable, $postData) === false){
+			$this->lastPostFailed = true;
+		}
 	}
 	
 	return $postData;
@@ -725,10 +727,18 @@ function getErrorUniqueName(){
 	return $this->lastUniqueName;
 }
 
-function insertSubmissionData($dataTable, $postData){
+function insertSubmissionData($formID, $dataTable, $postData){
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
 	$postData['timestamp'] = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+	
+	$recent = $this->getLastSubmission($formID);
+	if($recent['timestamp'] == $postData['timestamp'] 
+		&& $recent['user'] == $postData['user']
+		&& $recent['user_ip'] == $postData['user_ip']) {
+		return false;		
+	}
+	
 	foreach($postData as $k=>$v)
 		$arr[] = "`{$k}` = '".$v."'";
 	$q .= implode(",",$arr);
@@ -974,7 +984,7 @@ function getSubmissionDataNumRows($formID){
 
 function getLastSubmission($formID){
 	$dataTable = $this->getDataTableName($formID);
-	$q = "SELECT * FROM `{$dataTable}` ORDER BY `timestamp` DESC LIMIT 1";
+	$q = "SELECT * FROM `{$dataTable}` WHERE `timestamp` = ( SELECT MAX(`timestamp`) FROM `{$dataTable}` )";
 	$res = $this->query($q);
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);

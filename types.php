@@ -40,6 +40,7 @@ include 'types/panelhelper.php';
 
 function fm_showControlScripts(){
 	?><script type="text/javascript">
+//<![CDATA[
 	function fm_showEditDivCallback(itemID, callback){		
 		var editDiv = document.getElementById(itemID + '-edit-div');
 		var editClick = document.getElementById(itemID + '-edit');
@@ -55,7 +56,8 @@ function fm_showControlScripts(){
 			Effect.BlindUp(itemID + '-edit-div', { duration: 0.2 });
 		}	
 	}
-	</script><?php
+//]]>
+</script><?php
 }	
 
 ////////////////////////////////////////////////////////////////

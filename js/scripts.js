@@ -718,3 +718,17 @@ function fm_fix_str(str){
 function fm_htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+////////////////////////////////////////////////////////////
+//// FORM ELEMENTS /////////////////////////////////////////
+
+function fm_checkbox_show_hide(itemID, isDone){
+	if(isDone){
+		document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
+		document.getElementById(itemID + '-edit-value').checked = document.getElementById(itemID + '-value').checked;
+		if(document.getElementById(itemID + '-required').checked)
+			document.getElementById(itemID + '-edit-required').innerHTML = "<em>*</em>";
+		else
+			document.getElementById(itemID + '-edit-required').innerHTML = "";
+	}
+}

@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are textarea element settings */
 
 class fm_textareaControl extends fm_controlBase{
 	public function getTypeName(){ return "textarea"; }
@@ -77,6 +76,7 @@ class fm_textareaControl extends fm_controlBase{
 
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
+//<![CDATA[
 		function fm_textarea_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
@@ -87,7 +87,8 @@ class fm_textareaControl extends fm_controlBase{
 					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
 		}
-		</script>
+//]]>
+</script>
 		<?php
 	}
 	
