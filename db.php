@@ -133,7 +133,7 @@ $this->globalSettings = array(
 					'text_validator_2' => array('name' => 'email',
 												/* translators: the following are for the e-mail validator */
 												'label' => __("E-Mail", 'wordpress-form-manager'),
-												'message' => __("'%s' must be a valid E-Mail address", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid e-mail address", 'wordpress-form-manager'),
 												'regexp' => '/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/'
 												),
 					'text_validator_3' => array('name' => 'date',
@@ -391,11 +391,15 @@ function updateDataTables(){
 		$res = $this->query($q);
 		$found = false;
 		$postIDfound = false;
+		$uniqueIDfound = false;
+		
 		while($row = mysql_fetch_assoc($res)){
 			if($row['Field'] == 'user_ip')
 				$found = true;
 			if($row['Field'] == 'post_id')
 				$postIDfound = true;
+			if($row['Field'] == 'unique_id')
+				$uniqueIDfound = true;
 		}
 		mysql_free_result($res);
 		
@@ -405,6 +409,12 @@ function updateDataTables(){
 		}
 		if(!$postIDfound){
 			$q = "ALTER TABLE `".$dataTable."` ADD `post_id` INT DEFAULT '0' NOT NULL";
+			$this->query($q);
+		}
+		if(!$uniqueIDfound){
+			$q = "ALTER TABLE `".$dataTable."` ADD `unique_id` VARCHAR( 32 ) DEFAULT '' NOT NULL";
+			$this->query($q);
+			$q = "ALTER TABLE `".$dataTable."` ADD INDEX (`unique_id`)";
 			$this->query($q);
 		}
 	}
@@ -728,16 +738,17 @@ function getErrorUniqueName(){
 }
 
 function insertSubmissionData($formID, $dataTable, $postData){
+	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$postData['unique_id']."'";
+	$res = $this->query($q);
+	
+	if(mysql_num_rows($res) > 0){
+		mysql_free_result($res);
+		return false;
+	}
+	
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
 	$postData['timestamp'] = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
-	
-	$recent = $this->getLastSubmission($formID);
-	if($recent['timestamp'] == $postData['timestamp'] 
-		&& $recent['user'] == $postData['user']
-		&& $recent['user_ip'] == $postData['user_ip']) {
-		return false;		
-	}
 	
 	foreach($postData as $k=>$v)
 		$arr[] = "`{$k}` = '".$v."'";
@@ -1204,7 +1215,9 @@ function createDataTable($formInfo, $dataTable){
 		"`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,".
 		"`user` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
 		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
-		"`post_id` INT DEFAULT '0' NOT NULL";
+		"`post_id` INT DEFAULT '0' NOT NULL ,".
+		"`unique_id` VARCHAR( 32 ) DEFAULT '' NOT NULL ,".
+		"INDEX (`unique_id`)";
 	$q.= ") ".$charset_collate.";";
 	$this->query($q);
 }

@@ -257,7 +257,14 @@ function fm_doFormBySlug($formSlug, $options = array()){
 		
 		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
 		
-		$postData = $fmdb->processPost($formID, array('user'=>$current_user->user_login, 'user_ip' => fm_get_user_IP()), $overwrite);			
+		$postData = $fmdb->processPost(
+			$formID,
+			array('user'=>$current_user->user_login,
+				'user_ip' => fm_get_user_IP(),
+				'unique_id' => $_POST['fm_unique_id'],
+				), 
+			$overwrite
+			);			
 		
 		//strip slashes in case we need to display the submitted data
 		foreach($formInfo['items'] as $item){			

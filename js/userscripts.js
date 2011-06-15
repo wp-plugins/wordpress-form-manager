@@ -189,7 +189,7 @@ function fm_remove_placeholders(){
 	for(var i=0;i<fm_registered_form_items.length;i++){
 		if(fm_registered_form_items[i].type == 'text'){
 			var textItem = document.getElementById('fm-form-' + fm_registered_form_items[i].formID)[fm_registered_form_items[i].unique_name];
-			textItem.value = fm_registered_form_items[i].extra.placeholder;
+			textItem.value = fm_registered_form_items[i].extra.value;
 		}
 	}
 }
