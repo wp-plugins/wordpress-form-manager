@@ -358,9 +358,13 @@ function fm_helper_publishPost($formInfo, $postData){
 	global $fm_display;
 	global $fmdb;
 	
-	// Create post object
+	//use the same shortcodes as the e-mails
+	$advEmail = new fm_advanced_email_class($formInfo, $postData);
+	$parser = new fm_custom_shortcode_parser($advEmail->shortcodeList, array($advEmail, 'emailShortcodeCallback'));
+	$postTitle = $parser->parse($formInfo['publish_post_title']);
+	
 	$newPost = array(
-		'post_title' => sprintf($formInfo['publish_post_title'], $formInfo['title']),
+		'post_title' => sprintf($postTitle, $formInfo['title']),
 		'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
 		'post_status' => 'publish',
 		'post_author' => 1,
