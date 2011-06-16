@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are separator element settings */
 
 class fm_separatorControl extends fm_controlBase{
 	public function getTypeName(){ return "separator"; }
