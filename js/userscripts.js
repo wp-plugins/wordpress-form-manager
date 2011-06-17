@@ -30,13 +30,15 @@ function fm_get_form_item_indexed(itemID, index){
 	return document.getElementById('fm-form-' + itemInfo.ID)[itemInfo.unique_name + '-' + index];
 }	
 
-//adds the appropriate event handlers to the form: 'fm_submit_onclick' becomes the onclick event handler for any item with the name 'fm_form_submit'
+//does nothing for now; appropriate script should be attached to the button to begin with
 function fm_register_form(formID){
+	/*
 	var formElement = document.getElementById('fm-form-' + formID);
 	var submitButton = formElement['fm_form_submit'];
 	//submitButton.onclick = function(){ return fm_submit_onclick_ajax(formID, formSlug); }
 	submitButton.onclick = function(){ return fm_submit_onclick(formID); }
 	fm_registered_forms[formID] = false;
+	*/
 }
 
 function fm_submit_onclick(formID){

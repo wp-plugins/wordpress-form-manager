@@ -457,7 +457,7 @@ function fm_form_ID(){
 }
 function fm_form_submit_btn_script(){
 	global $fm_display;
-	return "fm_validate(".$fm_display->currentFormInfo['ID'].")";
+	return "fm_submit_onclick(".$fm_display->currentFormInfo['ID'].")";
 }
 
 function fm_form_the_title(){
@@ -468,14 +468,19 @@ function fm_form_the_title(){
 function fm_form_the_submit_btn(){
 	global $fm_display;
 	return "<input type=\"submit\" ".
-			"name=\"fm_form_submit\" ".
-			"id=\"fm_form_submit\" ".
+			"name=\"".fm_form_submit_btn_name()."\" ".
+			"id=\"".fm_form_submit_btn_id()."\" ".
 			"class=\"submit\" ".
-			"value=\"".$fm_display->currentFormInfo['submit_btn_text']."\" ".
+			"value=\"".fm_form_submit_btn_text()."\" ".
+			"onsubmit=\"".fm_form_submit_btn_script()."\" ".
 			" />\n";
 }
 
 function fm_form_submit_btn_name(){
+	return "fm_form_submit";
+}
+
+function fm_form_submit_btn_id(){
 	return "fm_form_submit";
 }
 

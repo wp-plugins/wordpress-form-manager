@@ -36,6 +36,7 @@ fm_form_ID() - Used for the opening form tag's 'name' and 'id' attributes.
 
 fm_form_the_submit_btn() - A properly formed submit button
 fm_form_submit_btn_name() - Submit button's 'name' attribute
+fm_form_submit_btn_id() - Submit button's 'id' attribute
 fm_form_submit_btn_text() - Submit button's 'value' attribute, as set in the form editor.
 fm_form_submit_btn_script() - Validation script
 
@@ -96,7 +97,7 @@ __("Applies to checkboxes, and when labels are to the left", 'wordpress-form-man
 		</ul>
 		
 		<div>
-		<?php echo fm_form_the_submit_btn(); ?>		
+		 <input type="submit" name="<?php echo fm_form_submit_btn_name();?>" id="<?php echo fm_form_submit_btn_id();?>" value="<?php echo fm_form_submit_btn_text();?>" onclick="return <?php echo fm_form_submit_btn_script();?>" />	
 		</div>
 		
 	<?php if($showBorder): ?></fieldset><?php endif; ?>
