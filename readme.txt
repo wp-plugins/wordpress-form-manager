@@ -43,10 +43,10 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 <br />
 = Languages =
 
-* Espanol (es_ES) - [Eduardo Aranda](http://sinetiks.com)
+* Espa&ntilde;ol (es_ES) - [Eduardo Aranda](http://sinetiks.com)
 * Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
-* Portugues (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
+* Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
 
 == Changelog ==
 = 1.5.16 =
