@@ -73,7 +73,7 @@ function fe_getInputHTML($elementDef){
 
 // checkbox
 function fe_getCheckboxHTML($elementDef){
-	return "<input type=\"checkbox\" ".fe_getAttributeString($elementDef['attributes'])." ".($elementDef['checked']?"checked":"")."/>";
+	return "<input type=\"checkbox\" ".fe_getAttributeString($elementDef['attributes'])." ".($elementDef['checked']?"checked=\"checked\"":"")."/>";
 }
 
 // checkbox lists

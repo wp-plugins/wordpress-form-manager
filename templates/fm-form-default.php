@@ -3,6 +3,7 @@
 Template Name: Form Manager Default
 Template Description: The default dislplay template for forms
 Template Type: form
+
 option: $showFormTitle, checkbox
 	label: Show form title:
 	default: checked
@@ -18,6 +19,7 @@ option: $labelWidth, text
 	label: Label width (in pixels):
 	description: Applies to checkboxes, and when labels are to the left
 	default: 200
+
 	
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,6 +36,7 @@ fm_form_ID() - Used for the opening form tag's 'name' and 'id' attributes.
 
 fm_form_the_submit_btn() - A properly formed submit button
 fm_form_submit_btn_name() - Submit button's 'name' attribute
+fm_form_submit_btn_id() - Submit button's 'id' attribute
 fm_form_submit_btn_text() - Submit button's 'value' attribute, as set in the form editor.
 fm_form_submit_btn_script() - Validation script
 
@@ -80,19 +83,22 @@ __("Applies to checkboxes, and when labels are to the left", 'wordpress-form-man
 		
 		<ul>
 			<?php while(fm_form_have_items()): fm_form_the_item(); ?>
-			<li<?php if(fm_form_the_nickname() != "") echo " id=\"fm-item-".fm_form_the_nickname()."\"";?>><?php if($labelPosition == "top"): ?>
-				<label style="display:block;width:<?php echo $labelwidth;?>px;"><?php echo fm_form_the_label(); ?><?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?></label><?php echo fm_form_the_input(); ?>
+			<li id="fm-item-<?php echo (fm_form_the_nickname() != "" ? fm_form_the_nickname() : fm_form_the_ID()); ?>">
+				<?php if($labelPosition == "top"): ?>
+					<label style="display:block;width:<?php echo $labelwidth;?>px;"><?php echo fm_form_the_label(); ?><?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?></label><?php echo fm_form_the_input(); ?>
 				<?php else: ?>
-				<table><tr>
-					<td style="width:<?php echo $labelWidth; ?>px"><label><?php echo fm_form_the_label(); ?><?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?></label></td>
-					<td><?php echo fm_form_the_input(); ?></td>
-				</tr></table>
+					<table><tr>
+						<td style="width:<?php echo $labelWidth; ?>px"><label><?php echo fm_form_the_label(); ?><?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?></label></td>
+						<td><?php echo fm_form_the_input(); ?></td>
+					</tr></table>
 				<?php endif; ?>
 			</li>
 			<?php endwhile; ?>
 		</ul>
 		
-		<input type="submit" name="<?php echo fm_form_submit_btn_name();?>" class="submit" value="<?php echo fm_form_submit_btn_text();?>" onclick="return <?php echo fm_form_submit_btn_script();?>" />		
+		<div>
+		 <input type="submit" name="<?php echo fm_form_submit_btn_name();?>" id="<?php echo fm_form_submit_btn_id();?>" value="<?php echo fm_form_submit_btn_text();?>" onclick="return <?php echo fm_form_submit_btn_script();?>" />	
+		</div>
 		
 	<?php if($showBorder): ?></fieldset><?php endif; ?>
 	
