@@ -95,12 +95,12 @@ __("Applies to checkboxes, and when labels are to the left", 'wordpress-form-man
 			</li>
 			<?php endwhile; ?>
 		</ul>
-		
+
 		<div>
-		 <input type="submit" name="<?php echo fm_form_submit_btn_name();?>" id="<?php echo fm_form_submit_btn_id();?>" value="<?php echo fm_form_submit_btn_text();?>" onclick="return <?php echo fm_form_submit_btn_script();?>" />	
+		 <input type="submit" class="submit" name="<?php echo fm_form_submit_btn_name();?>" id="<?php echo fm_form_submit_btn_id();?>" value="<?php echo fm_form_submit_btn_text();?>" onclick="return custom_submit()" />
 		</div>
-		
+
 	<?php if($showBorder): ?></fieldset><?php endif; ?>
-	
+
 	<?php echo fm_form_hidden(); ?>
 <?php echo fm_form_end(); ?>
