@@ -756,7 +756,7 @@ function insertSubmissionData($formID, $dataTable, $postData){
 	$this->query($q);
 }
 
-function writeFormSubmissionDataCSV($formID, $fname){
+function getFormSubmissionDataCSV($formID){
 	$formInfo = $this->getForm($formID);
 	$data = $this->getFormSubmissionData($formID, 'timestamp', 'DESC', 0, 0);
 	
@@ -816,14 +816,10 @@ function writeFormSubmissionDataCSV($formID, $fname){
 		
 	$str = ob_get_contents();
 	ob_end_clean();
-
-	$fp = fopen($fname, 'w') or die(__("Failed to open file", 'wordpress-form-manager').": '".$php_errormsg."'");
 	
 	//Properly encode the CSV so Excel can open it: Credit for this goes to someone called Eugene Murai
-	$tmp = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
-	$write = fwrite( $fp, $tmp );	
-	
-	fclose($fp);
+	$str = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
+	return $str;
 }
 
 function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){

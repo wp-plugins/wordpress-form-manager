@@ -142,10 +142,7 @@ function initTemplates(){
 			//echo $dbFile." recreated<br />";
 			$templateInfo = $fmdb->getTemplate($dbFile);
 			
-			$fp = fopen($this->templatesDir."/".$dbFile, "w");
-			fwrite($fp, $templateInfo['content']);
-			fclose($fp);
-			
+			fm_write_file( $this->templatesDir.'/'.$dbFile, $templateInfo['content'] );
 		}
 	}	
 	

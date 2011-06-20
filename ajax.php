@@ -149,32 +149,19 @@ function fm_createFormElement(){
 add_action('wp_ajax_fm_create_csv', 'fm_createCSV');
 function fm_createCSV(){
 	global $fmdb;
-	
+
 	/* translators: the date format for creating the filename of a .csv file.  see http://php.net/date */
 	$fname = $_POST['title']." (".date(__("m-y-d h-i-s", 'wordpress-form-manager')).").csv";
 	
-	$CSVFileFullPath = dirname(__FILE__)."/".get_option("fm-temp-dir")."/".sanitize_title($fname);
+	$CSVFileFullPath = dirname(__FILE__)."/".get_option("fm-temp-dir")."/".$fname;
 	
-	$fmdb->writeFormSubmissionDataCSV($_POST['id'], $CSVFileFullPath);
+	$csvText = $fmdb->getFormSubmissionDataCSV($_POST['id']);
 	
-	$fp = fopen(dirname(__FILE__)."/".get_option("fm-temp-dir")."/"."download.php", "w");	
-	fwrite($fp, fm_createDownloadFileContents($CSVFileFullPath, $fname));	
-	fclose($fp);
+	fm_write_file( $CSVFileFullPath, $csvText );
 	
-	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__)."download.php";
+	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__).$fname;
 	
 	die();
-}
-
-function fm_createDownloadFileContents($localFileName, $downloadFileName){
-	$str = "";
-	
-	$str.= "<?php\n";
-	$str.= "header('Content-Disposition: attachment; filename=\"".$downloadFileName."\"');\n";
-	$str.= "readfile('".$localFileName."');\n";
-	$str.= "?>";
- 
-	return $str;
 }
 
 //Download an uploaded file
@@ -193,7 +180,8 @@ function fm_downloadFile(){
 	
 	$fileInfo = unserialize($dataRow[$itemID]);	
 	
-	fm_createFileFromDB($fileInfo['filename'], $fileInfo, $tmpDir);
+	//fm_createFileFromDB($fileInfo['filename'], $fileInfo, $tmpDir);
+	fm_write_file( $tmpDir.$fileInfo['filename'], $fileInfo['contents'] );
 	
 	echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$fileInfo['filename'];		
 	
@@ -227,7 +215,7 @@ function fm_downloadAllFiles(){
 			if(!isset($fileInfo['upload_dir'])){
 				$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
 				$files[] = $tmpDir.$fname;
-				fm_createFileFromDB($fname, $fileInfo, $tmpDir);
+				fm_write_file( $tmpDir.$fname, $fileInfo['contents'] );
 			}
 			else{
 				$files[] = $fm_controls['file']->parseUploadDir($fileItem['extra']['upload_dir']).$fileInfo['filename'];
@@ -254,11 +242,15 @@ function fm_downloadAllFiles(){
 	die();
 }
 
-function fm_createFileFromDB($filename, $fileInfo, $dir){
-	$fullpath = $dir.$filename;
-	$fp = @fopen($fullpath,'wb') or die(__("Failed to open file", 'wordpress-form-manager'));
-	fwrite($fp, $fileInfo['contents']);
-	fclose($fp);
+function fm_createDownloadFileContents($localFileName, $downloadFileName){
+	$str = "";
+	
+	$str.= "<?php\n";
+	$str.= "header('Content-Disposition: attachment; filename=\"".$downloadFileName."\"');\n";
+	$str.= "readfile('".$localFileName."');\n";
+	$str.= "?>";
+ 
+	return $str;
 }
 
 /* Below is from David Walsh (davidwalsh.name), slightly modified. Thanks Dave! */

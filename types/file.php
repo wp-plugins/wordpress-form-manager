@@ -60,6 +60,7 @@ class fm_fileControl extends fm_controlBase{
 			
 		if(trim($itemInfo['extra']['upload_dir']) == ""){ //keep the upload in the form manager database
 			$filename = $_FILES[$uniqueName]['tmp_name'];			
+			
 			$handle = fopen($filename, "rb");
 			$contents = fread($handle, filesize($filename));
 			fclose($handle);

@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.17
+Version: 1.5.18
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.5.17";
+$fm_currentVersion = 		"1.5.18";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -198,10 +198,14 @@ function fm_cleanCSVData() {
 
 add_action( 'admin_init', 'fm_adminInit' );
 function fm_adminInit() {
-	global $fm_SLIMSTAT_EXISTS;	
+	global $fm_SLIMSTAT_EXISTS;
+	global $fm_templates;
+	
 	if ( get_option( 'slimstat_secret' ) !==  false ) {
 		$fm_SLIMSTAT_EXISTS = true;
 	}
+	
+	$fm_templates->initTemplates();
 }
 
 add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts');
@@ -292,7 +296,6 @@ function fm_adminEnqueueScripts() {
 add_action( 'init', 'fm_userInit' );
 function fm_userInit() {
 	global $fm_currentVersion;
-	global $fm_templates;
 	
 	//check if there was a stealth update
 	$ver = get_option( 'fm-version' );
@@ -301,8 +304,6 @@ function fm_userInit() {
 	}
 
 	include 'settings.php';
-
-	$fm_templates->initTemplates();
 
 	wp_enqueue_script(
 		'form-manager-js-user',
