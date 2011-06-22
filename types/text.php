@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are text element settings */
 
 class fm_textControl extends fm_controlBase{
 	var $validators;
@@ -19,10 +18,12 @@ class fm_textControl extends fm_controlBase{
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,	
 											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),									
-											'style' => "width:".$itemInfo['extra']['size']."px;"								
+											'style' => "width:".$itemInfo['extra']['size']."px;",							
 											)
-					);	
-			
+					);
+		if(trim($itemInfo['extra']['maxlength']) != "")
+			$elem['attributes']['maxlength'] = $itemInfo['extra']['maxlength'];
+		
 		return fe_getElementHTML($elem);
 	}	
 	
@@ -36,9 +37,13 @@ class fm_textControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "TEXT";
 	}
 	
 	public function editItem($uniqueName, $itemInfo){
@@ -50,6 +55,7 @@ class fm_textControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', __('Placeholder', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['value']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', __('Width (in pixels)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['size']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'maxlength', __('Max characters', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['maxlength']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'validation', __('Validation', 'wordpress-form-manager'), array('options' => array_merge(array('none' => "..."), $this->getValidatorList()), 'value' => $itemInfo['extra']['validation']));		
 		return $arr;
@@ -57,13 +63,13 @@ class fm_textControl extends fm_controlBase{
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
-		$opt['extra'] = $this->extraScriptHelper(array('value'=>'value', 'size'=>'size', 'validation'=>'validation'));
+		$opt['extra'] = $this->extraScriptHelper(array('value'=>'value', 'size'=>'size', 'validation'=>'validation', 'maxlength'=>'maxlength'));
 		$opt['required'] = $this->checkboxScriptHelper('required');		
 		return $opt;
 	}
 	
 	public function getShowHideCallbackName(){
-		return "fm_".$this->getTypeName()."_show_hide";
+		return "fm_text_show_hide";
 	}
 	
 	public function getRequiredValidatorName(){ 
@@ -80,7 +86,8 @@ class fm_textControl extends fm_controlBase{
 	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
-		function fm_<?php echo $this->getTypeName(); ?>_show_hide(itemID, isDone){
+//<![CDATA[
+		function fm_text_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 				document.getElementById(itemID + '-edit-value').value = document.getElementById(itemID + '-value').value;
@@ -89,13 +96,15 @@ class fm_textControl extends fm_controlBase{
 				else
 					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
-		}		
-		</script>
+		}
+//]]>
+</script>
 		<?php
 	}
 	
 	public function showUserScripts(){
 		?><script type="text/javascript">
+//<![CDATA[
 		function fm_text_validation(formID, itemID, valType){
 			var itemValue = document.getElementById('fm-form-' + formID)[itemID].value.toString();
 			if(fm_trim(itemValue) == "") return true;
@@ -107,7 +116,8 @@ class fm_textControl extends fm_controlBase{
 			}
 			return false;
 		}
-		</script><?php
+//]]>
+</script><?php
 	}
 
 	protected function getPanelKeys(){

@@ -3,11 +3,18 @@
 /**************************************************************/
 /******* AJAX *************************************************/
 
+//post form data
+add_action( 'wp_ajax_fm_post_form', 'fm_postFormAjax' );
+function fm_postFormAjax() {
+	echo fm_doFormBySlug( $_POST[ 'slug' ] );	
+	die();
+}
+
 //form editor 'save' button
-add_action('wp_ajax_fm_save_form', 'fm_saveFormAjax');
+add_action( 'wp_ajax_fm_save_form', 'fm_saveFormAjax' );
 global $fm_save_had_error;
 
-function fm_saveFormAjax(){
+function fm_saveFormAjax() {
 	global $fmdb;
 	global $fm_save_had_error;
 	
@@ -16,21 +23,27 @@ function fm_saveFormAjax(){
 	$formInfo = fm_saveHelperGatherFormInfo();
 	
 	//check if the shortcode is a duplicate
-	$scID = $fmdb->getFormID($formInfo['shortcode']);
-	if(!($scID == false || $scID == $_POST['id'] || trim($formInfo['shortcode']) == "")){
+	$scID = $fmdb->getFormID( $formInfo[ 'shortcode' ] );
+	if( !( $scID == false 
+			|| $scID == $_POST[ 'id' ] 
+			|| trim( $formInfo[ 'shortcode' ] ) == "" ) 
+		) {
 		//get the old shortcode
-		$formInfo['shortcode'] = $fmdb->getFormShortcode($_POST['id']);			
+		$formInfo[ 'shortcode' ] = $fmdb->getFormShortcode( $_POST[ 'id' ] );			
 		//save the rest of the form
-		$fmdb->updateForm($_POST['id'], $formInfo);
+		$fmdb->updateForm( $_POST[ 'id' ], $formInfo );
 		
 		//now tell the user there was an error
-		printf(__("Error: the shortcode '%s' is already in use. (other changes were saved successfully)", 'wordpress-form-manager'), $formInfo['shortcode']);
+		printf(
+			__("Error: the shortcode '%s' is already in use. (other changes were saved successfully)", 'wordpress-form-manager'), 
+			$formInfo[ 'shortcode' ]
+			);
 		
 		die();
 	}
 			
 	//no errors: save the form, return '1'
-	$fmdb->updateForm($_POST['id'], $formInfo);
+	$fmdb->updateForm( $_POST[ 'id' ], $formInfo );
 	
 	if(!$fm_save_had_error)
 		echo "1";
@@ -136,35 +149,22 @@ function fm_createFormElement(){
 add_action('wp_ajax_fm_create_csv', 'fm_createCSV');
 function fm_createCSV(){
 	global $fmdb;
-	
+
 	/* translators: the date format for creating the filename of a .csv file.  see http://php.net/date */
 	$fname = $_POST['title']." (".date(__("m-y-d h-i-s", 'wordpress-form-manager')).").csv";
 	
-	$CSVFileFullPath = dirname(__FILE__)."/".get_option("fm-temp-dir")."/".sanitize_title($fname);
+	$CSVFileFullPath = dirname(__FILE__)."/".get_option("fm-temp-dir")."/".$fname;
 	
-	$fmdb->writeFormSubmissionDataCSV($_POST['id'], $CSVFileFullPath);
+	$csvText = $fmdb->getFormSubmissionDataCSV($_POST['id']);
 	
-	$fp = fopen(dirname(__FILE__)."/".get_option("fm-temp-dir")."/"."download.php", "w");	
-	fwrite($fp, fm_createDownloadFileContents($CSVFileFullPath, $fname));	
-	fclose($fp);
+	fm_write_file( $CSVFileFullPath, $csvText );
 	
-	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__)."download.php";
+	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__).$fname;
 	
 	die();
 }
 
-function fm_createDownloadFileContents($localFileName, $downloadFileName){
-	$str = "";
-	
-	$str.= "<?php\n";
-	$str.= "header('Content-Disposition: attachment; filename=\"".$downloadFileName."\"');\n";
-	$str.= "readfile('".$localFileName."');\n";
-	$str.= "?>";
- 
-	return $str;
-}
-
-//Download an uploaded file
+//Download an uploaded file stored in the database
 add_action('wp_ajax_fm_download_file', 'fm_downloadFile');
 function fm_downloadFile(){
 	global $fmdb;
@@ -180,7 +180,7 @@ function fm_downloadFile(){
 	
 	$fileInfo = unserialize($dataRow[$itemID]);	
 	
-	fm_createFileFromDB($fileInfo['filename'], $fileInfo, $tmpDir);
+	fm_write_file( $tmpDir.$fileInfo['filename'], $fileInfo['contents'] );
 	
 	echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$fileInfo['filename'];		
 	
@@ -190,6 +190,7 @@ function fm_downloadFile(){
 add_action('wp_ajax_fm_download_all_files', 'fm_downloadAllFiles');
 function fm_downloadAllFiles(){
 	global $fmdb;
+	global $fm_controls;
 	
 	$tmpDir =  dirname(__FILE__)."/".get_option("fm-temp-dir")."/";
 	
@@ -197,18 +198,27 @@ function fm_downloadAllFiles(){
 	$itemID = $_POST['itemid'];
 	
 	$formInfo = $fmdb->getForm($formID);
-	foreach($formInfo['items'] as $item)
-		if($item['unique_name'] == $itemID)
+	
+	foreach($formInfo['items'] as $item){
+		if($item['unique_name'] == $itemID){
 			$itemLabel = $item['label'];
-			
+			$fileItem = $item;
+		}
+	}
+	
 	$formData = $fmdb->getFormSubmissionDataRaw($formID, 'timestamp', 'DESC', 0, 0);
 	$files = array();
 	foreach($formData as $dataRow){
 		$fileInfo = unserialize($dataRow[$itemID]);
-		if(sizeof($fileInfo) > 1){			
-			$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
-			$files[] = $tmpDir.$fname;
-			fm_createFileFromDB($fname, $fileInfo, $tmpDir);
+		if(sizeof($fileInfo) > 1){		
+			if(!isset($fileInfo['upload_dir'])){
+				$fname = "(".$dataRow['timestamp'].") ".$fileInfo['filename'];
+				$files[] = $tmpDir.$fname;
+				fm_write_file( $tmpDir.$fname, $fileInfo['contents'] );
+			}
+			else{
+				$files[] = $fm_controls['file']->parseUploadDir($fileItem['extra']['upload_dir']).$fileInfo['filename'];
+			}
 		}
 	}
 	
@@ -231,11 +241,15 @@ function fm_downloadAllFiles(){
 	die();
 }
 
-function fm_createFileFromDB($filename, $fileInfo, $dir){
-	$fullpath = $dir.$filename;
-	$fp = @fopen($fullpath,'wb') or die(__("Failed to open file", 'wordpress-form-manager'));
-	fwrite($fp, $fileInfo['contents']);
-	fclose($fp);
+function fm_createDownloadFileContents($localFileName, $downloadFileName){
+	$str = "";
+	
+	$str.= "<?php\n";
+	$str.= "header('Content-Disposition: attachment; filename=\"".$downloadFileName."\"');\n";
+	$str.= "readfile('".$localFileName."');\n";
+	$str.= "?>";
+ 
+	return $str;
 }
 
 /* Below is from David Walsh (davidwalsh.name), slightly modified. Thanks Dave! */

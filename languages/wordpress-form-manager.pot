@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Form Manager package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Form Manager 1.4.17\n"
+"Project-Id-Version: Form Manager 1.5.10\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/wordpress-form-manager\n"
-"POT-Creation-Date: 2011-05-30 03:41:16+00:00\n"
+"POT-Creation-Date: 2011-06-10 19:24:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,251 +12,858 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
+#: api.php:81 pages/formdata.php:296 pages/formdata.php:329 display.php:350
+msgid "Timestamp"
+msgstr ""
+
+#: api.php:82 pages/formdata.php:299 pages/formdata.php:330 display.php:349
+msgid "User"
+msgstr ""
+
+#: api.php:84 pages/formdata.php:304 pages/formdata.php:333
+msgid "Post"
+msgstr ""
+
+#: api.php:166
+msgid "(form  %s not found)"
+msgstr ""
+
 #: wordpress-form-manager.php:55
 msgid "Form Manager requires WordPress version 3.0 or higher"
 msgstr ""
 
 #: wordpress-form-manager.php:59
-msgid "Form Manager requires PHP version 5.0 or higher"
+msgid "Form Manager requires PHP version 5.2 or higher"
 msgstr ""
 
-#: wordpress-form-manager.php:221 main.php:73 main.php:107
+#: wordpress-form-manager.php:64
+msgid "Form manager requires MySQL version 5.0.3 or higher"
+msgstr ""
+
+#: wordpress-form-manager.php:192
+msgid ""
+"There may be (data) associated with the form item(s) you removed.  Are you "
+"sure you want to save?"
+msgstr ""
+
+#: wordpress-form-manager.php:193
+msgid "Any unsaved changes will be lost. Are you sure?"
+msgstr ""
+
+#: wordpress-form-manager.php:194
+msgid "Click here to download"
+msgstr ""
+
+#: wordpress-form-manager.php:195
+msgid "There are no files to download"
+msgstr ""
+
+#: wordpress-form-manager.php:196
+msgid "Unable to create .ZIP file"
+msgstr ""
+
+#: wordpress-form-manager.php:197
+msgid "move"
+msgstr ""
+
+#: wordpress-form-manager.php:198 pages/editsettingsadv.php:172
+msgid "delete"
+msgstr ""
+
+#: wordpress-form-manager.php:199
+msgid "Enter items separated by commas"
+msgstr ""
+
+#: wordpress-form-manager.php:200
+msgid "hide"
+msgstr ""
+
+#: wordpress-form-manager.php:201
+msgid "show"
+msgstr ""
+
+#: wordpress-form-manager.php:202
+msgid "Add Test"
+msgstr ""
+
+#: wordpress-form-manager.php:203
+msgid "Add Item"
+msgstr ""
+
+#: wordpress-form-manager.php:204
+msgid "Applies to"
+msgstr ""
+
+#: wordpress-form-manager.php:205
+msgid "AND"
+msgstr ""
+
+#: wordpress-form-manager.php:206
+msgid "OR"
+msgstr ""
+
+#: wordpress-form-manager.php:207
+msgid "(Choose a rule type)"
+msgstr ""
+
+#: wordpress-form-manager.php:208
+msgid "Only show elements if..."
+msgstr ""
+
+#: wordpress-form-manager.php:209
+msgid "Show elements if..."
+msgstr ""
+
+#: wordpress-form-manager.php:210
+msgid "Hide elements if..."
+msgstr ""
+
+#: wordpress-form-manager.php:211
+msgid "Only require elements if..."
+msgstr ""
+
+#: wordpress-form-manager.php:212
+msgid "Require elements if"
+msgstr ""
+
+#: wordpress-form-manager.php:213
+msgid "Do not require elements if"
+msgstr ""
+
+#: wordpress-form-manager.php:214
+msgid "..."
+msgstr ""
+
+#: wordpress-form-manager.php:215
+msgid "equals"
+msgstr ""
+
+#: wordpress-form-manager.php:216
+msgid "does not equal"
+msgstr ""
+
+#: wordpress-form-manager.php:217
+msgid "is less than"
+msgstr ""
+
+#: wordpress-form-manager.php:218
+msgid "is greater than"
+msgstr ""
+
+#: wordpress-form-manager.php:219
+msgid "is less than or equal to"
+msgstr ""
+
+#: wordpress-form-manager.php:220
+msgid "is greater than or equal to"
+msgstr ""
+
+#: wordpress-form-manager.php:221
+msgid "is empty"
+msgstr ""
+
+#: wordpress-form-manager.php:222
+msgid "is not empty"
+msgstr ""
+
+#: wordpress-form-manager.php:223
+msgid "is checked"
+msgstr ""
+
+#: wordpress-form-manager.php:224
+msgid "is not checked"
+msgstr ""
+
+#: wordpress-form-manager.php:267 pages/main.php:73 pages/main.php:107
 msgid "Forms"
 msgstr ""
 
-#: wordpress-form-manager.php:222 main.php:149 main.php:159
+#: wordpress-form-manager.php:268 pages/editform.php:8 pages/main.php:153
+#: pages/main.php:163 display.php:400 types.php:47 types.php:54
 msgid "Edit"
 msgstr ""
 
-#: wordpress-form-manager.php:223 main.php:151 main.php:163
-msgid "Data"
-msgstr ""
-
-#: wordpress-form-manager.php:228 wordpress-form-manager.php:241
-#: types/recaptcha.php:67
+#: wordpress-form-manager.php:274 wordpress-form-manager.php:287
+#: types/recaptcha.php:68
 msgid "Settings"
 msgstr ""
 
-#: wordpress-form-manager.php:229 editform.php:196
+#: wordpress-form-manager.php:275
 msgid "Advanced Settings"
 msgstr ""
 
-#: wordpress-form-manager.php:231
-msgid "Edit Form - Advanced"
-msgstr ""
-
-#: wordpress-form-manager.php:340
+#: wordpress-form-manager.php:369 wordpress-form-manager.php:375
 msgid ""
-"Error: the shortcode '%s' is already in use. (other changes were saved "
-"successfully)"
-msgstr ""
-
-#. translators: this error is given when saving the form, if there was a
-#. problem with the list of e-mails under 'E-Mail Notifications'.
-#: wordpress-form-manager.php:391
-msgid ""
-"Error: There was a problem with the notification e-mail list.  Other "
-"settings were updated."
-msgstr ""
-
-#. translators: This error occurs if the save script failed for some reason.
-#: wordpress-form-manager.php:406
-msgid "Error: Save posted an invalid array expression."
-msgstr ""
-
-#: wordpress-form-manager.php:451
-msgid "m-y-d h-i-s"
-msgstr ""
-
-#: wordpress-form-manager.php:546
-msgid "Failed to open file"
+"Form Manager: shortcode must include a form slug.  For example, something "
+"like '%s'"
 msgstr ""
 
 #. translators: the following are for the options for the default form display
 #. template
-#: templates/fm-form-default.php:59
+#: templates/fm-form-default.php:61
 msgid "Show form title:"
 msgstr ""
 
-#: templates/fm-form-default.php:60
+#: templates/fm-form-default.php:62
 msgid "Show border:"
 msgstr ""
 
-#: templates/fm-form-default.php:61
+#: templates/fm-form-default.php:63
 msgid "Label position:"
 msgstr ""
 
-#: templates/fm-form-default.php:62
+#: templates/fm-form-default.php:64
 msgid "Labels can be placed to the left or above each field"
 msgstr ""
 
-#: templates/fm-form-default.php:63
+#: templates/fm-form-default.php:65
 msgctxt "template-option"
 msgid "Left"
 msgstr ""
 
-#: templates/fm-form-default.php:64
+#: templates/fm-form-default.php:66
 msgctxt "template-option"
 msgid "Top"
 msgstr ""
 
-#: templates/fm-form-default.php:65
+#: templates/fm-form-default.php:67
 msgid "Label width (in pixels):"
 msgstr ""
 
-#: templates/fm-form-default.php:66
+#: templates/fm-form-default.php:68
 msgid "Applies to checkboxes, and when labels are to the left"
 msgstr ""
 
-#: db.php:106 settings.php:24
+#: db.php:70
+msgid "Submit"
+msgstr ""
+
+#: db.php:88
+msgid "%s Submission"
+msgstr ""
+
+#: db.php:112
 msgid "New Form"
 msgstr ""
 
-#: db.php:109 settings.php:28
+#: db.php:113
+msgid "Thank you! Your data has been submitted."
+msgstr ""
+
+#: db.php:115
 msgid "\\'%s\\' is required."
 msgstr ""
 
-#: db.php:116
+#: db.php:122
 msgid "Numbers Only"
 msgstr ""
 
-#: db.php:117
+#: db.php:123
 msgid "'%s' must be a valid number"
 msgstr ""
 
-#: db.php:122
+#: db.php:128
 msgid "Phone Number"
 msgstr ""
 
-#: db.php:123
+#: db.php:129
 msgid "'%s' must be a valid phone number"
 msgstr ""
 
-#: db.php:125
+#: db.php:131
 msgid "/^.*[0-9]{3}.*[0-9]{3}.*[0-9]{4}.*$/"
 msgstr ""
 
-#: db.php:129
+#: db.php:135
 msgid "E-Mail"
 msgstr ""
 
-#: db.php:130
+#: db.php:136
 msgid "'%s' must be a valid E-Mail address"
 msgstr ""
 
-#: db.php:135
+#: db.php:141
 msgid "Date (MM/DD/YY)"
 msgstr ""
 
-#: db.php:136
+#: db.php:142
 msgid "'%s' must be a date (MM/DD/YY)"
 msgstr ""
 
-#: editsettings.php:33
-msgid "Form Manager Settings"
+#: db.php:799 ajax.php:253
+msgid "Failed to open file"
 msgstr ""
 
-#: editsettings.php:38 editformadv.php:88 editsettingsadv.php:131
-msgid "Settings Saved."
+#: pages/editformdesign.php:69
+msgid "Form updated."
 msgstr ""
 
-#: editsettings.php:39 editform.php:73 editformadv.php:89
-#: editsettingsadv.php:132
+#: pages/editformdesign.php:70 pages/editformnn.php:54
+#: pages/editsettings.php:39 pages/editformcond.php:85
+#: pages/editformadv.php:94 pages/editsettingsadv.php:144
 msgid "Save failed."
 msgstr ""
 
-#: editsettings.php:48
+#: pages/editformdesign.php:85
+msgid "Publish"
+msgstr ""
+
+#: pages/editformdesign.php:90
+msgid "Save"
+msgstr ""
+
+#: pages/editformdesign.php:96 pages/editformnn.php:46 pages/editformnn.php:76
+#: pages/editformcond.php:76 pages/editformcond.php:122
+#: pages/editformadv.php:86 pages/editformadv.php:158
+msgid "Cancel Changes"
+msgstr ""
+
+#: pages/editformdesign.php:111
+msgid "Save Form"
+msgstr ""
+
+#: pages/editformdesign.php:120 pages/editform.php:14
+#: pages/editformadv.php:137
+msgid "Submission Data"
+msgstr ""
+
+#. translators: the number of submissions for a form
+#: pages/editformdesign.php:125 pages/main.php:132 pages/main.php:141
+msgid "Submission count"
+msgstr ""
+
+#. translators: label for the date of the most recent submission
+#: pages/editformdesign.php:126
+msgid "Last submission"
+msgstr ""
+
+#: pages/editformdesign.php:136
+msgid "Form Slug"
+msgstr ""
+
+#: pages/editformdesign.php:153 pages/editformadv.php:118
+msgid "E-Mail Notifications"
+msgstr ""
+
+#: pages/editformdesign.php:160
+msgid "Send to (user entry)"
+msgstr ""
+
+#: pages/editformdesign.php:162
+msgid "(none)"
+msgstr ""
+
+#: pages/editformdesign.php:169
+msgid "Make sure the field you choose contains an E-Mail validator"
+msgstr ""
+
+#: pages/editformdesign.php:173
+msgid "Also send notification(s) to"
+msgstr ""
+
+#: pages/editformdesign.php:175
+msgid "Enter a list of e-mail addresses separated by commas"
+msgstr ""
+
+#: pages/editformdesign.php:187
+msgid "Auto Redirect"
+msgstr ""
+
+#: pages/editformdesign.php:193
+msgid "Automatically redirect the user after a successful form submission"
+msgstr ""
+
+#: pages/editformdesign.php:195
+msgid "Enable automatic redirect"
+msgstr ""
+
+#: pages/editformdesign.php:200
+msgid "Desination page"
+msgstr ""
+
+#: pages/editformdesign.php:213
+msgid "Timeout (seconds)"
+msgstr ""
+
+#: pages/editformdesign.php:240
+msgid "Add Form Element:"
+msgstr ""
+
+#: pages/editformdesign.php:254
+msgid "Insert Saved Form"
+msgstr ""
+
+#: pages/editformdesign.php:266
+msgid "Insert Fields From:"
+msgstr ""
+
+#: pages/editformdesign.php:273
+msgid "Insert After:"
+msgstr ""
+
+#: pages/editformdesign.php:275
+msgid "(Insert at beginning)"
+msgstr ""
+
+#: pages/editformdesign.php:279
+msgid "(Insert at end)"
+msgstr ""
+
+#: pages/editformdesign.php:282
+msgid "Load Fields"
+msgstr ""
+
+#: pages/editformdesign.php:314
+msgid "Appearance"
+msgstr ""
+
+#: pages/editformdesign.php:344
+msgid "Customize"
+msgstr ""
+
+#: pages/editformdesign.php:348
+msgid "Submit acknowledgement message:"
+msgstr ""
+
+#: pages/editformdesign.php:349
+msgid "This is displayed after the form has been submitted"
+msgstr ""
+
+#: pages/editformdesign.php:354
+msgid "Show summary with acknowledgment:"
+msgstr ""
+
+#: pages/editformdesign.php:355
+msgid ""
+"A summary of the submitted data will be shown along with the acknowledgment "
+"message"
+msgstr ""
+
+#: pages/editformdesign.php:360
+msgid "Submit button label:"
+msgstr ""
+
+#: pages/editformdesign.php:364
+msgid "Required item message:"
+msgstr ""
+
+#: pages/editformdesign.php:365
+msgid ""
+"This is shown if a user leaves a required item blank.  The item's label will "
+"appear in place of '%s'."
+msgstr ""
+
+#: pages/editformnn.php:47 pages/editformnn.php:77 pages/editsettings.php:87
+#: pages/editformcond.php:77 pages/editformcond.php:123
+#: pages/editformadv.php:87 pages/editformadv.php:159
+#: pages/editsettingsadv.php:228
+msgid "Save Changes"
+msgstr ""
+
+#: pages/editformnn.php:53 pages/editsettings.php:38 pages/editformcond.php:84
+#: pages/editformadv.php:93 pages/editsettingsadv.php:143
+msgid "Settings Saved."
+msgstr ""
+
+#: pages/editformnn.php:64
+msgid ""
+"Giving a nickname to form items makes it easier to access their information "
+"within custom e-mail notifications and templates"
+msgstr ""
+
+#: pages/editformnn.php:68 types/base.php:109 types/blank.php:15
+msgid "Item Label"
+msgstr ""
+
+#: pages/editformnn.php:68
+msgid "Nickname"
+msgstr ""
+
+#: pages/editsettings.php:33
+msgid "Form Manager Settings"
+msgstr ""
+
+#: pages/editsettings.php:48
 msgid "Global E-Mail Notifications"
 msgstr ""
 
-#: editsettings.php:50
+#: pages/editsettings.php:50
 msgid "These settings will be applied to every form you create."
 msgstr ""
 
-#: editsettings.php:51
+#: pages/editsettings.php:51
 msgid "Send to Administrator"
 msgstr ""
 
-#: editsettings.php:52
+#: pages/editsettings.php:52
 msgid "Registered Users"
 msgstr ""
 
-#: editsettings.php:52
+#: pages/editsettings.php:52
 msgid ""
 "A confirmation e-mail will be sent to a registered user only when they "
 "submit a form"
 msgstr ""
 
-#: editsettings.php:55
+#: pages/editsettings.php:55
 msgid "Default Form Settings"
 msgstr ""
 
-#: editsettings.php:57
+#: pages/editsettings.php:57
 msgid "Form Title"
 msgstr ""
 
-#: editsettings.php:58
+#: pages/editsettings.php:58
 msgid "Submit Acknowledgment"
 msgstr ""
 
-#: editsettings.php:59
+#: pages/editsettings.php:59
 msgid "Required Item Message"
 msgstr ""
 
-#: editsettings.php:59
+#: pages/editsettings.php:59
 msgid ""
 "This is displayed when a user fails to input a required item.  Include '%s' "
 "in the message where you would like the item's label to appear."
 msgstr ""
 
-#: editsettings.php:62
+#: pages/editsettings.php:62
 msgid "reCAPTCHA Settings"
 msgstr ""
 
-#: editsettings.php:63
+#: pages/editsettings.php:63
 msgid "API Keys for reCAPTCHA can be acquired (for free) by visiting"
 msgstr ""
 
-#: editsettings.php:65
+#: pages/editsettings.php:65
 msgid "reCAPTCHA Public Key"
 msgstr ""
 
-#: editsettings.php:66
+#: pages/editsettings.php:66
 msgid "reCAPTCHA Private Key"
 msgstr ""
 
-#: editsettings.php:68
+#: pages/editsettings.php:68
 msgid "Red"
 msgstr ""
 
-#: editsettings.php:68
+#: pages/editsettings.php:68
 msgid "White"
 msgstr ""
 
-#: editsettings.php:68
+#: pages/editsettings.php:68
 msgid "Black"
 msgstr ""
 
-#: editsettings.php:68
+#: pages/editsettings.php:68
 msgid "Clean"
 msgstr ""
 
-#: editsettings.php:73
+#: pages/editsettings.php:73
 msgid "Color Scheme"
 msgstr ""
 
-#: editsettings.php:89 editformadv.php:79 editformadv.php:145
-#: editsettingsadv.php:206
-msgid "Save Changes"
+#: pages/editform.php:7 pages/main.php:153 pages/main.php:163
+msgid "Edit this form"
+msgstr ""
+
+#: pages/editform.php:13 pages/main.php:155 pages/main.php:167
+msgid "View form data"
+msgstr ""
+
+#: pages/editform.php:19
+msgid "Form item nicknames"
+msgstr ""
+
+#: pages/editform.php:20
+msgid "Item Nicknames"
+msgstr ""
+
+#: pages/editform.php:25
+msgid "Conditional behavior"
+msgstr ""
+
+#: pages/editform.php:26
+msgid "Conditions"
+msgstr ""
+
+#: pages/editform.php:31 pages/main.php:154 pages/main.php:165
+msgid "Advanced form settings"
+msgstr ""
+
+#: pages/editform.php:32 pages/main.php:154 pages/main.php:165
+msgid "Advanced"
+msgstr ""
+
+#: pages/editform.php:43
+msgid "Edit Form"
+msgstr ""
+
+#: pages/main.php:75
+msgid "Are you sure you want to delete:"
+msgstr ""
+
+#: pages/main.php:91
+msgid "Yes"
+msgstr ""
+
+#: pages/main.php:92 pages/formdata.php:120 pages/formdata.php:151
+msgid "Cancel"
+msgstr ""
+
+#: pages/main.php:109
+msgid "Add New"
+msgstr ""
+
+#: pages/main.php:117 pages/formdata.php:235
+msgid "Bulk Actions"
+msgstr ""
+
+#: pages/main.php:118 pages/main.php:156 pages/main.php:169 display.php:401
+msgid "Delete"
+msgstr ""
+
+#: pages/main.php:120 pages/formdata.php:245
+msgid "Apply"
+msgstr ""
+
+#: pages/main.php:130 pages/main.php:139 pages/editsettingsadv.php:157
+msgid "Name"
+msgstr ""
+
+#: pages/main.php:131 pages/main.php:140
+msgid "Slug"
+msgstr ""
+
+#: pages/main.php:133 pages/main.php:142
+msgid "Last Submission"
+msgstr ""
+
+#: pages/main.php:155 pages/main.php:167 pages/formdata.php:117
+#: pages/formdata.php:170
+msgid "Data"
+msgstr ""
+
+#: pages/main.php:156 pages/main.php:169
+msgid "Delete this form"
+msgstr ""
+
+#. translators: the following is displayed if there are no forms to list
+#: pages/main.php:185
+msgid " No forms yet..."
+msgstr ""
+
+#: pages/formdata.php:119 pages/formdata.php:150
+msgid "Submit Changes"
+msgstr ""
+
+#: pages/formdata.php:126
+msgid "Edit data"
+msgstr ""
+
+#: pages/formdata.php:174
+msgid "Data summary:"
+msgstr ""
+
+#: pages/formdata.php:227
+msgid "Download Data (.csv)"
+msgstr ""
+
+#: pages/formdata.php:230 pages/formdata.php:317
+msgid "Working..."
+msgstr ""
+
+#: pages/formdata.php:236
+msgid "Show Summary"
+msgstr ""
+
+#: pages/formdata.php:238
+msgid "Delete Selected"
+msgstr ""
+
+#: pages/formdata.php:239
+msgid "Delete All Submission Data"
+msgstr ""
+
+#: pages/formdata.php:242
+msgid "Edit Selected"
+msgstr ""
+
+#: pages/formdata.php:261
+msgid "Are you sure you want to delete the selected items?"
+msgstr ""
+
+#: pages/formdata.php:265
+msgid "This will delete all submission data for this form. Are you sure?"
+msgstr ""
+
+#: pages/formdata.php:302 pages/formdata.php:331
+msgid "IP Address"
+msgstr ""
+
+#: pages/formdata.php:314
+msgid "Download Files"
+msgstr ""
+
+#: pages/formdata.php:358
+msgid "Download"
+msgstr ""
+
+#: pages/editformcond.php:95 types/panelhelper.php:79
+msgid "Add"
+msgstr ""
+
+#: pages/editformadv.php:103
+msgid "Behavior"
+msgstr ""
+
+#: pages/editformadv.php:109
+msgid "Behavior Type"
+msgstr ""
+
+#: pages/editformadv.php:109
+msgid "Behavior types other than 'Default' require a registered user"
+msgstr ""
+
+#: pages/editformadv.php:117
+msgid "Form Display"
+msgstr ""
+
+#: pages/editformadv.php:117 pages/editformadv.php:118
+#: pages/editformadv.php:119
+msgid "(use default)"
+msgstr ""
+
+#: pages/editformadv.php:119
+msgid "Data Summary"
+msgstr ""
+
+#: pages/editformadv.php:123
+msgid "Custom E-Mail Notifications"
+msgstr ""
+
+#: pages/editformadv.php:125
+msgid "Use custom e-mail notifications"
+msgstr ""
+
+#: pages/editformadv.php:126
+msgid ""
+"This will override the 'E-Mail Notifications' settings in both the main "
+"editor and the plugin settings page with the information entered below"
+msgstr ""
+
+#: pages/editformadv.php:130
+msgid "Publish Submitted Data"
+msgstr ""
+
+#: pages/editformadv.php:132
+msgid "Publish submissions as posts"
+msgstr ""
+
+#: pages/editformadv.php:133
+msgid "Post category"
+msgstr ""
+
+#: pages/editformadv.php:134
+msgid "Post title"
+msgstr ""
+
+#: pages/editformadv.php:134
+msgid "Include '%s' where you would like the form title to appear"
+msgstr ""
+
+#: pages/editformadv.php:167
+msgid "Edit Form Definition:"
+msgstr ""
+
+#: pages/editformadv.php:171
+msgid "Update Form"
+msgstr ""
+
+#. translators: this will be followed by the name of the template to be removed
+#: pages/editsettingsadv.php:91
+msgid "Are you sure you want to remove"
+msgstr ""
+
+#: pages/editsettingsadv.php:95
+msgid "Are you sure? All templates other than the default will be removed."
+msgstr ""
+
+#: pages/editsettingsadv.php:138
+msgid "Form Manager Settings - Advanced"
+msgstr ""
+
+#: pages/editsettingsadv.php:153
+msgid "Text Validators"
+msgstr ""
+
+#: pages/editsettingsadv.php:158
+msgid "Error Message"
+msgstr ""
+
+#: pages/editsettingsadv.php:159
+msgid "Regular Expression"
+msgstr ""
+
+#: pages/editsettingsadv.php:191
+msgid "Shortcode"
+msgstr ""
+
+#: pages/editsettingsadv.php:193
+msgid "Plugin Shortcode"
+msgstr ""
+
+#: pages/editsettingsadv.php:196
+msgid "Display Templates"
+msgstr ""
+
+#: pages/editsettingsadv.php:198
+msgid "Default Form Template"
+msgstr ""
+
+#: pages/editsettingsadv.php:199
+msgid "Default E-Mail Template"
+msgstr ""
+
+#: pages/editsettingsadv.php:200
+msgid "Default Summary Template"
+msgstr ""
+
+#: pages/editsettingsadv.php:202
+msgid "Reset Templates"
+msgstr ""
+
+#: pages/editsettingsadv.php:210
+msgid "Remove"
+msgstr ""
+
+#: pages/editsettingsadv.php:214
+msgid "Database Check"
+msgstr ""
+
+#: pages/editsettingsadv.php:216
+msgid "Check the Form Manager database"
+msgstr ""
+
+#: pages/editsettingsadv.php:216
+msgid "Go"
+msgstr ""
+
+#: pages/editsettingsadv.php:219
+msgid "Post/Page Editor"
+msgstr ""
+
+#: pages/editsettingsadv.php:221
+msgid "Enable the editor button"
 msgstr ""
 
 #: types/separator.php:8
 msgid "Separator"
 msgstr ""
 
-#: types/separator.php:16 types/textarea.php:50 types/list.php:132
-#: types/blank.php:34 types/file.php:80 types/recaptcha.php:73
-#: types/checkbox.php:46 types/text.php:54
+#: types/separator.php:16 types/textarea.php:54 types/list.php:134
+#: types/blank.php:38 types/file.php:121 types/recaptcha.php:74
+#: types/checkbox.php:51 types/text.php:55
 msgid "Label"
 msgstr ""
 
@@ -264,9 +871,9 @@ msgstr ""
 msgid "New Separator"
 msgstr ""
 
-#: types/separator.php:42 types/textarea.php:24 types/base.php:102
-#: types/list.php:18 types/note.php:52 types/blank.php:16 types/file.php:19
-#: types/checkbox.php:13 types/text.php:37
+#: types/separator.php:42 types/textarea.php:24 types/base.php:110
+#: types/list.php:18 types/note.php:59 types/blank.php:16 types/file.php:19
+#: types/checkbox.php:13 types/text.php:34
 msgid "Item Description"
 msgstr ""
 
@@ -278,28 +885,24 @@ msgstr ""
 msgid "New Text Area"
 msgstr ""
 
-#: types/textarea.php:51
+#: types/textarea.php:55
 msgid "Default Value"
 msgstr ""
 
-#: types/textarea.php:52
+#: types/textarea.php:56
 msgid "Height (in pixels)"
 msgstr ""
 
-#: types/textarea.php:53 types/list.php:134 types/text.php:56
+#: types/textarea.php:57 types/list.php:136 types/text.php:57
 msgid "Width (in pixels)"
 msgstr ""
 
-#: types/textarea.php:54 types/list.php:135 types/checkbox.php:48
-#: types/text.php:57
+#: types/textarea.php:58 types/list.php:137 types/checkbox.php:54
+#: types/text.php:59
 msgid "Required"
 msgstr ""
 
-#: types/base.php:101 types/blank.php:15 editformadv.php:131
-msgid "Item Label"
-msgstr ""
-
-#: types/base.php:104 types/blank.php:18
+#: types/base.php:112 types/blank.php:18
 msgid "Item Nickname"
 msgstr ""
 
@@ -311,27 +914,27 @@ msgstr ""
 msgid "New List"
 msgstr ""
 
-#: types/list.php:133
+#: types/list.php:135
 msgid "Style"
 msgstr ""
 
-#: types/list.php:133
+#: types/list.php:135
 msgid "Dropdown"
 msgstr ""
 
-#: types/list.php:133
+#: types/list.php:135
 msgid "List Box"
 msgstr ""
 
-#: types/list.php:133
+#: types/list.php:135
 msgid "Radio Buttons"
 msgstr ""
 
-#: types/list.php:133
+#: types/list.php:135
 msgid "Checkboxes"
 msgstr ""
 
-#: types/list.php:136
+#: types/list.php:138
 msgid "List Items"
 msgstr ""
 
@@ -339,16 +942,16 @@ msgstr ""
 msgid "Note"
 msgstr ""
 
-#: types/note.php:51
+#: types/note.php:23
+msgid "HTML"
+msgstr ""
+
+#: types/note.php:58
 msgid "New Note"
 msgstr ""
 
 #: types/panelhelper.php:74
 msgid "Enter Items as Text"
-msgstr ""
-
-#: types/panelhelper.php:79
-msgid "Add"
 msgstr ""
 
 #: types/file.php:9
@@ -359,52 +962,81 @@ msgstr ""
 msgid "New File Upload"
 msgstr ""
 
-#: types/file.php:39
+#: types/file.php:43
 msgid "File upload exceeded maximum allowable size."
 msgstr ""
 
-#: types/file.php:42
+#: types/file.php:46
 msgid "There was an error with the file upload."
 msgstr ""
 
-#: types/file.php:49
+#: types/file.php:53
 msgid "Cannot be of type"
 msgstr ""
 
-#: types/file.php:54
+#: types/file.php:58
 msgid "Can only be of types"
 msgstr ""
 
-#: types/file.php:81
+#: types/file.php:122
 msgid "Max file size (in kB)"
 msgstr ""
 
-#: types/file.php:82
+#: types/file.php:123
 msgid "Your host restricts uploads to"
 msgstr ""
 
-#: types/file.php:83
+#: types/file.php:124
 msgid "File Types"
 msgstr ""
 
-#: types/file.php:84
+#: types/file.php:125
 msgid ""
 "Enter a list of extensions separated by commas, e.g. \".txt, .rtf, .doc\""
 msgstr ""
 
-#: types/file.php:85
+#: types/file.php:126
 msgid "Only allow"
 msgstr ""
 
-#: types/file.php:86
+#: types/file.php:127
 msgid "Do not allow"
 msgstr ""
 
-#: types/file.php:120
+#: types/file.php:128
+msgid "Uploads"
+msgstr ""
+
+#: types/file.php:129
+msgid "Upload directory"
+msgstr ""
+
+#: types/file.php:131
+msgid "<em>This does not appear to be a valid directory</em>"
+msgstr ""
+
+#: types/file.php:132
+msgid ""
+"Using an upload directory will allow you to post links to uploaded files.  "
+"Otherwise, Form Manager will manage the uploaded files for you in the "
+"database."
+msgstr ""
+
+#: types/file.php:133
+msgid "Upload URL"
+msgstr ""
+
+#: types/file.php:134
+msgid ""
+"This will be the base URL used for links to the uploaded files.  If left "
+"blank, no links will be generated."
+msgstr ""
+
+#: types/file.php:168
 msgid "'Only allow' must be a list of extensions separated by commas"
 msgstr ""
 
-#: types/file.php:124
+#: types/file.php:172
 msgid "'Do not allow' must be a list of extensions separated by commas"
 msgstr ""
 
@@ -420,15 +1052,15 @@ msgstr ""
 msgid "The reCAPTCHA was incorrect."
 msgstr ""
 
-#: types/recaptcha.php:67
+#: types/recaptcha.php:68
 msgid "You need reCAPTCHA API keys."
 msgstr ""
 
-#: types/recaptcha.php:67
+#: types/recaptcha.php:68
 msgid "Fix this in"
 msgstr ""
 
-#: types/recaptcha.php:68
+#: types/recaptcha.php:69
 msgid "(reCAPTCHA field)"
 msgstr ""
 
@@ -440,444 +1072,99 @@ msgstr ""
 msgid "New Checkbox"
 msgstr ""
 
-#: types/checkbox.php:47
+#: types/checkbox.php:41
+msgid "yes"
+msgstr ""
+
+#: types/checkbox.php:41 types/checkbox.php:42
+msgid "no"
+msgstr ""
+
+#: types/checkbox.php:52
+msgid "Position"
+msgstr ""
+
+#: types/checkbox.php:52
+msgid "Left"
+msgstr ""
+
+#: types/checkbox.php:52
+msgid "Right"
+msgstr ""
+
+#: types/checkbox.php:53
 msgid "Checked by Default"
 msgstr ""
 
-#: types/text.php:16
+#: types/text.php:15
 msgid "Text"
 msgstr ""
 
-#: types/text.php:36
+#: types/text.php:33
 msgid "New Text"
 msgstr ""
 
-#: types/text.php:55
+#: types/text.php:56
 msgid "Placeholder"
 msgstr ""
 
 #: types/text.php:58
+msgid "Max characters"
+msgstr ""
+
+#: types/text.php:60
 msgid "Validation"
 msgstr ""
 
-#: editform.php:66 formdata.php:237 editformadv.php:81
-msgid "Edit Form"
-msgstr ""
-
-#: editform.php:72
-msgid "Form updated."
-msgstr ""
-
-#: editform.php:88
-msgid "Publish"
-msgstr ""
-
-#: editform.php:93
-msgid "Save"
-msgstr ""
-
-#: editform.php:99
-msgid "Cancel Changes"
-msgstr ""
-
-#: editform.php:114
-msgid "Save Form"
-msgstr ""
-
-#: editform.php:123
-msgid "Submission Data"
-msgstr ""
-
-#: editform.php:130
-msgid "View Data"
-msgstr ""
-
-#. translators: the number of submissions for a form
-#: editform.php:136
-msgid "Submission count:"
-msgstr ""
-
-#. translators: label for the date of the most recent submission
-#: editform.php:137
-msgid "Last submission:"
-msgstr ""
-
-#: editform.php:147
-msgid "Form Slug"
-msgstr ""
-
-#: editform.php:164 editformadv.php:113
-msgid "E-Mail Notifications"
-msgstr ""
-
-#: editform.php:171
-msgid "Send to (user entry)"
-msgstr ""
-
-#: editform.php:173
-msgid "(none)"
-msgstr ""
-
-#: editform.php:180
-msgid "Make sure the field you choose contains an E-Mail validator"
-msgstr ""
-
-#: editform.php:184
-msgid "Also send notification(s) to"
-msgstr ""
-
-#: editform.php:186
-msgid "Enter a list of e-mail addresses separated by commas"
-msgstr ""
-
-#: editform.php:216
-msgid "Add Form Element:"
-msgstr ""
-
-#: editform.php:230
-msgid "Insert Saved Form"
-msgstr ""
-
-#: editform.php:242
-msgid "Insert Fields From:"
-msgstr ""
-
-#: editform.php:249
-msgid "Insert After:"
-msgstr ""
-
-#: editform.php:251
-msgid "(Insert at beginning)"
-msgstr ""
-
-#: editform.php:255
-msgid "(Insert at end)"
-msgstr ""
-
-#: editform.php:258
-msgid "Load Fields"
-msgstr ""
-
-#: editform.php:290
-msgid "Appearance"
-msgstr ""
-
-#: editform.php:320
-msgid "Customize"
-msgstr ""
-
-#: editform.php:324
-msgid "Submit acknowledgement message:"
-msgstr ""
-
-#: editform.php:325
-msgid "This is displayed after the form has been submitted"
-msgstr ""
-
-#: editform.php:330
-msgid "Show summary with acknowledgment:"
-msgstr ""
-
-#: editform.php:331
+#: ajax.php:34
 msgid ""
-"A summary of the submitted data will be shown along with the acknowledgment "
-"message"
+"Error: the shortcode '%s' is already in use. (other changes were saved "
+"successfully)"
 msgstr ""
 
-#: editform.php:336
-msgid "Submit button label:"
-msgstr ""
-
-#: editform.php:340
-msgid "Required item message:"
-msgstr ""
-
-#: editform.php:341
+#. translators: this error is given when saving the form, if there was a
+#. problem with the list of e-mails under 'E-Mail Notifications'.
+#: ajax.php:88
 msgid ""
-"This is shown if a user leaves a required item blank.  The item's label will "
-"appear in place of '%s'."
+"Error: There was a problem with the notification e-mail list.  Other "
+"settings were updated."
 msgstr ""
 
-#: main.php:75
-msgid "Are you sure you want to delete:"
+#. translators: This error occurs if the save script failed for some reason.
+#: ajax.php:103
+msgid "Error: Save posted an invalid array expression."
 msgstr ""
 
-#: main.php:91
-msgid "Yes"
+#: ajax.php:148
+msgid "m-y-d h-i-s"
 msgstr ""
 
-#: main.php:92 formdata.php:118 formdata.php:149
-msgid "Cancel"
+#: settings.php:7
+msgid "'%s' is only available to registered users."
 msgstr ""
 
-#: main.php:109
-msgid "Add New"
-msgstr ""
-
-#: main.php:117 formdata.php:245
-msgid "Bulk Actions"
-msgstr ""
-
-#: main.php:118 main.php:152 main.php:165
-msgid "Delete"
-msgstr ""
-
-#: main.php:120 formdata.php:255
-msgid "Apply"
-msgstr ""
-
-#: main.php:130 main.php:137 editsettingsadv.php:145
-msgid "Name"
-msgstr ""
-
-#: main.php:131 main.php:138
-msgid "Slug"
-msgstr ""
-
-#: main.php:149 main.php:159 formdata.php:237
-msgid "Edit this form"
-msgstr ""
-
-#: main.php:150 main.php:161
-msgid "Advanced form settings"
-msgstr ""
-
-#: main.php:150 main.php:161 editformadv.php:76
-msgid "Advanced"
-msgstr ""
-
-#: main.php:151 main.php:163
-msgid "View form data"
-msgstr ""
-
-#: main.php:152 main.php:165
-msgid "Delete this form"
-msgstr ""
-
-#. translators: the following is displayed if there are no forms to list
-#: main.php:179
-msgid " No forms yet..."
-msgstr ""
-
-#: formdata.php:117 formdata.php:148
-msgid "Submit Changes"
-msgstr ""
-
-#: formdata.php:170 formdata.php:187
-msgid "Back to Form Data"
-msgstr ""
-
-#: formdata.php:175
-msgid "Data summary:"
-msgstr ""
-
-#: formdata.php:235
-msgid "Download Data (.csv)"
-msgstr ""
-
-#: formdata.php:240 formdata.php:324
-msgid "Working..."
-msgstr ""
-
-#: formdata.php:246
-msgid "Show Summary"
-msgstr ""
-
-#: formdata.php:248
-msgid "Delete Selected"
-msgstr ""
-
-#: formdata.php:249
-msgid "Delete All Submission Data"
-msgstr ""
-
-#: formdata.php:252
-msgid "Edit Selected"
-msgstr ""
-
-#: formdata.php:271
-msgid "Are you sure you want to delete the selected items?"
-msgstr ""
-
-#: formdata.php:275
-msgid "This will delete all submission data for this form. Are you sure?"
-msgstr ""
-
-#: formdata.php:306 formdata.php:336
-msgid "Timestamp"
-msgstr ""
-
-#: formdata.php:309 formdata.php:337
-msgid "User"
-msgstr ""
-
-#: formdata.php:312 formdata.php:338
-msgid "IP Address"
-msgstr ""
-
-#: formdata.php:321
-msgid "Download Files"
-msgstr ""
-
-#: formdata.php:357
-msgid "Download"
-msgstr ""
-
-#: editformadv.php:98
-msgid "Behavior"
-msgstr ""
-
-#: editformadv.php:104
-msgid "Behavior Type"
-msgstr ""
-
-#: editformadv.php:104
-msgid "Behavior types other than 'Default' require a registered user"
-msgstr ""
-
-#: editformadv.php:112
-msgid "Form Display"
-msgstr ""
-
-#: editformadv.php:112 editformadv.php:113 editformadv.php:114
-msgid "(use default)"
-msgstr ""
-
-#: editformadv.php:114
-msgid "Data Summary"
-msgstr ""
-
-#: editformadv.php:118
-msgid "Custom E-Mail Notifications"
-msgstr ""
-
-#: editformadv.php:120
-msgid "Use custom e-mail notifications"
-msgstr ""
-
-#: editformadv.php:121
-msgid ""
-"This will override the 'E-Mail Notifications' settings in both the main "
-"editor and the plugin settings page with the information entered below"
-msgstr ""
-
-#: editformadv.php:125
-msgid "Form Item Nicknames"
-msgstr ""
-
-#: editformadv.php:127
-msgid ""
-"Giving a nickname to form items makes it easier to access their information "
-"within custom e-mail notifications and templates"
-msgstr ""
-
-#: editformadv.php:131
-msgid "Nickname"
-msgstr ""
-
-#: editformadv.php:138
-msgid "Publish Submitted Data"
-msgstr ""
-
-#: editformadv.php:140
-msgid "Publish submissions as posts"
-msgstr ""
-
-#: editformadv.php:141
-msgid "Post category"
-msgstr ""
-
-#: editformadv.php:142
-msgid "Post title"
-msgstr ""
-
-#: editformadv.php:142
-msgid "Include '%s' where you would like the form title to appear"
-msgstr ""
-
-#: editformadv.php:152
-msgid "Edit Form Definition:"
-msgstr ""
-
-#: editformadv.php:156
-msgid "Update Form"
-msgstr ""
-
-#: settings.php:26
-msgid "Thank you! Your data has been submitted."
-msgstr ""
-
-#: settings.php:27
-msgid "Submit"
-msgstr ""
-
-#: settings.php:46
+#: settings.php:19
 msgid "Default"
 msgstr ""
 
-#: settings.php:47
+#: settings.php:20
 msgid "Registered users only"
 msgstr ""
 
-#: settings.php:48
+#: settings.php:21
 msgid "Keep only most recent submission"
 msgstr ""
 
-#: settings.php:49
+#: settings.php:22
 msgid "Single submission"
 msgstr ""
 
-#: settings.php:50
+#: settings.php:23
 msgid "'User profile' style"
 msgstr ""
 
-#. translators: this will be followed by the name of the template to be removed
-#: editsettingsadv.php:79
-msgid "Are you sure you want to remove"
-msgstr ""
-
-#: editsettingsadv.php:83
-msgid "Are you sure? All templates other than the default will be removed."
-msgstr ""
-
-#: editsettingsadv.php:126
-msgid "Form Manager Settings - Advanced"
-msgstr ""
-
-#: editsettingsadv.php:141
-msgid "Text Validators"
-msgstr ""
-
-#: editsettingsadv.php:146
-msgid "Error Message"
-msgstr ""
-
-#: editsettingsadv.php:147
-msgid "Regular Expression"
-msgstr ""
-
-#: editsettingsadv.php:181
-msgid "Plugin Shortcode"
-msgstr ""
-
-#: editsettingsadv.php:186
-msgid "Default Form Template"
-msgstr ""
-
-#: editsettingsadv.php:187
-msgid "Default E-Mail Template"
-msgstr ""
-
-#: editsettingsadv.php:188
-msgid "Default Summary Template"
-msgstr ""
-
-#: editsettingsadv.php:190
-msgid "Reset Templates"
-msgstr ""
-
-#: editsettingsadv.php:198
-msgid "Remove"
+#: types.php:49
+msgid "Hide"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
