@@ -285,7 +285,7 @@ function fm_doFormBySlug($formSlug, $options = array()){
 
 			$emails = $advEmail->generateEmails($formInfo['advanced_email']);
 							
-			foreach($emails as $email){
+			foreach($emails as $email){				
 				$headerStr = "";
 				foreach($email['headers'] as $header => $value)
 					$headerStr.= $header.": ".$value."\r\n";

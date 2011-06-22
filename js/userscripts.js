@@ -32,13 +32,7 @@ function fm_get_form_item_indexed(itemID, index){
 
 //does nothing for now; appropriate script should be attached to the button to begin with
 function fm_register_form(formID){
-	/*
-	var formElement = document.getElementById('fm-form-' + formID);
-	var submitButton = formElement['fm_form_submit'];
-	//submitButton.onclick = function(){ return fm_submit_onclick_ajax(formID, formSlug); }
-	submitButton.onclick = function(){ return fm_submit_onclick(formID); }
-	fm_registered_forms[formID] = false;
-	*/
+
 }
 
 function fm_submit_onclick(formID){
@@ -212,6 +206,12 @@ function fm_fix_str(str){
 }
 function fm_htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function fm_array_contains(haystack, needle){
+	for(var x=0;x<haystack.length;x++){
+		if( haystack[x] == needle ) return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////

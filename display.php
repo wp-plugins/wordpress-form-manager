@@ -305,9 +305,11 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 		//build an array of the item types and nicknames
 		$itemTypes = array();
 		$itemNames = array();
+		$itemObjects = array();
 		foreach($formInfo['items'] as $item){
 			$itemTypes[$item['unique_name']] = $item['type'];
 			$itemNames[$item['unique_name']] = ($item['nickname'] != "" ? $item['nickname'] : $item['unique_name']);
+			$itemObjects[$item['unique_name']] = $item;
 		}
 		
 		$itemDependents = array();
@@ -328,8 +330,16 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 						$str.= "document.getElementById('".$test['unique_name']."').checked;\n";
 						break;
 					case 'custom_list':
-						$str.= "\"\"; var x".$x." = document.getElementById('".$test['unique_name']."').selectedIndex;\n";
-						$str.= "t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
+						if($itemObjects[$test['unique_name']]['extra']['list_type'] == 'checkbox') {
+							$obj = $itemObjects[$test['unique_name']];
+							$str .= "[];\n";
+							for($y=0;$y<sizeof($obj['extra']['options']);$y++){
+								$str .= "t".$x.".push( document.getElementById('".$test['unique_name']."-".$y."').checked ? ".json_encode((string)$obj['extra']['options'][$y])." : \"\") ;\n";
+							}
+						} else {
+							$str.= "\"\"; var x".$x." = document.getElementById('".$test['unique_name']."').selectedIndex;\n";
+							$str.= "t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
+						}
 						break;
 					case 'text':
 					case 'textarea':
@@ -346,27 +356,38 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 			for($x=0;$x<sizeof($condition['tests']);$x++){
 				$test = $condition['tests'][$x];
 				if($x>0) $str.= ($test['connective'] == 'and' ? " && " : " || ");
-				switch($test['test']){
-					case "eq": 			$str.= "t".$x." == '".$test['val']."'"; 
-						break;
-					case "neq":			$str.= "t".$x." != '".$test['val']."'"; 
-						break;
-					case "lt":			$str.= "(t".$x." < ".$test['val']." && t".$x." !== '')"; 
-						break;
-					case "gt":			$str.= "t".$x." > ".$test['val']." && t".$x." !== '')"; 
-						break;
-					case "lteq":		$str.= "t".$x." <= ".$test['val']." && t".$x." !== '')"; 
-						break;
-					case "gteq":		$str.= "t".$x." >= ".$test['val']." && t".$x." !== '')"; 
-						break;
-					case "isempty":		$str.= "t".$x." === ''";
-						break;
-					case "nisempty":	$str.= "t".$x." !== ''";
-						break;
-					case "checked": 	$str.= "t".$x;
-						break;
-					case "unchecked": 	$str.= "!t".$x;
-						break;
+				
+				if($itemTypes[$test['unique_name']] == 'custom_list' 
+				&& $itemObjects[$test['unique_name']]['extra']['list_type'] == 'checkbox') {
+					switch($test['test']){
+						case "eq":			$str.= "fm_array_contains( t".$x.", '".$test['val']."' )";
+							break;
+						case "neq":			$str.= "(! fm_array_contains( t".$x.", '".$test['val']."' ))";
+							break;
+					}
+				} else {				
+					switch($test['test']){
+						case "eq": 			$str.= "t".$x." == '".$test['val']."'"; 
+							break;
+						case "neq":			$str.= "t".$x." != '".$test['val']."'";
+							break;
+						case "lt":			$str.= "(t".$x." < ".$test['val']." && t".$x." !== '')"; 
+							break;
+						case "gt":			$str.= "t".$x." > ".$test['val']." && t".$x." !== '')"; 
+							break;
+						case "lteq":		$str.= "t".$x." <= ".$test['val']." && t".$x." !== '')"; 
+							break;
+						case "gteq":		$str.= "t".$x." >= ".$test['val']." && t".$x." !== '')"; 
+							break;
+						case "isempty":		$str.= "t".$x." === ''";
+							break;
+						case "nisempty":	$str.= "t".$x." !== ''";
+							break;
+						case "checked": 	$str.= "t".$x;
+							break;
+						case "unchecked": 	$str.= "!t".$x;
+							break;
+					}
 				}
 			}
 			$str.=");\n";

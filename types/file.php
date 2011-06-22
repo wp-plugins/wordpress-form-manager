@@ -42,7 +42,7 @@ class fm_fileControl extends fm_controlBase{
 				$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("File upload exceeded maximum allowable size.", 'wordpress-form-manager'));
 			else if($_FILES[$uniqueName]['error'] == 4) // no file
 				return "";
-			$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("There was an error with the file upload.", 'wordpress-form-manager'));
+			$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("There was an error with the file upload.", 'wordpress-form-manager')." (".$_FILES[$uniqueName]['error'].")");
 			return false;
 		}
 		

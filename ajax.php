@@ -164,7 +164,7 @@ function fm_createCSV(){
 	die();
 }
 
-//Download an uploaded file
+//Download an uploaded file stored in the database
 add_action('wp_ajax_fm_download_file', 'fm_downloadFile');
 function fm_downloadFile(){
 	global $fmdb;
@@ -180,7 +180,6 @@ function fm_downloadFile(){
 	
 	$fileInfo = unserialize($dataRow[$itemID]);	
 	
-	//fm_createFileFromDB($fileInfo['filename'], $fileInfo, $tmpDir);
 	fm_write_file( $tmpDir.$fileInfo['filename'], $fileInfo['contents'] );
 	
 	echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$fileInfo['filename'];		
