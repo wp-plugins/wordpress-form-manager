@@ -26,7 +26,7 @@ class fm_customListControl extends fm_controlBase{
 	}
 	
 	public function getColumnType(){
-		return "VARCHAR (255) DEFAULT ''";
+		return "TEXT";
 	}
 	
 	public function showItem($uniqueName, $itemInfo){

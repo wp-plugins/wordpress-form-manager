@@ -43,7 +43,7 @@ class fm_textControl extends fm_controlBase{
 	}
 	
 	public function getColumnType(){
-		return "VARCHAR(1000) DEFAULT ''";
+		return "TEXT";
 	}
 	
 	public function editItem($uniqueName, $itemInfo){
