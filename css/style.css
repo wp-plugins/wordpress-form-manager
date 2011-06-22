@@ -3,7 +3,6 @@
 
 /* ADMIN SIDE */
 
-
 .fm-editor{
 	background-color:#fff;
 	margin:0px;
@@ -177,6 +176,14 @@ hr.edit-panel-sep{
 	margin-bottom:10px;
 }
 
+#fm-editor-tabs-wrap{
+	margin-top:15px;
+	border-bottom:1px solid #CCCCCC;
+}
+.fm-editor-tab{
+	
+}
+
 /******************************************/
 /* Data summary */
 
@@ -212,6 +219,52 @@ hr.edit-panel-sep{
 
 .fm-download-link{
 	cursor: pointer;
+}
+
+/******************************************/
+/* Condition editor */
+
+#fm-conditions-container{
+	
+}
+
+#fm-conditions{
+	margin-top:20px;
+}
+#fm-conditions li{
+	padding:10px 10px;
+	width:90%;
+}
+.condition-move{
+	padding-right:15px;
+	padding-top:5px;
+	vertical-align:top;
+}
+.condition-test-list{
+}
+.condition-test-list li{
+	width:100% !important;
+	padding:3px 20px !important;
+	margin:2px 0px !important;
+}
+.condition-test{
+	background-color:#eee !important;	
+}
+.condition-items-div{
+	margin-top:20px;
+	margin-left:20px;
+}
+.condition-item-list li{
+	width:100% !important;
+	padding:2px 0px !important;
+	margin:0px 0px !important;
+}
+.condition-item{
+
+}
+
+table.condition-buttons td{
+	padding-right:15px;
 }
 
 
@@ -286,5 +339,87 @@ hr.edit-panel-sep{
 }
 
 .fm-form input.submit{
+	float:right;
+}
+
+.fm-form #ajax-loading{
+	float:right;
+}
+
+/******************************************************************/
+/* WIDGET */
+
+
+.fm-form-widget fieldset{	
+	border: 1px solid #000;
+	padding:10px 10px 10px 10px;
+}
+
+.fm-form-widget h3{
+	font-weight:bold;
+}
+
+.fm-form-widget legend{
+	font-size:15px;
+	margin:10px 10px 10px 10px;
+}
+
+.fm-form-widget em{
+	color:#FF0000;
+	font-weight:bold;
+	font-style: normal;
+}
+.fm-form-widget .separator{
+	font-size:15px;
+	font-weight:bold;
+	margin-top:10px;
+}
+
+.fm-form-widget label{
+	text-align: left; 
+	margin-right: 0.5em;
+	display:block; 
+}
+
+.fm-form-widget input{
+	margin:3px 0px 0px 0px;
+	padding:0px 0px 0px 0px;
+}
+
+.fm-form-widget input[type='checkbox']{
+	margin-top:5px;
+}
+
+.fm-form-widget table, .fm-form-widget tr, .fm-form-widget td{
+	border:none !important;
+	margin:0px !important;
+	padding:0px !important;
+	vertical-align:top;
+}
+
+.fm-form-widget select{
+	margin:0px 0px 0px 0px;
+	padding:0px 0px 0px 0px;
+}
+
+.fm-form-widget ul li:before{
+	content:inherit; 
+}
+
+.fm-form-widget li{
+	margin-left:-15px !important;
+}
+
+.fm-form-widget li{
+	list-style:none !important;
+	margin:0px 0px 5px 0px;
+	padding:0px 0px 0px 0px;
+}
+
+.fm-form-widget li.content{	
+	margin-bottom:10px;
+}
+
+.fm-form-widget input.submit{
 	float:right;
 }
