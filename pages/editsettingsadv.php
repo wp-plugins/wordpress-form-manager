@@ -165,11 +165,14 @@ function fm_getManagedListCount(ulID){
 	fm_createManagedList('validator-list', 'fm_new_validator', '');
 	
 	function fm_new_validator(ulID, itemID, value){
-		return "<input type=\"text\" value=\"" + value.label + "\" name=\"" + itemID + "-label\" style=\"width:200px;\"/>" +
+		var str = "<input type=\"text\" value=\"" + value.label + "\" name=\"" + itemID + "-label\" style=\"width:200px;\"/>" +
 				"<input type=\"text\" value=\"" + value.message + "\" name=\"" + itemID + "-message\" style=\"width:200px;\" />" + 
 				"<input type=\"text\" value=\"" + value.regexp + "\" name=\"" + itemID + "-regexp\" style=\"width:400px;\" />" + 
 				"<input type=\"hidden\" value=\"" + value.name + "\" name=\"" + itemID + "-name\" />" +
 				"&nbsp;&nbsp;<a onclick=\"fm_removeManagedListItem('" + itemID + "')\" style=\"cursor: pointer\"><?php _e("delete", 'wordpress-form-manager');?></a>";
+		if(value.msg != "")
+			str = str + '<br /><div style="color:#f00;">' + value.msg + '</div>';
+		return str;
 	}
 	<?php 
 	$validators = $fmdb->getTextValidators(); 
@@ -177,7 +180,13 @@ function fm_getManagedListCount(ulID){
 		$val['label'] = htmlspecialchars(addslashes($val['label']));
 		$val['message'] = htmlspecialchars(addslashes($val['message']));
 		$val['regexp'] = htmlspecialchars(addslashes($val['regexp']));
-		echo "var validator = { name: '".$val['name']."', label: '".$val['label']."', message: '".$val['message']."', regexp: '".$val['regexp']."' };\n";
+		
+		//test to see if the regexp is valid (at least for PHP)
+		$str = $val['regexp'];
+		$msg = "";
+		if(@preg_match($str, "foo") === false) $msg = __("The regular expression is invalid.", 'wordpress-form-manager');
+		
+		echo "var validator = { name: '".$val['name']."', label: '".$val['label']."', message: '".$val['message']."', regexp: '".$val['regexp']."', msg: ".json_encode($msg)." };\n";
 		echo "fm_addManagedListItem('validator-list', validator);\n";
 	}	
 	?>

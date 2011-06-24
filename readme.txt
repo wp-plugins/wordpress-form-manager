@@ -49,6 +49,11 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
 
 == Changelog ==
+= 1.5.22 =
+* Added warning about invalid regular expressions for custom validators
+* Empty conditions no longer cause the validator script to break
+* Updated Italian translation
+
 = 1.5.21 =
 * Fixed validation bug
 

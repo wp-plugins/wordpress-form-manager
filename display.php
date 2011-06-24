@@ -297,10 +297,21 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 </script><?php
 	}
 	
+	protected function getValidConditions($conditions){
+		foreach($conditions as $key => $cond) {
+			if($cond['rule'] == "none") unset($conditions[$key]);
+		}	
+		return $conditions;
+	}
+	
 	protected function getConditionHandlerScripts(){
 		$formInfo = &$this->formInfo;
 		
 		if(!is_array($formInfo['conditions'])) return "";
+		
+		$formInfo['conditions'] = $this->getValidConditions($formInfo['conditions']);
+		
+		if(sizeof($formInfo['conditions']) == 0) return "";
 		
 		//build an array of the item types and nicknames
 		$itemTypes = array();

@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.5.21";
+$fm_currentVersion = 		"1.5.22";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -150,6 +150,8 @@ function fm_install() {
 	$fmdb->updateDataTables();
 	
 	$fmdb->fixDBTypeBug();
+	
+	$fmdb->fixDateValidator();
 		
 	update_option( 'fm-version', $fm_currentVersion );			
 }  

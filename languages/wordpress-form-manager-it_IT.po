@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2011-06-09 09:38+0100\n"
+"PO-Revision-Date: 2011-06-24 11:12+0100\n"
 "Last-Translator: Andrea Bersi\n"
 "Language-Team: \n"
 
@@ -369,7 +369,7 @@ msgstr "Stile 'Profilo utente'"
 #: pages/editformnn.php:76
 #: pages/editformdesign.php:96
 msgid "Cancel Changes"
-msgstr "Annula modifiche"
+msgstr "Annulla modifiche"
 
 #: pages/editformcond.php:77
 #: pages/editformcond.php:123
@@ -1014,7 +1014,7 @@ msgstr "'%s' deve essere una data (MM/DD/YY)"
 #. template
 #: templates/fm-form-default.php:61
 msgid "Show form title:"
-msgstr "Visualizza bordo:"
+msgstr "Visualizza titolo modulo:"
 
 #: templates/fm-form-default.php:62
 msgid "Show border:"

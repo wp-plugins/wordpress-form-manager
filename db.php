@@ -140,7 +140,7 @@ $this->globalSettings = array(
 												/* translators: the following are for the date validator */
 												'label' => __("Date (MM/DD/YY)", 'wordpress-form-manager'),
 												'message' => __("'%s' must be a date (MM/DD/YY)", 'wordpress-form-manager'),
-												'regexp' => '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'
+												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/'
 												)
 					);
 }
@@ -444,6 +444,16 @@ function fixDBTypeBug(){
 	}
 	mysql_free_result($res);
 }
+
+function fixDateValidator(){
+	$count = $this->getGlobalSetting('text_validator_count');
+	$val = $this->getGlobalSetting('text_validator_3');
+	if($val['regexp'] == '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'){
+		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/';
+		$this->setGlobalSetting('text_validator_3', $val);
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
