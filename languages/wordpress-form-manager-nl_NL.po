@@ -1,0 +1,973 @@
+# Copyright (C) 2010 Form Manager
+# This file is distributed under the same license as the Form Manager package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Form Manager 1.4.21\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/wordpress-form-manager\n"
+"POT-Creation-Date: 2011-05-31 00:50:59+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2011-06-01 12:53+0100\n"
+"Last-Translator: Sander Kolthof <sanderkolthof@me.com>\n"
+"Language-Team: Full Circle Media <info@fullcirclemedia.nl>\n"
+"X-Poedit-Language: Dutch\n"
+"X-Poedit-Country: NETHERLANDS\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: types/base.php:101
+#: types/blank.php:15
+#: pages/editformadv.php:129
+msgid "Item Label"
+msgstr "Item label"
+
+#: types/base.php:102
+#: types/file.php:19
+#: types/separator.php:42
+#: types/checkbox.php:13
+#: types/textarea.php:24
+#: types/list.php:18
+#: types/note.php:52
+#: types/blank.php:16
+#: types/text.php:34
+msgid "Item Description"
+msgstr "Item omschrijving"
+
+#: types/base.php:104
+#: types/blank.php:18
+msgid "Item Nickname"
+msgstr "Item bijnaam"
+
+#: types/file.php:9
+msgid "File"
+msgstr "Bestand"
+
+#: types/file.php:18
+msgid "New File Upload"
+msgstr "Nieuw bestand uploaden"
+
+#: types/file.php:39
+msgid "File upload exceeded maximum allowable size."
+msgstr "Geuploade bestand groter dan de maximaal toegestane grootte."
+
+#: types/file.php:42
+msgid "There was an error with the file upload."
+msgstr "Er is een fout opgetreden tijden het uploaden van het bestand."
+
+#: types/file.php:49
+msgid "Cannot be of type"
+msgstr "Dit type is niet toegestaan"
+
+#: types/file.php:54
+msgid "Can only be of types"
+msgstr "Alleen deze types zijn toegestaan"
+
+#: types/file.php:80
+#: types/separator.php:16
+#: types/checkbox.php:46
+#: types/textarea.php:50
+#: types/list.php:132
+#: types/recaptcha.php:74
+#: types/blank.php:34
+#: types/text.php:51
+msgid "Label"
+msgstr "Label"
+
+#: types/file.php:81
+msgid "Max file size (in kB)"
+msgstr "Max. bestandsgrootte (in kB)"
+
+#: types/file.php:82
+msgid "Your host restricts uploads to"
+msgstr "Uw provider beperkt uploads naar"
+
+#: types/file.php:83
+msgid "File Types"
+msgstr "Bestandstypes"
+
+#: types/file.php:84
+msgid "Enter a list of extensions separated by commas, e.g. \".txt, .rtf, .doc\""
+msgstr "Voer een lijst in met extensies gescheiden van elkaar door komma's, bijv. \".txt, .rtf, .doc\""
+
+#: types/file.php:85
+msgid "Only allow"
+msgstr "Alleen toegestaan"
+
+#: types/file.php:86
+msgid "Do not allow"
+msgstr "Niet toegestaan"
+
+#: types/file.php:120
+msgid "'Only allow' must be a list of extensions separated by commas"
+msgstr "'Alleen toegestaan' moet een lijst van extensies zijn gescheiden van elkaar met komma's"
+
+#: types/file.php:124
+msgid "'Do not allow' must be a list of extensions separated by commas"
+msgstr "'Niet toegestaan' moet een lijst van extensies zijn gescheiden van elkaar met komma's"
+
+#: types/separator.php:8
+msgid "Separator"
+msgstr "Scheidingsteken"
+
+#: types/separator.php:41
+msgid "New Separator"
+msgstr "Nieuw scheidingsteken"
+
+#: types/checkbox.php:8
+msgid "Checkbox"
+msgstr "Checkbox"
+
+#: types/checkbox.php:12
+msgid "New Checkbox"
+msgstr "Nieuw checkbox"
+
+#: types/checkbox.php:47
+msgid "Checked by Default"
+msgstr "Standaard aangevinkt"
+
+#: types/checkbox.php:48
+#: types/textarea.php:54
+#: types/list.php:135
+#: types/text.php:55
+msgid "Required"
+msgstr "Verplicht"
+
+#: types/textarea.php:8
+msgid "Text Area"
+msgstr "Tekstvak"
+
+#: types/textarea.php:23
+msgid "New Text Area"
+msgstr "Nieuw tekstvak"
+
+#: types/textarea.php:51
+msgid "Default Value"
+msgstr "Standaardwaarde"
+
+#: types/textarea.php:52
+msgid "Height (in pixels)"
+msgstr "Hoogte (in pixels)"
+
+#: types/textarea.php:53
+#: types/list.php:134
+#: types/text.php:53
+msgid "Width (in pixels)"
+msgstr "Breedte (in pixels)"
+
+#: types/list.php:12
+msgid "List"
+msgstr "Lijst"
+
+#: types/list.php:17
+msgid "New List"
+msgstr "Nieuwe lijst"
+
+#: types/list.php:133
+msgid "Style"
+msgstr "Stijl"
+
+#: types/list.php:133
+msgid "Dropdown"
+msgstr "Dropdown"
+
+#: types/list.php:133
+msgid "List Box"
+msgstr "Keuzelijst"
+
+#: types/list.php:133
+msgid "Radio Buttons"
+msgstr "Radio Buttons"
+
+#: types/list.php:133
+msgid "Checkboxes"
+msgstr "Checkboxen"
+
+#: types/list.php:136
+msgid "List Items"
+msgstr "Lijstitems"
+
+#: types/recaptcha.php:11
+msgid "reCAPTCHA"
+msgstr "reCAPTCHA"
+
+#: types/recaptcha.php:16
+msgid "(No reCAPTCHA API public key found)"
+msgstr "(Geen reCAPTCHA API public key gevonden)"
+
+#: types/recaptcha.php:23
+msgid "The reCAPTCHA was incorrect."
+msgstr "De reCAPTCHA is incorrect"
+
+#: types/recaptcha.php:68
+msgid "You need reCAPTCHA API keys."
+msgstr "Je hebt reCAPTCHA API keys nodig."
+
+#: types/recaptcha.php:68
+msgid "Fix this in"
+msgstr "Fix this in"
+
+#: types/recaptcha.php:68
+#: wordpress-form-manager.php:229
+#: wordpress-form-manager.php:242
+msgid "Settings"
+msgstr "Instellingen"
+
+#: types/recaptcha.php:69
+msgid "(reCAPTCHA field)"
+msgstr "(reCAPTCHA veld)"
+
+#: types/note.php:8
+msgid "Note"
+msgstr "Opmerking"
+
+#: types/note.php:51
+msgid "New Note"
+msgstr "Nieuwe opmerking"
+
+#: types/panelhelper.php:74
+msgid "Enter Items as Text"
+msgstr "Voer items in als tekst"
+
+#: types/panelhelper.php:79
+msgid "Add"
+msgstr "Toevoegen"
+
+#: types/text.php:15
+msgid "Text"
+msgstr "Tekst"
+
+#: types/text.php:33
+msgid "New Text"
+msgstr "Nieuwe tekst"
+
+#: types/text.php:52
+msgid "Placeholder"
+msgstr "Plaatsaanduiding"
+
+#: types/text.php:54
+msgid "Max characters"
+msgstr "Max. tekens"
+
+#: types/text.php:56
+msgid "Validation"
+msgstr "Validatie"
+
+#: db.php:109
+#: settings.php:24
+msgid "New Form"
+msgstr "Nieuw formulier"
+
+#: db.php:112
+#: settings.php:28
+msgid "\\'%s\\' is required."
+msgstr "\\'%s\\' is verplicht."
+
+#: db.php:119
+msgid "Numbers Only"
+msgstr "Alleen cijfers"
+
+#: db.php:120
+msgid "'%s' must be a valid number"
+msgstr "'%s' moet een geldig nummer zijn"
+
+#: db.php:125
+msgid "Phone Number"
+msgstr "Telefoonnummer"
+
+#: db.php:126
+msgid "'%s' must be a valid phone number"
+msgstr "'%s' moet een geldig telefoonnummer zijn"
+
+#: db.php:128
+msgid "/^.*[0-9]{3}.*[0-9]{3}.*[0-9]{4}.*$/"
+msgstr "/^.*[0-9]{3}.*[0-9]{3}.*[0-9]{4}.*$/"
+
+#: db.php:132
+msgid "E-Mail"
+msgstr "E-mail"
+
+#: db.php:133
+msgid "'%s' must be a valid E-Mail address"
+msgstr "'%s' moet een geldig e-mail adres zijn"
+
+#: db.php:138
+msgid "Date (MM/DD/YY)"
+msgstr "Datum (MM/DD/YY)"
+
+#: db.php:139
+msgid "'%s' must be a date (MM/DD/YY)"
+msgstr "'%s' moet een datum zijn (MM/DD/YY)"
+
+#: pages/main.php:73
+#: pages/main.php:107
+#: wordpress-form-manager.php:222
+msgid "Forms"
+msgstr "Formulieren"
+
+#: pages/main.php:75
+msgid "Are you sure you want to delete:"
+msgstr "Weet u zeker dat u dit wilt verwijderen:"
+
+#: pages/main.php:91
+msgid "Yes"
+msgstr "Ja"
+
+#: pages/main.php:92
+#: pages/formdata.php:118
+#: pages/formdata.php:149
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: pages/main.php:109
+msgid "Add New"
+msgstr "Nieuwe toevoegen"
+
+#: pages/main.php:117
+#: pages/formdata.php:245
+msgid "Bulk Actions"
+msgstr "Bulkacties"
+
+#: pages/main.php:118
+#: pages/main.php:152
+#: pages/main.php:165
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: pages/main.php:120
+#: pages/formdata.php:255
+msgid "Apply"
+msgstr "Toepassen"
+
+#: pages/main.php:130
+#: pages/main.php:137
+#: pages/editsettingsadv.php:145
+msgid "Name"
+msgstr "Naam"
+
+#: pages/main.php:131
+#: pages/main.php:138
+msgid "Slug"
+msgstr "Afkorting"
+
+#: pages/main.php:149
+#: pages/main.php:159
+#: pages/formdata.php:237
+msgid "Edit this form"
+msgstr "Formulier bewerken"
+
+#: pages/main.php:149
+#: pages/main.php:159
+#: wordpress-form-manager.php:223
+msgid "Edit"
+msgstr "Bewerken"
+
+#: pages/main.php:150
+#: pages/main.php:161
+msgid "Advanced form settings"
+msgstr "Geavanceerde formulier instellingen"
+
+#: pages/main.php:150
+#: pages/main.php:161
+#: pages/editformadv.php:74
+msgid "Advanced"
+msgstr "Geavanceerd"
+
+#: pages/main.php:151
+#: pages/main.php:163
+msgid "View form data"
+msgstr "Bekijk formuliergegevens"
+
+#: pages/main.php:151
+#: pages/main.php:163
+#: wordpress-form-manager.php:224
+msgid "Data"
+msgstr "Gegevens"
+
+#: pages/main.php:152
+#: pages/main.php:165
+msgid "Delete this form"
+msgstr "Formulier verwijderen"
+
+#. translators: the following is displayed if there are no forms to list
+#: pages/main.php:179
+msgid " No forms yet..."
+msgstr "Nog geen formulieren..."
+
+#: pages/editform.php:66
+#: pages/formdata.php:237
+#: pages/editformadv.php:79
+msgid "Edit Form"
+msgstr "Formulier bewerken"
+
+#: pages/editform.php:72
+msgid "Form updated."
+msgstr "Formulier bijgewerkt."
+
+#: pages/editform.php:73
+#: pages/editsettings.php:39
+#: pages/editsettingsadv.php:132
+#: pages/editformadv.php:87
+msgid "Save failed."
+msgstr "Opslaan is mislukt."
+
+#: pages/editform.php:88
+msgid "Publish"
+msgstr "Publiceren"
+
+#: pages/editform.php:93
+msgid "Save"
+msgstr "Opslaan"
+
+#: pages/editform.php:99
+msgid "Cancel Changes"
+msgstr "Wijzigingen annuleren"
+
+#: pages/editform.php:114
+msgid "Save Form"
+msgstr "Formulier opslaan"
+
+#: pages/editform.php:123
+msgid "Submission Data"
+msgstr "Ingevoerde gegevens"
+
+#: pages/editform.php:130
+msgid "View Data"
+msgstr "Bekijk gegevens"
+
+#. translators: the number of submissions for a form
+#: pages/editform.php:136
+msgid "Submission count:"
+msgstr "Invoer aantal:"
+
+#. translators: label for the date of the most recent submission
+#: pages/editform.php:137
+msgid "Last submission:"
+msgstr "Laatste invoer:"
+
+#: pages/editform.php:147
+msgid "Form Slug"
+msgstr "Formulier afkorting"
+
+#: pages/editform.php:164
+#: pages/editformadv.php:111
+msgid "E-Mail Notifications"
+msgstr "E-mail berichten"
+
+#: pages/editform.php:171
+msgid "Send to (user entry)"
+msgstr "Versturen naar (gebruiker)"
+
+#: pages/editform.php:173
+msgid "(none)"
+msgstr "(geen)"
+
+#: pages/editform.php:180
+msgid "Make sure the field you choose contains an E-Mail validator"
+msgstr "Zorg ervoor dat het veld dat u kiest een e-mail validator bevat"
+
+#: pages/editform.php:184
+msgid "Also send notification(s) to"
+msgstr "Stuur ook bericht(en) naar"
+
+#: pages/editform.php:186
+msgid "Enter a list of e-mail addresses separated by commas"
+msgstr "Geef een lijst van e-mail adressen gescheiden door komma's"
+
+#: pages/editform.php:198
+msgid "Auto Redirect"
+msgstr "Automatisch doorsturen"
+
+#: pages/editform.php:204
+msgid "Automatically redirect the user after a successful form submission"
+msgstr "De gebruiker automatisch doorsturen na het succesvol invullen van het formulier"
+
+#: pages/editform.php:206
+msgid "Enable automatic redirect"
+msgstr "Automatisch doorsturen inschakelen"
+
+#: pages/editform.php:211
+msgid "Desination page"
+msgstr "Doelpagina"
+
+#: pages/editform.php:224
+msgid "Timeout (seconds)"
+msgstr "Timeout (secondes)"
+
+#: pages/editform.php:235
+#: wordpress-form-manager.php:230
+msgid "Advanced Settings"
+msgstr "Geavanceerde instellingen"
+
+#: pages/editform.php:255
+msgid "Add Form Element:"
+msgstr "Voeg formulier element toe:"
+
+#: pages/editform.php:269
+msgid "Insert Saved Form"
+msgstr "Voeg formulier in"
+
+#: pages/editform.php:281
+msgid "Insert Fields From:"
+msgstr "Voeg velden in van formulier:"
+
+#: pages/editform.php:288
+msgid "Insert After:"
+msgstr "Voeg in na:"
+
+#: pages/editform.php:290
+msgid "(Insert at beginning)"
+msgstr "(Voeg aan begin toe)"
+
+#: pages/editform.php:294
+msgid "(Insert at end)"
+msgstr "(Voeg aan eind toe)"
+
+#: pages/editform.php:297
+msgid "Load Fields"
+msgstr "Laad velden"
+
+#: pages/editform.php:329
+msgid "Appearance"
+msgstr "Opmaak"
+
+#: pages/editform.php:359
+msgid "Customize"
+msgstr "Personaliseer"
+
+#: pages/editform.php:363
+msgid "Submit acknowledgement message:"
+msgstr "Ontvangstbevestigingsbericht:"
+
+#: pages/editform.php:364
+msgid "This is displayed after the form has been submitted"
+msgstr "Dit wordt weergegeven nadat het formulier is verstuurd"
+
+#: pages/editform.php:369
+msgid "Show summary with acknowledgment:"
+msgstr "Toon overzicht bij ontvangstbevestiging:"
+
+#: pages/editform.php:370
+msgid "A summary of the submitted data will be shown along with the acknowledgment message"
+msgstr "Een samenvatting van de verzonden gegevens worden getoond samen met het ontvangstbevestigingsbericht"
+
+#: pages/editform.php:375
+msgid "Submit button label:"
+msgstr "Verstuur button label:"
+
+#: pages/editform.php:379
+msgid "Required item message:"
+msgstr "Verplicht item bericht:"
+
+#: pages/editform.php:380
+msgid "This is shown if a user leaves a required item blank.  The item's label will appear in place of '%s'."
+msgstr "Dit wordt weergegeven als een gebruiker een verplicht item blanco  laat. Het item label zal verschijnen in plaats van '%s'."
+
+#: pages/editsettings.php:33
+msgid "Form Manager Settings"
+msgstr "Form manager instellingen"
+
+#: pages/editsettings.php:38
+#: pages/editsettingsadv.php:131
+#: pages/editformadv.php:86
+msgid "Settings Saved."
+msgstr "Instellingen opgeslagen."
+
+#: pages/editsettings.php:48
+msgid "Global E-Mail Notifications"
+msgstr "Algemene e-mail berichtgeving"
+
+#: pages/editsettings.php:50
+msgid "These settings will be applied to every form you create."
+msgstr "Deze instellingen worden toegepast op elk formulier dat u maakt."
+
+#: pages/editsettings.php:51
+msgid "Send to Administrator"
+msgstr "Stuur naar beheerder"
+
+#: pages/editsettings.php:52
+msgid "Registered Users"
+msgstr "Geregistreerde gebruikers"
+
+#: pages/editsettings.php:52
+msgid "A confirmation e-mail will be sent to a registered user only when they submit a form"
+msgstr "Een bevestiging per e-mail zal worden verstuurd naar een geregistreerde gebruiker alleen wanneer zij een formulier versturen"
+
+#: pages/editsettings.php:55
+msgid "Default Form Settings"
+msgstr "Standaard formulier instellingen"
+
+#: pages/editsettings.php:57
+msgid "Form Title"
+msgstr "Formulier titel"
+
+#: pages/editsettings.php:58
+msgid "Submit Acknowledgment"
+msgstr "Ontvangstbevestiging:"
+
+#: pages/editsettings.php:59
+msgid "Required Item Message"
+msgstr "Verplicht item bericht"
+
+#: pages/editsettings.php:59
+msgid "This is displayed when a user fails to input a required item.  Include '%s' in the message where you would like the item's label to appear."
+msgstr "Dit wordt weergegeven wanneer een gebruiker een verplicht item niet heeft ingevoerd. Onder '%s' in het bericht waar je zou willen dat het item-label zou verschijnen."
+
+#: pages/editsettings.php:62
+msgid "reCAPTCHA Settings"
+msgstr "reCAPTCHA instellingen"
+
+#: pages/editsettings.php:63
+msgid "API Keys for reCAPTCHA can be acquired (for free) by visiting"
+msgstr "API Keys voor reCAPTCHA kunnen (gratis) worden verkregen op"
+
+#: pages/editsettings.php:65
+msgid "reCAPTCHA Public Key"
+msgstr "reCAPTCHA Public Key"
+
+#: pages/editsettings.php:66
+msgid "reCAPTCHA Private Key"
+msgstr "reCAPTCHA Private Key"
+
+#: pages/editsettings.php:68
+msgid "Red"
+msgstr "Rood"
+
+#: pages/editsettings.php:68
+msgid "White"
+msgstr "Wit"
+
+#: pages/editsettings.php:68
+msgid "Black"
+msgstr "Zwart"
+
+#: pages/editsettings.php:68
+msgid "Clean"
+msgstr "Rood"
+
+#: pages/editsettings.php:73
+msgid "Color Scheme"
+msgstr "Kleur schema"
+
+#: pages/editsettings.php:87
+#: pages/editsettingsadv.php:206
+#: pages/editformadv.php:77
+#: pages/editformadv.php:143
+msgid "Save Changes"
+msgstr "Wijzigingen opslaan"
+
+#. translators: this will be followed by the name of the template to be removed
+#: pages/editsettingsadv.php:79
+msgid "Are you sure you want to remove"
+msgstr "Weet u zeker dat u wilt verwijderen"
+
+#: pages/editsettingsadv.php:83
+msgid "Are you sure? All templates other than the default will be removed."
+msgstr "Ben je zeker? Alle sjablonen anders dan de standaard zullen worden verwijderd."
+
+#: pages/editsettingsadv.php:126
+msgid "Form Manager Settings - Advanced"
+msgstr "Formulieren manager instellingen - geavanceerd"
+
+#: pages/editsettingsadv.php:141
+msgid "Text Validators"
+msgstr "Tekst validators"
+
+#: pages/editsettingsadv.php:146
+msgid "Error Message"
+msgstr "Foutmelding"
+
+#: pages/editsettingsadv.php:147
+msgid "Regular Expression"
+msgstr "Toegestane karakters"
+
+#: pages/editsettingsadv.php:181
+msgid "Plugin Shortcode"
+msgstr "Plugin afkorting"
+
+#: pages/editsettingsadv.php:186
+msgid "Default Form Template"
+msgstr "Standaard formulier sjabloon"
+
+#: pages/editsettingsadv.php:187
+msgid "Default E-Mail Template"
+msgstr "Standaar e-mail sjabloon"
+
+#: pages/editsettingsadv.php:188
+msgid "Default Summary Template"
+msgstr "Standaard overzicht sjabloon"
+
+#: pages/editsettingsadv.php:190
+msgid "Reset Templates"
+msgstr "Reset sjablonen"
+
+#: pages/editsettingsadv.php:198
+msgid "Remove"
+msgstr "Verwijder"
+
+#: pages/formdata.php:117
+#: pages/formdata.php:148
+msgid "Submit Changes"
+msgstr "Aanpassingen versturen"
+
+#: pages/formdata.php:170
+#: pages/formdata.php:187
+msgid "Back to Form Data"
+msgstr "Terug naar formuliergegevens"
+
+#: pages/formdata.php:175
+msgid "Data summary:"
+msgstr "Gegevens overzicht"
+
+#: pages/formdata.php:235
+msgid "Download Data (.csv)"
+msgstr "Download gegevens (.csv)"
+
+#: pages/formdata.php:240
+#: pages/formdata.php:324
+msgid "Working..."
+msgstr "Laden..."
+
+#: pages/formdata.php:246
+msgid "Show Summary"
+msgstr "Laat overzicht zien"
+
+#: pages/formdata.php:248
+msgid "Delete Selected"
+msgstr "Verwijder selectie"
+
+#: pages/formdata.php:249
+msgid "Delete All Submission Data"
+msgstr "Verwijder alle gegevens"
+
+#: pages/formdata.php:252
+msgid "Edit Selected"
+msgstr "Bewerk selectie"
+
+#: pages/formdata.php:271
+msgid "Are you sure you want to delete the selected items?"
+msgstr "Weet u zeker dat u de geselecteerde items wilt verwijderen?"
+
+#: pages/formdata.php:275
+msgid "This will delete all submission data for this form. Are you sure?"
+msgstr "Hierdoor zul je alle gegevens van dit formulier verwijderen. Ben je zeker?"
+
+#: pages/formdata.php:306
+#: pages/formdata.php:336
+msgid "Timestamp"
+msgstr "Tijdstip"
+
+#: pages/formdata.php:309
+#: pages/formdata.php:337
+msgid "User"
+msgstr "Gebruiker"
+
+#: pages/formdata.php:312
+#: pages/formdata.php:338
+msgid "IP Address"
+msgstr "IP adres"
+
+#: pages/formdata.php:321
+msgid "Download Files"
+msgstr "Download bestanden"
+
+#: pages/formdata.php:357
+msgid "Download"
+msgstr "Download"
+
+#: pages/editformadv.php:96
+msgid "Behavior"
+msgstr "Gebruikersvoorwaarde"
+
+#: pages/editformadv.php:102
+msgid "Behavior Type"
+msgstr "Gebruikersvoorwaarde type"
+
+#: pages/editformadv.php:102
+msgid "Behavior types other than 'Default' require a registered user"
+msgstr "Gebruikersvoorwaarde type anders dan 'Standaard' vereisen een geregistreerde gebruiker"
+
+#: pages/editformadv.php:110
+msgid "Form Display"
+msgstr "Formulier weergave"
+
+#: pages/editformadv.php:110
+#: pages/editformadv.php:111
+#: pages/editformadv.php:112
+msgid "(use default)"
+msgstr "(gebruik standaard)"
+
+#: pages/editformadv.php:112
+msgid "Data Summary"
+msgstr "Gegevens overzicht"
+
+#: pages/editformadv.php:116
+msgid "Custom E-Mail Notifications"
+msgstr "Aangepaste e-mailberichten"
+
+#: pages/editformadv.php:118
+msgid "Use custom e-mail notifications"
+msgstr "Gebruik aangepaste e-mailberichten"
+
+#: pages/editformadv.php:119
+msgid "This will override the 'E-Mail Notifications' settings in both the main editor and the plugin settings page with the information entered below"
+msgstr "Dit zal de 'e-mail meldingen' instellingen voor zowel de hoofdredacteur en de plugin-instellingen pagina met de ingevoerde gegevens hieronder"
+
+#: pages/editformadv.php:123
+msgid "Form Item Nicknames"
+msgstr "Formulier item bijnaam"
+
+#: pages/editformadv.php:125
+msgid "Giving a nickname to form items makes it easier to access their information within custom e-mail notifications and templates"
+msgstr "Het geven van een bijnaam aan formulier items maakt het gemakkelijker om toegang tot hun informatie te krijgen binnen de aangepaste e-mail meldingen en sjablonen"
+
+#: pages/editformadv.php:129
+msgid "Nickname"
+msgstr "Bijnaam"
+
+#: pages/editformadv.php:136
+msgid "Publish Submitted Data"
+msgstr "Publiceer gegevens"
+
+#: pages/editformadv.php:138
+msgid "Publish submissions as posts"
+msgstr "Publiceer gegevens als bericht"
+
+#: pages/editformadv.php:139
+msgid "Post category"
+msgstr "Bericht categorie"
+
+#: pages/editformadv.php:140
+msgid "Post title"
+msgstr "Bericht titel"
+
+#: pages/editformadv.php:140
+msgid "Include '%s' where you would like the form title to appear"
+msgstr "Gebruik '%s' op de plek waar je zou willen dat de formulier titel verschijnt"
+
+#: pages/editformadv.php:150
+msgid "Edit Form Definition:"
+msgstr "Bewerk formulier omschrijving:"
+
+#: pages/editformadv.php:154
+msgid "Update Form"
+msgstr "Update formulier"
+
+#: ajax.php:27
+msgid "Error: the shortcode '%s' is already in use. (other changes were saved successfully)"
+msgstr "Fout: de shortcode '%s' is al in gebruik. (andere wijzigingen zijn succesvol opgeslagen)"
+
+#. translators: this error is given when saving the form, if there was a
+#. problem with the list of e-mails under 'E-Mail Notifications'.
+#: ajax.php:81
+msgid "Error: There was a problem with the notification e-mail list.  Other settings were updated."
+msgstr "Fout: Er was een probleem met de e-mail melding lijst. Andere instellingen zijn bijgewerkt."
+
+#. translators: This error occurs if the save script failed for some reason.
+#: ajax.php:96
+msgid "Error: Save posted an invalid array expression."
+msgstr "Fout: Opslaan gepost een ongeldige reeks karakters."
+
+#: ajax.php:141
+msgid "m-y-d h-i-s"
+msgstr "m-y-d h-i-s"
+
+#: ajax.php:236
+msgid "Failed to open file"
+msgstr "Kan bestand niet openen"
+
+#. translators: the following are for the options for the default form display
+#. template
+#: templates/fm-form-default.php:59
+msgid "Show form title:"
+msgstr "Toon formulier titel:"
+
+#: templates/fm-form-default.php:60
+msgid "Show border:"
+msgstr "Toon rand:"
+
+#: templates/fm-form-default.php:61
+msgid "Label position:"
+msgstr "Label positie:"
+
+#: templates/fm-form-default.php:62
+msgid "Labels can be placed to the left or above each field"
+msgstr "Labels kunnen worden geplaatst aan de linkerkant of boven elk veld"
+
+#: templates/fm-form-default.php:63
+msgctxt "template-option"
+msgid "Left"
+msgstr "Links"
+
+#: templates/fm-form-default.php:64
+msgctxt "template-option"
+msgid "Top"
+msgstr "Boven"
+
+#: templates/fm-form-default.php:65
+msgid "Label width (in pixels):"
+msgstr "Label breedte (in pixels):"
+
+#: templates/fm-form-default.php:66
+msgid "Applies to checkboxes, and when labels are to the left"
+msgstr "Geldt voor checkboxen, en wanneer labels aan de linkerkant staan"
+
+#: settings.php:26
+msgid "Thank you! Your data has been submitted."
+msgstr "Dank je wel! Uw gegevens zijn opgeslagen."
+
+#: settings.php:27
+msgid "Submit"
+msgstr "Verstuur"
+
+#: settings.php:46
+msgid "Default"
+msgstr "Standaard"
+
+#: settings.php:47
+msgid "Registered users only"
+msgstr "Alleen voor geregistreerde gebruikers"
+
+#: settings.php:48
+msgid "Keep only most recent submission"
+msgstr "Houd alleen de meest recente bijdrage"
+
+#: settings.php:49
+msgid "Single submission"
+msgstr "Enkele invoer"
+
+#: settings.php:50
+msgid "'User profile' style"
+msgstr "'Gebruikersprofiel' stijl"
+
+#: wordpress-form-manager.php:55
+msgid "Form Manager requires WordPress version 3.0 or higher"
+msgstr "Form Manager vereist WordPress versie 3.0 of hoger"
+
+#: wordpress-form-manager.php:59
+msgid "Form Manager requires PHP version 5.0 or higher"
+msgstr "Form Manager vereist PHP version 5.0 or hoger"
+
+#: wordpress-form-manager.php:232
+msgid "Edit Form - Advanced"
+msgstr "Bewerk formulier - geavanceerd"
+
+#. Plugin Name of the plugin/theme
+msgid "Form Manager"
+msgstr "Form Manager"
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.campbellhoffman.com/form-manager/"
+msgstr "http://www.campbellhoffman.com/form-manager/"
+
+#. Description of the plugin/theme
+msgid "Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;"
+msgstr "Maak aangepaste vormen; download ingevoerde gegevens in CSV-formaat;. validatie, verplichte velden, aangepaste bevestigingen;"
+
+#. Author of the plugin/theme
+msgid "Campbell Hoffman"
+msgstr "Sander Kolthof"
+
+#. Author URI of the plugin/theme
+msgid "http://www.campbellhoffman.com/"
+msgstr "http://www.fullcirclemedia.nl/"
+

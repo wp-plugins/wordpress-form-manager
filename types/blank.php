@@ -19,9 +19,13 @@ class fm_dummyControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "TEXT";
 	}
 
 	public function editItem($uniqueName, $itemInfo){
@@ -59,13 +63,16 @@ class fm_dummyControl extends fm_controlBase{
 	}*/
 		
 	protected function showExtraScripts(){
-		?><script type="text/javascript">
+		?>
+<script type="text/javascript">
+//<![CDATA[
 		function fm_<?php echo $this->getTypeName(); ?>_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 			}
-		}		
-		</script>
+		}
+//]]>
+</script>
 		<?php
 	}
 	

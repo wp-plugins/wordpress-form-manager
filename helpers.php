@@ -60,6 +60,19 @@ function helper_option_field($id, $label, $options, $value = false, $desc = ""){
 	<?php
 }
 
+function fm_write_file($fullPath, $fileData, $text = true){
+	if(! WP_Filesystem() ){
+		return "Could not initialize WP filesystem";
+	}
+	
+	global $wp_filesystem;
+	if(! $wp_filesystem->put_contents( $fullPath, $fileData, FS_CHMOD_FILE ) ) {
+		return "Error writing file";
+	}
+	
+	return 0;
+}
+
 function fm_get_file_data( $file, $fields) {
 	
 	$fp = fopen( $file, 'r' );

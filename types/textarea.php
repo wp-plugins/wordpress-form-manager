@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are textarea element settings */
 
 class fm_textareaControl extends fm_controlBase{
 	public function getTypeName(){ return "textarea"; }
@@ -27,9 +26,13 @@ class fm_textareaControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "TEXT";
 	}
 	
 	public function editItem($uniqueName, $itemInfo){
@@ -73,6 +76,7 @@ class fm_textareaControl extends fm_controlBase{
 
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
+//<![CDATA[
 		function fm_textarea_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
@@ -83,7 +87,8 @@ class fm_textareaControl extends fm_controlBase{
 					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
 		}
-		</script>
+//]]>
+</script>
 		<?php
 	}
 	
