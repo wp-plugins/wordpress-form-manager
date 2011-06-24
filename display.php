@@ -478,7 +478,7 @@ function fm_form_ID(){
 }
 function fm_form_submit_btn_script(){
 	global $fm_display;
-	return "fm_submit_onclick(".$fm_display->currentFormInfo['ID'].")";
+	return "return fm_submit_onclick(".$fm_display->currentFormInfo['ID'].")";
 }
 
 function fm_form_the_title(){
@@ -493,7 +493,7 @@ function fm_form_the_submit_btn(){
 			"id=\"".fm_form_submit_btn_id()."\" ".
 			"class=\"submit\" ".
 			"value=\"".fm_form_submit_btn_text()."\" ".
-			"onsubmit=\"".fm_form_submit_btn_script()."\" ".
+			"onclick=\"".fm_form_submit_btn_script()."\" ".
 			" />\n";
 }
 
