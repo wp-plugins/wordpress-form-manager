@@ -6,6 +6,7 @@ public $formsTable;
 public $itemsTable;
 public $settingsTable;
 public $templatesTable;
+public $showerr;
 public $conn;
 
 
@@ -21,7 +22,7 @@ function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, 
 	$this->conn = $conn;
 	$this->cachedInfo = array();
 	$this->lastPostFailed = false;
-	
+	$this->showerr = true;
 	$this->initDefaultSettings();
 }
 
@@ -30,7 +31,8 @@ function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, 
 
 function query($q){
 	//echo '<p>'.$q.'</p>';
-	$res = mysql_query($q, $this->conn) or die(mysql_error());
+	$res = mysql_query($q, $this->conn);
+	if($this->showerr && mysql_errno()) die(mysql_error());
 	return $res;
 }
 
@@ -65,7 +67,7 @@ function initDefaultSettings(){
 $this->formSettingsKeys = array(
 					'title' => '',
 					'submitted_msg' => '', 
-					'submit_btn_text' => '', 
+					'submit_btn_text' => __('Submit', 'wordpress-form-manager'), 
 					'required_msg' => '', 
 					'action' => '',
 					'data_index' => '',
@@ -79,14 +81,15 @@ $this->formSettingsKeys = array(
 					'summary_template' => '',
 					'template_values' => '',
 					'show_summary' => 0,
-					'use_advanced_email' => false,
+					'use_advanced_email' => 0,
 					'advanced_email' => '',
 					'publish_post' => 0,
 					'publish_post_category' => '',
-					'publish_post_title' => '%s Submission',
+					'publish_post_title' => __('%s Submission', 'wordpress-form-manager'),
 					'auto_redirect' => 0,
 					'auto_redirect_page' => 0,
-					'auto_redirect_timeout' => 5
+					'auto_redirect_timeout' => 5,
+					'conditions' => ''
 					);
 					
 $this->itemKeys = array (
@@ -107,7 +110,7 @@ $this->globalSettings = array(
 					'recaptcha_theme' => 'red',
 					/* translators: the default name of a new form */				
 					'title' =>				__("New Form", 'wordpress-form-manager'),	
-					'submitted_msg' => 		'Thank you! Your data has been submitted.', 
+					'submitted_msg' => 		__('Thank you! Your data has been submitted.', 'wordpress-form-manager'), 
 					/* translators: the default message given if a required item is left blank.  You must include a backslash before any single quotes */
 					'required_msg' => 		__("\'%s\' is required.", 'wordpress-form-manager'),
 					'email_admin' => "YES",
@@ -130,14 +133,14 @@ $this->globalSettings = array(
 					'text_validator_2' => array('name' => 'email',
 												/* translators: the following are for the e-mail validator */
 												'label' => __("E-Mail", 'wordpress-form-manager'),
-												'message' => __("'%s' must be a valid E-Mail address", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid e-mail address", 'wordpress-form-manager'),
 												'regexp' => '/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/'
 												),
 					'text_validator_3' => array('name' => 'date',
 												/* translators: the following are for the date validator */
 												'label' => __("Date (MM/DD/YY)", 'wordpress-form-manager'),
 												'message' => __("'%s' must be a date (MM/DD/YY)", 'wordpress-form-manager'),
-												'regexp' => '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'
+												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/'
 												)
 					);
 }
@@ -184,36 +187,38 @@ function setupFormManager(){
 		auto_redirect		- whether or not to do the automatic redirect
 		auto_redirect_page	- the page / post ID of the page to go to after (timeout) seconds
 		auto_redirect_timeout - the timeout for the automatic redirect
+		conditions			- associative array structure, specifying form interface behavior conditions (e.g., only show elements if other elements have certain values)
 	*/	
 	
 	
 	$sql = "CREATE TABLE `".$this->formsTable."` (
 		`ID` INT DEFAULT '0' NOT NULL,
-		`title` TEXT DEFAULT '' NOT NULL,
-		`submitted_msg` TEXT NOT NULL DEFAULT '',
+		`title` TEXT NOT NULL,
+		`submitted_msg` TEXT NOT NULL,
 		`submit_btn_text` VARCHAR( 32 ) DEFAULT '' NOT NULL,
-		`required_msg` TEXT DEFAULT '' NOT NULL,
+		`required_msg` TEXT NOT NULL,
 		`data_table` VARCHAR( 32 ) DEFAULT '' NOT NULL,
-		`action` TEXT DEFAULT '' NOT NULL,
+		`action` TEXT NOT NULL,
 		`data_index` VARCHAR( 32 ) DEFAULT '' NOT NULL,
 		`shortcode` VARCHAR( 64 ) DEFAULT '' NOT NULL,
 		`type` VARCHAR( 32 ) DEFAULT '' NOT NULL,
-		`email_list` TEXT DEFAULT '' NOT NULL,
+		`email_list` TEXT NOT NULL,
 		`behaviors` VARCHAR( 256 ) DEFAULT '' NOT NULL,
 		`email_user_field` VARCHAR( 64 ) DEFAULT '' NOT NULL,
 		`form_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`email_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`summary_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
-		`template_values` TEXT DEFAULT '' NOT NULL,
+		`template_values` TEXT NOT NULL,
 		`show_summary` BOOL DEFAULT '0' NOT NULL,
 		`use_advanced_email` BOOL DEFAULT '0' NOT NULL,
-		`advanced_email` TEXT DEFAULT '' NOT NULL,
+		`advanced_email` TEXT NOT NULL,
 		`publish_post` BOOL DEFAULT '0' NOT NULL,
-		`publish_post_category` TEXT DEFAULT '' NOT NULL,
-		`publish_post_title` TEXT DEFAULT '' NOT NULL,
+		`publish_post_category` TEXT NOT NULL,
+		`publish_post_title` TEXT NOT NULL,
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
-		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL
+		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
+		`conditions` TEXT NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -242,13 +247,13 @@ function setupFormManager(){
 	$sql = "CREATE TABLE `".$this->itemsTable."` ( 
 				`ID` INT NOT NULL ,							
 				`index` INT NOT NULL ,
-				`unique_name` VARCHAR( 64 ) NOT NULL ,
-				`type` VARCHAR( 32 ) NOT NULL ,
+				`unique_name` VARCHAR( 64 ) DEFAULT '' NOT NULL ,
+				`type` VARCHAR( 32 ) DEFAULT '' NOT NULL ,
 				`extra` TEXT NOT NULL ,
 				`nickname` TEXT NOT NULL ,
 				`label` TEXT NOT NULL ,
 				`required` BOOL NOT NULL ,
-				`db_type` VARCHAR( 32 ) NOT NULL ,
+				`db_type` VARCHAR( 16 ) DEFAULT '' NOT NULL ,
 				`description` TEXT NOT NULL ,
 				INDEX ( `ID` ) ,
 				UNIQUE (`unique_name`)
@@ -263,7 +268,7 @@ function setupFormManager(){
 		`title` TEXT NOT NULL,
 		`filename` TEXT NOT NULL,
 		`content` TEXT NOT NULL,
-		`status` VARCHAR( 32 ) NOT NULL,
+		`status` VARCHAR( 32 ) DEFAULT '' NOT NULL,
 		`modified` BIGINT NOT NULL
 		) ".$charset_collate.";";
 	
@@ -385,15 +390,33 @@ function updateDataTables(){
 		$q = "SHOW COLUMNS FROM `".$dataTable."`";
 		$res = $this->query($q);
 		$found = false;
-		while($row = mysql_fetch_assoc($res))
+		$postIDfound = false;
+		$uniqueIDfound = false;
+		
+		while($row = mysql_fetch_assoc($res)){
 			if($row['Field'] == 'user_ip')
 				$found = true;
+			if($row['Field'] == 'post_id')
+				$postIDfound = true;
+			if($row['Field'] == 'unique_id')
+				$uniqueIDfound = true;
+		}
 		mysql_free_result($res);
 		
 		if(!$found){
-			$q = "ALTER TABLE `".$dataTable."` ADD `user_ip` VARCHAR( 64 ) NOT NULL";
+			$q = "ALTER TABLE `".$dataTable."` ADD `user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL";
 			$this->query($q);
-		}		
+		}
+		if(!$postIDfound){
+			$q = "ALTER TABLE `".$dataTable."` ADD `post_id` INT DEFAULT '0' NOT NULL";
+			$this->query($q);
+		}
+		if(!$uniqueIDfound){
+			$q = "ALTER TABLE `".$dataTable."` ADD `unique_id` VARCHAR( 32 ) DEFAULT '' NOT NULL";
+			$this->query($q);
+			$q = "ALTER TABLE `".$dataTable."` ADD INDEX (`unique_id`)";
+			$this->query($q);
+		}
 	}
 }
 
@@ -408,6 +431,29 @@ function fixTemplatesTableModified(){
 	}
 	mysql_free_result($res);	
 }
+
+function fixDBTypeBug(){
+	$q = "SELECT `unique_name`, `db_type` FROM `".$this->itemsTable."`";
+	$res = $this->query($q);
+	while($row = mysql_fetch_assoc($res)){
+		$dbType = $row['db_type'];
+		if(trim($dbType) != "NONE"){
+			$q = "UPDATE `".$this->itemsTable."` SET `db_type` = 'DATA' WHERE `unique_name` = '".$row['unique_name']."'";
+			$this->query($q);
+		}
+	}
+	mysql_free_result($res);
+}
+
+function fixDateValidator(){
+	$count = $this->getGlobalSetting('text_validator_count');
+	$val = $this->getGlobalSetting('text_validator_3');
+	if($val['regexp'] == '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'){
+		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/';
+		$this->setGlobalSetting('text_validator_3', $val);
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
@@ -459,8 +505,11 @@ function storeTemplate($filename, $title, $content, $modified){
 			"`modified` = '".addslashes($modified)."'";
 	$this->query($q);
 }
-function getTemplate($filename){
-	$q = "SELECT * FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
+function getTemplate($filename, $content = true){
+	if($content)
+		$q = "SELECT * FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
+	else
+		$q = "SELECT `title`, `filename`, `status`, `modified` FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
 	$res = $this->query($q);
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);
@@ -657,7 +706,7 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 		if($processed === false){
 			$this->lastPostFailed = true;
 		}
-		if($item['db_type'] != "NONE")						
+		if($this->isDataCol($item['unique_name']))						
 			$postData[$item['unique_name']] = $processed;
 	}
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
@@ -676,7 +725,9 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 			$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
 			$this->query($q);
 		}
-		$this->insertSubmissionData($dataTable, $postData);
+		if($this->insertSubmissionData($formID, $dataTable, $postData) === false){
+			$this->lastPostFailed = true;
+		}
 	}
 	
 	return $postData;
@@ -696,18 +747,28 @@ function getErrorUniqueName(){
 	return $this->lastUniqueName;
 }
 
-function insertSubmissionData($dataTable, $postData){
+function insertSubmissionData($formID, $dataTable, $postData){
+	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$postData['unique_id']."'";
+	$res = $this->query($q);
+	
+	if(mysql_num_rows($res) > 0){
+		mysql_free_result($res);
+		return false;
+	}
+	
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
+	$postData['timestamp'] = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+	
 	foreach($postData as $k=>$v)
 		$arr[] = "`{$k}` = '".$v."'";
 	$q .= implode(",",$arr);
 	$this->query($q);
 }
 
-function writeFormSubmissionDataCSV($formID, $fname){
+function getFormSubmissionDataCSV($formID){
 	$formInfo = $this->getForm($formID);
-	$data = $this->getFormSubmissionData($formID);
+	$data = $this->getFormSubmissionData($formID, 'timestamp', 'DESC', 0, 0);
 	
 	$data = $data['data'];
 	//store the lines in an array
@@ -719,7 +780,7 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	//index form fields by unique_name, remove fields with no data
 	$newItems = array();
 	foreach($formInfo['items'] as $item){
-		if($item['db_type'] != "NONE")
+		if($this->isDataCol($item['unique_name']))
 			$newItems[$item['unique_name']] = $item;
 	}
 	$formInfo['items'] = $newItems;
@@ -766,14 +827,9 @@ function writeFormSubmissionDataCSV($formID, $fname){
 	$str = ob_get_contents();
 	ob_end_clean();
 	
-	
 	//Properly encode the CSV so Excel can open it: Credit for this goes to someone called Eugene Murai
-	$fp = fopen($fname, 'w') or die("Failed to open file: '".$php_errormsg."'");
-	
-	$tmp = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
-	$write = fwrite( $fp, $tmp );	
-	
-	fclose($fp);
+	$str = chr(255).chr(254).mb_convert_encoding( $str, 'UTF-16LE', 'UTF-8');
+	return $str;
 }
 
 function getFormSubmissionData($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){
@@ -847,11 +903,21 @@ function updateDataSubmissionRow($formID, $timestamp, $user, $user_ip, $newData)
 	$q.= " WHERE `timestamp` = '{$timestamp}' AND `user` = '{$user}' AND `user_ip` = '{$user_ip}'";
 	$this->query($q);
 }
+
+function dataHasPublishedSubmissions($formID){
+	$hasPosts = false;
+	$dataTable = $this->getDataTableName($formID);
+	$q = "SELECT COUNT(*) FROM `{$dataTable}` WHERE `post_id` > 0";
+	$res = $this->query($q);
+	$row = mysql_fetch_array($res);
+	mysql_free_result($res);
+	if($row[0] > 0) return  true;
+	return false;
+}
 							
-//determines if $uniqueName is a "NONE" db_type or not
-function isDataCol($formID, $uniqueName){
-	$cacheKey = $uniqueName."-type";
-	$type = $this->getCache($formID, $cacheKey);
+function isDataCol($uniqueName){
+	$cacheKey = $uniqueName."-is-data";
+	$type = $this->getCache(1, $cacheKey);
 	if($type == null){
 		$q = "SELECT `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '{$uniqueName}'";
 		$res = $this->query($q);
@@ -859,8 +925,68 @@ function isDataCol($formID, $uniqueName){
 		mysql_free_result($res);
 		$type = $row['db_type'];
 		$this->setCache($formID, $cacheKey, $type);
-	}	
+	}
 	return ($type != "NONE");	
+}
+
+function getDataType($uniqueName){
+	$cacheKey = $uniqueName."-type";
+	$fullType = $this->getCache(1, $cacheKey);
+	if($fullType == null){
+		$q = "SELECT `ID`, `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
+		$res = $this->query($q);		
+		$row = mysql_fetch_assoc($res);		
+		mysql_free_result($res);
+		
+		if($row['db_type'] == "NONE") return "NONE";
+		
+		$dataTable = $this->getDataTableName($row['ID']);
+		
+		$q = "SHOW FULL COLUMNS FROM `{$dataTable}` LIKE '".$uniqueName."'";
+		$res = $this->query($q);		
+		$row = mysql_fetch_assoc($res);		
+		mysql_free_result($res);
+		
+		//VARCHAR( 1000 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'doop'
+		if($row['Collation'] == "")
+			$charCollate = "";
+		else{
+			$q = "SHOW COLLATION LIKE '".$row['Collation']."'";
+			$res = $this->query($q);
+			$collRow = mysql_fetch_assoc($res);
+			mysql_free_result($res);
+			$charCollate = " CHARACTER SET ".$collRow['Charset']." COLLATE ".$row['Collation'];	
+		}
+		
+		switch($row['Type']){
+			case 'text':
+			case 'tinytext':
+			case 'mediumtext':
+			case 'longtext':
+			case 'blob':
+			case 'tinyblob':
+			case 'mediumblob':
+			case 'longblob':
+				$default = "";
+				break;
+			default:
+				$default = " DEFAULT '".$row['Default']."'";
+		}
+
+		$null = ($row['Null'] == "NO" ? " NOT NULL" : " NULL");
+		
+		$fullType = $row['Type'].$charCollate.$null.$default;
+						
+		$fullType = trim($fullType);
+		$this->setCache($formID, $cacheKey, $fullType);
+	}
+	return $fullType;
+}
+
+function updateDataType($formID, $uniqueName, $newType){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "ALTER TABLE `".$dataTable."` CHANGE `".$uniqueName."` `".$uniqueName."` ".$newType;
+	$this->query($q);
 }
 
 function getSubmissionDataCount($formID){ return $this->getSubmissionDataNumRows($formID); }
@@ -875,7 +1001,7 @@ function getSubmissionDataNumRows($formID){
 
 function getLastSubmission($formID){
 	$dataTable = $this->getDataTableName($formID);
-	$q = "SELECT * FROM `{$dataTable}` ORDER BY `timestamp` DESC LIMIT 1";
+	$q = "SELECT * FROM `{$dataTable}` WHERE `timestamp` = ( SELECT MAX(`timestamp`) FROM `{$dataTable}` )";
 	$res = $this->query($q);
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);
@@ -1093,16 +1219,11 @@ function createDataTable($formInfo, $dataTable){
 		
 	$q = "CREATE TABLE `{$dataTable}` (".
 		"`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,".
-		"`user` VARCHAR( 64 ) NOT NULL ,".
-		"`user_ip` VARCHAR( 64 ) NOT NULL";
-			
-	if(isset($formInfo['items']) && sizeof($formInfo['items'])>0){
-		$itemArr = array();
-		foreach($formInfo['items'] as $item)
-			$itemArr[] = "`".$item['unique_name']."` ".($item['db_type']==""||!isset($item['db_type'])?"TEXT":$item['db_type'])." NOT NULL";			
-		$itemArr[] = "PRIMARY KEY (`timestamp`)";
-		$q.=", ".implode(", ",$itemArr);
-	}
+		"`user` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
+		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
+		"`post_id` INT DEFAULT '0' NOT NULL ,".
+		"`unique_id` VARCHAR( 32 ) DEFAULT '' NOT NULL ,".
+		"INDEX (`unique_id`)";
 	$q.= ") ".$charset_collate.";";
 	$this->query($q);
 }
@@ -1116,39 +1237,6 @@ function dataTablePrefix(){
 //////////////////////////////////////////////////////////////////
 // Items
 
-
-//change a 'unique_name' for a particular form item. Fails if duplicate, or of 'old' name does not exist
-function changeUniqueName($old, $new){
-	//first verify that the new name doesn't already exist
-	$q = "SELECT `unique_name` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$new."'";
-	$res = $this->query($q);
-	$n = mysql_num_rows($res);
-	mysql_free_result($res);	
-	if($n>0) return -1;
-	
-	//now make sure the old name exists
-	$q = "SELECT `unique_name`, `ID`, `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$old."'";
-	$res =$this->query($q);
-	$n = mysql_num_rows($res);
-	$row = mysql_fetch_assoc($res);
-	mysql_free_result($res);	
-	if($n==0) return -2;
-	$formID = $row['ID'];
-	$dbType = $row['db_type'];
-	
-	//do the swap
-	$q = "UPDATE `".$this->itemsTable."` SET `unique_name` = '".$new."' WHERE `unique_name` = '".$old."' LIMIT 1;";
-	$this->query($q);
-	
-	if($dbType!="NONE") $this->changeDataFieldName($old, $new, $formID, $dbType);
-	return true;
-}
-
-function changeDataFieldName($old, $new, $formID, $dbType){
-	$dataTable = $this->getDataTableName($formID);	
-	$q = "ALTER TABLE `".$dataTable."` CHANGE `".$old."` `".$new."` ".$dbType;
-	$this->query($q);
-}
 
 //returns an indexed array of all items in a form
 function getFormItems($formID){
@@ -1186,8 +1274,8 @@ function createFormItem($formID, $uniqueName, $itemInfo){
 		$itemInfo['index'] = $row['index'] + 1;
 		mysql_free_result($res);
 	}
-		//now add the item to the items table
-	if(!isset($itemInfo['db_type'])) $itemInfo['db_type'] = 'TEXT';
+	
+	//now add the item to the items table
 	$itemInfo = $this->packItem($itemInfo);
 
 	$ignoreKeys = array();
@@ -1204,12 +1292,14 @@ function createFormItem($formID, $uniqueName, $itemInfo){
 	$this->query($q);
 	
 	//add a field to the data table
-	if($itemInfo['db_type'] != "NONE") $this->createFormItemDataField($formID, $uniqueName, $itemInfo);
+	if($this->isDataCol($itemInfo['unique_name'])) $this->createFormItemDataField($formID, $uniqueName, $itemInfo);
 }	
 
 function createFormItemDataField($formID, $uniqueName, $itemInfo){	
-	$dataTable = $this->getDataTableName($formID);		
-	$q = "ALTER TABLE `".$dataTable."` ADD `".$uniqueName."` ".$itemInfo['db_type']." NOT NULL";
+	global $fm_controls;
+	
+	$dataTable = $this->getDataTableName($formID);
+	$q = "ALTER TABLE `".$dataTable."` ADD `".$uniqueName."` ".($fm_controls[$itemInfo['type']]->getColumnType())." NOT NULL";
 	$this->query($q);
 }
 
@@ -1224,37 +1314,11 @@ function updateFormItem($formID, $uniqueName, $itemInfo){
 					
 	$toUpdate = array_intersect_key($itemInfo,$this->itemKeys);
 	$strArr=array();
-	foreach($toUpdate as $k=>$v)
-		$strArr[] = "`{$k}` = '".$itemInfo[$k]."'";
+	foreach($toUpdate as $k=>$v){
+		$strArr[] = "`{$k}` = '".$itemInfo[$k]."'";		
+	}
 	$q = "UPDATE `".$this->itemsTable."` SET ".implode(", ",$strArr)." WHERE `unique_name` = '".$uniqueName."'";
 
-	$this->query($q);
-	
-	//check if the db_type was updated
-	if(isset($itemInfo['db_type']) && $itemInfo['db_type'] != "NONE"){
-		//check if this is the table's index
-		$formInfo = $this->getFormSettings($formID);
-		$isIndex = ($formInfo['data_index'] == $uniqueName);
-		if($isIndex) $this->removeDataFieldIndex($formID); //remove it and add it again; this would happen anyway, but we also have to deal with the 'text' and 'blob' prefix issue; better to just remove the index and use our own safe index adding function after we change the field type
-		$this->updateDataFieldType($formID, $uniqueName, $itemInfo['db_type']);	
-		if($isIndex) $this->setDataFieldIndex($formID, $uniqueName, false);
-	}
-}
-
-function updateDataFieldType($formID, $uniqueName, $newType){
-	$dataTable = $this->getDataTableName($formID);
-	$q = "ALTER TABLE `".$dataTable."` MODIFY `".$uniqueName."` ".$newType;
-	$this->query($q);
-}
-
-function setDataFieldIndex($formID, $uniqueName, $remove=true){
-	global $msg;
-	$indexItem = $this->getFormItem($uniqueName);
-	$dbType = $indexItem['db_type'];
-	$dataTable = $this->getDataTableName($formID);
-	if($remove) $this->removeDataFieldIndex($formID);
-	$prefixStr = (strtolower($dbType) == "text" || strtolower($dbType) == "blob")?"(10)":"";
-	$q = "ALTER TABLE `".$dataTable."` ADD INDEX (`".$uniqueName."`{$prefixStr})";
 	$this->query($q);	
 }
 
@@ -1366,10 +1430,10 @@ function packItem($item){
 		$item['extra'] = array();
 		
 	foreach($item as $k=>$v){
-		if($k != 'extra' || !is_array($item['extra']))
-			$item[$k] = addslashes($item[$k]);
-		else		
+		if($k == 'extra' && is_array($item['extra']))
 			$item['extra'] = addslashes(serialize($item['extra']));
+		else
+			$item[$k] = addslashes($item[$k]);			
 	}
 	return $item;
 }
@@ -1405,6 +1469,143 @@ function getDataTableName($formID){
 	}
 	return $dataTable;
 }
+
+// database consistency check; returns a string telling what was checked and the results
+function consistencyCheck(){
+	
+	//first see if the basic tables exist
+	$tbls = array($this->formsTable, $this->itemsTable, $this->templatesTable, $this->settingsTable);
+	$names = array('Forms', 'Items', 'Templates', 'Settings');
+	$found = array();
+	
+	for($x=0;$x<sizeof($tbls);$x++){
+		echo  $names[$x]." table (".$tbls[$x].")... ";
+		if($this->tableExists($tbls[$x])){
+			echo  "OK\n";
+			$found[$x] = true;
+		}else{
+			echo "FAIL\n";
+			$found[$x] = false;
+		}
+	}	
+	
+	// do the table checks	
+	if($found[0]){
+		echo  "Forms table...\n";
+	
+		//make sure a data table exists for each form
+		$q = "SELECT `ID`, `data_table` FROM `".$this->formsTable."` WHERE `ID` > 0";
+		$res = $this->query($q);
+		while($row = mysql_fetch_assoc($res)){
+			echo  "Form ".$row['ID']." for data table: ";
+			$q = "SHOW TABLES LIKE '".$row['data_table']."'";
+			if(mysql_num_rows($this->query($q)) == 1)
+				echo  "OK\n";
+			else
+				echo  "FAIL\n";
+		}
+		mysql_free_result($res);		
+		
+		//no duplicate form IDs or slugs
+		echo  "For duplicate IDs and slugs...\n";
+		$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` > 0";
+		$res = $this->query($q);
+		$ids = array();
+		$slugs = array();
+		while($row = mysql_fetch_assoc($res)){
+			$ids[] = $row['ID'];
+			$slugs[] = $row['shortcode'];
+		}		
+		mysql_free_result($res);
+		
+		sort($ids);
+		sort($slugs);
+		$fail = false;
+		$last = $ids[0];
+		for($x=1;$x<sizeof($ids);$x++){
+			if($last == $ids[$x]){
+				" DUPLICATE ID FOUND (".$ids[$x].")\n";
+				$fail = true;
+			}			
+			$last = $ids[$x];
+		}
+		$last = $slugs[$x];
+		for($x=1;$x<sizeof($slugs);$x++){
+			if($last == $slugs[$x]){
+				" DUPLICATE SLUG FOUND (".$slugs[$x].")\n";
+				$fail = true;
+			}
+			$last = $slugs[$x];
+		}
+		if(!$fail) echo  "OK\n";
+	}
+	
+	//list of entries in the items table
+	if($found[1] && $found[0]){
+		echo  "Items table...\n";
+		echo "Checking form IDs exists...\n";
+		$q = "SELECT * FROM `".$this->itemsTable."`";
+		$res = $this->query($q);
+		$items = array();
+		$err = false;
+		while($row = mysql_fetch_assoc($res)){
+			$items[] = $row;
+			if(!in_array($row['ID'], $ids)){
+				echo  $row['unique_name'].": nonexistent form ".$row['ID']."\n";
+				$err = true;
+			}
+		}
+		mysql_free_result($res);
+		if(!$err)
+			echo  "OK\n";
+		
+		echo "Checking unique names...\n";
+		$last = $items[0]['unique_name'];
+		$err = false;
+		for($x=1;$x<sizeof($items);$x++){
+			if($last == $items[$x]['unique_name']){
+				$err = true;
+				echo  "Duplicate: ".$last."\n";
+			}			
+		}
+		if(!$err)
+			echo "SLUGS OK\n";
+	}
+	
+	//list of entries in the templates table
+	if($found[2]){
+		echo  "Templates entries: \n";
+		$q = "SELECT `title`, `filename`, `modified` FROM `".$this->templatesTable."`";
+		$res = $this->query($q);
+		if(mysql_num_rows($res) > 0){
+			while($row = mysql_fetch_assoc($res)){
+				echo " Title: ".$row['title']."  Filename: ".$row['filename']."  Modified: ".$row['modified']."\n";
+			}
+			mysql_free_result($res);
+		}
+	}
+	
+	//list of entries in the settings table
+	if($found[3]){
+		echo  "Settings entries: \n";
+		$q = "SELECT * FROM `".$this->settingsTable."`";
+		$res = $this->query($q);
+		while($row = mysql_fetch_assoc($res)){
+			echo " Name: ".$row['setting_name']."  Value: ".$row['setting_value']."\n";
+		}
+		mysql_fetch_assoc($res);
+	}
+	
+	echo "Done.\n";
+}
+
+function tableExists($tableName){
+	$q = "SHOW TABLES LIKE '".$this->formsTable."'";
+	$res = mysql_query($q);
+	if(mysql_num_rows($res) == 0) return false;
+	return true;		
+}
+
 
 }
 
