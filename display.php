@@ -136,10 +136,11 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 	
 	$str.= ob_get_contents();
 	ob_end_clean();
-		
+	
 	// show the support scripts, validation, etc.
-	$footer = new fm_footer_class($formInfo, $options);
-	add_action('wp_footer', array($footer, 'showTemplateScripts'));
+	$scripts = new fm_script_display_class($formInfo, $options);
+	add_action('wp_footer', array($scripts, 'showBeforeFormScripts'));
+	add_action('wp_footer', array($scripts, 'showAfterFormScripts'));
 	
 	return $str;
 }
@@ -243,8 +244,7 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 ///////////////////////////////////////////////////////////////////////////////////////////////
 }
 
-/// an ugly hack to display the scripts in the footer
-class fm_footer_class{
+class fm_script_display_class{
 	var $formInfo;
 	var $options;
 	
@@ -253,7 +253,7 @@ class fm_footer_class{
 		$this->options = $_options;
 	}
 	
-	public function showTemplateScripts(){
+	public function showBeforeFormScripts(){
 		global $fm_controls;
 		
 		$formInfo = &$this->formInfo;
@@ -280,6 +280,18 @@ fm_current_form = <?php echo $formInfo['ID'];?>;
 	}
 ?>
 
+//]]>
+</script><?php
+	}
+	
+	public function showAfterFormScripts(){
+		global $fm_controls;
+		
+		$formInfo = &$this->formInfo;
+		$options = $this->options;
+		
+		?><script type="text/javascript">
+//<![CDATA[
 fm_register_form(<?php echo $formInfo['ID'];?>);
 <?php
 	//below is a workaround: the 'default value' for a text item is displayed as a placeholder.  In some instances, this should be an actual value in the field.  The script below takes care of this.	
@@ -292,9 +304,9 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 	
 	echo $this->getConditionHandlerScripts();
 ?>
-
 //]]>
 </script><?php
+	
 	}
 	
 	protected function getValidConditions($conditions){
