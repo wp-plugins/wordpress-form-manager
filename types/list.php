@@ -1,5 +1,4 @@
 <?php
-/* translators: list element settings */
 
 class fm_customListControl extends fm_controlBase{
 	
@@ -21,9 +20,13 @@ class fm_customListControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "TEXT";
 	}
 	
 	public function showItem($uniqueName, $itemInfo){
@@ -57,9 +60,7 @@ class fm_customListControl extends fm_controlBase{
 											),
 						'value' => $itemInfo['extra']['value'],	
 						'options' => $itemInfo['extra']['options']
-						);
-			if($itemInfo['required'] == "1")
-				$elem['options'] = array_merge(array('-1' => "..."), $elem['options']);
+						);			
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';								
 			return fe_getElementHTML($elem);
@@ -144,42 +145,6 @@ class fm_customListControl extends fm_controlBase{
 		
 		return $opt;
 	}
-		
-	//called when displaying the user form; used for validation scripts, etc.
-	public function showUserScripts(){		
-		?>
-		<script type="text/javascript">
-		function fm_custom_list_required_validator(formID, itemID){
-			var listType = document.getElementById('fm-form-' + formID)[itemID + '-list-style'].value;
-			switch(listType){
-				case "radio":
-					return fm_radio_list_required_validator(formID, itemID);
-				case "checkbox": 
-					return fm_checkbox_list_required_validator(formID, itemID);
-				default:
-					return fm_select_list_required_validator(formID, itemID);
-			}
-			return false;
-		}
-		function fm_select_list_required_validator(formID, itemID){			
-			return (document.getElementById('fm-form-' + formID)[itemID].value != 0);
-		}
-		function fm_radio_list_required_validator(formID, itemID){	
-			var radioList = document.getElementById('fm-form-' + formID)[itemID];
-			for(var x=0;x<radioList.length;x++)
-				if(radioList[x].checked == true) return true;		
-			return false;
-		}
-		function fm_checkbox_list_required_validator(formID, itemID){
-			var count = document.getElementById('fm-form-' + formID)[itemID + '-count'].value;
-			for(var x=0;x<count;x++){
-				if(document.getElementById('fm-form-' + formID)[itemID + '-' + x].checked) return true;
-			}
-			return false;
-		}
-		</script>
-		<?php		
-	}
 	
 	//called when displaying a required form item in the user form; returns the name of a javascript function that should return 'true' only if the input is not blank
 	public function getRequiredValidatorName(){ 
@@ -188,6 +153,7 @@ class fm_customListControl extends fm_controlBase{
 	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
+//<![CDATA[
 		function fm_custom_list_show_hide(itemID, isDone){
 			if(isDone){				
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
@@ -283,7 +249,8 @@ class fm_customListControl extends fm_controlBase{
 			var textInput = document.getElementById(optionID + "-text");
 			return textInput.value;
 		}
-		</script>
+//]]>
+</script>
 		<?php
 	}
 	public function getShowHideCallbackName(){

@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are recaptcha element settings */
 
 class fm_recaptchaControl extends fm_controlBase{
 	
@@ -81,17 +80,19 @@ class fm_recaptchaControl extends fm_controlBase{
 	}
 	
 	public function getShowHideCallbackName(){
-		return "fm_".$this->getTypeName()."_show_hide";
+		return "fm_recaptcha_show_hide";
 	}
 
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
-		function fm_<?php echo $this->getTypeName(); ?>_show_hide(itemID, isDone){
+//<![CDATA[
+		function fm_recaptcha_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
 			}
-		}		
-		</script>
+		}
+//]]>
+</script>
 		<?php
 	}
 	

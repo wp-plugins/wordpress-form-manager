@@ -1,5 +1,4 @@
 <?php
-/* translators: the following are textarea element settings */
 
 class fm_textareaControl extends fm_controlBase{
 	public function getTypeName(){ return "textarea"; }
@@ -9,12 +8,12 @@ class fm_textareaControl extends fm_controlBase{
 	
 	public function showItem($uniqueName, $itemInfo){
 		$elem=array('type' => 'textarea',
-					'default' => $itemInfo['extra']['value'],
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,
-											'style' => "width:".$itemInfo['extra']['cols']."px;height:".$itemInfo['extra']['rows']."px;"
-											)					
-					);											
+											'style' => "width:".$itemInfo['extra']['cols']."px;height:".$itemInfo['extra']['rows']."px;",
+											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),
+											),
+					);					
 		return fe_getElementHTML($elem);
 	}	
 	
@@ -27,9 +26,13 @@ class fm_textareaControl extends fm_controlBase{
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
-		$itemInfo['db_type'] = "TEXT";
+		$itemInfo['db_type'] = "DATA";
 		
 		return $itemInfo;
+	}
+	
+	public function getColumnType(){
+		return "TEXT";
 	}
 	
 	public function editItem($uniqueName, $itemInfo){
@@ -48,7 +51,7 @@ class fm_textareaControl extends fm_controlBase{
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', __('Default Value', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['value']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'value', __('Placeholder', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['value']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'rows', __('Height (in pixels)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['rows']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'cols', __('Width (in pixels)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['cols']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
@@ -73,6 +76,7 @@ class fm_textareaControl extends fm_controlBase{
 
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
+//<![CDATA[
 		function fm_textarea_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
@@ -83,7 +87,8 @@ class fm_textareaControl extends fm_controlBase{
 					document.getElementById(itemID + '-edit-required').innerHTML = "";
 			}
 		}
-		</script>
+//]]>
+</script>
 		<?php
 	}
 	
