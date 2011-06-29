@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.5.24
+Stable tag: 1.5.25
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -49,6 +49,9 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
 
 == Changelog ==
+= 1.5.25 =
+* Fixed date validator bug
+
 = 1.5.24 =
 * Fixed conflict with Gantry Framework
 * Fixed checkbox bug
