@@ -100,7 +100,8 @@ $this->itemKeys = array (
 					'label' => 0,
 					'required' => 0,
 					'db_type' => 0,
-					'description' => 0
+					'description' => 0,
+					'meta' => 0,
 					);
 
 
@@ -255,6 +256,7 @@ function setupFormManager(){
 				`required` BOOL NOT NULL ,
 				`db_type` VARCHAR( 16 ) DEFAULT '' NOT NULL ,
 				`description` TEXT NOT NULL ,
+				`meta` TEXT NOT NULL ,
 				INDEX ( `ID` ) ,
 				UNIQUE (`unique_name`)
 				) ".$charset_collate.";";
@@ -702,12 +704,16 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 	$dataTable = $this->getDataTableName($formID);
 	$postData = array();
 	foreach($formInfo['items'] as $item){
-		$processed = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
-		if($processed === false){
-			$this->lastPostFailed = true;
-		}
-		if($this->isDataCol($item['unique_name']))						
+		if($this->isDataCol($item['unique_name'])) {
+			//&& (!isset($item['meta']['private']) || $item['meta']['private'] === false) ) {
+			
+			$processed = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
+			if($processed === false){
+				$this->lastPostFailed = true;
+			}
+									
 			$postData[$item['unique_name']] = $processed;
+		}
 	}
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
 		$postData = array_merge($postData, $extraInfo);
@@ -924,7 +930,7 @@ function isDataCol($uniqueName){
 		$row = mysql_fetch_assoc($res);
 		mysql_free_result($res);
 		$type = $row['db_type'];
-		$this->setCache($formID, $cacheKey, $type);
+		$this->setCache(1, $cacheKey, $type);
 	}
 	return ($type != "NONE");	
 }
@@ -1417,10 +1423,14 @@ function initNonces(){
 // Helpers
 function unpackItem($item){
 	foreach($item as $k=>$v){
-		if($k != 'extra')
-			$item[$k] = stripslashes($item[$k]);
-		else			
-			$item['extra'] = unserialize($item['extra']);
+		switch($k){
+			case 'extra':
+			case 'meta':
+				$item[$k] = unserialize($item[$k]);
+				break;
+			default:
+				$item[$k] = stripslashes($item[$k]);
+		}			
 	}
 	return $item;
 }
@@ -1429,11 +1439,19 @@ function packItem($item){
 	if(!isset($item['extra']) || $item['extra']=="")
 		$item['extra'] = array();
 		
+	if(!isset($item['meta']) || $item['meta']=="")
+		$item['meta'] = array();
+	
 	foreach($item as $k=>$v){
-		if($k == 'extra' && is_array($item['extra']))
-			$item['extra'] = addslashes(serialize($item['extra']));
-		else
-			$item[$k] = addslashes($item[$k]);			
+		switch($k){
+			case 'extra':
+			case 'meta':
+				if(is_array($item[$k]))
+					$item[$k] = addslashes(serialize($item[$k]));
+				break;
+			default:
+				$item[$k] = addslashes($item[$k]);
+		}
 	}
 	return $item;
 }

@@ -202,6 +202,7 @@ class fm_controlBase{
 	function showHiddenVars($uniqueName, $itemInfo, $hideKeys = null, $script = "fm_base_get(itemID, index)"){
 		global $fmdb;
 		$itemInfo['extra'] = serialize($itemInfo['extra']);
+		$itemInfo['meta'] = serialize($itemInfo['meta']);
 		if($hideKeys==null) $hideKeys = array();
 		$str.= $this->getScriptHidden($uniqueName, $script)."\n";
 		$str.= $this->getTypeHidden($uniqueName, $itemInfo);

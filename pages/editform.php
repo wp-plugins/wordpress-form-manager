@@ -17,7 +17,7 @@ $pages = array( array('sec' => 'design',
 				),
 				array('sec' => 'nicknames',
 					'title' => __("Form item nicknames", 'wordpress-form-manager'),
-					'linktext' => __("Item Nicknames", 'wordpress-form-manager'),
+					'linktext' => __("Item Meta", 'wordpress-form-manager'),
 					'capability' => 'form_manager_nicknames',
 					'page' => 'editformnn.php'
 				),

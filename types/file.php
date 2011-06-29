@@ -16,7 +16,9 @@ class fm_fileControl extends fm_controlBase{
 		$itemInfo = array();
 		$itemInfo['label'] = __("New File Upload", 'wordpress-form-manager');
 		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
-		$itemInfo['extra'] = array('max_size' => 1000);
+		$itemInfo['extra'] = array('max_size' => 10000,
+									'upload_url' => '%wp_uploads_url%',
+									'upload_dir' => '%wp_uploads_dir%');
 		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
@@ -106,11 +108,16 @@ class fm_fileControl extends fm_controlBase{
 	
 	public function parseUploadDir($dir){
 		$dir = str_replace("%doc_root%", $_SERVER['DOCUMENT_ROOT'], $dir);
+		$uploads = wp_upload_dir();
+		$dir = str_replace("%wp_uploads_dir%", $uploads['path'], $dir);
 		if(substr($dir, -1) != "/" && substr($dir, -1) != "\\") $dir.="/";			
 		return $dir;
 	}
 	
 	public function parseUploadURL($url){
+		$url = str_replace("%site_url%", get_bloginfo('url'), $url);
+		$uploads = wp_upload_dir();
+		$url = str_replace("%wp_uploads_url%", $uploads['url'], $url);
 		if(substr($url, -1) != "/") $url.="/";	
 		return $url;
 	}

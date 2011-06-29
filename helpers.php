@@ -114,6 +114,14 @@ function fm_get_slimstat_IP_link($queryVars, $ipAddr){
 	return "<a href=\"".get_admin_url(null, 'index.php')."?".http_build_query(array_merge($queryVars, array('page' => 'wp-slimstat/view/index.php', 'slimpanel' => 4, 'ip' => $ipAddr, 'ip-op' => 'equal', 'direction' => 'DESC')))."\">".$ipAddr."</a>";
 }
 
+function fm_is_private_item($itemInfo){
+	return !( (! isset($itemInfo['meta']['private']))
+			|| $itemInfo['meta']['private'] === false
+			|| current_user_can($itemInfo['meta']['capability'])
+			|| (trim($itemInfo['meta']['capability']) == "" && is_admin() )
+			);
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Custom shortcode processor
 

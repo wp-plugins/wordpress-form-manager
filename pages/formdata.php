@@ -75,8 +75,10 @@ else if((!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')) && i
 			if($item['type'] != 'file'
 			&& $item['type'] != 'separator'
 			&& $item['type'] != 'note'
-			&& $item['type'] != 'recaptcha'){		
-				$processed = $fm_controls[$item['type']]->processPost($item['unique_name']."-".$x, $item);
+			&& $item['type'] != 'recaptcha'	
+			&& !fm_is_private_item($item)
+			) {		
+				$processed = $fm_controls[$item['type']]->processPost($item['unique_name']."-".$dataIndex, $item);
 				if($processed === false){
 					$postFailed = true;
 				}
@@ -85,12 +87,14 @@ else if((!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')) && i
 			}
 		}
 		
-		$fmdb->updateDataSubmissionRow($form['ID'],
-										$formData['data'][$dataIndex]['timestamp'],
-										$formData['data'][$dataIndex]['user'],
-										$formData['data'][$dataIndex]['user_ip'],
-										$postData
-										);
+		if(sizeof($postData) > 0) {
+			$fmdb->updateDataSubmissionRow($form['ID'],
+											$formData['data'][$dataIndex]['timestamp'],
+											$formData['data'][$dataIndex]['user'],
+											$formData['data'][$dataIndex]['user_ip'],
+											$postData
+											);
+		}
 	}
 	//clean up the mess we made
 	$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
@@ -152,6 +156,7 @@ if($formData !== false){
 		</div>
 	</div>
 </div>
+</form>
 	<?php
 }
 break;
@@ -304,7 +309,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<th><?php _e("Post", 'wordpress-form-manager');?></th>
 				<?php endif; ?>
 				<?php $x=1; foreach($form['items'] as $formItem): ?>
-					<?php if($fmdb->isDataCol($formItem['unique_name'])): ?>
+					<?php if($fmdb->isDataCol($formItem['unique_name']) && !fm_is_private_item($formItem) ): ?>
 						<th><a class="edit-form-button" href="<?php
 									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
 									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>">
@@ -333,7 +338,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 					<th><?php _e("Post", 'wordpress-form-manager');?></th>
 				<?php endif; ?>
 				<?php foreach($form['items'] as $formItem): ?>
-					<?php if($fmdb->isDataCol($formItem['unique_name'])): ?>
+					<?php if($fmdb->isDataCol($formItem['unique_name']) && !fm_is_private_item($formItem)): ?>
 						<th><?php echo fm_restrictString($formItem['label'],20);?></th>
 					<?php endif; ?>
 				<?php endforeach; ?>
@@ -359,7 +364,7 @@ for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
 							<?php else: ?>
 								<td><?php echo $dataRow[$formItem['unique_name']]; ?></td>
 							<?php endif; /* end if file */ 
-						}else if($fmdb->isDataCol($formItem['unique_name'])){ ?>
+						}else if($fmdb->isDataCol($formItem['unique_name']) && !fm_is_private_item($formItem)){ ?>
 							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
 						<?php } /* end if data type other than file */
 					} /* end foreach */ 

@@ -10,6 +10,7 @@ var $currentFormOptions;
 var $currentFormValues;
 var $currentFormData;
 var $currentItemIndex;
+var $nextItemIndex;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +66,9 @@ function displayFormBare($formInfo, $options=array(), $values=array()){
 			if(isset($values[$item['unique_name']]))
 				$item['extra']['value'] = $values[$item['unique_name']];
 			
-			if(!in_array($item['type'], $options['exclude_types']) || in_array($item['type'], $options['include_types'])){
+			if( (!in_array($item['type'], $options['exclude_types']) || in_array($item['type'], $options['include_types']))
+				&& !fm_is_private_item( $item )
+			){
 			
 				$str.= "<li".($options['li_class'] != '' ? " class=\"".$options['li_class']."\"" : "").">";
 				
@@ -535,12 +538,27 @@ function fm_form_submit_btn_text(){
 
 function fm_form_have_items(){
 	global $fm_display;
-	return ($fm_display->currentItemIndex < sizeof($fm_display->currentFormInfo['items'])-1);
+	$done = false;
+	$index = $fm_display->currentItemIndex;
+	
+	while(!$done) {
+		$index++;
+		if( $index >= sizeof($fm_display->currentFormInfo['items']) ) {
+			return false;
+		}
+		
+		$item = $fm_display->currentFormInfo['items'][$index];
+		if( ! (isset($item['meta']['private']) && $item['meta']['private'] === true) ) {
+			$done = true;
+			$fm_display->nextItemIndex = $index;
+		}
+	}
+	return true;
 }
 
 function fm_form_the_item(){
 	global $fm_display;
-	$fm_display->currentItemIndex++;
+	$fm_display->currentItemIndex = $fm_display->nextItemIndex;
 }
 
 function fm_form_the_label(){
@@ -605,13 +623,11 @@ function fm_form_get_item_label($nickname){
 ///// EMAIL TEMPLATE FUNCTIONS ////////////////////////////////////////////////////////////////
 
 function fm_summary_have_items(){
-	global $fm_display;
-	return ($fm_display->currentItemIndex < sizeof($fm_display->currentFormInfo['items'])-1);
+	return fm_form_have_items();
 }
 
 function fm_summary_the_item(){
-	global $fm_display;
-	$fm_display->currentItemIndex++;
+	return fm_form_the_item();
 }
 
 function fm_summary_the_label(){

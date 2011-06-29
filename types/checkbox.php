@@ -25,12 +25,13 @@ class fm_checkboxControl extends fm_controlBase{
 	}
 	
 	public function showItem($uniqueName, $itemInfo){
+		$isChecked = $itemInfo['extra']['value'] == __("yes",'wordpress-form-manager');
 		$elem=array('type' => 'checkbox',
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,
 											'style'=> ($itemInfo['extra']['position'] == "right" ? "float:right;" : "")
 											),
-					'checked'=> ($itemInfo['extra']['value']=='checked')				
+					'checked'=> $isChecked,				
 					);											
 		return fe_getElementHTML($elem);
 	}	

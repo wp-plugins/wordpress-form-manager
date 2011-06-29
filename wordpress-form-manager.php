@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.23
+Version: 1.5.24
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.5.23";
+$fm_currentVersion = 		"1.5.24";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -210,89 +210,95 @@ function fm_adminInit() {
 	$fm_templates->initTemplates();
 }
 
-add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts');
-function fm_adminEnqueueScripts() {
-	wp_enqueue_script(
-		'form-manager-js',
-		plugins_url( '/js/scripts.js', __FILE__ ),
-		array( 'scriptaculous' )
-		);	
+add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts', 10, 1);
+function fm_adminEnqueueScripts( ) {
+	global $plugin_page;
 	
-	wp_localize_script(
-		'form-manager-js', 
-		'fm_I18n', 
-		array(
-			'save_with_deleted_items' => 
-				__("There may be (data) associated with the form item(s) you removed.  Are you sure you want to save?", 'wordpress-form-manager'),
-			'unsaved_changes' => 
-				__("Any unsaved changes will be lost. Are you sure?", 'wordpress-form-manager'),
-			'click_here_to_download' => 
-				__("Click here to download", 'wordpress-form-manager'),
-			'there_are_no_files' => 
-				__("There are no files to download", 'wordpress-form-manager'),
-			'unable_to_create_zip' => 
-				__("Unable to create .ZIP file", 'wordpress-form-manager'),
-			'move_button' => 
-				__("Move", 'wordpress-form-manager'),
-			'delete_button' => 
-				__("Delete", 'wordpress-form-manager'),
-			'enter_items_separated_by_commas' => 
-				__("Enter items separated by commas", 'wordpress-form-manager'),
-			'hide_button' => 
-				__("Hide", 'wordpress-form-manager'),
-			'show_button' => 
-				__("Show", 'wordpress-form-manager'),
-			'add_test' => 
-				__("Add Test", 'wordpress-form-manager'),
-			'add_item' => 
-				__("Add Item", 'wordpress-form-manager'),
-			'applies_to' => 
-				__("Applies to", 'wordpress-form-manager'),
-			'and_connective' => 
-				__("AND", 'wordpress-form-manager'),
-			'or_connective' => 
-				__("OR", 'wordpress-form-manager'),
-			'choose_a_rule_type' => 
-				__("(Choose a rule type)",'wordpress-form-manager'),
-			'only_show_elements_if' => 
-				__("Only show elements if...", 'wordpress-form-manager'),
-			'show_elements_if' => 
-				__("Show elements if...", 'wordpress-form-manager'),
-			'hide_elements_if' => 
-				__("Hide elements if...", 'wordpress-form-manager'),
-			'only_require_elements_if' =>				
-				__("Only require elements if...", 'wordpress-form-manager'),
-			'require_elements_if' => 
-				__("Require elements if", 'wordpress-form-manager'),
-			'do_not_require_elements_if' => 				
-				__("Do not require elements if", 'wordpress-form-manager'),
-			'empty_test' => 
-				__("...", 'wordpress-form-manager'),
-			'equals' => 
-				__("equals", 'wordpress-form-manager'),
-			'does_not_equal' => 
-				__("does not equal", 'wordpress-form-manager'),
-			'is_less_than' => 
-				__("is less than", 'wordpress-form-manager'),
-			'is_greater_than' => 
-				__("is greater than",'wordpress-form-manager'),
-			'is_lt_or_equal_to' => 
-				__("is less than or equal to", 'wordpress-form-manager'),
-			'is_gt_or_equal_to' => 
-				__("is greater than or equal to", 'wordpress-form-manager'),
-			'is_empty' => 
-				__("is empty", 'wordpress-form-manager'),
-			'is_not_empty' => 
-				__("is not empty", 'wordpress-form-manager'),
-			'is_checked' => 
-				__("is checked", 'wordpress-form-manager'),
-			'is_not_checked' => 
-				__("is not checked", 'wordpress-form-manager')
-			)
-		); 
-
-	wp_register_style( 'form-manager-css', plugins_url( '/css/style.css', __FILE__ ) );
-	wp_enqueue_style( 'form-manager-css' );	
+	$isFMPage = strrpos($plugin_page, 'fm-');
+	
+	if( $isFMPage !== false && $isFMPage == 0 ) {		
+		wp_enqueue_script(
+			'form-manager-js',
+			plugins_url( '/js/scripts.js', __FILE__ ),
+			array( 'scriptaculous' )
+			);	
+		
+		wp_localize_script(
+			'form-manager-js', 
+			'fm_I18n', 
+			array(
+				'save_with_deleted_items' => 
+					__("There may be (data) associated with the form item(s) you removed.  Are you sure you want to save?", 'wordpress-form-manager'),
+				'unsaved_changes' => 
+					__("Any unsaved changes will be lost. Are you sure?", 'wordpress-form-manager'),
+				'click_here_to_download' => 
+					__("Click here to download", 'wordpress-form-manager'),
+				'there_are_no_files' => 
+					__("There are no files to download", 'wordpress-form-manager'),
+				'unable_to_create_zip' => 
+					__("Unable to create .ZIP file", 'wordpress-form-manager'),
+				'move_button' => 
+					__("Move", 'wordpress-form-manager'),
+				'delete_button' => 
+					__("Delete", 'wordpress-form-manager'),
+				'enter_items_separated_by_commas' => 
+					__("Enter items separated by commas", 'wordpress-form-manager'),
+				'hide_button' => 
+					__("Hide", 'wordpress-form-manager'),
+				'show_button' => 
+					__("Show", 'wordpress-form-manager'),
+				'add_test' => 
+					__("Add Test", 'wordpress-form-manager'),
+				'add_item' => 
+					__("Add Item", 'wordpress-form-manager'),
+				'applies_to' => 
+					__("Applies to", 'wordpress-form-manager'),
+				'and_connective' => 
+					__("AND", 'wordpress-form-manager'),
+				'or_connective' => 
+					__("OR", 'wordpress-form-manager'),
+				'choose_a_rule_type' => 
+					__("(Choose a rule type)",'wordpress-form-manager'),
+				'only_show_elements_if' => 
+					__("Only show elements if...", 'wordpress-form-manager'),
+				'show_elements_if' => 
+					__("Show elements if...", 'wordpress-form-manager'),
+				'hide_elements_if' => 
+					__("Hide elements if...", 'wordpress-form-manager'),
+				'only_require_elements_if' =>				
+					__("Only require elements if...", 'wordpress-form-manager'),
+				'require_elements_if' => 
+					__("Require elements if", 'wordpress-form-manager'),
+				'do_not_require_elements_if' => 				
+					__("Do not require elements if", 'wordpress-form-manager'),
+				'empty_test' => 
+					__("...", 'wordpress-form-manager'),
+				'equals' => 
+					__("equals", 'wordpress-form-manager'),
+				'does_not_equal' => 
+					__("does not equal", 'wordpress-form-manager'),
+				'is_less_than' => 
+					__("is less than", 'wordpress-form-manager'),
+				'is_greater_than' => 
+					__("is greater than",'wordpress-form-manager'),
+				'is_lt_or_equal_to' => 
+					__("is less than or equal to", 'wordpress-form-manager'),
+				'is_gt_or_equal_to' => 
+					__("is greater than or equal to", 'wordpress-form-manager'),
+				'is_empty' => 
+					__("is empty", 'wordpress-form-manager'),
+				'is_not_empty' => 
+					__("is not empty", 'wordpress-form-manager'),
+				'is_checked' => 
+					__("is checked", 'wordpress-form-manager'),
+				'is_not_checked' => 
+					__("is not checked", 'wordpress-form-manager')
+				)
+			); 
+	
+		wp_register_style( 'form-manager-css', plugins_url( '/css/style.css', __FILE__ ) );
+		wp_enqueue_style( 'form-manager-css' );	
+	}
 }
 
 add_action( 'init', 'fm_userInit' );
