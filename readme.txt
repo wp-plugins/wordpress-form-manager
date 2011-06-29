@@ -1,10 +1,10 @@
 === WordPress Form Manager ===
 Contributors: hoffcamp
 Donate link: http://www.campbellhoffman.com/
-Tags: form, forms
+Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.1.1
-Stable tag: 1.4.19
+Stable tag: 1.5.24
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -17,6 +17,7 @@ Form Manager is a tool for creating forms to collect and download data from visi
 * required fields
 * custom acknowledgments
 * e-mail notifications.   
+* form display templates
 
 = Supported field types =
 
@@ -26,19 +27,133 @@ Form Manager is a tool for creating forms to collect and download data from visi
 * radio buttons
 * checkbox / checkbox list
 * multiline select
+* file upload
 * reCAPTCHA
 
 Subtitles and notes can also be added to the form in any location.
 
 = Publishing a Form =
-Forms are placed within posts or pages.  For example, if your form's slug is 'form-1', put the following within a post or page: 
+Forms are placed within posts or pages.  Look for the Form Manager button in your post editor towards the right (Thanks to [Andrea Bersi](http://www.andreabersi.com)).  
+
+You can also type in shortcodes yourself.  For example, if your form's slug is 'form-1', put the following within a post or page: 
 
 `[form form-1]`  
-
+  
+  
+<br />
 = Languages =
-Italian (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
+
+* Espa&ntilde;ol (es_ES) - [Eduardo Aranda](http://sinetiks.com)
+* Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
+* Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
+* Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
 
 == Changelog ==
+= 1.5.24 =
+* Fixed conflict with Gantry Framework
+* Fixed checkbox bug
+* Added %wp_uploads% code for file uploads
+
+= 1.5.23 =
+* Textarea uses placeholder rather than default value
+
+= 1.5.22 =
+* Added warning about invalid regular expressions for custom validators
+* Empty conditions no longer cause the validator script to break
+* Updated Italian translation
+
+= 1.5.21 =
+* Fixed validation bug
+
+= 1.5.20 =
+* Fixed submission data problem with large forms
+
+= 1.5.19 =
+* Fixed checkbox list condition bug
+
+= 1.5.18 =
+* File creation now uses wp_filesystem
+
+= 1.5.17 =
+* Fixed submit button alignment
+
+= 1.5.16 =
+* Fixed bug in form template functions
+
+= 1.5.15 =
+* Added shortcodes for published post titles
+
+= 1.5.14 =
+* Fixed a bug when repopulating a form after a failed submission
+
+= 1.5.13 =
+* Fixed multiple submission bug
+* Scripts appear within CDATA sections
+
+= 1.5.12 =
+* Added API for the form user's JavaScript environment
+
+= 1.5.11 =
+* Fixed internationalization for certain parts of the plugin
+
+= 1.5.10 =
+* Added a 'table' view for the form data display shortcode
+* Fixed the timezone for timestamps
+* Added options to change data table column types
+
+= 1.5.9 =
+* Added links to published submissions in the data page
+
+= 1.5.8 =
+* Improved conditions editor
+* Fixed bug when uploading files with Unicode file names
+* Added some missing internationalization handles
+* Conditions can apply to 'file' inputs
+* Added submission information to the main page
+
+= 1.5.7 =
+* Fixed a bug when updating a form element's nickname
+
+= 1.5.6 =
+* Fixed permissions bug
+* Fixed CSV download bug
+* Added separators, notes, and recaptchas to the items you can show/hide with conditions.
+
+= 1.5.4 =
+* Fixed install issues on certain platforms.  Thanks to Metin Kale. 
+
+= 1.5.3 =
+* Added an option to disable the TinyMCE button in the 'Advanced' settings page
+
+= 1.5.2 =
+* Files can be uploaded to a directory of your choosing
+* Links in summaries / e-mails to uploaded files, if they are in a directory
+
+= 1.5.1 =
+* Fixed script loading bug in certain environments
+
+= 1.5.0 =
+* Added conditional behavior, e.g., only show certain items based on the values of other items
+* Dutch language support (Thanks to [Sander Kolthof](www.fullcirclemedia.nl))
+* Fixed '0 kB' summary bug
+* Fixed checkbox default value bug
+
+= 1.4.23 =
+* Editor/Data/Advanced for forms now uses a 'tabbed' interface
+* Added database check for troubleshooting
+* Added checkbox positioning option
+* Added more specific capabilities for Members plugin
+
+= 1.4.22 =
+* Notes can display HTML
+
+= 1.4.21 =
+* Added 'maximum length' attribute for text inputs
+* Added tinyMCE button. (Many thanks to [Andrea Bersi](http://www.andreabersi.com))
+
+= 1.4.20 =
+* Fixed install error
+
 = 1.4.19 =
 * Added auto-redirect option
 
@@ -214,4 +329,4 @@ Method 2: Download the source code for the plugin, and upload the 'wordpress-for
 
 == Frequently Asked Questions ==
 
-Please visit [www.campbellhoffman.com/form-manager-faq/] for FAQ and tutorials.
+Please visit [www.campbellhoffman.com/form-manager-faq/](http://www.campbellhoffman.com/form-manager-faq/) for FAQ and tutorials.

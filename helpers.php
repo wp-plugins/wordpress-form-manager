@@ -60,6 +60,19 @@ function helper_option_field($id, $label, $options, $value = false, $desc = ""){
 	<?php
 }
 
+function fm_write_file($fullPath, $fileData, $text = true){
+	if(! WP_Filesystem() ){
+		return "Could not initialize WP filesystem";
+	}
+	
+	global $wp_filesystem;
+	if(! $wp_filesystem->put_contents( $fullPath, $fileData, FS_CHMOD_FILE ) ) {
+		return "Error writing file";
+	}
+	
+	return 0;
+}
+
 function fm_get_file_data( $file, $fields) {
 	
 	$fp = fopen( $file, 'r' );
@@ -99,6 +112,14 @@ function fm_get_user_IP(){
 
 function fm_get_slimstat_IP_link($queryVars, $ipAddr){
 	return "<a href=\"".get_admin_url(null, 'index.php')."?".http_build_query(array_merge($queryVars, array('page' => 'wp-slimstat/view/index.php', 'slimpanel' => 4, 'ip' => $ipAddr, 'ip-op' => 'equal', 'direction' => 'DESC')))."\">".$ipAddr."</a>";
+}
+
+function fm_is_private_item($itemInfo){
+	return !( (! isset($itemInfo['meta']['private']))
+			|| $itemInfo['meta']['private'] === false
+			|| current_user_can($itemInfo['meta']['capability'])
+			|| (trim($itemInfo['meta']['capability']) == "" && is_admin() )
+			);
 }
 
 /////////////////////////////////////////////////////////////////////////
