@@ -708,15 +708,15 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 	$dataTable = $this->getDataTableName($formID);
 	$postData = array();
 	foreach($formInfo['items'] as $item){
-		if($this->isDataCol($item['unique_name'])) {
-			//&& (!isset($item['meta']['private']) || $item['meta']['private'] === false) ) {
+		if(!fm_is_private_item($item)) {
 			
 			$processed = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
 			if($processed === false){
 				$this->lastPostFailed = true;
 			}
-									
-			$postData[$item['unique_name']] = $processed;
+			
+			if($this->isDataCol($item['unique_name']))
+				$postData[$item['unique_name']] = $processed;
 		}
 	}
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
