@@ -7,13 +7,20 @@ class fm_textareaControl extends fm_controlBase{
 	public function getTypeLabel(){ return __("Text Area", 'wordpress-form-manager'); }
 	
 	public function showItem($uniqueName, $itemInfo){
+		global $fm_display;
+		
 		$elem=array('type' => 'textarea',
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,
-											'style' => "width:".$itemInfo['extra']['cols']."px;height:".$itemInfo['extra']['rows']."px;",
-											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),
+											'style' => "width:".$itemInfo['extra']['cols']."px;height:".$itemInfo['extra']['rows']."px;",											
 											),
-					);					
+					);
+		
+		if(isset($fm_display->currentFormOptions['use_placeholders']) && $fm_display->currentFormOptions['use_placeholders'] === false)
+			$elem['default'] = htmlspecialchars($itemInfo['extra']['value']);			
+		else 
+			$elem['attributes']['placeholder'] = htmlspecialchars(strip_tags($itemInfo['extra']['value']));
+		
 		return fe_getElementHTML($elem);
 	}	
 	

@@ -14,15 +14,21 @@ class fm_textControl extends fm_controlBase{
 	public function getTypeLabel(){ return __("Text", 'wordpress-form-manager'); }
 	
 	public function showItem($uniqueName, $itemInfo){
+		global $fm_display;
+		
 		$elem=array('type' => 'text',
 					'attributes' => array('name' => $uniqueName,
-											'id'=> $uniqueName,	
-											'placeholder' => htmlspecialchars($itemInfo['extra']['value']),									
-											'style' => "width:".$itemInfo['extra']['size']."px;",							
+											'id'=> $uniqueName,																			
+											'style' => "width:".$itemInfo['extra']['size']."px;",
 											)
 					);
 		if(trim($itemInfo['extra']['maxlength']) != "")
 			$elem['attributes']['maxlength'] = $itemInfo['extra']['maxlength'];
+		
+		if(isset($fm_display->currentFormOptions['use_placeholders']) && $fm_display->currentFormOptions['use_placeholders'] === false)
+			$elem['attributes']['value'] = htmlspecialchars(strip_tags($itemInfo['extra']['value']));			
+		else
+			$elem['attributes']['placeholder'] = htmlspecialchars(strip_tags($itemInfo['extra']['value']));
 		
 		return fe_getElementHTML($elem);
 	}	

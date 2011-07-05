@@ -178,6 +178,7 @@ function displayDataSummary($type, $formInfo, $data){
 
 function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "", $userAndTimestamp = false){
 	global $fm_controls;
+	global $fmdb;
 	
 	$str = "";
 	$str.= "<div class=\"fm-data-summary\">\n";
