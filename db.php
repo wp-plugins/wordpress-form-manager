@@ -141,7 +141,7 @@ $this->globalSettings = array(
 												/* translators: the following are for the date validator */
 												'label' => __("Date (MM/DD/YY)", 'wordpress-form-manager'),
 												'message' => __("'%s' must be a date (MM/DD/YY)", 'wordpress-form-manager'),
-												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/'
+												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/'
 												)
 					);
 }
@@ -451,7 +451,11 @@ function fixDateValidator(){
 	$count = $this->getGlobalSetting('text_validator_count');
 	$val = $this->getGlobalSetting('text_validator_3');
 	if($val['regexp'] == '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'){
-		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/';
+		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/';
+		$this->setGlobalSetting('text_validator_3', $val);
+	}
+	if($val['regexp'] == '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/.'){
+		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/';
 		$this->setGlobalSetting('text_validator_3', $val);
 	}
 }
@@ -704,15 +708,15 @@ function processPost($formID, $extraInfo = null, $overwrite = false){
 	$dataTable = $this->getDataTableName($formID);
 	$postData = array();
 	foreach($formInfo['items'] as $item){
-		if($this->isDataCol($item['unique_name'])) {
-			//&& (!isset($item['meta']['private']) || $item['meta']['private'] === false) ) {
+		if(!fm_is_private_item($item)) {
 			
 			$processed = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
 			if($processed === false){
 				$this->lastPostFailed = true;
 			}
-									
-			$postData[$item['unique_name']] = $processed;
+			
+			if($this->isDataCol($item['unique_name']))
+				$postData[$item['unique_name']] = $processed;
 		}
 	}
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
