@@ -118,7 +118,8 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
 				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
 						$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
-						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$item['nickname'].'</th>';
+						$lbl = ($item['nickname'] == "" ? $item['label'] : $item['nickname']);
+						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$lbl.'</th>';
 				}
 			}
 		}
