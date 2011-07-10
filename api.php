@@ -118,7 +118,8 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
 				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
 						$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
-						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$item['nickname'].'</th>';
+						$lbl = ($item['nickname'] == "" ? $item['label'] : $item['nickname']);
+						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$lbl.'</th>';
 				}
 			}
 		}
@@ -234,16 +235,23 @@ function fm_doFormBySlug($formSlug, $options = array()){
 	// error checking
 	$formID = $fmdb->getFormID($formSlug);
 	if($formID === false) return sprintf(__("(form  %s not found)", 'wordpress-form-manager'), (trim($formSlug)!=""?"'{$formSlug}' ":""));
+	
+	$formInfo = $fmdb->getForm($formID);
+
+	$formBehaviors = fm_helper_parseBehaviors($formInfo['behaviors']);
 		
-	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == "") 
-		return sprintf($fm_registered_user_only_msg, $formInfo['title']);
+	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == ""){
+		if(isset($formBehaviors['allow_view'])){
+			return sprintf($fm_registered_user_only_msg, $formInfo['title']).
+			'<br/>'.
+			$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'show_submit' => false)));
+		}			
+		else
+			return sprintf($fm_registered_user_only_msg, $formInfo['title']);
+	}
 		
 	$output = "";
 	
-	$formInfo = $fmdb->getForm($formID);
-	
-	$formBehaviors = fm_helper_parseBehaviors($formInfo['behaviors']);
-		
 	$userDataCount = $fmdb->getUserSubmissionCount($formID, $current_user->user_login);
 	
 	//process the data submission

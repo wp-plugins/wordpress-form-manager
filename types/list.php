@@ -39,12 +39,14 @@ class fm_customListControl extends fm_controlBase{
 		public function select_showItem($uniqueName, $itemInfo, $disabled = false){
 			$elem=array('type' => 'select',
 						'attributes' => array('name' => $uniqueName,
-												'id'=> $uniqueName,																					
-												'style' => "width:".$itemInfo['extra']['size']."px;"
+												'id'=> $uniqueName
 											),
 						'value' => $itemInfo['extra']['value'],	
 						'options' => $itemInfo['extra']['options']
-						);			
+						);
+			
+			if(isset($itemInfo['extra']['size'])) $elem['attributes']['style'] = "width:".$itemInfo['extra']['size']."px;";
+			
 			if($itemInfo['required'] == "1")
 				$elem['options'] = array_merge(array('-1' => "..."), $elem['options']);
 			if($disabled)
@@ -55,12 +57,13 @@ class fm_customListControl extends fm_controlBase{
 			$elem=array('type' => 'select',
 						'attributes' => array('name' => $uniqueName,
 												'id'=> $uniqueName,																					
-												'style' => "width:".$itemInfo['extra']['size']."px;",
 												'size' => sizeof($itemInfo['extra']['options'])
 											),
 						'value' => $itemInfo['extra']['value'],	
 						'options' => $itemInfo['extra']['options']
-						);			
+						);
+			if(isset($itemInfo['extra']['size'])) $elem['attributes']['style'] = "width:".$itemInfo['extra']['size']."px;";
+			
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';								
 			return fe_getElementHTML($elem);
@@ -91,7 +94,11 @@ class fm_customListControl extends fm_controlBase{
 			return '<div class="fm-checkbox-list">'.fe_getElementHTML($elem).'</div>';
 		}
 		
-		
+	public function showItemSimple($uniqueName, $itemInfo){
+		unset($itemInfo['extra']['size']);
+		return $this->showItem($uniqueName, $itemInfo);
+	}
+	
 	public function editItem($uniqueName, $itemInfo){	
 		$fn = $itemInfo['extra']['list_type']."_showItem";
 		unset($itemInfo['extra']['size']);
@@ -99,6 +106,9 @@ class fm_customListControl extends fm_controlBase{
 	}
 	
 	public function processPost($uniqueName, $itemInfo){
+		if(!isset($_POST[$uniqueName]))
+			return NULL;
+		
 		$fn = $itemInfo['extra']['list_type']."_processPost";
 		return $this->$fn($uniqueName, $itemInfo);
 	}
@@ -259,5 +269,34 @@ class fm_customListControl extends fm_controlBase{
 	
 	protected function getPanelKeys(){
 		return array('label','required');
+	}
+}
+
+class fm_metaCustomListControl extends fm_customListControl {
+	public function isSubmissionMeta() { return true; }
+	public function isFormField() { return false; }
+	
+	protected function showExtraScripts() { }
+	
+	public function getPanelItems($uniqueName, $itemInfo){
+		$arr=array();		
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'list_type', __('Style', 'wordpress-form-manager'), array('options' => array('select' => __("Dropdown", 'wordpress-form-manager'), 'list' => __("List Box", 'wordpress-form-manager'), 'radio' => __("Radio Buttons", 'wordpress-form-manager'), 'checkbox' => __("Checkboxes", 'wordpress-form-manager')), 'value' => $itemInfo['extra']['list_type']));
+		$arr[] = new fm_editPanelItemMulti($uniqueName, 'options', __('List Items', 'wordpress-form-manager'), array('options' => $itemInfo['extra']['options'], 'get_item_script' => 'fm_custom_list_options_panel_item', 'get_item_value_script' => 'fm_custom_list_option_get'));
+		return $arr;
+	}
+	
+	public function getPanelScriptOptions(){
+		$opt = $this->getPanelScriptOptionDefaults();		
+		$opt['extra'] = "\"array('options' => \" + js_multi_item_get_php_array('multi-panel-' + itemID, 'fm_custom_list_option_get') + \", 'list_type' => '\" + fm_get_item_value(itemID, 'list_type') + \"')\"";
+		return $opt;
+	}
+	
+	public function getTypeName(){
+		return "metacustom_list";
+	}
+	
+	protected function getPanelKeys(){
+		return array('label');
 	}
 }

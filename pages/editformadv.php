@@ -9,12 +9,14 @@ global $fm_form_behavior_types;
 global $fm_DEBUG;
 global $fm_MEMBERS_EXISTS;
 
+$form = null;
+if($_REQUEST['id']!="")
+	$form = $fmdb->getForm($_REQUEST['id']);
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
 if(isset($_POST['submit-form-settings'])){
-	$form = $fmdb->getForm($_POST['fm-form-id']);
-	
 	$formInfo = array();
 	
 	$formInfo['behaviors'] = $_POST['behaviors'];
@@ -30,7 +32,6 @@ if(isset($_POST['submit-form-settings'])){
 	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 	
-	
 	$fmdb->showerr = false;
 	$itemTypeErr = array();
 	foreach($form['items'] as $item){
@@ -44,7 +45,8 @@ if(isset($_POST['submit-form-settings'])){
 		}
 	}
 	$fmdb->showerr = true;
-
+	
+	$form = $fmdb->getForm($_REQUEST['id']);
 }
 
 
@@ -56,12 +58,6 @@ if($fm_DEBUG && isset($_POST['form-definition'])){
 	$formInfo = $formDef->createFormInfo($_POST['form-definition']);	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 } 
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-$form = null;
-if($_REQUEST['id']!="")
-	$form = $fmdb->getForm($_REQUEST['id']);
 	
 $formTemplateFile = $form['form_template'];
 	if($formTemplateFile == '') $formTemplateFile = $fmdb->getGlobalSetting('template_form');
