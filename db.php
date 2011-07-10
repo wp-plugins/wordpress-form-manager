@@ -309,15 +309,10 @@ function fixItemMeta(){
 					$item['type'] = 'meta'.$item['type'];
 					break;
 				default:
-					$item['type'] = NULL;
+					$item['set'] = 0;
 			}
 			
-			if($item['type'] === NULL){
-				$this->deleteFormItem($row['ID'], $item['unique_name']);
-			}
-			else{
-				$this->updateFormItem($row['ID'], $item['unique_name'], $item);
-			}
+			$this->updateFormItem($row['ID'], $item['unique_name'], $item);
 		}
 	}
 	
