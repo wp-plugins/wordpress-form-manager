@@ -220,13 +220,17 @@ function displayDataSummaryTemplate($template, $formInfo, $data){
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-function getEditorItem($uniqueName, $type, $itemInfo){
+function getEditorItem($uniqueName, $type, $itemInfo, $isMeta = false){
 	global $fm_controls;
 	
 	if(isset($fm_controls[$type]))
 		$control = $fm_controls[$type];
 	else
 		$control = $fm_controls['default'];
+		
+	$oldMeta = $control->isMeta;
+	$control->isMeta = $isMeta;
+	
 	// a new item
 	if($itemInfo == null) $itemInfo = $control->itemDefaults();
 	
@@ -241,6 +245,8 @@ function getEditorItem($uniqueName, $type, $itemInfo){
 			"</tr>".
 			"</table>".
 			"<input type=\"hidden\" id=\"{$uniqueName}-type\" value=\"{$type}\" />";
+	
+	$control->isMeta = $oldMeta;
 	
 	return $str;
 }
@@ -357,15 +363,23 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 						$str.= "document.getElementById('".$test['unique_name']."').checked;\n";
 						break;
 					case 'custom_list':
-						if($itemObjects[$test['unique_name']]['extra']['list_type'] == 'checkbox') {
-							$obj = $itemObjects[$test['unique_name']];
-							$str .= "[];\n";
-							for($y=0;$y<sizeof($obj['extra']['options']);$y++){
-								$str .= "t".$x.".push( document.getElementById('".$test['unique_name']."-".$y."').checked ? ".json_encode((string)$obj['extra']['options'][$y])." : \"\") ;\n";
-							}
-						} else {
-							$str.= "\"\"; var x".$x." = document.getElementById('".$test['unique_name']."').selectedIndex;\n";
-							$str.= "t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
+						switch($itemObjects[$test['unique_name']]['extra']['list_type']){
+							case 'checkbox':
+								$obj = $itemObjects[$test['unique_name']];
+								$str .= "[];\n";
+								for($y=0;$y<sizeof($obj['extra']['options']);$y++)
+									$str .= "t".$x.".push( document.getElementById('".$test['unique_name']."-".$y."').checked ? ".json_encode((string)$obj['extra']['options'][$y])." : \"\") ;\n";
+								break;
+							case 'radio':
+								//document.forms['radioExampleForm'].elements['number']
+								$str .= "\"\";\n var list".$x." = document.forms['fm-form-".$formInfo['ID']."'].elements['".$test['unique_name']."'];\n";
+								$str .= "for(var i=0; i<list".$x.".length; i++){\n";
+								$str .=		"if(list{$x}[i].checked) t{$x} = document.getElementById('".$test['unique_name']."-' + i + '-value').value;\n";
+								$str .= "}\n";
+								break;
+							default:
+								$str.= "\"\"; var x".$x." = document.getElementById('".$test['unique_name']."').selectedIndex;\n";
+								$str.= "t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
 						}
 						break;
 					case 'text':
@@ -373,7 +387,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 					case 'file':
 						$str.= "document.getElementById('".$test['unique_name']."').value;\n";
 						break;
-					default:
+					default:					
 						$str.= "false;\n";
 				}
 			}
@@ -384,7 +398,13 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 				$test = $condition['tests'][$x];
 				if($x>0) $str.= ($test['connective'] == 'and' ? " && " : " || ");
 				
-				if($itemTypes[$test['unique_name']] == 'custom_list' 
+				if($test['unique_name'] == '__always__'){
+					$str.= 'true';
+				}
+				elseif($test['unique_name'] == '__never__'){
+					$str.= 'false';
+				}
+				elseif($itemTypes[$test['unique_name']] == 'custom_list' 
 				&& $itemObjects[$test['unique_name']]['extra']['list_type'] == 'checkbox') {
 					switch($test['test']){
 						case "eq":			$str.= "fm_array_contains( t".$x.", '".$test['val']."' )";
@@ -447,8 +467,14 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 			
 			//this keeps track of which test functions we create depend on which items, so we can make an onchange event appropriately. 
 			foreach($condition['tests'] as $test){
-				if(!isset($itemDependents[$itemNames[$test['unique_name']]])) $itemDependents[$itemNames[$test['unique_name']]] = array();
-				$itemDependents[$itemNames[$test['unique_name']]][] = $fn;
+				switch($test['unique_name']){
+					case '__always__':
+					case '__never__':
+						break;
+					default:
+						if(!isset($itemDependents[$itemNames[$test['unique_name']]])) $itemDependents[$itemNames[$test['unique_name']]] = array();
+						$itemDependents[$itemNames[$test['unique_name']]][] = $fn;
+				}
 			}
 			
 			//make sure the form displays according to the conditions initially, so run the tests in order
@@ -515,13 +541,17 @@ function fm_form_the_title(){
 
 function fm_form_the_submit_btn(){
 	global $fm_display;
-	return "<input type=\"submit\" ".
-			"name=\"".fm_form_submit_btn_name()."\" ".
-			"id=\"".fm_form_submit_btn_id()."\" ".
-			"class=\"submit\" ".
-			"value=\"".fm_form_submit_btn_text()."\" ".
-			"onclick=\"".fm_form_submit_btn_script()."\" ".
-			" />\n";
+	if(!isset($fm_display->currentFormOptions['show_submit']) 
+	|| $fm_display->currentFormOptions['show_submit'] !== false)
+	{
+		return "<input type=\"submit\" ".
+				"name=\"".fm_form_submit_btn_name()."\" ".
+				"id=\"".fm_form_submit_btn_id()."\" ".
+				"class=\"submit\" ".
+				"value=\"".fm_form_submit_btn_text()."\" ".
+				"onclick=\"".fm_form_submit_btn_script()."\" ".
+				" />\n";
+	}
 }
 
 function fm_form_submit_btn_name(){
@@ -549,7 +579,7 @@ function fm_form_have_items(){
 		}
 		
 		$item = $fm_display->currentFormInfo['items'][$index];
-		if( ! (isset($item['meta']['private']) && $item['meta']['private'] === true) ) {
+		if( $item['set'] == 0 ) {
 			$done = true;
 			$fm_display->nextItemIndex = $index;
 		}

@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.5.29";
+$fm_currentVersion = 		"1.6.0";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -123,6 +123,12 @@ $fm_templates = new fm_template_manager();
 function fm_install() {
 	global $fmdb;
 	global $fm_currentVersion;
+	
+	if ( get_option( 'fm-version' ) == '1.5.29' ) {
+		$fmdb->fixItemMeta();
+	}
+	
+	update_option( 'fm-last-version', get_option( 'fm-version' ) );
 	
 	//from any version before 1.4.0; must be done before the old columns are removed
 	$fmdb->convertAppearanceSettings();
@@ -271,6 +277,10 @@ function fm_adminEnqueueScripts( ) {
 					__("Require elements if", 'wordpress-form-manager'),
 				'do_not_require_elements_if' => 				
 					__("Do not require elements if", 'wordpress-form-manager'),
+				'always' =>
+					__("Always", 'wordpress-form-manager'),
+				'never' =>
+					__("Never", 'wordpress-form-manager'),
 				'empty_test' => 
 					__("...", 'wordpress-form-manager'),
 				'equals' => 
@@ -417,7 +427,7 @@ function fm_showSettingsAdvancedPage()	{	include 'pages/editsettingsadv.php'; }
 
 // capabilities
 
-if ( function_exists( 'members_plugin_init' ) ) {
+if ( class_exists( 'Members_Load' ) ) {
 	$fm_MEMBERS_EXISTS = true;
 	
 	add_filter( 'fm_main_capability', 			'fm_main_capability');
@@ -448,6 +458,9 @@ function fm_add_members_capabilities( $caps ) {
 	$caps[] = 'form_manager_settings_advanced';
 	
 	$caps[] = 'form_manager_edit_data';
+	$caps[] = 'form_manager_data_summary';
+	$caps[] = 'form_manager_data_summary_edit';
+	$caps[] = 'form_manager_data_options';
 	$caps[] = 'form_manager_delete_data';
 	$caps[] = 'form_manager_nicknames';
 	$caps[] = 'form_manager_conditions';
