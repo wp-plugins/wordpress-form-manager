@@ -472,7 +472,7 @@ for($x=1;$x<=$dataNumPages;$x++){
 	
 	<?php if(!empty($csvQuery)): ?>
 		<div class="fm-message" style="float:right; clear:right; margin-right:10px;">
-			<a href="<?php echo $CSVFileURL;?>">Click here to download</a>
+			<a href="<?php echo $CSVFileURL;?>"><?php _e("Click here to download", 'wordpress-form-manager');?></a>
 		</div>
 	<?php endif; ?>
 	

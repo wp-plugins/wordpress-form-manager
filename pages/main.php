@@ -102,7 +102,7 @@ else: ?>
 
 <?php if(get_option('fm-last-version') == '1.5.29'): ?>
 	<div class="fm-message">
-	<?php _e("The 'Submission Data' page has changed. You may want to review permissions if you are using the 'Members' plugin.", 'wordpress-form-manager');?>
+	<?php echo _x("The 'Submission Data' page has changed. You may want to review permissions if you are using the 'Members' plugin.", 'upgrade-notice', 'wordpress-form-manager');?>
 	</div>
 <?php endif; ?>
 

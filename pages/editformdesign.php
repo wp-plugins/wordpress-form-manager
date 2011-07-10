@@ -293,7 +293,7 @@ if(isset($_POST['message']))
 	
 	<?php if(get_option('fm-last-version') == '1.5.29'): ?>
 	<div class='fm-message'>
-		<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=nicknames&id=".$form['ID'];?>"><?php _e("Private fields have moved...", 'wordpress-form-manager');?></a>
+		<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=nicknames&id=".$form['ID'];?>"><?php echo _x("Private fields have moved", 'upgrade-notice', 'wordpress-form-manager');?></a>
 	</div>
 	<?php endif; ?>
 	
