@@ -28,7 +28,8 @@ if(isset($_POST['submit-form-settings'])){
 	$formInfo['advanced_email'] = $_POST['advanced_email'];
 	$formInfo['publish_post'] = ($_POST['publish_post']=="on"?1:0);
 	$formInfo['publish_post_category'] = $_POST['publish_post_category'];
-	$formInfo['publish_post_title'] = $_POST['publish_post_title'];	
+	$formInfo['publish_post_title'] = $_POST['publish_post_title'];
+	$formInfo['reg_user_only_msg'] = $_POST['reg_user_only_msg'];
 	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 	
@@ -103,6 +104,8 @@ $behaviorList = array();
 foreach($fm_form_behavior_types as $desc => $val)
 	$behaviorList[$val] = $desc;
 helper_option_field('behaviors', __("Behavior Type", 'wordpress-form-manager'), $behaviorList, $form['behaviors'], __("Behavior types other than 'Default' require a registered user", 'wordpress-form-manager'));
+$msg = empty($formInfo['reg_user_only_msg']) ? $fmdb->getGlobalSetting('reg_user_only_msg') : $form['reg_user_only_msg'];
+helper_text_field('reg_user_only_msg', __("Message displayed to unregistered users", 'wordpress-form-manager'), $msg, __("Include '%s' where you would like the form title to appear", 'wordpress-form-manager'));
 ?>
 </table>
 

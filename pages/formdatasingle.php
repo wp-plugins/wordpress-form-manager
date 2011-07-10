@@ -33,8 +33,10 @@ fm_applyColSettings($fm_dataPageSettings, $cols);
 
 if ( isset($_POST['submit-changes']) && (!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_summary_edit'))) {
 	$postData = fm_getEditPost($_REQUEST['sub'], $cols, true);
-	$fmdb->updateDataSubmissionRowByID($form['ID'], $_REQUEST['sub'], $postData);
-	$dbRow = $fmdb->getSubmissionByID($form['ID'], $_REQUEST['sub']);
+	if(sizeof($postData) > 0){
+		$fmdb->updateDataSubmissionRowByID($form['ID'], $_REQUEST['sub'], $postData);
+		$dbRow = $fmdb->getSubmissionByID($form['ID'], $_REQUEST['sub']);
+	}
 }
 
 $editMode = false;
@@ -77,13 +79,15 @@ if ( isset($_POST['submit-edit']) ) $editMode = true;
 							$item['extra']['value'] = $dbRow[$col['key']];
 							echo $fm_controls[$item['type']]->showItemSimple($dbRow['unique_id'].'-'.$item['unique_name'], $item);
 							?></td>
+						<?php elseif(isset($col['show-callback'])): ?>
+							<td><?php echo $col['show-callback']($col, $dbRow);?></td>
 						<?php else: ?>
 							<td><?php echo $fm_controls[$col['item']['type']]->parseData($col['key'], $col['item'], $dbRow[$col['key']]);?></td>
 						<?php endif; ?>
 					<?php else: ?>
 						<td><strong><?php echo $col['value'];?></strong></td>						
 						<?php if(isset($col['show-callback'])): ?>
-							<td><?php echo $col['show-callback']($dbRow[$col['key']]);?></td>
+							<td><?php echo $col['show-callback']($col, $dbRow);?></td>
 						<?php else: ?>
 							<td><?php echo $dbRow[$col['key']]; ?></td>
 						<?php endif; ?>

@@ -2,9 +2,6 @@
 /* translators: the following are general plugin settings */
 global $fm_controls;
 global $fm_form_behavior_types;
-global $fm_registered_user_only_msg;
-
-$fm_registered_user_only_msg = __("'%s' is only available to registered users.", 'wordpress-form-manager');
 
 /* 
 reg_user_only 		- only show form to registered users

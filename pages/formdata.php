@@ -146,7 +146,9 @@ function fm_echoDataTableRowEdit($cols, $dbRow){
 		<?php endif; ?>
 		<?php foreach($cols as $col): ?>
 			<?php if(!$col['hidden']):?>
-				<?php if(isset($col['item']) && $col['editable']): ?>
+				<?php if(isset($col['show-callback'])): ?>
+					<td><?php echo $col['show-callback']($col, $dbRow);?></td>
+				<?php elseif(isset($col['item']) && $col['editable']): ?>
 					<?php if(!$fm_MEMBERS_EXISTS || trim($col['edit_capability']) == "" || current_user_can($col['edit_capability'])): ?>
 						<td><?php
 						$item = $col['item'];					
@@ -161,8 +163,6 @@ function fm_echoDataTableRowEdit($cols, $dbRow){
 					<?php else: ?>
 						<td><?php echo $fm_controls[$col['item']['type']]->parseData($col['key'], $col['item'], $dbRow[$col['key']]);?></td>
 					<?php endif; ?>
-				<?php elseif(isset($col['show-callback'])): ?>
-					<td><?php echo $col['show-callback']($dbRow[$col['key']]);?></td>
 				<?php else: ?>
 					<td><?php echo $dbRow[$col['key']]; ?></td>
 				<?php endif; ?>
@@ -277,7 +277,8 @@ if(isset($_POST['submit-edit'])){
 	$checked = fm_getEditItems();
 	foreach($checked as $subID){
 		$newData = fm_getEditPost($subID, $cols);
-		$fmdb->updateDataSubmissionRowByID($form['ID'], $subID, $newData);
+		if(sizeof($newData) > 0)
+			$fmdb->updateDataSubmissionRowByID($form['ID'], $subID, $newData);
 	}
 }
 
@@ -351,7 +352,7 @@ $searchQuery = $dataQuery;
 //page range
 $dataQuery .= " LIMIT ".(($dataCurrentPage-1)*$dataPerPage).", ".$dataPerPage;
 
-echo $dataQuery."<br />";
+//echo $dataQuery."<br />";
 
 $res = $fmdb->query($dataQuery);
 
@@ -421,7 +422,7 @@ for($x=1;$x<=$dataNumPages;$x++){
 					<tr>					
 						<th>&nbsp;</th>
 						<th><?php _e("Show", 'wordpress-form-manager');?></th>
-						<th><?php _e("Editable", 'wordpress-form-manager');?></th>
+						<th><?php _e("Editable", 'wordpress-form-manager');?><br /><?php _e("(bulk)", 'wordpress-form-manager');?></th>
 						<?php if($fm_MEMBERS_EXISTS) : ?>
 							<th><?php _e("Edit capability", 'wordpress-form-manager');?></th>
 						<?php endif; ?>

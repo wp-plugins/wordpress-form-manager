@@ -228,9 +228,7 @@ function fm_getFormID($formSlug){
 function fm_doFormBySlug($formSlug, $options = array()){
 	global $fm_display;
 	global $fmdb;
-	global $current_user;
-	global $fm_registered_user_only_msg;
-	
+	global $current_user;	
 	
 	// error checking
 	$formID = $fmdb->getFormID($formSlug);
@@ -241,13 +239,14 @@ function fm_doFormBySlug($formSlug, $options = array()){
 	$formBehaviors = fm_helper_parseBehaviors($formInfo['behaviors']);
 		
 	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == ""){
+		$msg = empty($formInfo['reg_user_only_msg']) ? $fmdb->getGlobalSetting('reg_user_only_msg') : $formInfo['reg_user_only_msg'];
 		if(isset($formBehaviors['allow_view'])){
-			return sprintf($fm_registered_user_only_msg, $formInfo['title']).
+			return sprintf($msg, $formInfo['title']).
 			'<br/>'.
 			$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'show_submit' => false)));
 		}			
 		else
-			return sprintf($fm_registered_user_only_msg, $formInfo['title']);
+			return sprintf($msg, $formInfo['title']);
 	}
 		
 	$output = "";

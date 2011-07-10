@@ -170,9 +170,9 @@ class fm_metaTextControl extends fm_textControl {
 	}
 	
 	public function processPost($uniqueName, $itemInfo){
-		if($_POST[$uniqueName] != null)
+		if(isset($_POST[$uniqueName]))
 			return strip_tags($_POST[$uniqueName]);
-		return $itemInfo['extra']['value'];
+		return NULL;
 	}
 }
 
@@ -185,7 +185,7 @@ class fm_metaIDNumberControl extends fm_metaTextControl {
 	public function processPost($uniqueName, $itemInfo){
 		global $fmdb;
 		
-		if($_POST[$uniqueName] != null)
+		if(isset($_POST[$uniqueName]))
 			return strip_tags($_POST[$uniqueName]);
 		
 		$fmdb->query("LOCK TABLES `".$fmdb->itemsTable."` WRITE");		
@@ -265,9 +265,9 @@ class fm_metaTrackNumberControl extends fm_metaTextControl {
 	}
 	
 	public function processPost($uniqueName, $itemInfo){
-		if($_POST[$uniqueName] != null)
+		if(isset($_POST[$uniqueName]))
 			return strip_tags($_POST[$uniqueName]);
-		return "";
+		return NULL;
 	}
 	
 	public function getPanelItems($uniqueName, $itemInfo){

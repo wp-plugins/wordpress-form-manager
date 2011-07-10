@@ -68,7 +68,8 @@ $this->formSettingsKeys = array(
 					'title' => '',
 					'submitted_msg' => '', 
 					'submit_btn_text' => __('Submit', 'wordpress-form-manager'), 
-					'required_msg' => '', 
+					'required_msg' => '',
+					'reg_user_only_msg' => '',
 					'action' => '',
 					'data_index' => '',
 					'shortcode' => '',
@@ -114,6 +115,7 @@ $this->globalSettings = array(
 					'submitted_msg' => 		__('Thank you! Your data has been submitted.', 'wordpress-form-manager'), 
 					/* translators: the default message given if a required item is left blank.  You must include a backslash before any single quotes */
 					'required_msg' => 		__("\'%s\' is required.", 'wordpress-form-manager'),
+					'reg_user_only_msg' => addslashes(__("'%s' is only available to registered users.", 'wordpress-form-manager')),
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
 					'template_form' => '',
@@ -220,6 +222,7 @@ function setupFormManager(){
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
 		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
 		`conditions` TEXT NOT NULL,
+		`reg_user_only_msg` TEXT NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
