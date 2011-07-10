@@ -390,6 +390,7 @@ function fm_pluginActions( $links ) {
 		'<a href="' . get_admin_url( null, 'admin.php' ) . "?page=fm-global-settings".'">' .
 		__('Settings', 'wordpress-form-manager') . '</a>';
 	array_unshift( $links, $settings_link );
+	
 	return $links;
 }	
 
