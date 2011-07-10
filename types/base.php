@@ -110,7 +110,7 @@ class fm_controlBase{
 		$itemInfo['label'] = __("Item Label", 'wordpress-form-manager');
 		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array();
-		$itemInfo['nickname'] = __("Item Nickname", 'wordpress-form-manager');
+		$itemInfo['nickname'] = "";
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
