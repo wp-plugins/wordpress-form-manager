@@ -34,7 +34,18 @@ class fm_checkboxControl extends fm_controlBase{
 					'checked'=> $isChecked,				
 					);											
 		return fe_getElementHTML($elem);
-	}	
+	}
+	
+	public function showItemSimple($uniqueName, $itemInfo){
+		$isChecked = $itemInfo['extra']['value'] == __("yes",'wordpress-form-manager');
+		$elem=array('type' => 'checkbox',
+					'attributes' => array('name' => $uniqueName,
+											'id'=> $uniqueName,
+											),
+					'checked'=> $isChecked,
+					);
+		return fe_getElementHTML($elem);
+	}
 	
 	public function processPost($uniqueName, $itemInfo){
 		if(isset($_POST[$uniqueName]))
@@ -89,7 +100,38 @@ class fm_checkboxControl extends fm_controlBase{
 		
 	protected function getPanelKeys(){
 		return array('label', 'required');
-	}	
+	}
 }
 
+class fm_metaCheckboxControl extends fm_checkboxControl {
+	public function isSubmissionMeta() { return true; }
+	public function isFormField() { return false; }
+	
+	public function getTypeName(){ return "metacheckbox"; }
+	
+	public function getPanelItems($uniqueName, $itemInfo){
+		$arr=array();
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'value', __('Checked by Default', 'wordpress-form-manager'), array('checked'=>($itemInfo['extra']['value']=='checked')));
+		return $arr;
+	}
+	
+	public function getPanelScriptOptions(){
+		$opt = $this->getPanelScriptOptionDefaults();		
+		$opt['extra'] = "\"array('value' => '\" + ".$this->checkboxScriptHelper('value',array('onValue'=>'checked', 'offValue'=>""))." + \"')\"";
+		return $opt;
+	}
+	
+	public function processPost($uniqueName, $itemInfo){
+		if(isset($_POST[$uniqueName]))
+			return $_POST[$uniqueName]=="on"?__("yes",'wordpress-form-manager'):__("no",'wordpress-form-manager');
+		return $itemInfo['extra']['value']=='checked'?__("yes",'wordpress-form-manager'):__("no",'wordpress-form-manager');
+	}
+	
+	protected function showExtraScripts(){ }
+	
+	protected function getPanelKeys(){ 
+		return array('label');
+	}
+}
 ?>

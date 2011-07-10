@@ -61,9 +61,13 @@ function helper_option_field($id, $label, $options, $value = false, $desc = ""){
 }
 
 function fm_write_file($fullPath, $fileData, $text = true){
-	if(! WP_Filesystem() ){
+	
+	
+	add_filter('filesystem_method', 'fm_getFSMethod');
+	if(! WP_Filesystem( ) ){
 		return "Could not initialize WP filesystem";
-	}
+	}	
+	remove_filter('filesystem_method', '_return_direct');
 	
 	global $wp_filesystem;
 	if(! $wp_filesystem->put_contents( $fullPath, $fileData, FS_CHMOD_FILE ) ) {
@@ -71,6 +75,11 @@ function fm_write_file($fullPath, $fileData, $text = true){
 	}
 	
 	return 0;
+}
+function fm_getFSMethod($autoMethod) {
+	$method = get_option('fm-file-method'); 
+	if($method = 'auto') return $autoMethod;
+	return $method;
 }
 
 function fm_get_file_data( $file, $fields) {
@@ -115,11 +124,171 @@ function fm_get_slimstat_IP_link($queryVars, $ipAddr){
 }
 
 function fm_is_private_item($itemInfo){
-	return !( (! isset($itemInfo['meta']['private']))
-			|| $itemInfo['meta']['private'] === false
-			|| current_user_can($itemInfo['meta']['capability'])
-			|| (trim($itemInfo['meta']['capability']) == "" && is_admin() )
-			);
+	return $itemInfo['set'] != 0;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+// Data page
+
+function fm_getDefaultDataCols(){
+	$cols = array(); 
+				
+	$cols[] = array('attributes' => 
+					array( 'class' => 'timestamp-column' ),
+					'value' => __("Timestamp", 'wordpress-form-manager'),
+					'key' => 'timestamp',
+					'editable' => false,
+					);
+	
+	$cols[] = array('attributes' => 
+					array( 'class' => 'user-column' ),
+					'value' => __("User", 'wordpress-form-manager'),
+					'key' => 'user',
+					'editable' => false,
+					);
+	
+	$cols[] = array('attributes' =>
+					array( 'class' => 'ip-column' ),
+					'value' => __("IP Address", 'wordpress-form-manager'),
+					'key' => 'user_ip',
+					'editable' => false,
+					);
+	$cols[] = array('attributes' =>
+					array( 'class' => 'post-column' ),
+					'value' => __("Post Link", 'wordpress-form-manager'),
+					'key' => 'post_id',
+					'editable' => false,
+					'show-callback' => 'fm_getPostLink',
+					);
+	return $cols;
+}
+
+function fm_getPostLink($col, $dbRow){
+	$postID = $dbRow['post_id'];
+	if($postID != 0)
+		return '<a href="'.get_permalink($postID).'">'.$postID.'</a>';
+	else
+		return "";
+}
+
+function fm_getFileLink($col, $dbRow){
+	global $fm_controls;
+	$link = $fm_controls['file']->parseData($col['key'], $col['item'], $dbRow[$col['key']]);
+	if(strpos($link, "<a ") !== 0)
+		$link = '<a class="fm-download-link" onclick="fm_downloadFile(\''.$col['item']['ID'].'\', \''.$col['item']['unique_name'].'\', \''.$dbRow['unique_id'].'\')" >'.$link.'</a>';
+	return $link;
+}
+
+function fm_getTableCol($item){
+	$col = array( 
+		'value' => (empty($item['nickname']) ? $item['label'] : $item['nickname']),
+		'key' => $item['unique_name'],
+		'item' => $item,
+		'editable' => true,
+		);
+	
+	if($item['type'] == 'file'){
+		$col['show-callback'] = 'fm_getFileLink';
+		$col['value'] = '<a class="fm-download-link" onclick="fm_downloadAllFiles(\''.$col['item']['ID'].'\', \''.$col['item']['unique_name'].'\')" >'.$col['value'].'</a>';
+	}
+	
+	return $col;
+}
+
+function fm_dataBuildTableCols($form, $subMetaFields, &$cols){
+	foreach($form['items'] as $item){
+		if($item['db_type'] != "NONE"){
+			$newCol = fm_getTableCol($item);
+			$cols[] = $newCol;
+		}
+	}
+	
+	foreach($subMetaFields as $item){
+		$newCol = fm_getTableCol($item);
+		$cols[] = $newCol;
+	}
+}
+
+function fm_applyColSettings($fm_dataPageSettings, &$cols){
+	global $fm_MEMBERS_EXISTS;
+	foreach($cols as $i=>$col){
+		$cols[$i]['hidden'] = in_array($col['key'], $fm_dataPageSettings['hide']);
+		$cols[$i]['editable'] = !in_array($col['key'], $fm_dataPageSettings['noedit']);
+		$cols[$i]['nosummary'] = in_array($col['key'], $fm_dataPageSettings['nosummary']);
+		
+		if($fm_MEMBERS_EXISTS){
+			$cols[$i]['edit_capability'] = $fm_dataPageSettings['edit_capabilities'][$cols[$i]['key']];
+		}
+	}
+}
+
+// post processing
+
+function fm_getCheckedItems(){
+	$numrows = $_POST['fm-num-rows'];
+	$checked=array();
+	for($x=0;$x<$numrows;$x++){
+		$rowID = $_POST['cb-'.$x];
+		if(isset($_POST['cb-'.$rowID])){
+			$checked[] = $rowID;
+		}
+	}
+	return $checked;
+}
+
+function fm_getEditItems(){
+	$numrows = $_POST['fm-num-rows'];
+	$edit = array();
+	for($x=0;$x<$numrows;$x++){
+		$rowID = $_POST['cb-'.$x];
+		if($_POST['cb-'.$rowID] == 'edit'){
+			$edit[] = $rowID;
+		}
+	}
+	return $edit;
+}
+
+function fm_getEditPost($subID, $cols, $all = false){
+	global $fm_controls;
+	global $fm_MEMBERS_EXISTS;
+	
+	$data=array();
+	foreach($cols as $col){
+		if(isset($col['item']) && 
+			($all 
+			|| (!$col['hidden'] 
+				&& $col['editable'] 
+				&& (!$fm_MEMBERS_EXISTS 
+					|| trim($col['edit_capability']) == "" 
+					|| current_user_can($col['edit_capability']))
+				)
+			)
+		){
+			$item = $col['item'];
+			$postName = $subID.'-'.$item['unique_name'];
+			$processed = $fm_controls[$item['type']]->processPost($postName, $item);
+			if($processed !== NULL)
+				$data[$item['unique_name']] = $processed;
+		}
+	}
+	return $data;
+}
+
+function fm_createCSVFile($formID, $query, $filename){
+	global $fmdb;
+
+	$csvData = $fmdb->getFormSubmissionDataCSV($formID, $query);
+	
+	fm_write_file($filename, $csvData);
+}
+
+function fm_getTmpPath(){
+	return  WP_PLUGIN_DIR."/".dirname(plugin_basename(__FILE__))."/".get_option("fm-temp-dir")."/";
+}
+
+function fm_getTmpURL(){
+	return WP_PLUGIN_URL."/".dirname(plugin_basename(__FILE__))."/".get_option("fm-temp-dir")."/";
 }
 
 /////////////////////////////////////////////////////////////////////////
