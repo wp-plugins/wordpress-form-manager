@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.24
+Version: 1.6.3
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.5.24";
+$fm_currentVersion = 		"1.6.3";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -84,6 +84,8 @@ if ( get_option( 'fm-shortcode' ) === false )
 	update_option("fm-shortcode", "form");
 if ( get_option( 'fm-enable-mce-button' ) === false )
 	update_option( "fm-enable-mce-button", "YES" );
+if ( get_option( 'fm-file-method' ) === false )
+	update_option( 'fm-file-method', 'auto' );
 	
 update_option( "fm-forms-table-name", 			"fm_forms" );
 update_option( "fm-items-table-name", 			"fm_items" );
@@ -123,6 +125,12 @@ $fm_templates = new fm_template_manager();
 function fm_install() {
 	global $fmdb;
 	global $fm_currentVersion;
+	
+	if ( get_option( 'fm-version' ) == '1.5.29' ) {
+		$fmdb->fixItemMeta();
+	}
+	
+	update_option( 'fm-last-version', get_option( 'fm-version' ) );
 	
 	//from any version before 1.4.0; must be done before the old columns are removed
 	$fmdb->convertAppearanceSettings();
@@ -271,6 +279,10 @@ function fm_adminEnqueueScripts( ) {
 					__("Require elements if", 'wordpress-form-manager'),
 				'do_not_require_elements_if' => 				
 					__("Do not require elements if", 'wordpress-form-manager'),
+				'always' =>
+					__("Always", 'wordpress-form-manager'),
+				'never' =>
+					__("Never", 'wordpress-form-manager'),
 				'empty_test' => 
 					__("...", 'wordpress-form-manager'),
 				'equals' => 
@@ -380,6 +392,7 @@ function fm_pluginActions( $links ) {
 		'<a href="' . get_admin_url( null, 'admin.php' ) . "?page=fm-global-settings".'">' .
 		__('Settings', 'wordpress-form-manager') . '</a>';
 	array_unshift( $links, $settings_link );
+	
 	return $links;
 }	
 
@@ -417,7 +430,7 @@ function fm_showSettingsAdvancedPage()	{	include 'pages/editsettingsadv.php'; }
 
 // capabilities
 
-if ( function_exists( 'members_plugin_init' ) ) {
+if ( class_exists( 'Members_Load' ) ) {
 	$fm_MEMBERS_EXISTS = true;
 	
 	add_filter( 'fm_main_capability', 			'fm_main_capability');
@@ -448,6 +461,9 @@ function fm_add_members_capabilities( $caps ) {
 	$caps[] = 'form_manager_settings_advanced';
 	
 	$caps[] = 'form_manager_edit_data';
+	$caps[] = 'form_manager_data_summary';
+	$caps[] = 'form_manager_data_summary_edit';
+	$caps[] = 'form_manager_data_options';
 	$caps[] = 'form_manager_delete_data';
 	$caps[] = 'form_manager_nicknames';
 	$caps[] = 'form_manager_conditions';
