@@ -1,5 +1,6 @@
 <?php
-/* translators: the following are from the form's data page */
+
+global $wpdb;
 global $fmdb;
 global $fm_display;
 global $fm_controls;
@@ -7,395 +8,606 @@ global $fm_controls;
 global $fm_SLIMSTAT_EXISTS;
 global $fm_MEMBERS_EXISTS;
 
-$itemsPerPage = 30;
-$set = isset($_REQUEST['set']) ? $_REQUEST['set'] : 0;
-
-$fm_dataDialog = "main";
+$queryMessage = "";
 
 $form = null;
-$formData = null;
-if($_REQUEST['id']!="") $form = $fmdb->getForm($_REQUEST['id']);
-if($form != null){
-	$orderBy = isset($_REQUEST['orderby']) ? $_REQUEST['orderby'] : 'timestamp';
-	$orderBy = $fmdb->isValidItem($form, $orderBy) ? $orderBy : 'timestamp';
-	$ord = $_REQUEST['ord'] == 'ASC' ? 'ASC' : 'DESC';
-	$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
+if($_REQUEST['id']!="")
+	$form = $fmdb->getForm($_REQUEST['id']);
 	
-	$numDataPages = ceil($formData['count'] / $itemsPerPage);
+$subMetaFields = $fmdb->getFormItems($_REQUEST['id'], 1);
+
+global $fm_dataPageSettings;
+$fm_dataPageSettings = $fmdb->getDataPageSettings($form['ID']);
+
+$fm_dateRangeOptions = array(
+	'all' => _x('All', 'date-range', 'wordpress-form-manager'),
+	'month' => _x('This month', 'date-range', 'wordpress-form-manager'),
+	'week' => _x('Past 7 days', 'date-range', 'wordpress-form-manager'),
+	'today' => _x('Today', 'date-range', 'wordpress-form-manager'),
+	'other' => _x('Range...', 'date-range', 'wordpress-form-manager')
+	);
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+function fm_colSelect($name, $cols, $selected = NULL){
+	if($selected === NULL)
+		$selected = $_POST[$name];
+?><select name="<?php echo $name;?>" id="<?php echo $name;?>">
+		<?php foreach ( $cols as $col ): ?>
+			<?php if(!$col['hidden']): ?>
+				<option value="<?php echo $col['key'];?>" <?php if($selected == $col['key']) echo 'selected="selected"';?>>
+					<?php echo $col['value'];?>
+				</option>
+			<?php endif; ?>
+		<?php endforeach; ?>
+	</select><?php
 }
 
-$hasPosts = $fmdb->dataHasPublishedSubmissions($form['ID']);
+function fm_getSafeColKey($var, $cols){
+	foreach($cols as $col)
+		if($col['key'] == $var) 
+			return $var;
+	return false;
+}
 
-// PARSE THE QUERY STRING
-parse_str($_SERVER['QUERY_STRING'], $queryVars);
+function outputTableHead($cols){
+	global $fm_rowIndex;
+	global $fm_MEMBERS_EXISTS;
+	$fm_rowIndex = 0;	
+	?>	
+		<thead>
+			<tr>
+			<th class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-top" onchange="fm_dataCBColChange()"/></th>
+			<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_summary')): ?>
+				<th class="fm-data-actions-col">&nbsp</th>
+			<?php endif; ?>
+	<?php foreach($cols as $col): ?>
+		<?php if(!$col['hidden']):?>
+			<?php if(!isset($col['attributes'])): ?>
+				<th><?php echo $col['value'];?></th>
+			<?php else: ?>
+				<th <?php foreach($col['attributes'] as $att=>$val): echo $att.'="'.$val.'" '; endforeach; ?>><?php echo $col['value'];?></th>
+			<?php endif; ?>
+		<?php endif; ?>
+	<?php endforeach;?>
+			</tr>
+		</thead>
+	<?php
+}
 
-////////////////////////////////////////////////////////////////////////////////
-//ACTIONS
+function outputTableFoot($cols){
+	global $fm_rowIndex;
+	global $fm_MEMBERS_EXISTS;
+	?>	
+		<tfoot>
+			<tr>
+			<th class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-top" onchange="fm_dataCBColChange()"/></th>
+			<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_summary')): ?>
+				<th>&nbsp</th>
+			<?php endif; ?>
+	<?php foreach($cols as $col): ?>
+		<?php if(!$col['hidden']):?>
+			<?php if(!isset($col['attributes'])): ?>
+				<th><?php echo $col['value'];?></th>
+			<?php else: ?>
+				<th <?php foreach($col['attributes'] as $att=>$val): echo $att.'="'.$val.'" '; endforeach; ?>><?php echo $col['value'];?></th>
+			<?php endif; ?>
+		<?php endif; ?>
+	<?php endforeach;?>
+			</tr>
+		</tfoot>
+		<input type="hidden" name="fm-num-rows" id="fm-num-rows" value="<?php echo $fm_rowIndex;?>" />
+	<?php
+}
+function fm_echoDataTableRow($cols, $dbRow, &$form){
+	global $fm_controls;
+	global $fm_rowIndex;
+	global $fm_MEMBERS_EXISTS;
+	?>
+	<tr>
+		<td>
+			<input type="checkbox" name="cb-<?php echo $dbRow['unique_id'];?>" id="cb-<?php echo $dbRow['unique_id'];?>" />
+			<input type="hidden" name="cb-<?php echo $fm_rowIndex; ?>" id="cb-<?php echo $fm_rowIndex; ?>" value="<?php echo $dbRow['unique_id'];?>" />
+		</td>
+		<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_summary')): ?>
+			<td>
+				<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=datasingle&id=".$form['ID']."&sub=".$dbRow['unique_id'];?>"><?php _e("View", 'wordpress-form-manager');?></a>
+			</td>
+		<?php endif; ?>
+		<?php foreach($cols as $col): ?>
+			<?php if(!$col['hidden']):?>
+				<?php if(isset($col['show-callback'])): ?>
+					<td><?php echo $col['show-callback']($col, $dbRow);?></td>
+				<?php elseif(isset($col['item'])): ?>
+					<td><?php echo $fm_controls[$col['item']['type']]->parseData($col['key'], $col['item'], $dbRow[$col['key']]);?></td>
+				<?php else: ?>
+					<td><?php echo $dbRow[$col['key']]; ?></td>
+				<?php endif; ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
+	</tr>
+	<?php
+	
+	$fm_rowIndex++;
+}
 
-//Delete data row(s):
-if(isset($_POST['fm-action-select'])){
-		
+function fm_echoDataTableRowEdit($cols, $dbRow){
+	global $fm_controls;
+	global $fm_rowIndex;
+	global $fm_MEMBERS_EXISTS;
+	?>
+	<tr>
+		<td>
+			<input type="hidden" name="cb-<?php echo $dbRow['unique_id'];?>" id="cb-<?php echo $dbRow['unique_id'];?>" value="edit" />
+			<input type="hidden" name="cb-<?php echo $fm_rowIndex; ?>" id="cb-<?php echo $fm_rowIndex; ?>" value="<?php echo $dbRow['unique_id'];?>" />
+		</td>
+		<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_summary')): ?>
+			<td>&nbsp;</td>
+		<?php endif; ?>
+		<?php foreach($cols as $col): ?>
+			<?php if(!$col['hidden']):?>
+				<?php if(isset($col['show-callback'])): ?>
+					<td><?php echo $col['show-callback']($col, $dbRow);?></td>
+				<?php elseif(isset($col['item']) && $col['editable']): ?>
+					<?php if(!$fm_MEMBERS_EXISTS || trim($col['edit_capability']) == "" || current_user_can($col['edit_capability'])): ?>
+						<td><?php
+						$item = $col['item'];					
+						$item['extra']['value'] = $dbRow[$col['key']];
+						
+						// a special exception for how we display file elements
+						if($item['type'] == 'file')
+							echo $fm_controls[$col['item']['type']]->parseData($col['key'], $col['item'], $dbRow[$col['key']])."<br />";
+							
+						echo $fm_controls[$item['type']]->showItemSimple($dbRow['unique_id'].'-'.$item['unique_name'], $item);
+						?></td>
+					<?php else: ?>
+						<td><?php echo $fm_controls[$col['item']['type']]->parseData($col['key'], $col['item'], $dbRow[$col['key']]);?></td>
+					<?php endif; ?>
+				<?php else: ?>
+					<td><?php echo $dbRow[$col['key']]; ?></td>
+				<?php endif; ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
+	</tr>
+	<?php
+	
+	$fm_rowIndex++;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+$cols = fm_getDefaultDataCols();
+
+fm_dataBuildTableCols($form, $subMetaFields, $cols);
+
+$fm_notEditable = array();
+foreach($cols as $col){
+	if(!$col['editable']) $fm_notEditable[] = $col['key'];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+/// data page options
+
+if(isset($_POST['submit-col-options'])){
+	$hide=array();
+	$noedit=array();
+	$caps=array();
+	$nosummary=array();
+	foreach($cols as $col){
+		if(!isset($_POST['fm-show-'.$col['key']]))
+			$hide[] = $col['key'];
+		if(!isset($_POST['fm-edit-'.$col['key']]))
+			$noedit[] = $col['key'];
+		if(isset($_POST['fm-edit-'.$col['key'].'-capability']))
+			$caps[$col['key']] = stripslashes($_POST['fm-edit-'.$col['key'].'-capability']);
+		if(!isset($_POST['fm-show-'.$col['key'].'-summary']))
+			$nosummary[] = $col['key'];
+	}
+	
+	$fm_dataPageSettings['hide'] = $hide;
+	$fm_dataPageSettings['noedit'] = $noedit;
+	$fm_dataPageSettings['nosummary'] = $nosummary;
+
+	if($fm_MEMBERS_EXISTS){
+		$fm_dataPageSettings['edit_capabilities'] = $caps;
+	}
+	
+	update_option('fm-ds-'.$form['ID'], $fm_dataPageSettings);
+}
+
+if(isset($_POST['fm-data-show-options'])){
+	$fm_dataPageSettings['showoptions'] = $_POST['fm-data-show-options'];
+	update_option('fm-ds-'.$form['ID'], $fm_dataPageSettings);
+}
+
+
+// update the date range box and other search options
+// (this value is always posted by the data page)
+if(isset($_POST['fm-data-date-range'])){
+	$date = array(
+		'range' => $_POST['fm-data-date-range'],
+		'start' => $_POST['fm-data-date-start'],
+		'end' => $_POST['fm-data-date-end'],
+		);
+	
+	$search = array(
+		'search' => $_POST['fm-data-search'],
+		'column' => $_POST['fm-data-search-column'],
+	);
+	
+	$results = array(
+		'perpage' => $_POST['fm-data-per-page'],
+		'sortby' => $_POST['fm-data-sort-by'],
+		'sortorder' => $_POST['fm-data-sort-order'],
+	);
+	
+	$fm_dataPageSettings['date'] = $date;
+	$fm_dataPageSettings['search'] = $search;
+	$fm_dataPageSettings['results'] = $results;
+	
+	update_option('fm-ds-'.$form['ID'], $fm_dataPageSettings);
+}
+
+// pass the settings on to the $col array
+
+fm_applyColSettings($fm_dataPageSettings, $cols);
+
+/// data edit / delete
+$fm_showEditRows = false;
+
+if(isset($_POST['fm-doaction'])){
+	$checked = fm_getCheckedItems();
 	switch($_POST['fm-action-select']){
-		case "delete":
-			if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data')){
-				$toDelete = fm_data_getCheckedRows();
-				foreach($toDelete as $del)
-					$fmdb->deleteSubmissionDataRow($form['ID'], $formData['data'][$del]);				
+		case 'delete':
+			foreach($checked as $subID){
+				$fmdb->deleteSubmissionDataByID($form['ID'], $subID);
 			}
-			//clean up the mess we made
-			$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
 			break;
-		case "delete_all":
-			if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data'))
-				$fmdb->clearSubmissionData($form['ID']);
-			//clean up the mess we made
-			$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
+		case 'delete_all':
+			$fmdb->clearSubmissionData($form['ID']);
 			break;
-		case "edit":
-			if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data'))
-				$fm_dataDialog = "edit";	
-			break;
-		case "summary":
-			$fm_dataDialog = "summary";
+		case 'edit':
+			$fm_showEditRows = true;
 			break;
 	}
 }
 
-//Edit data rows(s)
-else if((!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')) && isset($_POST['fm-edit-data-ok'])){
-	$numRows = $_POST['fm-num-edit-rows'];
-	$postFailed = false;
-	
-	for($x=0;$x<$numRows;$x++){
-		$dataIndex = $_POST['fm-edit-row-'.$x];
+if(isset($_POST['submit-edit'])){
+	$checked = fm_getEditItems();
+	foreach($checked as $subID){
+		$newData = fm_getEditPost($subID, $cols);
+		if(sizeof($newData) > 0)
+			$fmdb->updateDataSubmissionRowByID($form['ID'], $subID, $newData);
+	}
+}
+
+/// build the query
+$dataPerPage = isset($fm_dataPageSettings['results']['perpage']) ? $fm_dataPageSettings['results']['perpage'] : 30;
+$dataSortBy = isset($fm_dataPageSettings['results']['sortby']) ? $fm_dataPageSettings['results']['sortby'] : 'timestamp';
+if(trim($dataSortBy) == "") $dataSortBy = 'timestamp';
+
+$dataSortOrder = $fm_dataPageSettings['results']['sortorder'] == 'asc' ? 'ASC' : 'DESC';
+$dataCurrentPage = isset($_POST['fm-data-current-page']) ? $_POST['fm-data-current-page'] : 1;
+
+$dataQuery = "SELECT * FROM `".$form['data_table']."` ";
+$allQuery = $dataQuery;
+
+$countQuery = "SELECT COUNT(*) FROM `".$form['data_table']."` ";
+
+$queryClauses = array();
+
+// search
+if(!trim($fm_dataPageSettings['search']['search']) == ""){
+	$colID = fm_getSafeColKey($fm_dataPageSettings['search']['column'], $cols);	
+	if($colID !== false)
+		$queryClauses[] = $wpdb->prepare("`".$colID."` LIKE %s ", "%".$fm_dataPageSettings['search']['search']."%");
+}
+
+//date range
+switch ( $fm_dataPageSettings['date']['range'] ) {
 		
-		$newData = array();
-		$postData = array();
-		foreach($form['items'] as $item){
-			if($item['type'] != 'file'
-			&& $item['type'] != 'separator'
-			&& $item['type'] != 'note'
-			&& $item['type'] != 'recaptcha'	
-			&& !fm_is_private_item($item)
-			) {		
-				$processed = $fm_controls[$item['type']]->processPost($item['unique_name']."-".$dataIndex, $item);
-				if($processed === false){
-					$postFailed = true;
-				}
-				if($fmdb->isDataCol($item['unique_name']))						
-					$postData[$item['unique_name']] = $processed;
-			}
-		}
+	case 'month':
+		$queryClauses[] = "MONTH(`timestamp`) = MONTH(CURDATE())";
+		$queryMessage = __("Showing data for the current month", 'wordpress-form-manager');
+		break;
 		
-		if(sizeof($postData) > 0) {
-			$fmdb->updateDataSubmissionRow($form['ID'],
-											$formData['data'][$dataIndex]['timestamp'],
-											$formData['data'][$dataIndex]['user'],
-											$formData['data'][$dataIndex]['user_ip'],
-											$postData
-											);
-		}
+	case 'week':
+		$queryClauses[] = "`timestamp` > DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+		$queryMessage = __("Showing data from the past seven days", 'wordpress-form-manager');
+		break;
+
+	case 'today':
+		$queryClauses[] = "DATE(`timestamp`) = CURDATE()";
+		$queryMessage = __("Showing data for today", 'wordpress-form-manager');
+		break;
+		
+	case 'other':
+		/*translators: this is a date format. See php.net for more about that. */
+		$dateFormat = __('Y-m-d', 'wordpress-form-manager');
+		$start = date($dateFormat, strtotime($fm_dataPageSettings['date']['start']));
+		$end = (trim($fm_dataPageSettings['date']['end']) == "" ? "CURDATE()" : date($dateFormat, strtotime($fm_dataPageSettings['date']['end'])));
+		$queryClauses[] = "DATE(`timestamp`) >= DATE('".$start."') AND DATE(`timestamp`) <= DATE('".$end."')";
+		$queryMessage = sprintf(__("Showing data from %s to %s", 'wordpress-form-manager'), $start, $end);
+		break;
+		
+	default:
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// HOOK ////////////////////////////////////////////////////////////////////////////////////
+
+$queryClauses = apply_filters( 'fm_data_query_clauses', $queryClauses );
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+if(sizeof($queryClauses) > 0){
+	$clauses = " WHERE ".implode(" AND ", $queryClauses);
+	$dataQuery .= $clauses;
+	$countQuery .= $clauses;
+}
+
+//get the full query count
+$res = $fmdb->query($dataQuery);
+$dataCount = mysql_num_rows($res);
+mysql_free_result($res);
+
+//sort the results
+$dataQuery .= " ORDER BY `".$dataSortBy."` ".$dataSortOrder;
+
+//'search results' query is the data query without the LIMIT clause
+$searchQuery = $dataQuery;
+
+//page range
+$dataQuery .= " LIMIT ".(($dataCurrentPage-1)*$dataPerPage).", ".$dataPerPage;
+
+//echo $dataQuery."<br />";
+
+$res = $fmdb->query($dataQuery);
+
+//create a CSV download file
+
+if(isset($_POST['submit-download-csv'])){
+	$filename = 'data.csv';
+	$fullpath = fm_getTmpPath().$filename;
+	$CSVFileURL = fm_getTmpURL().$filename;
+	
+	$csvQuery = "";
+	switch($_POST['fm-data-download-csv-type']){
+		case 'all':
+			$csvQuery = $allQuery;
+			break;
+		case 'current-search':
+			$csvQuery = $searchQuery;
+			break;
+		case 'current-page':
+			$csvQuery = $dataQuery;
+			break;
 	}
-	//clean up the mess we made
-	$formData = $fmdb->getFormSubmissionData($form['ID'], $orderBy, $ord, ($set*$itemsPerPage), $itemsPerPage);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// BEGIN OUTPUT
-
-switch($fm_dataDialog){
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//EDIT DIALOG
-
-case "edit":
-
-if($formData !== false){
-	$numRows = (int)$_POST['fm-num-data-rows'];
-
-	?>
-<form name="fm-main-form" id="fm-main-form" action="" method="post">
-<div class="wrap">
-	<div id="icon-edit-pages" class="icon32"></div>
-	<h2><?php _e("Data", 'wordpress-form-manager');?>: <?php echo $form['title'];?></h2>
-	<div style="float:right;">
-		<input type="submit" name="fm-edit-data-ok" value="<?php _e("Submit Changes", 'wordpress-form-manager');?>" />
-		<input type="submit" name="fm-edit-data-cancel" value="<?php _e("Cancel", 'wordpress-form-manager');?>" />		
-	</div>
-	
-	<div class="wrap">
-	<br />
-	
-	<?php _e("Edit data", 'wordpress-form-manager');?>: <br />
-	<?php
-	
-	$callbacks = array( 'text' => 'fm_data_displayTextEdit',
-						'textarea' => 'fm_data_displayTextAreaEdit',
-						'file' => 'fm_data_displayFileEdit'
-					);
-	$exclude_types = array('note', 'recaptcha');
-	
-	$editRowCount = 0;
-	for($x=0;$x<$numRows;$x++){
-		if(isset($_POST['fm-checked-'.$x])){
-			echo "<div class=\"fm-data-edit-div\" >".$fm_display->displayFormBare($form, array('exclude_types' => $exclude_types, 'display_callbacks' => $callbacks, 'unique_name_suffix' => '-'.$x), $formData['data'][$x])."</div>\n";
-			echo "<input type=\"hidden\" name=\"fm-edit-row-".$editRowCount."\" value=\"".$x."\" />\n";
-			$editRowCount++;
-		}
-	}	
-	?>
-	</div>
-	
-	<input type="hidden" name="fm-num-edit-rows" value="<?php echo $editRowCount; ?>" />
-	
-	<div>
-		<div style="float:right;">		
-			<input type="submit" name="fm-edit-data-ok" value="<?php _e("Submit Changes", 'wordpress-form-manager');?>" />
-			<input type="submit" name="fm-edit-data-cancel" value="<?php _e("Cancel", 'wordpress-form-manager');?>" />		
-		</div>
-	</div>
-</div>
-</form>
-	<?php
-}
-break;
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//SUMMARY DIALOG
-
-case "summary":
-
-if($formData !== false){
-	$numRows = (int)$_POST['fm-num-data-rows'];
-	?>
-<div class="wrap">
-	<div id="icon-edit-pages" class="icon32"></div>
-	<h2><?php _e("Data", 'wordpress-form-manager');?>: <?php echo $form['title'];?></h2>
-	
-	<div class="wrap">
-	<br />
-	<?php _e("Data summary:", 'wordpress-form-manager');?> <br />
-	<?php
-	for($x=0;$x<$numRows;$x++){		
-		if(isset($_POST['fm-checked-'.$x])){
-			echo "<div class=\"fm-data-summary-div\" >".$fm_display->displayDataSummaryNoTemplate($form, $formData['data'][$x], "", "", true)."</div>\n";
-		}
-	}	
-	?>
-	</div>	
-	
-</div>
-	<?php
-}
-
-break;
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//MAIN DIALOG
-
-
-case "main":
-default:
-
-//keep track of the max number of chars in each column so we can set the table widths appropriately
-$colMaxChars=array();
-for($x=0;$x<sizeof($form['items']);$x++) $colMaxChars[$x]=0;
-
-if($formData !== false){
-	foreach($formData['data'] as $dataRow){
-		$x=1;
-		foreach($form['items'] as $formItem){			
-			$restricted = fm_restrictString($dataRow[$formItem['unique_name']], 20);						
-			$len = strlen($restricted);
-			if($len>$colMaxChars[$x]) $colMaxChars[$x] = $len;		
-			$x++;
-		}
+	if($csvQuery != ""){
+		fm_createCSVFile($form['ID'], $csvQuery, $fullpath);		
 	}
 }
 
-//'total' character width
-$totalCharWidth = 0;
-for($x=0;$x<sizeof($form['items']);$x++) $totalCharWidth += $colMaxChars[$x];
+/// build the page links
+
+$dataNumPages = ceil($dataCount / $dataPerPage);
+
+$dataFirstRow = (($dataCurrentPage-1)*$dataPerPage) + 1;
+$dataLastRow = $dataCurrentPage*$dataPerPage;
+if($dataLastRow > $dataCount) $dataLastRow = $dataCount;
+
+$dataPageLinks=array();
+for($x=1;$x<=$dataNumPages;$x++){
+	if($x==$dataCurrentPage)
+		$dataPageLinks[] = $x;
+	else
+		$dataPageLinks[] = '<a class="edit-form-button" onclick="fm_pageLinkClick(\''.$x.'\')">'.$x.'</a>';
+}
+
+/////
 
 ?>
-<form name="fm-main-form" id="fm-main-form" action="" method="post">
-<input type="hidden" value="<?php echo $form['ID'];?>" name="form-id" id="form-id"/>
-<input type="hidden" value="<?php echo $form['title'];?>" name="title" id="title"/>
-<input type="hidden" value="" name="message" id="message-post" />
+<form enctype="multipart/form-data" name="fm-main-form" id="fm-main-form" action="" method="post">
+	<input type="hidden" value="<?php echo $form['ID'];?>" name="form-id" id="form-id"/>
+	<input type="hidden" value="" name="message" id="message-post" />
+	<input type="hidden" value="" name="fm-data-view-sub-id" id="fm-data-view-sub-id" />
+	<input type="hidden" value="<?php echo $fm_dataPageSettings['showoptions'];?>" name="fm-data-show-options" id="fm-data-show-options" />
+	
+	<?php if(isset($_POST['submit-edit'])): ?>
+		<div id="message-container">
+			<div id="message-success" class="updated"><p><?php _e("Data updated.", 'wordpress-form-manager');?></p></div>
+		</div>
+	<?php endif; ?>
 
-<div class="wrap">
-	<div style="float:right;padding-top:10px;">
-		
-		<a class="button-primary" onclick="fm_downloadCSV()" title="Download Data as CSV"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?></a>
-		
-		<br />
-		<div id="csv-working" style="visibility:hidden;padding-top:10px;margin-bottom:-20px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;<?php _e("Working...", 'wordpress-form-manager');?></div><a href="#" id="fm-csv-download-link"></a>
+	<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_options')): ?>
+		<div class="fm-data-options-show-btn">
+			<a class="edit-form-button" onclick="fm_toggleMoreDataOptions()"><?php _e("Options", 'wordpress-form-manager'); ?></a>
+		</div>
+		<div id="fm-data-more-options" <?php if($fm_dataPageSettings['showoptions'] != "yes") echo 'style="display:none;"';?>>			
+			<div class="postbox fm-data-options">
+				<h3><?php _e("Column Options", 'wordpress-form-manager'); ?></h3>
+				<table>
+					<tr>					
+						<th>&nbsp;</th>
+						<th><?php _e("Show", 'wordpress-form-manager');?></th>
+						<th><?php _e("Editable", 'wordpress-form-manager');?><br /><?php _e("(bulk)", 'wordpress-form-manager');?></th>
+						<?php if($fm_MEMBERS_EXISTS) : ?>
+							<th><?php _e("Edit capability", 'wordpress-form-manager');?></th>
+						<?php endif; ?>
+						<th><?php _e("Summary", 'wordpress-form-manager');?></th>						
+					</tr>
+					
+					<?php foreach($cols as $col): ?>
+						<tr>
+						<td class="field-title"><label for="fm-show-<?php echo $col['key'];?>"><?php echo strip_tags($col['value']);?></label></td>
+						<td><input type="checkbox" name="fm-show-<?php echo $col['key'];?>" <?php if(!$col['hidden']) echo 'checked="checked"';?> /></td>
+						
+						<?php if(!in_array($col['key'], $fm_notEditable)): ?>
+							<td><input type="checkbox" name="fm-edit-<?php echo $col['key'];?>" <?php if($col['editable']) echo 'checked="checked"';?> /></td>
+						<?php else: ?>
+							<td>&nbsp;</td>
+						<?php endif; ?>
+
+						<?php if($fm_MEMBERS_EXISTS):?>
+							<?php if(!in_array($col['key'], $fm_notEditable)):?>
+								<td><input type="text" name="fm-edit-<?php echo $col['key'];?>-capability" value="<?php echo htmlspecialchars($col['edit_capability']);?>" /></td>
+							<?php else: ?>
+								<td>&nbsp;</td>
+							<?php endif; ?>
+						<?php endif; ?>
+
+						<td><input type="checkbox" name="fm-show-<?php echo $col['key'];?>-summary" <?php if(!$col['nosummary']) echo 'checked="checked"';?> /></td>
+
+						</tr>
+					<?php endforeach; ?>
+
+				</table>
+				<div class="fm-data-option-submit-btn">
+					<input type="submit" name="submit-col-options" id="submit-col-options" class="button-primary" value="<?php echo _x("Update", 'date-range', 'wordpress-form-manager');?>" />
+				</div>
+			</div>
+		</div>
+	<?php endif; ?>
+	
+	<div class="tablenav" style="float:right; clear:right; padding-right:10px;" >
+		<label for="fm-data-download-csv-type"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?>:</label>
+		<select name="fm-data-download-csv-type" id="fm-data-download-csv-type" >
+			<option value="all"><?php _e("All entries", 'wordpress-form-manager');?></option>
+			<option value="current-search"><?php _e("Search results (all pages)", 'wordpress-form-manager');?></option>
+			<option value="current-page"><?php _e("Search results (current page only)", 'wordpress-form-manager');?></option>
+		</select>
+		<input type="submit" name="submit-download-csv" id="submit-download-csv" class="button-primary" value="<?php _e("Download", 'wordpress-form-manager');?>" />
 	</div>
-		<div class="tablenav">			
+	
+	<?php if(!empty($csvQuery)): ?>
+		<div class="fm-message" style="float:right; clear:right; margin-right:10px;">
+			<a href="<?php echo $CSVFileURL;?>"><?php _e("Click here to download", 'wordpress-form-manager');?></a>
+		</div>
+	<?php endif; ?>
+	
+	<div class="postbox fm-data-options" style="float:right; clear:right;">
+		<h3><?php _e("Date Range", 'wordpress-form-manager');?></h3>
+		<table>
+			<tr>
+				<td>
+					<label for="fm-data-date-range"><?php echo _x("Show", 'date-range', 'wordpress-form-manager'); ?>:</label>
+					<select name="fm-data-date-range" id="fm-data-date-range" >
+						<?php foreach($fm_dateRangeOptions as $k=>$v): ?>
+							<option value="<?php echo $k;?>" <?php if($k==$fm_dataPageSettings['date']['range']) echo 'selected="selected"';?>><?php echo $v;?></option>
+						<?php endforeach; ?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td><?php echo _x("From", 'date-range', 'wordpress-form-manager');?>: <input type="text" name="fm-data-date-start" id="fm-data-date-start" value="<?php echo htmlspecialchars($fm_dataPageSettings['date']['start']);?>"/></td>
+			</tr>
+			<tr>
+				<td><?php echo _x("To", 'date-range', 'wordpress-form-manager');?>: <input type="text" name="fm-data-date-end" id="fm-data-date-end" value="<?php echo htmlspecialchars($fm_dataPageSettings['date']['end']);?>"/></td>
+			</tr>
+		</table>
+	</div>
+	
+	<div class="postbox fm-data-options" style="float:right;">
+		<h3><?php _e("Search", 'wordpress-form-manager');?></h3>
+		<table>
+			<tr>
+				<td><?php _e("Search for", 'wordpress-form-manager');?>:</td>
+				<td><input type="text" name="fm-data-search" id="fm-data-search" value="<?php echo htmlspecialchars($fm_dataPageSettings['search']['search']); ?>" /></td>
+			</tr>
+			<tr>
+				<td><?php _e("Field", 'wordpress-form-manager');?>:</td>
+				<td><?php fm_colSelect('fm-data-search-column', $cols, $fm_dataPageSettings['search']['column']); ?></td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="tablenav" style="float:right; clear:right;">
+		<div class="alignleft actions">
+			<label for="fm-data-per-page"><?php _e("Results per page", 'wordpress-form-manager'); ?>:</label>
+			<input type="text" id="fm-data-per-page" name="fm-data-per-page" value="<?php echo $dataPerPage; ?>"/>
+			
+			<label for="fm-data-sort-by"><?php _e("Sort by", 'wordpress-form-manager');?>:</label>
+			<?php fm_colSelect('fm-data-sort-by', $cols, $fm_dataPageSettings['results']['sortby']); ?>
+			
+			<label for="fm-data-sort-order"><?php _e("Order", 'wordpress-form-manager');?>:</label>
+			<select name="fm-data-sort-order" id="fm-data-sort-order">
+				<option value="desc"><?php _e("Descending", 'wordpress-form-manager');?></option>
+				<option value="asc" <?php if($fm_dataPageSettings['results']['sortorder']=='asc') echo 'selected="selected"';?>><?php _e("Ascending", 'wordpress-form-manager');?></option>
+			</select>
+			
+			<input type="submit" name="submit-ok" id="submit-ok" class="button secondary" value="<?php _e("Update", 'wordpress-form-manager');?>" />
+		</div>
+	</div>
+	
+	<div style="clear:both;"></div>
+
+	<div id="fm-data-basic-actions">
+		<?php if ( $fm_showEditRows ): ?>
+		<div style="float:right;">
+			<input type="submit" name="cancel" class="button secondary" value="<?php _e("Cancel Changes", 'wordpress-form-manager');?>" />
+			<input type="submit" name="submit-edit" id="submit-edit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>" />&nbsp;&nbsp;
+		</div>
+		<?php endif; ?>
+	
+		<div class="tablenav" style="float:left; clear:none;">			
 			<div class="alignleft actions">
 				<select name="fm-action-select" id="fm-action-select">
-				<option value="-1" selected="selected"><?php _e("Bulk Actions", 'wordpress-form-manager');?></option>
-				<option value="summary"><?php _e("Show Summary", 'wordpress-form-manager');?></option>
-				<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data')): ?>
-				<option value="delete"><?php _e("Delete Selected", 'wordpress-form-manager');?></option>
-				<option value="delete_all"><?php _e("Delete All Submission Data", 'wordpress-form-manager');?></option>
-				<?php endif; ?>
-				<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')): ?>
-				<option value="edit"><?php _e("Edit Selected", 'wordpress-form-manager');?></option>
-				<?php endif; ?>
+					<option value="-1" selected="selected"><?php _e("Bulk Actions", 'wordpress-form-manager');?></option>
+					<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data')): ?>
+					<option value="delete"><?php _e("Delete Selected", 'wordpress-form-manager');?></option>
+					<option value="delete_all"><?php _e("Delete All Submission Data", 'wordpress-form-manager');?></option>
+					<?php endif; ?>
+					<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')): ?>
+					<option value="edit"><?php _e("Edit Selected", 'wordpress-form-manager');?></option>
+					<?php endif; ?>
 				</select>
 				<input type="submit" value="<?php _e("Apply", 'wordpress-form-manager');?>" name="fm-doaction" id="fm-doaction" onclick="return fm_confirmSubmit()" class="button-secondary action" />							
 				<script type="text/javascript">
-				function fm_confirmSubmit(){
-					var action = document.getElementById('fm-action-select').value;
-					var numItems = document.getElementById('fm-num-data-rows').value;
-					
-					//see if anything is selected
-					var selected = false;
-					for(var x=0;x<numItems;x++){
-						if(document.getElementById('fm-checked-' + x).checked){
-							selected = true;
-							x = numItems;
-						}
-					}					
-					
-					if(action == 'delete'){
-						if (selected) return confirm("<?php _e("Are you sure you want to delete the selected items?", 'wordpress-form-manager');?>");
+					function fm_confirmSubmit(){
+						if(action != '-1') return selected;
 						return false;
 					}
-					else if(action == 'delete_all'){
-						return confirm("<?php _e("This will delete all submission data for this form. Are you sure?", 'wordpress-form-manager');?>");
-					}			
-					else if(action != '-1') return selected;		
-					return false;
-				}
 				</script>
-			</div>				
-			<div class="clear"></div>
-		</div>		
-		
-		<div class="tablenav">
-			<div style="float:left;">
-			Showing page <?php echo $set + 1;?> ( Rows <?php echo $set*$itemsPerPage;?> - <?php echo min(($set+1)*$itemsPerPage, $formData['count']); ?> out of <?php echo $formData['count'];?> ): 
 			</div>
-			<div style="float:right;">
-				Page: &nbsp;&nbsp;
-				<?php for($x=0;$x<$numDataPages;$x++): ?>
-					<?php if($set == $x): ?>
-						<strong><?php echo $x+1; ?>&nbsp;</strong>
-					<?php else: ?>
-						<a href="<?php echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('set' => $x)));?>"> <?php echo $x+1; ?></a>&nbsp;
-					<?php endif; ?>
-				<?php endfor; ?>
-			</div>			
 		</div>
-		<table class="widefat post fixed">
-			<thead>
-			<tr>
-				<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-top" onchange="fm_dataCBColChange()"/></th>
-				<th width="130px"><a class="edit-form-button" href="<?php
-									$ord = ($queryVars['orderby'] == 'timestamp' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'timestamp'))); ?>"><?php _e("Timestamp", 'wordpress-form-manager');?></a></th>
-				<th width="60px"><a class="edit-form-button" href="<?php
-									$ord = ($queryVars['orderby'] == 'user' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user'))); ?>"><?php _e("User", 'wordpress-form-manager');?></a></th>
-				<th width="130px"><a class="edit-form-button" href="<?php
-									$ord = ($queryVars['orderby'] == 'user_ip' && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => 'user_ip'))); ?>"><?php _e("IP Address", 'wordpress-form-manager');?></a></th>
-				<?php if($hasPosts): ?>
-					<th><?php _e("Post", 'wordpress-form-manager');?></th>
-				<?php endif; ?>
-				<?php $x=1; foreach($form['items'] as $formItem): ?>
-					<?php if($fmdb->isDataCol($formItem['unique_name']) && !fm_is_private_item($formItem) ): ?>
-						<th><a class="edit-form-button" href="<?php
-									$ord = ($queryVars['orderby'] == $formItem['unique_name'] && $queryVars['ord'] == 'ASC') ? 'DESC' : 'ASC';
-									echo get_admin_url(null, 'admin.php')."?".http_build_query(array_merge($queryVars, array('ord' => $ord, 'orderby' => $formItem['unique_name']))); ?>">
-									<?php echo (trim($formItem['nickname']) != "" ? $formItem['nickname'] : fm_restrictString($formItem['label'],20));?>
-									</a>
-									<?php if($formItem['type'] == 'file'): ?>
-									<div style="margin-top:8px"><a id="<?php echo $formItem['unique_name'];?>-download" class="button-primary" onclick="fm_downloadAllFiles('<?php echo $formItem['unique_name'];?>')"><?php _e("Download Files", 'wordpress-form-manager');?></a>																	
-									</div>
-									<div style="position:absolute;">
-										<div id="<?php echo $formItem['unique_name'];?>-working" style="visibility:hidden;position:relative;top:-17px;margin-bottom:-17px;" ><img src="<?php echo get_admin_url(null, '');?>/images/wpspin_light.gif" id="ajax-loading" alt=""/>&nbsp;<?php _e("Working...", 'wordpress-form-manager');?></div>
-										<a style="visibility:hidden;position:relative;top:-17px;text-decoration:underline;" id="<?php echo $formItem['unique_name'];?>-link" href="#">&nbsp;</a>
-									</div>
-									<?php endif; ?>
-									</th>
-					<?php endif; ?>
-				<?php endforeach; ?>
-			</tr>
-			</thead>
-			<tfoot>
-			<tr>
-				<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" id="cb-col-bottom" onchange="fm_dataCBColChange()"/></th>
-				<th><?php _e("Timestamp", 'wordpress-form-manager');?></th>
-				<th><?php _e("User", 'wordpress-form-manager');?></th>
-				<th><?php _e("IP Address", 'wordpress-form-manager');?></th>
-				<?php if($hasPosts): ?>
-					<th><?php _e("Post", 'wordpress-form-manager');?></th>
-				<?php endif; ?>
-				<?php foreach($form['items'] as $formItem): ?>
-					<?php if($fmdb->isDataCol($formItem['unique_name']) && !fm_is_private_item($formItem)): ?>
-						<th><?php echo fm_restrictString($formItem['label'],20);?></th>
-					<?php endif; ?>
-				<?php endforeach; ?>
-			</tr>
-			</tfoot>
-			<?php $index=0; ?>
-			<?php foreach($formData['data'] as $dataRow): ?>
-				<tr class="alternate author-self status-publish iedit">
-					<td><input type="checkbox" name="fm-checked-<?php echo $index;?>" id="fm-checked-<?php echo $index++;?>"/></td>
-					<td><?php echo $dataRow['timestamp'];?></td>
-					<td><?php echo $dataRow['user'];?></td>
-					<td><?php if($fm_SLIMSTAT_EXISTS): echo fm_get_slimstat_IP_link($queryVars, $dataRow['user_ip']); ?>
-						<?php else: echo $dataRow['user_ip']; endif; ?>
-					</td>
-					<?php if($hasPosts): ?>
-						<td><?php if($dataRow['post_id'] > 0): ?><a href="<?php echo get_permalink($dataRow['post_id']);?>"><?php echo get_the_title($dataRow['post_id']);?></a><?php else: echo "&nbsp;"; endif;?></td>
-					<?php endif; ?>
-					<?php 
-					foreach($form['items'] as $formItem){
-						if($formItem['type'] == 'file'){
-							if(strpos($dataRow[$formItem['unique_name']],"</a>") === false):?>
-								<td><a class="fm-download-link" onclick="fm_downloadFile('<?php echo $formItem['unique_name'];?>', '<?php echo $dataRow['timestamp'];?>', '<?php echo $dataRow['user'];?>')" title="<?php _e("Download", 'wordpress-form-manager');?> '<?php echo $dataRow[$formItem['unique_name']];?>'"><?php echo $dataRow[$formItem['unique_name']]; ?></a></td>
-							<?php else: ?>
-								<td><?php echo $dataRow[$formItem['unique_name']]; ?></td>
-							<?php endif; /* end if file */ 
-						}else if($fmdb->isDataCol($formItem['unique_name']) && !fm_is_private_item($formItem)){ ?>
-							<td class="post-title column-title"><?php echo fm_restrictString($dataRow[$formItem['unique_name']], 75);?></td>						
-						<?php } /* end if data type other than file */
-					} /* end foreach */ 
-					?>
-				</tr>
-			<?php endforeach; ?>
-			<input type="hidden" name="fm-num-data-rows" id="fm-num-data-rows" value="<?php echo $index;?>" />
-		</table>			
 		
-	<br class="clear" />
-</div><!-- /wrap -->
-
+		<div class="tablenav" style="float:right; clear:none;" >
+			<div class="fm-data-pagination">
+				<input type="hidden" name="fm-data-current-page" id="fm-data-current-page" value="<?php echo $dataCurrentPage;?>" />
+				<?php echo sprintf(__("Showing row(s) %s - %s out of %s", 'wordpress-form-manager'), $dataFirstRow, $dataLastRow, $dataCount);?>
+				<?php if(sizeof($dataPageLinks)>1) echo '&nbsp;&nbsp;&nbsp;'._x("Pages", 'data-page-select', 'wordpress-form-manager').':&nbsp;'.implode("&nbsp;|&nbsp", $dataPageLinks); ?>
+			</div>
+		</div>
+	</div>
+	
+	<div style="clear:both;"></div>
+	
+	<?php if ( $queryMessage != "" ): ?>
+		<div class="fm-message">
+		<?php echo $queryMessage; ?>
+		</div>
+	<?php endif; ?>
+	
+	<div class="wrap">
+		<table class="widefat post fixed">
+			<?php outputTableHead($cols); ?>
+			<?php while($row = mysql_fetch_assoc($res)): ?>
+				<?php if($fm_showEditRows && in_array($row['unique_id'], $checked)): ?>
+					<?php fm_echoDataTableRowEdit($cols, $row); ?>
+				<?php else: ?>
+					<?php fm_echoDataTableRow($cols, $row, $form); ?>
+				<?php endif; ?>			
+			<?php endwhile; ?>
+			<?php outputTableFoot($cols); ?>
+		</table>
+	</div>
+	
+	<?php if ( $fm_showEditRows ): ?>
+	<div style="float:right;">
+		<input type="submit" name="cancel" class="button secondary" value="<?php _e("Cancel Changes", 'wordpress-form-manager');?>" />
+		<input type="submit" name="submit-edit" id="submit-edit" class="button-primary" value="<?php _e("Save Changes", 'wordpress-form-manager');?>" />&nbsp;&nbsp;
+	</div>
+	<?php endif; ?>
+	
 </form>
-
-<?php 
-}
-
-// HELPERS
-function fm_data_getCheckedRows(){
-	$checked=array();
-	$numRows = (int)$_POST['fm-num-data-rows'];
-	for($x=0;$x<$numRows;$x++){
-		if(isset($_POST['fm-checked-'.$x])){
-			$checked[]=$x;
-		}
-	}
-	return $checked;
-}
-
-function fm_data_displayTextEdit($uniqueName, $itemInfo){ return "<input name=\"".$uniqueName."\" type=\"text\" value=\"".htmlspecialchars($itemInfo['extra']['value'])."\" style=\"width:400px;\"/>"; }
-function fm_data_displayTextAreaEdit($uniqueName, $itemInfo){ return "<textarea style=\"width:400px;\" rows=\"5\"  name=\"".$uniqueName."\" >".$itemInfo['extra']['value']."</textarea>"; }
-function fm_data_displayFileEdit($uniqueName, $itemInfo){ return $itemInfo['extra']['value']; }
-
-?>

@@ -6,15 +6,21 @@ include 'formelements/formelements.php';
 
 //associative array: 'type name' => 'class name'
 // the keys in this array are used in the 'addItem' AJAX to create new items, and as the 'type' db field for form items
-$fm_controlTypes = array('default' => 'fm_controlBase',
-						'text' => 'fm_textControl',
-						'textarea' => 'fm_textareaControl',									
-						'checkbox' => 'fm_checkboxControl',
-						'custom_list' => 'fm_customListControl',
-						'separator' => 'fm_separatorControl',
-						'note' => 'fm_noteControl',
-						'recaptcha' => 'fm_recaptchaControl',
-						'file' => 'fm_fileControl'
+$fm_controlTypes = array('default' => 			'fm_controlBase',
+						'text' => 				'fm_textControl',
+						'metatext' => 			'fm_metaTextControl',						
+						'textarea' => 			'fm_textareaControl',
+						'metatextarea' => 		'fm_metaTextareaControl',
+						'checkbox' => 			'fm_checkboxControl',
+						'metacheckbox' => 		'fm_metaCheckboxControl',
+						'custom_list' => 		'fm_customListControl',
+						'metacustom_list' =>	'fm_metaCustomListControl',
+						'separator' => 			'fm_separatorControl',
+						'note' => 				'fm_noteControl',
+						'recaptcha' => 			'fm_recaptchaControl',
+						'file' => 				'fm_fileControl',
+						'metaidnumber' =>		'fm_metaIDNumberControl',
+						'metatracknumber' =>	'fm_metaTrackNumberControl',
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
