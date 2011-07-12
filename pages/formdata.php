@@ -285,6 +285,8 @@ if(isset($_POST['submit-edit'])){
 /// build the query
 $dataPerPage = isset($fm_dataPageSettings['results']['perpage']) ? $fm_dataPageSettings['results']['perpage'] : 30;
 $dataSortBy = isset($fm_dataPageSettings['results']['sortby']) ? $fm_dataPageSettings['results']['sortby'] : 'timestamp';
+if(trim($dataSortBy) == "") $dataSortBy = 'timestamp';
+
 $dataSortOrder = $fm_dataPageSettings['results']['sortorder'] == 'asc' ? 'ASC' : 'DESC';
 $dataCurrentPage = isset($_POST['fm-data-current-page']) ? $_POST['fm-data-current-page'] : 1;
 
@@ -359,7 +361,7 @@ $searchQuery = $dataQuery;
 //page range
 $dataQuery .= " LIMIT ".(($dataCurrentPage-1)*$dataPerPage).", ".$dataPerPage;
 
-echo $dataQuery."<br />";
+//echo $dataQuery."<br />";
 
 $res = $fmdb->query($dataQuery);
 
