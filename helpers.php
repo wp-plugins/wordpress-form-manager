@@ -208,6 +208,8 @@ function fm_dataBuildTableCols($form, $subMetaFields, &$cols){
 		$newCol = fm_getTableCol($item);
 		$cols[] = $newCol;
 	}
+	
+	$cols = apply_filters( 'fm_data_columns' , $cols );
 }
 
 function fm_applyColSettings($fm_dataPageSettings, &$cols){

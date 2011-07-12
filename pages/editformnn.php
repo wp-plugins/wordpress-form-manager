@@ -19,12 +19,14 @@ if($_REQUEST['id']!="")
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
-if(isset($_POST['submit-form-settings'])){
+if(isset($_POST['fm-form-id'])){
+	
 	$formInfo = array();	
 	
 	$formInfo['items'] = $form['items'];
 	foreach($form['items'] as $index => $item){
 		$formInfo['items'][$index]['nickname'] = sanitize_title($_POST[$item['unique_name'].'-edit-nickname']);
+		
 	}
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 	

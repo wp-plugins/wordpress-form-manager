@@ -332,6 +332,13 @@ switch ( $fm_dataPageSettings['date']['range'] ) {
 	default:
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// HOOK ////////////////////////////////////////////////////////////////////////////////////
+
+$queryClauses = apply_filters( 'fm_data_query_clauses', $queryClauses );
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 if(sizeof($queryClauses) > 0){
 	$clauses = " WHERE ".implode(" AND ", $queryClauses);
 	$dataQuery .= $clauses;
@@ -352,7 +359,7 @@ $searchQuery = $dataQuery;
 //page range
 $dataQuery .= " LIMIT ".(($dataCurrentPage-1)*$dataPerPage).", ".$dataPerPage;
 
-//echo $dataQuery."<br />";
+echo $dataQuery."<br />";
 
 $res = $fmdb->query($dataQuery);
 
@@ -431,7 +438,7 @@ for($x=1;$x<=$dataNumPages;$x++){
 					
 					<?php foreach($cols as $col): ?>
 						<tr>
-						<td class="field-title"><label for="fm-show-<?php echo $col['key'];?>"><?php echo $col['value'];?></label></td>
+						<td class="field-title"><label for="fm-show-<?php echo $col['key'];?>"><?php echo strip_tags($col['value']);?></label></td>
 						<td><input type="checkbox" name="fm-show-<?php echo $col['key'];?>" <?php if(!$col['hidden']) echo 'checked="checked"';?> /></td>
 						
 						<?php if(!in_array($col['key'], $fm_notEditable)): ?>

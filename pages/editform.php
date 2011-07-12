@@ -48,6 +48,8 @@ $pages = array( 'design' =>
 						'page' => 'editformadv.php'
 					)				
 		);
+		
+$pages = apply_filters( 'fm_form_editor_tabs', $pages );
 
 // show the tabs
 
@@ -85,7 +87,12 @@ $found = false;
 foreach($pages as $page)
 	if($queryVars['sec'] == $page['sec'] &&
 		(!$fm_MEMBERS_EXISTS || current_user_can($page['capability']))){
-			include dirname(__FILE__).'/'.$page['page'];
+			if(isset( $page['page_function'] )){
+				$page['page_function']();
+			}
+			else{
+				include dirname(__FILE__).'/'.$page['page'];
+			}
 			$found = true;
 	}
 
