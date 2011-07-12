@@ -287,8 +287,12 @@ function fm_doFormBySlug($formSlug, $options = array()){
 			
 		if($formInfo['use_advanced_email'] != 1){
 			fm_helper_sendEmail($formInfo, $postData);			
-		}else{			
-			$advEmail = new fm_advanced_email_class($formInfo, $postData);
+		}else{
+			$metaForm = $formInfo;
+			$metaItems = $fmdb->getFormItems( $formInfo['ID'], 1 );
+			$metaForm['items'] = array_merge( $formInfo['items'], $metaItems );
+			
+			$advEmail = new fm_advanced_email_class($metaForm, $postData);
 
 			$emails = $advEmail->generateEmails($formInfo['advanced_email']);
 							

@@ -122,6 +122,10 @@ class fm_metaCheckboxControl extends fm_checkboxControl {
 		return $opt;
 	}
 	
+	public function getShowHideCallbackName(){
+		return "fm_metatext_show_hide";
+	}
+	
 	public function processPost($uniqueName, $itemInfo){
 		if(isset($_POST[$uniqueName]))
 			return $_POST[$uniqueName]=="on"?__("yes",'wordpress-form-manager'):__("no",'wordpress-form-manager');

@@ -16,6 +16,8 @@ $form = null;
 if($_REQUEST['id']!="")
 	$form = $fmdb->getForm($_REQUEST['id']);
 
+$metaForm = $fmdb->getForm( $_REQUEST['id'], 1 );
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
@@ -25,12 +27,17 @@ if(isset($_POST['fm-form-id'])){
 	
 	$formInfo['items'] = $form['items'];
 	foreach($form['items'] as $index => $item){
-		$formInfo['items'][$index]['nickname'] = sanitize_title($_POST[$item['unique_name'].'-edit-nickname']);
-		
+		$formInfo['items'][$index]['nickname'] = sanitize_title($_POST[$item['unique_name'].'-edit-nickname']);		
 	}
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 	
+	foreach($metaForm['items'] as $index => $item){
+		$metaForm['items'][$index]['nickname'] = sanitize_title($_POST[$item['unique_name'].'-edit-nickname']);		
+	}
+	$fmdb->updateForm($_POST['fm-form-id'], $metaForm, 1 );	
+		
 	$form = $fmdb->getForm($_POST['fm-form-id']);
+	$metaForm = $fmdb->getForm( $_REQUEST['id'], 1 );
 }
 
 
@@ -71,15 +78,22 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <br />
 <table class="form-table">
 <tr><th><strong><?php _e("Item Label", 'wordpress-form-manager');?></strong></th><th><strong><?php _e("Nickname", 'wordpress-form-manager');?></strong></th></tr>
-<?php foreach($form['items'] as $item){
+<?php 
+foreach($form['items'] as $item){
 	if($item['type'] != 'separator' && $item['type'] != 'note' && $item['type'] != 'recaptcha')
 		helper_text_field($item['unique_name'].'-edit-nickname', $item['label'], $item['nickname']);
-} ?>
+}
+?>
+<tr><td><hr /></td><td>&nbsp;</td></tr>
+<?php
+foreach($metaForm['items'] as $item){
+	helper_text_field($item['unique_name'].'-edit-nickname', $item['label'], $item['nickname']);
+}
+?>
 </table>
 
 <?php
-if($_REQUEST['id']!="")
-	$form = $fmdb->getForm($_REQUEST['id'], 1);
+$form = $metaForm;
 ?>
 
 <h3><?php _e("Private Fields", 'wordpress-form-manager');?></h3>

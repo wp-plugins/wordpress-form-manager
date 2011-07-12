@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.4
+Version: 1.6.5
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.4";
+$fm_currentVersion = 		"1.6.5";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -325,6 +325,8 @@ function fm_userInit() {
 
 	include 'settings.php';
 
+	fm_init_members_integration();
+	
 	wp_enqueue_script(
 		'form-manager-js-user',
 		plugins_url( '/js/userscripts.js', __FILE__ )
@@ -430,17 +432,21 @@ function fm_showSettingsAdvancedPage()	{	include 'pages/editsettingsadv.php'; }
 
 // capabilities
 
-if ( class_exists( 'Members_Load' ) ) {
-	$fm_MEMBERS_EXISTS = true;
+function fm_init_members_integration() {
+	global $fm_MEMBERS_EXISTS;
 	
-	add_filter( 'fm_main_capability', 			'fm_main_capability');
-	add_filter( 'fm_forms_capability', 			'fm_forms_capability');
-	add_filter( 'fm_forms_advanced_capability', 'fm_forms_advanced_capability');
-	add_filter( 'fm_data_capability', 			'fm_data_capability');
-	add_filter( 'fm_settings_capability', 		'fm_settings_capability');
-	add_filter( 'fm_settings_advanced_capability', 'fm_settings_advanced_capability');
-	
-	add_filter( 'members_get_capabilities', 	'fm_add_members_capabilities' ); 
+	if ( class_exists( 'Members_Load' ) ) {
+		$fm_MEMBERS_EXISTS = true;
+		
+		add_filter( 'fm_main_capability', 			'fm_main_capability');
+		add_filter( 'fm_forms_capability', 			'fm_forms_capability');
+		add_filter( 'fm_forms_advanced_capability', 'fm_forms_advanced_capability');
+		add_filter( 'fm_data_capability', 			'fm_data_capability');
+		add_filter( 'fm_settings_capability', 		'fm_settings_capability');
+		add_filter( 'fm_settings_advanced_capability', 'fm_settings_advanced_capability');
+		
+		add_filter( 'members_get_capabilities', 	'fm_add_members_capabilities' ); 
+	}
 }
 
 function fm_main_capability( $cap ) 			{ return 'form_manager_main'; }

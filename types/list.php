@@ -91,7 +91,8 @@ class fm_customListControl extends fm_controlBase{
 				$elem['options'][$uniqueName."-".$x] = $itemInfo['extra']['options'][$x];
 			if($disabled)
 				$elem['attributes']['disabled'] = 'disabled';
-			return '<div class="fm-checkbox-list">'.fe_getElementHTML($elem).'</div>';
+			return '<div class="fm-checkbox-list">'.fe_getElementHTML($elem).'</div>'.
+					'<input type="hidden" name="'.$uniqueName.'" id="'.$uniqueName.'" value="'.sizeof($itemInfo['extra']['options']).'" />';
 		}
 		
 	public function showItemSimple($uniqueName, $itemInfo){
@@ -277,6 +278,10 @@ class fm_metaCustomListControl extends fm_customListControl {
 	public function isFormField() { return false; }
 	
 	protected function showExtraScripts() { }
+	
+	public function getShowHideCallbackName(){
+		return "fm_metatext_show_hide";
+	}
 	
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();		

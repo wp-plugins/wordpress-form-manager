@@ -148,7 +148,6 @@ class fm_metaTextControl extends fm_textControl {
 	public function isSubmissionMeta() { return true; }
 	public function isFormField() { return false; }
 	public function showUserScripts(){ }
-	public function showExtraScripts() { }
 	
 	public function getTypeName(){ return "metatext"; }
 	
@@ -163,6 +162,22 @@ class fm_metaTextControl extends fm_textControl {
 		$opt = $this->getPanelScriptOptionDefaults();		
 		$opt['extra'] = $this->extraScriptHelper(array('value'=>'value'));
 		return $opt;
+	}
+	
+	public function getShowHideCallbackName(){
+		return "fm_metatext_show_hide";
+	}
+	protected function showExtraScripts(){
+		?><script type="text/javascript">
+//<![CDATA[
+		function fm_metatext_show_hide(itemID, isDone){
+			if(isDone){
+				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
+			}
+		}
+//]]>
+</script>
+		<?php
 	}
 	
 	protected function getPanelKeys(){

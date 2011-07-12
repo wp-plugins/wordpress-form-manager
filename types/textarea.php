@@ -126,6 +126,10 @@ class fm_metaTextareaControl extends fm_textareaControl {
 	
 	public function getTypeName(){ return "metatextarea"; }
 	
+	public function getShowHideCallbackName(){
+		return "fm_metatext_show_hide";
+	}			
+		
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
