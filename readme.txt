@@ -3,8 +3,8 @@ Contributors: hoffcamp
 Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
-Tested up to: 3.1.1
-Stable tag: 1.5.24
+Tested up to: 3.2
+Stable tag: 1.6.5
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -49,6 +49,51 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
 
 == Changelog ==
+= 1.6.5 =
+* Added nicknames to private fields
+* Fixed show/hide for editing private fields
+* Fixed checkbox list bug
+
+= 1.6.4 =
+* Minor changes
+
+= 1.6.3 =
+* Fixed nickname update bug
+* Updated Spanish translation
+* Minor interface improvements
+
+= 1.6.2 =
+* Added option to change the 'registered users only' message
+* Added option to select filesystem method
+* Fixed data edit bug for blank text boxes
+* Updated Italian, Portuguese
+
+= 1.6.1 =
+* Added friendly upgrade notices
+
+= 1.6.0 =
+* New 'Submission Data' section, with search and date range
+* Download CSV of search results
+* More permissions for the 'Members' plugin
+* New ID and Tracking Number fields
+* Fixed radio button condition bug
+
+= 1.5.29 =
+* Fixed default form value bug
+
+= 1.5.28 =
+* Fixed data summary bug
+* Fixed data table shortcode bug
+
+= 1.5.27 =
+* Fixed reCAPTCHA bug
+
+= 1.5.26 =
+* Updated internationalization
+
+= 1.5.25 =
+* Fixed date validator bug
+
 = 1.5.24 =
 * Fixed conflict with Gantry Framework
 * Fixed checkbox bug
