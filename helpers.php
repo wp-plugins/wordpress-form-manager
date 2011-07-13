@@ -226,6 +226,54 @@ function fm_applyColSettings($fm_dataPageSettings, &$cols){
 	}
 }
 
+function fm_userCanEditCol( $col , $summaryPage = false ){
+	global $fm_MEMBERS_EXISTS;
+		
+	if(!fm_userCanViewCol( $col, $summaryPage )) return false;
+	if(!$summaryPage && !$col['editable']) return false;
+	return (!$fm_MEMBERS_EXISTS || trim($col['edit_capability']) == "" || current_user_can($col['edit_capability']));
+}
+
+function fm_userCanViewCol( $col , $summaryPage = false ){
+	global $fm_MEMBERS_EXISTS;
+	
+	if($summaryPage && $col['nosummary']) return false;
+	elseif(!$summaryPage && $col['hidden']) return false;
+	
+	if($fm_MEMBERS_EXISTS 
+		&& ! (trim($col['show_capability']) == "" 
+			|| current_user_can($col['show_capability'])) ){
+		return false;
+	}
+	return true;
+}
+
+function fm_userCanGetCSV(){
+	global $fm_MEMBERS_EXISTS;
+	if(!$fm_MEMBERS_EXISTS) return true;
+	if(current_user_can('form_manager_data_csv')) return true;
+	return false;
+}
+
+function fm_userCanViewData(){
+	global $fm_MEMBERS_EXISTS;
+	if(!$fm_MEMBERS_EXISTS) return true;
+	if(current_user_can('form_manager_data')) return true;
+	return false;
+}
+
+function fm_getColQueryList( &$cols ){
+	$list = array();
+	foreach($cols as $col){
+		if(trim($col['key']) != "" 
+		&& !in_array($col['key'], $list)
+		&& fm_userCanViewCol( $col )){
+			$list[] = '`'.$col['key'].'`';
+		}
+	}
+	return implode(", ", $list);
+}
+
 // post processing
 
 function fm_getCheckedItems(){
@@ -252,21 +300,14 @@ function fm_getEditItems(){
 	return $edit;
 }
 
-function fm_getEditPost($subID, $cols, $all = false){
+function fm_getEditPost($subID, $cols, $isSummary = false){
 	global $fm_controls;
 	global $fm_MEMBERS_EXISTS;
 	
 	$data=array();
 	foreach($cols as $col){
-		if(isset($col['item']) && 
-			($all 
-			|| (!$col['hidden'] 
-				&& $col['editable'] 
-				&& (!$fm_MEMBERS_EXISTS 
-					|| trim($col['edit_capability']) == "" 
-					|| current_user_can($col['edit_capability']))
-				)
-			)
+		if(isset($col['item'])
+		&& (fm_userCanEditCol( $col, $isSummary ))
 		){
 			$item = $col['item'];
 			$postName = $subID.'-'.$item['unique_name'];

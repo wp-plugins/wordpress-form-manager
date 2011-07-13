@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.7
+Version: 1.6.8
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.7";
+$fm_currentVersion = 		"1.6.8";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -346,6 +346,8 @@ function fm_userInit() {
 
 add_action( 'admin_menu', 'fm_setupAdminMenu' );
 function fm_setupAdminMenu() {
+	global $fmdb;
+	
 	$pages[] = add_object_page(
 		__("Forms", 'wordpress-form-manager'), 
 		__("Forms", 'wordpress-form-manager'),
@@ -382,9 +384,19 @@ function fm_setupAdminMenu() {
 		'fm_showSettingsAdvancedPage'
 		);
 		
-	foreach ( $pages as $page )
-		add_action( 'admin_head-' . $page, 'fm_adminHeadPluginOnly' );
+	$pages[] = add_object_page(
+		__("Data", 'wordpress-form-manager'),
+		__("Data", 'wordpress-form-manager'),
+		apply_filters( 'fm_data_capability', 'manage_options' ),
+		'fm-submission-data-top-level',
+		'fm_showMainPage',
+		plugins_url( '/mce_plugins/formmanager.png', __FILE__ )
+	);
 		
+	foreach ( $pages as $page ) {
+		add_action( 'admin_head-' . $page, 'fm_adminHeadPluginOnly' );
+	}
+	
 	$pluginName = plugin_basename( __FILE__ );
 	add_filter( 'plugin_action_links_' . $pluginName, 'fm_pluginActions' );
 }
@@ -401,7 +413,8 @@ function fm_pluginActions( $links ) {
 add_action( 'admin_head', 'fm_adminHead' );
 function fm_adminHead() {
 	global $submenu;	
-						
+	global $fmdb;
+	
 	$toUnset = array( 'fm-edit-form' );
 	
 	if ( isset( $submenu[ 'fm-admin-main' ] ) && is_array( $submenu[ 'fm-admin-main' ] ) ) {		
@@ -409,6 +422,25 @@ function fm_adminHead() {
 			if ( in_array( $submenuItem[ 2 ], $toUnset, true ) ) {
 				unset( $submenu[ 'fm-admin-main' ][ $index ] );	
 			}
+		}
+	}
+	
+	if ( fm_userCanViewData() ) {
+		$sub = &$submenu[ 'fm-submission-data-top-level' ];
+		
+		$sub[] = array(
+			__("Data", 'wordpress-form-manager'),
+			apply_filters( 'fm_data_capability', 'manage_options' ),
+			get_admin_url(null, 'admin.php')."?page=fm-submission-data-top-level"
+		);
+		
+		$formList = $fmdb->getFormList();	
+		foreach ( $formList as $form ) {
+			$sub[] = array(
+					$form['title'],	
+					apply_filters( 'fm_data_capability', 'manage_options' ),
+					get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=data&id=" . $form['ID'],
+				);
 		}
 	}
 }
@@ -429,6 +461,11 @@ function fm_showDataPage()				{	include 'pages/formdata.php'; }
 function fm_showMainPage()				{	include 'pages/main.php'; }
 function fm_showSettingsPage()			{	include 'pages/editsettings.php'; }
 function fm_showSettingsAdvancedPage()	{	include 'pages/editsettingsadv.php'; }
+
+function fm_showSubmissionDataTopLevel(){	
+	global $submenu;
+	echo '<pre>'.print_r($submenu,true).'</pre>';
+}
 
 // capabilities
 
@@ -470,6 +507,7 @@ function fm_add_members_capabilities( $caps ) {
 	$caps[] = 'form_manager_data_summary';
 	$caps[] = 'form_manager_data_summary_edit';
 	$caps[] = 'form_manager_data_options';
+	$caps[] = 'form_manager_data_csv';
 	$caps[] = 'form_manager_delete_data';
 	$caps[] = 'form_manager_nicknames';
 	$caps[] = 'form_manager_conditions';

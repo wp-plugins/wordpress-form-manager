@@ -901,39 +901,63 @@ function getFormSubmissionDataCSV($formID, $query, $ignoreFields = NULL){
 						'post_id' => 'Post ID',
 						'unique_id' => 'Unique Identifier',
 						);
-						
+	
+	$formInfo = $this->getForm($formID);
+	$metaFields = $this->getFormItems($formID, 1);	
+	$formInfo['items'] = array_merge($formInfo['items'], $metaFields);
+	
+	//remove fields that need to be ignored
+	
 	foreach($baseFields as $k=>$f){
 		if(in_array($k, $ignoreFields)) unset($baseFields[$k]);
 	}
-	
-	$formInfo = $this->getForm($formID);
-	$metaFields = $this->getFormItems($formID, 1);
-	
-	$formInfo['items'] = array_merge($formInfo['items'], $metaFields);
-	
-	//remove the ignored fields
 	foreach($formInfo['items'] as $k=>$item){
 		if(in_array($item['unique_name'], $ignoreFields)) unset($formInfo['items'][$k]);
 	}
 	
+	//remove fields that are not in the result	
+	$res = $this->query($query);
+	$firstRow = mysql_fetch_assoc($res);
+	
+	foreach($baseFields as $k=>$f){
+		if(!isset($firstRow[$k])) unset($baseFields[$k]);
+	}
+	foreach($formInfo['items'] as $k=>$item){
+		if(!isset($firstRow[$item['unique_name']])) unset($formInfo['items'][$k]);
+	}
+	
+	//build the title row
 	$titleRow = array();
+	foreach($baseFields as $k=>$f){
+		$titleRow[] = $f;
+	}
 	foreach($formInfo['items'] as $item){
 		$titleRow[] = (trim($item['nickname']) == "" ? $item['label'] : $item['nickname']);
 	}
 	
+	//build the CSV data
+	
 	$data = array();
 	$data[] = $titleRow;
 	
-	$res = $this->query($query);
-	while($row = mysql_fetch_assoc($res)){
+	$row = $firstRow;
+	do{
 		$newRow = array();
-		foreach($formInfo['items'] as $item){
-			//use the item's CSV parse version
-			$newRow[$item['unique_name']] = $fm_controls[$item['type']]->parseDataCSV($item['unique_name'], $item, $row[$item['unique_name']]);
+		foreach($baseFields as $k=>$f){
+			if(isset($row[$k])){
+				$newRow[$k] = $row[$k];
+			}
+		}
+		foreach($formInfo['items'] as $item){		
+			if(isset($row[$item['unique_name']])){
+				//use the item's CSV parse version
+				$newRow[$item['unique_name']] = $fm_controls[$item['type']]->parseDataCSV($item['unique_name'], $item, $row[$item['unique_name']]);
+			}
 		}
 		
 		$data[] = $newRow;
-	}
+	}while($row = mysql_fetch_assoc($res));
+	
 	mysql_free_result($res);
 	
 	//use the stream capture to get the CSV formatted data, since we need to mess with the encoding later

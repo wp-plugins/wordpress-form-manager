@@ -69,11 +69,11 @@ if ( isset($_POST['submit-edit']) ) $editMode = true;
 	<table class="fm-data-summary-table">
 
 		<?php foreach ( $cols as $col ): ?>
-			<?php if(!$col['nosummary']):?>
+			<?php if( fm_userCanViewCol( $col , true) ):?>
 				<tr>
 					<?php if(isset($col['item'])): ?>
 						<td><strong><?php echo $col['item']['nickname'] == "" ? $col['value'] : $col['item']['nickname'];?><strong></td>
-						<?php if( $editMode ): ?>
+						<?php if( $editMode && fm_userCanEditCol( $col , true)): ?>
 							<td><?php
 							$item = $col['item'];					
 							$item['extra']['value'] = $dbRow[$col['key']];

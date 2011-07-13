@@ -174,21 +174,6 @@ function fm_echoDataTableRowEdit($cols, $dbRow){
 	$fm_rowIndex++;
 }
 
-function fm_userCanEditCol( $col ){
-	global $fm_MEMBERS_EXISTS;
-	return (!$fm_MEMBERS_EXISTS || trim($col['edit_capability']) == "" || current_user_can($col['edit_capability']));
-}
-
-function fm_userCanViewCol( $col ){
-	global $fm_MEMBERS_EXISTS;
-	if($col['hidden']) return false;
-	if($fm_MEMBERS_EXISTS 
-		&& ! (trim($col['show_capability']) == "" 
-			|| current_user_can($col['show_capability'])) ){
-		return false;
-	}
-	return true;
-}
 ////////////////////////////////////////////////////////////////////////////////////////
 
 $cols = fm_getDefaultDataCols();
@@ -309,7 +294,7 @@ if(trim($dataSortBy) == "") $dataSortBy = 'timestamp';
 $dataSortOrder = $fm_dataPageSettings['results']['sortorder'] == 'asc' ? 'ASC' : 'DESC';
 $dataCurrentPage = isset($_POST['fm-data-current-page']) ? $_POST['fm-data-current-page'] : 1;
 
-$dataQuery = "SELECT * FROM `".$form['data_table']."` ";
+$dataQuery = "SELECT ".fm_getColQueryList( $cols )." FROM `".$form['data_table']."` ";
 $allQuery = $dataQuery;
 
 $countQuery = "SELECT COUNT(*) FROM `".$form['data_table']."` ";
@@ -386,7 +371,8 @@ $res = $fmdb->query($dataQuery);
 
 //create a CSV download file
 
-if(isset($_POST['submit-download-csv'])){
+if(isset($_POST['submit-download-csv']) && fm_userCanGetCSV()){
+
 	$filename = 'data.csv';
 	$fullpath = fm_getTmpPath().$filename;
 	$CSVFileURL = fm_getTmpURL().$filename;
@@ -394,7 +380,7 @@ if(isset($_POST['submit-download-csv'])){
 	$csvQuery = "";
 	switch($_POST['fm-data-download-csv-type']){
 		case 'all':
-			$csvQuery = $allQuery;
+			$csvQuery = $allQuery." ORDER BY `timestamp` DESC";
 			break;
 		case 'current-search':
 			$csvQuery = $searchQuery;
@@ -453,7 +439,7 @@ for($x=1;$x<=$dataNumPages;$x++){
 						<?php if($fm_MEMBERS_EXISTS) : ?>
 							<th><?php _e("Show capability", 'wordpress-form-manager');?></th>
 						<?php endif; ?>
-						<th><?php _e("Editable", 'wordpress-form-manager');?><br /><?php _e("(bulk)", 'wordpress-form-manager');?></th>
+						<th><?php _e("Editable", 'wordpress-form-manager');?></th>
 						<?php if($fm_MEMBERS_EXISTS) : ?>
 							<th><?php _e("Edit capability", 'wordpress-form-manager');?></th>
 						<?php endif; ?>
@@ -496,20 +482,22 @@ for($x=1;$x<=$dataNumPages;$x++){
 		</div>
 	<?php endif; ?>
 	
-	<div class="tablenav" style="float:right; clear:right; padding-right:10px;" >
-		<label for="fm-data-download-csv-type"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?>:</label>
-		<select name="fm-data-download-csv-type" id="fm-data-download-csv-type" >
-			<option value="all"><?php _e("All entries", 'wordpress-form-manager');?></option>
-			<option value="current-search"><?php _e("Search results (all pages)", 'wordpress-form-manager');?></option>
-			<option value="current-page"><?php _e("Search results (current page only)", 'wordpress-form-manager');?></option>
-		</select>
-		<input type="submit" name="submit-download-csv" id="submit-download-csv" class="button-primary" value="<?php _e("Download", 'wordpress-form-manager');?>" />
-	</div>
-	
-	<?php if(!empty($csvQuery)): ?>
-		<div class="fm-message" style="float:right; clear:right; margin-right:10px;">
-			<a href="<?php echo $CSVFileURL;?>"><?php _e("Click here to download", 'wordpress-form-manager');?></a>
-		</div>
+	<?php if( fm_userCanGetCSV() ): ?>
+		<div class="tablenav" style="float:right; clear:right; padding-right:10px;" >
+			<label for="fm-data-download-csv-type"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?>:</label>
+			<select name="fm-data-download-csv-type" id="fm-data-download-csv-type" >
+				<option value="all"><?php _e("All entries", 'wordpress-form-manager');?></option>
+				<option value="current-search"><?php _e("Search results (all pages)", 'wordpress-form-manager');?></option>
+				<option value="current-page"><?php _e("Search results (current page only)", 'wordpress-form-manager');?></option>
+			</select>
+			<input type="submit" name="submit-download-csv" id="submit-download-csv" class="button-primary" value="<?php _e("Download", 'wordpress-form-manager');?>" />
+		</div>		
+		
+		<?php if(!empty($csvQuery)): ?>
+			<div class="fm-message" style="float:right; clear:right; margin-right:10px;">
+				<a href="<?php echo $CSVFileURL;?>"><?php _e("Click here to download", 'wordpress-form-manager');?></a>
+			</div>
+		<?php endif; ?>
 	<?php endif; ?>
 	
 	<div class="postbox fm-data-options" style="float:right; clear:right;">
