@@ -9,16 +9,20 @@ global $fm_form_behavior_types;
 global $fm_DEBUG;
 global $fm_MEMBERS_EXISTS;
 
+$form = null;
+if($_REQUEST['id']!="")
+	$form = $fmdb->getForm($_REQUEST['id']);
+	
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
 if(isset($_POST['submit-form-settings'])){
-	$form = $fmdb->getForm($_POST['fm-form-id']);
-	
 	$formInfo = array();	
 	$formInfo['conditions'] = processConditionsPost();
 	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
+	
+	$form = $fmdb->getForm($_POST['fm-form-id']);
 }
 
 //takes the posted info and converts it to the proper associative array structure to be stored in the DB
@@ -53,12 +57,6 @@ function processConditionsPost(){
 	}
 	return $condInfo;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-$form = null;
-if($_REQUEST['id']!="")
-	$form = $fmdb->getForm($_REQUEST['id']);
 	
 /////////////////////////////////////////////////////////////////////////////////////
 

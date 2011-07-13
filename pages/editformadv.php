@@ -9,12 +9,14 @@ global $fm_form_behavior_types;
 global $fm_DEBUG;
 global $fm_MEMBERS_EXISTS;
 
+$form = null;
+if($_REQUEST['id']!="")
+	$form = $fmdb->getForm($_REQUEST['id']);
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
 if(isset($_POST['submit-form-settings'])){
-	$form = $fmdb->getForm($_POST['fm-form-id']);
-	
 	$formInfo = array();
 	
 	$formInfo['behaviors'] = $_POST['behaviors'];
@@ -26,10 +28,10 @@ if(isset($_POST['submit-form-settings'])){
 	$formInfo['advanced_email'] = $_POST['advanced_email'];
 	$formInfo['publish_post'] = ($_POST['publish_post']=="on"?1:0);
 	$formInfo['publish_post_category'] = $_POST['publish_post_category'];
-	$formInfo['publish_post_title'] = $_POST['publish_post_title'];	
+	$formInfo['publish_post_title'] = $_POST['publish_post_title'];
+	$formInfo['reg_user_only_msg'] = $_POST['reg_user_only_msg'];
 	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
-	
 	
 	$fmdb->showerr = false;
 	$itemTypeErr = array();
@@ -44,7 +46,8 @@ if(isset($_POST['submit-form-settings'])){
 		}
 	}
 	$fmdb->showerr = true;
-
+	
+	$form = $fmdb->getForm($_REQUEST['id']);
 }
 
 
@@ -56,12 +59,6 @@ if($fm_DEBUG && isset($_POST['form-definition'])){
 	$formInfo = $formDef->createFormInfo($_POST['form-definition']);	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 } 
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-$form = null;
-if($_REQUEST['id']!="")
-	$form = $fmdb->getForm($_REQUEST['id']);
 	
 $formTemplateFile = $form['form_template'];
 	if($formTemplateFile == '') $formTemplateFile = $fmdb->getGlobalSetting('template_form');
@@ -107,6 +104,8 @@ $behaviorList = array();
 foreach($fm_form_behavior_types as $desc => $val)
 	$behaviorList[$val] = $desc;
 helper_option_field('behaviors', __("Behavior Type", 'wordpress-form-manager'), $behaviorList, $form['behaviors'], __("Behavior types other than 'Default' require a registered user", 'wordpress-form-manager'));
+$msg = empty($formInfo['reg_user_only_msg']) ? $fmdb->getGlobalSetting('reg_user_only_msg') : $form['reg_user_only_msg'];
+helper_text_field('reg_user_only_msg', __("Message displayed to unregistered users", 'wordpress-form-manager'), $msg, __("Include '%s' where you would like the form title to appear", 'wordpress-form-manager'));
 ?>
 </table>
 
