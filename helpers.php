@@ -61,8 +61,7 @@ function helper_option_field($id, $label, $options, $value = false, $desc = ""){
 }
 
 function fm_write_file($fullPath, $fileData, $text = true){
-	
-	
+
 	add_filter('filesystem_method', 'fm_getFSMethod');
 	if(! WP_Filesystem( ) ){
 		return "Could not initialize WP filesystem";
@@ -78,7 +77,7 @@ function fm_write_file($fullPath, $fileData, $text = true){
 }
 function fm_getFSMethod($autoMethod) {
 	$method = get_option('fm-file-method'); 
-	if($method = 'auto') return $autoMethod;
+	if($method == 'auto') return $autoMethod;
 	return $method;
 }
 

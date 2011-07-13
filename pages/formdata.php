@@ -390,7 +390,8 @@ if(isset($_POST['submit-download-csv']) && fm_userCanGetCSV()){
 			break;
 	}
 	if($csvQuery != ""){
-		fm_createCSVFile($form['ID'], $csvQuery, $fullpath);		
+		$err = fm_createCSVFile($form['ID'], $csvQuery, $fullpath);
+		if($err != 0) echo '<em>'.$err.'</em>';
 	}
 }
 

@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.8
+Version: 1.6.9
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.8";
+$fm_currentVersion = 		"1.6.9";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -427,12 +427,6 @@ function fm_adminHead() {
 	
 	if ( fm_userCanViewData() ) {
 		$sub = &$submenu[ 'fm-submission-data-top-level' ];
-		
-		$sub[] = array(
-			__("Data", 'wordpress-form-manager'),
-			apply_filters( 'fm_data_capability', 'manage_options' ),
-			get_admin_url(null, 'admin.php')."?page=fm-submission-data-top-level"
-		);
 		
 		$formList = $fmdb->getFormList();	
 		foreach ( $formList as $form ) {

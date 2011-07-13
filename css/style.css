@@ -299,6 +299,7 @@ th.fm-data-actions-col{
 div.fm-data-options{
 	float:left;
 	margin:10px;
+	width: auto;
 }
 
 .fm-data-options td{
@@ -320,6 +321,7 @@ div.fm-data-options{
 	font-size:12px;
 	padding:5px;
 	margin-bottom:0px;
+	margin-top:0px;
 }
 
 .fm-data-options th{
