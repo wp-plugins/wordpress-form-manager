@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.5.24
+Version: 1.6.8
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.5.24";
+$fm_currentVersion = 		"1.6.8";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -84,6 +84,8 @@ if ( get_option( 'fm-shortcode' ) === false )
 	update_option("fm-shortcode", "form");
 if ( get_option( 'fm-enable-mce-button' ) === false )
 	update_option( "fm-enable-mce-button", "YES" );
+if ( get_option( 'fm-file-method' ) === false )
+	update_option( 'fm-file-method', 'auto' );
 	
 update_option( "fm-forms-table-name", 			"fm_forms" );
 update_option( "fm-items-table-name", 			"fm_items" );
@@ -123,6 +125,12 @@ $fm_templates = new fm_template_manager();
 function fm_install() {
 	global $fmdb;
 	global $fm_currentVersion;
+	
+	if ( get_option( 'fm-version' ) == '1.5.29' ) {
+		$fmdb->fixItemMeta();
+	}
+	
+	update_option( 'fm-last-version', get_option( 'fm-version' ) );
 	
 	//from any version before 1.4.0; must be done before the old columns are removed
 	$fmdb->convertAppearanceSettings();
@@ -271,6 +279,10 @@ function fm_adminEnqueueScripts( ) {
 					__("Require elements if", 'wordpress-form-manager'),
 				'do_not_require_elements_if' => 				
 					__("Do not require elements if", 'wordpress-form-manager'),
+				'always' =>
+					__("Always", 'wordpress-form-manager'),
+				'never' =>
+					__("Never", 'wordpress-form-manager'),
 				'empty_test' => 
 					__("...", 'wordpress-form-manager'),
 				'equals' => 
@@ -313,6 +325,8 @@ function fm_userInit() {
 
 	include 'settings.php';
 
+	fm_init_members_integration();
+	
 	wp_enqueue_script(
 		'form-manager-js-user',
 		plugins_url( '/js/userscripts.js', __FILE__ )
@@ -332,6 +346,8 @@ function fm_userInit() {
 
 add_action( 'admin_menu', 'fm_setupAdminMenu' );
 function fm_setupAdminMenu() {
+	global $fmdb;
+	
 	$pages[] = add_object_page(
 		__("Forms", 'wordpress-form-manager'), 
 		__("Forms", 'wordpress-form-manager'),
@@ -368,9 +384,19 @@ function fm_setupAdminMenu() {
 		'fm_showSettingsAdvancedPage'
 		);
 		
-	foreach ( $pages as $page )
-		add_action( 'admin_head-' . $page, 'fm_adminHeadPluginOnly' );
+	$pages[] = add_object_page(
+		__("Data", 'wordpress-form-manager'),
+		__("Data", 'wordpress-form-manager'),
+		apply_filters( 'fm_data_capability', 'manage_options' ),
+		'fm-submission-data-top-level',
+		'fm_showMainPage',
+		plugins_url( '/mce_plugins/formmanager.png', __FILE__ )
+	);
 		
+	foreach ( $pages as $page ) {
+		add_action( 'admin_head-' . $page, 'fm_adminHeadPluginOnly' );
+	}
+	
 	$pluginName = plugin_basename( __FILE__ );
 	add_filter( 'plugin_action_links_' . $pluginName, 'fm_pluginActions' );
 }
@@ -380,13 +406,15 @@ function fm_pluginActions( $links ) {
 		'<a href="' . get_admin_url( null, 'admin.php' ) . "?page=fm-global-settings".'">' .
 		__('Settings', 'wordpress-form-manager') . '</a>';
 	array_unshift( $links, $settings_link );
+	
 	return $links;
 }	
 
 add_action( 'admin_head', 'fm_adminHead' );
 function fm_adminHead() {
 	global $submenu;	
-						
+	global $fmdb;
+	
 	$toUnset = array( 'fm-edit-form' );
 	
 	if ( isset( $submenu[ 'fm-admin-main' ] ) && is_array( $submenu[ 'fm-admin-main' ] ) ) {		
@@ -394,6 +422,25 @@ function fm_adminHead() {
 			if ( in_array( $submenuItem[ 2 ], $toUnset, true ) ) {
 				unset( $submenu[ 'fm-admin-main' ][ $index ] );	
 			}
+		}
+	}
+	
+	if ( fm_userCanViewData() ) {
+		$sub = &$submenu[ 'fm-submission-data-top-level' ];
+		
+		$sub[] = array(
+			__("Data", 'wordpress-form-manager'),
+			apply_filters( 'fm_data_capability', 'manage_options' ),
+			get_admin_url(null, 'admin.php')."?page=fm-submission-data-top-level"
+		);
+		
+		$formList = $fmdb->getFormList();	
+		foreach ( $formList as $form ) {
+			$sub[] = array(
+					$form['title'],	
+					apply_filters( 'fm_data_capability', 'manage_options' ),
+					get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=data&id=" . $form['ID'],
+				);
 		}
 	}
 }
@@ -415,19 +462,28 @@ function fm_showMainPage()				{	include 'pages/main.php'; }
 function fm_showSettingsPage()			{	include 'pages/editsettings.php'; }
 function fm_showSettingsAdvancedPage()	{	include 'pages/editsettingsadv.php'; }
 
+function fm_showSubmissionDataTopLevel(){	
+	global $submenu;
+	echo '<pre>'.print_r($submenu,true).'</pre>';
+}
+
 // capabilities
 
-if ( function_exists( 'members_plugin_init' ) ) {
-	$fm_MEMBERS_EXISTS = true;
+function fm_init_members_integration() {
+	global $fm_MEMBERS_EXISTS;
 	
-	add_filter( 'fm_main_capability', 			'fm_main_capability');
-	add_filter( 'fm_forms_capability', 			'fm_forms_capability');
-	add_filter( 'fm_forms_advanced_capability', 'fm_forms_advanced_capability');
-	add_filter( 'fm_data_capability', 			'fm_data_capability');
-	add_filter( 'fm_settings_capability', 		'fm_settings_capability');
-	add_filter( 'fm_settings_advanced_capability', 'fm_settings_advanced_capability');
-	
-	add_filter( 'members_get_capabilities', 	'fm_add_members_capabilities' ); 
+	if ( class_exists( 'Members_Load' ) ) {
+		$fm_MEMBERS_EXISTS = true;
+		
+		add_filter( 'fm_main_capability', 			'fm_main_capability');
+		add_filter( 'fm_forms_capability', 			'fm_forms_capability');
+		add_filter( 'fm_forms_advanced_capability', 'fm_forms_advanced_capability');
+		add_filter( 'fm_data_capability', 			'fm_data_capability');
+		add_filter( 'fm_settings_capability', 		'fm_settings_capability');
+		add_filter( 'fm_settings_advanced_capability', 'fm_settings_advanced_capability');
+		
+		add_filter( 'members_get_capabilities', 	'fm_add_members_capabilities' ); 
+	}
 }
 
 function fm_main_capability( $cap ) 			{ return 'form_manager_main'; }
@@ -448,6 +504,10 @@ function fm_add_members_capabilities( $caps ) {
 	$caps[] = 'form_manager_settings_advanced';
 	
 	$caps[] = 'form_manager_edit_data';
+	$caps[] = 'form_manager_data_summary';
+	$caps[] = 'form_manager_data_summary_edit';
+	$caps[] = 'form_manager_data_options';
+	$caps[] = 'form_manager_data_csv';
 	$caps[] = 'form_manager_delete_data';
 	$caps[] = 'form_manager_nicknames';
 	$caps[] = 'form_manager_conditions';

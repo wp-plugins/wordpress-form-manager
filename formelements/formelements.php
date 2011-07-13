@@ -32,9 +32,15 @@ function fe_getRadioHTML($elementDef){
 		return "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." ".($elementDef['value']?'checked':'')."/>";
 	//multiple radio options
 	$arr=array();
+	$index = 0;
+	$idPrefix = $elementDef['attributes']['id'];
 	foreach($elementDef['options'] as $k=>$v){
+		$elementDef['attributes']['id'] = $idPrefix.'-'.$index;
 		$arr[] = "<input type=\"radio\" ".fe_getAttributeString($elementDef['attributes'])." value=\"".htmlspecialchars($k)."\" ".
-				((isset($elementDef['value']) && $elementDef['value']==$v)?'checked':'')."/>&nbsp;&nbsp;".htmlspecialchars($v)."";
+				 ((isset($elementDef['value']) && $elementDef['value']==$v)?'checked':'')."/>&nbsp;&nbsp;".htmlspecialchars($v).
+				 "<input type=\"hidden\" id=\"".$idPrefix.'-'.$index."-value\" value=\"".htmlspecialchars($v)."\" />";
+				
+		$index++;
 	}
 	$str = implode($elementDef['separator'],$arr);
 	return $str;

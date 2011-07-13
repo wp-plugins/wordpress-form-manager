@@ -10,7 +10,11 @@ class fm_fileControl extends fm_controlBase{
 	public function showItem($uniqueName, $itemInfo){
 		return "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"".($itemInfo['extra']['max_size']*1024)."\" />".
 				"<input name=\"".$uniqueName."\" id=\"".$uniqueName."\" type=\"file\" />";
-	}	
+	}
+	
+	public function showItemSimple($uniqueName, $itemInfo){
+		return $this->showItem($uniqueName, $itemInfo);
+	}
 
 	public function itemDefaults(){
 		$itemInfo = array();
@@ -38,6 +42,11 @@ class fm_fileControl extends fm_controlBase{
 	
 	public function processPost($uniqueName, $itemInfo){
 		global $fmdb;
+
+		if(!isset($_FILES[$uniqueName]['error'])) return NULL;
+		
+		//if no file uploaded
+		if($_FILES[$uniqueName]['error'] == 4) return NULL;
 		
 		if($_FILES[$uniqueName]['error'] > 0){
 			if($_FILES[$uniqueName]['error'] == 2)
@@ -96,14 +105,23 @@ class fm_fileControl extends fm_controlBase{
 		else
 			$sizeStr = ((int)($fileInfo['size']/1024))." kB";
 			
-		if(!isset($fileInfo['upload_dir'])) 
+		if(!isset($fileInfo['upload_dir']) || trim($itemInfo['extra']['upload_url']) == "") 
 			return $fileInfo['filename']." (".$sizeStr.")";
-		elseif(trim($itemInfo['extra']['upload_url']) == "")
-			return $fileInfo['filename']." (".$sizeStr.")<!-- </a> -->";
 		else{
 			$uploadURL = $this->parseUploadURL($itemInfo['extra']['upload_url']);
 			return '<a class="fm-download-link" href="'.$uploadURL.$fileInfo['filename'].'">'.$fileInfo['filename'].' ('.$sizeStr.')'.'</a>';
 		}
+	}
+	
+	public function parseDataCSV($uniqueName, $itemInfo, $data){
+		if(trim($data) == "") return "";
+		$fileInfo = unserialize($data);
+		if($fileInfo['size'] < 1024)
+			$sizeStr = $fileInfo['size']." B";
+		else
+			$sizeStr = ((int)($fileInfo['size']/1024))." kB";
+			
+		return $fileInfo['filename'].' ('.$sizeStr.')';
 	}
 	
 	public function parseUploadDir($dir){
