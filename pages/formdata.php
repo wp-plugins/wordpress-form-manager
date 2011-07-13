@@ -181,8 +181,13 @@ function fm_userCanEditCol( $col ){
 
 function fm_userCanViewCol( $col ){
 	global $fm_MEMBERS_EXISTS;
-	return ( ( $fm_MEMBERS_EXISTS && (trim($col['show_capability']) == "" || current_user_can($col['show_capability'])) )
-			|| (!$fm_MEMBERS_EXISTS && !$col['hidden']));
+	if($col['hidden']) return false;
+	if($fm_MEMBERS_EXISTS 
+		&& ! (trim($col['show_capability']) == "" 
+			|| current_user_can($col['show_capability'])) ){
+		return false;
+	}
+	return true;
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -213,7 +218,7 @@ if(isset($_POST['submit-col-options'])){
 		if(isset($_POST['fm-edit-'.$col['key'].'-capability']))
 			$caps[$col['key']] = stripslashes($_POST['fm-edit-'.$col['key'].'-capability']);
 		if(isset($_POST['fm-show-'.$col['key'].'-capability']))
-			$showcaps[$col['key']] = stripslashes($_POST['fm-edit-'.$col['key'].'-capability']);
+			$showcaps[$col['key']] = stripslashes($_POST['fm-show-'.$col['key'].'-capability']);
 		if(!isset($_POST['fm-show-'.$col['key'].'-summary']))
 			$nosummary[] = $col['key'];
 	}
