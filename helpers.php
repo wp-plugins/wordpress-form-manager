@@ -221,6 +221,7 @@ function fm_applyColSettings($fm_dataPageSettings, &$cols){
 		
 		if($fm_MEMBERS_EXISTS){
 			$cols[$i]['edit_capability'] = $fm_dataPageSettings['edit_capabilities'][$cols[$i]['key']];
+			$cols[$i]['show_capability'] = $fm_dataPageSettings['show_capabilities'][$cols[$i]['key']];
 		}
 	}
 }

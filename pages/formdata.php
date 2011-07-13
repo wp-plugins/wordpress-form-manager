@@ -62,7 +62,7 @@ function outputTableHead($cols){
 				<th class="fm-data-actions-col">&nbsp</th>
 			<?php endif; ?>
 	<?php foreach($cols as $col): ?>
-		<?php if(!$col['hidden']):?>
+		<?php if( fm_userCanViewCol($col) ):?>
 			<?php if(!isset($col['attributes'])): ?>
 				<th><?php echo $col['value'];?></th>
 			<?php else: ?>
@@ -86,7 +86,7 @@ function outputTableFoot($cols){
 				<th>&nbsp</th>
 			<?php endif; ?>
 	<?php foreach($cols as $col): ?>
-		<?php if(!$col['hidden']):?>
+		<?php if( fm_userCanViewCol($col) ):?>
 			<?php if(!isset($col['attributes'])): ?>
 				<th><?php echo $col['value'];?></th>
 			<?php else: ?>
@@ -115,7 +115,7 @@ function fm_echoDataTableRow($cols, $dbRow, &$form){
 			</td>
 		<?php endif; ?>
 		<?php foreach($cols as $col): ?>
-			<?php if(!$col['hidden']):?>
+			<?php if( fm_userCanViewCol($col) ):?>
 				<?php if(isset($col['show-callback'])): ?>
 					<td><?php echo $col['show-callback']($col, $dbRow);?></td>
 				<?php elseif(isset($col['item'])): ?>
@@ -145,11 +145,11 @@ function fm_echoDataTableRowEdit($cols, $dbRow){
 			<td>&nbsp;</td>
 		<?php endif; ?>
 		<?php foreach($cols as $col): ?>
-			<?php if(!$col['hidden']):?>
+			<?php if( fm_userCanViewCol($col) ):?>
 				<?php if(isset($col['show-callback'])): ?>
 					<td><?php echo $col['show-callback']($col, $dbRow);?></td>
 				<?php elseif(isset($col['item']) && $col['editable']): ?>
-					<?php if(!$fm_MEMBERS_EXISTS || trim($col['edit_capability']) == "" || current_user_can($col['edit_capability'])): ?>
+					<?php if( fm_userCanEditCol($col) ): ?>
 						<td><?php
 						$item = $col['item'];					
 						$item['extra']['value'] = $dbRow[$col['key']];
@@ -174,6 +174,16 @@ function fm_echoDataTableRowEdit($cols, $dbRow){
 	$fm_rowIndex++;
 }
 
+function fm_userCanEditCol( $col ){
+	global $fm_MEMBERS_EXISTS;
+	return (!$fm_MEMBERS_EXISTS || trim($col['edit_capability']) == "" || current_user_can($col['edit_capability']));
+}
+
+function fm_userCanViewCol( $col ){
+	global $fm_MEMBERS_EXISTS;
+	return ( ( $fm_MEMBERS_EXISTS && (trim($col['show_capability']) == "" || current_user_can($col['show_capability'])) )
+			|| (!$fm_MEMBERS_EXISTS && !$col['hidden']));
+}
 ////////////////////////////////////////////////////////////////////////////////////////
 
 $cols = fm_getDefaultDataCols();
@@ -193,6 +203,7 @@ if(isset($_POST['submit-col-options'])){
 	$hide=array();
 	$noedit=array();
 	$caps=array();
+	$showcaps=array();
 	$nosummary=array();
 	foreach($cols as $col){
 		if(!isset($_POST['fm-show-'.$col['key']]))
@@ -201,6 +212,8 @@ if(isset($_POST['submit-col-options'])){
 			$noedit[] = $col['key'];
 		if(isset($_POST['fm-edit-'.$col['key'].'-capability']))
 			$caps[$col['key']] = stripslashes($_POST['fm-edit-'.$col['key'].'-capability']);
+		if(isset($_POST['fm-show-'.$col['key'].'-capability']))
+			$showcaps[$col['key']] = stripslashes($_POST['fm-edit-'.$col['key'].'-capability']);
 		if(!isset($_POST['fm-show-'.$col['key'].'-summary']))
 			$nosummary[] = $col['key'];
 	}
@@ -211,6 +224,7 @@ if(isset($_POST['submit-col-options'])){
 
 	if($fm_MEMBERS_EXISTS){
 		$fm_dataPageSettings['edit_capabilities'] = $caps;
+		$fm_dataPageSettings['show_capabilities'] = $showcaps;
 	}
 	
 	update_option('fm-ds-'.$form['ID'], $fm_dataPageSettings);
@@ -431,6 +445,9 @@ for($x=1;$x<=$dataNumPages;$x++){
 					<tr>					
 						<th>&nbsp;</th>
 						<th><?php _e("Show", 'wordpress-form-manager');?></th>
+						<?php if($fm_MEMBERS_EXISTS) : ?>
+							<th><?php _e("Show capability", 'wordpress-form-manager');?></th>
+						<?php endif; ?>
 						<th><?php _e("Editable", 'wordpress-form-manager');?><br /><?php _e("(bulk)", 'wordpress-form-manager');?></th>
 						<?php if($fm_MEMBERS_EXISTS) : ?>
 							<th><?php _e("Edit capability", 'wordpress-form-manager');?></th>
@@ -442,6 +459,10 @@ for($x=1;$x<=$dataNumPages;$x++){
 						<tr>
 						<td class="field-title"><label for="fm-show-<?php echo $col['key'];?>"><?php echo strip_tags($col['value']);?></label></td>
 						<td><input type="checkbox" name="fm-show-<?php echo $col['key'];?>" <?php if(!$col['hidden']) echo 'checked="checked"';?> /></td>
+						
+						<?php if($fm_MEMBERS_EXISTS):?>
+							<td><input type="text" name="fm-show-<?php echo $col['key'];?>-capability" value="<?php echo htmlspecialchars($col['show_capability']);?>" /></td>
+						<?php endif; ?>
 						
 						<?php if(!in_array($col['key'], $fm_notEditable)): ?>
 							<td><input type="checkbox" name="fm-edit-<?php echo $col['key'];?>" <?php if($col['editable']) echo 'checked="checked"';?> /></td>
