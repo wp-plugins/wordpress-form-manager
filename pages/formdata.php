@@ -294,7 +294,7 @@ if(trim($dataSortBy) == "") $dataSortBy = 'timestamp';
 $dataSortOrder = $fm_dataPageSettings['results']['sortorder'] == 'asc' ? 'ASC' : 'DESC';
 $dataCurrentPage = isset($_POST['fm-data-current-page']) ? $_POST['fm-data-current-page'] : 1;
 
-$dataQuery = "SELECT ".fm_getColQueryList( $cols )." FROM `".$form['data_table']."` ";
+$dataQuery = "SELECT `unique_id`, ".fm_getColQueryList( $cols )." FROM `".$form['data_table']."` ";
 $allQuery = $dataQuery;
 
 $countQuery = "SELECT COUNT(*) FROM `".$form['data_table']."` ";
@@ -381,6 +381,12 @@ if(isset($_POST['submit-download-csv']) && fm_userCanGetCSV()){
 	switch($_POST['fm-data-download-csv-type']){
 		case 'all':
 			$csvQuery = $allQuery." ORDER BY `timestamp` DESC";
+			break;
+		case 'allfields':
+			if(!$fm_MEMBERS_EXISTS || current_user_can( 'form_manager_data_csv_all' ))
+				$csvQuery = "SELECT * FROM `".$form['data_table']."` ORDER BY `timestamp` DESC";
+			else
+				$csvQuery = $allQuery." ORDER BY `timestamp` DESC";
 			break;
 		case 'current-search':
 			$csvQuery = $searchQuery;
@@ -490,6 +496,9 @@ for($x=1;$x<=$dataNumPages;$x++){
 				<option value="all"><?php _e("All entries", 'wordpress-form-manager');?></option>
 				<option value="current-search"><?php _e("Search results (all pages)", 'wordpress-form-manager');?></option>
 				<option value="current-page"><?php _e("Search results (current page only)", 'wordpress-form-manager');?></option>
+				<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_csv_all')): ?>
+					<option value="allfields"><?php _e("All entries (including hidden fields)", 'wordpress-form-manager'); ?></option>
+				<?php endif; ?>
 			</select>
 			<input type="submit" name="submit-download-csv" id="submit-download-csv" class="button-primary" value="<?php _e("Download", 'wordpress-form-manager');?>" />
 		</div>		

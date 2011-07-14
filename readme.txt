@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.2
-Stable tag: 1.6.9
+Stable tag: 1.6.10
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -49,6 +49,10 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
 
 == Changelog ==
+= 1.6.10 =
+* Added an 'all' option for CSV download
+* Fixed summary view bug
+
 = 1.6.9 =
 * Minor interface changes
 * Fixed file creation bug on some systems
