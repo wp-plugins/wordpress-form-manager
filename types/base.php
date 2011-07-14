@@ -2,6 +2,10 @@
 
 class fm_controlBase{
 	
+	public function __construct(){
+		$this->isMeta = false;
+	}
+	
 	//used to name javascript functions and such
 	public function getTypeName(){
 		return "basic";
@@ -16,6 +20,11 @@ class fm_controlBase{
 	public function showItem($uniqueName, $itemInfo){
 		return "<input type=\"text\" id=\"{$uniqueName}\" />";
 	}	
+	
+	//HTML returned for the back end (admin) version of the form. Should be the item with no formatting, and use default values rather than placeholders, etc.
+	public function showItemSimple($uniqueName, $itemInfo){
+		return "<input type=\"text\" id=\"{$uniqueName}\" name=\"{$uniqueName}\" value=\"".$itemInfo['extra']['value']."\" />";
+	}
 	
 	//HTML returned for the editor (admin) version of the form
 	public function editItem($uniqueName, $itemInfo){
@@ -78,15 +87,21 @@ class fm_controlBase{
 	}
 		
 	//called when processing a submission from the user version of the form; $itemInfo is an associative array of the db row defining the form item
+	//items can return boolean false to indicate a failure, or NULL to indicate information should not be updated.
 	public function processPost($uniqueName, $itemInfo){
-		if($_POST[$uniqueName] != null)
+		if(isset($_POST[$uniqueName]))
 			return strip_tags($_POST[$uniqueName]);
-		return "";
+		return NULL;
 	}
 	
 	//called when viewing submission data. $data contains (hopefully) the same value (in string form) as the value returned from processPost()
 	public function parseData($uniqueName, $itemInfo, $data){
 		return $data;
+	}
+	
+	//in case the data needs to be shown in a special way for the CSV download, such as for file types
+	public function parseDataCSV($uniqueName, $itemInfo, $data){
+		return $this->parseData($uniqueName, $itemInfo, $data);
 	}
 	
 	//returns an associative array keyed by the item db fields; used in the AJAX for creating a new form item in the back end / admin side
@@ -95,7 +110,7 @@ class fm_controlBase{
 		$itemInfo['label'] = __("Item Label", 'wordpress-form-manager');
 		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array();
-		$itemInfo['nickname'] = __("Item Nickname", 'wordpress-form-manager');
+		$itemInfo['nickname'] = "";
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
 		$ItemInfo['validation_msg'] = "";
@@ -111,6 +126,16 @@ class fm_controlBase{
 	//item keys that are handled in the 'panel'
 	protected function getPanelKeys(){
 		return array();
+	}
+	
+	//whether or not the item can be used as a 'submission meta' column
+	public function isSubmissionMeta(){
+		return false;
+	}
+	
+	//whether or not the item type is for actual forms
+	public function isFormField(){
+		return true;
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -170,7 +195,7 @@ class fm_controlBase{
 		fm_registerSaveValidator('<?php echo $this->getTypeName(); ?>', '<?php echo $this->getSaveValidatorName();?>');
 		<?php endif; ?>
 //]]>
-</script><?php		
+</script><?php
 	}
 		
 	public function showEditorItem($uniqueName, $itemInfo){
@@ -202,7 +227,6 @@ class fm_controlBase{
 	function showHiddenVars($uniqueName, $itemInfo, $hideKeys = null, $script = "fm_base_get(itemID, index)"){
 		global $fmdb;
 		$itemInfo['extra'] = serialize($itemInfo['extra']);
-		$itemInfo['meta'] = serialize($itemInfo['meta']);
 		if($hideKeys==null) $hideKeys = array();
 		$str.= $this->getScriptHidden($uniqueName, $script)."\n";
 		$str.= $this->getTypeHidden($uniqueName, $itemInfo);
