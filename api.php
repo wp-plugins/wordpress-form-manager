@@ -377,7 +377,7 @@ function fm_helper_publishPost($formInfo, $postData){
 	$newPost = array(
 		'post_title' => sprintf($postTitle, $formInfo['title']),
 		'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
-		'post_status' => 'publish',
+		'post_status' => (trim($formInfo['publish_post_status']) == "" ? 'publish' : $formInfo['publish_post_status']),
 		'post_author' => 1,
 		'post_category' => array($formInfo['publish_post_category'])
 	);

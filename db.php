@@ -86,6 +86,7 @@ $this->formSettingsKeys = array(
 					'advanced_email' => '',
 					'publish_post' => 0,
 					'publish_post_category' => '',
+					'publish_post_status' => 'publish',
 					'publish_post_title' => __('%s Submission', 'wordpress-form-manager'),
 					'auto_redirect' => 0,
 					'auto_redirect_page' => 0,
@@ -218,6 +219,7 @@ function setupFormManager(){
 		`publish_post` BOOL DEFAULT '0' NOT NULL,
 		`publish_post_category` TEXT NOT NULL,
 		`publish_post_title` TEXT NOT NULL,
+		`publish_post_status` VARCHAR( 16 ) DEFAULT 'publish' NOT NULL,
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
 		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
@@ -1231,6 +1233,13 @@ function getForm($formID, $itemSet = 0){
 	$formInfo = $this->getFormSettings($formID);	
 	$formInfo['items']=$this->getFormItems($formID, $itemSet);
 	return $formInfo;
+}
+
+function getFormAndMeta($formID){
+	$form = $this->getForm($formID);
+	$formMeta = $this->getFormItems($formID, 1);
+	$form['items'] = array_merge( $form['items'], $formMeta );
+	return $form;
 }
 
 //does not change the database; returns a form identical to $formID, but with new unique names for the form items

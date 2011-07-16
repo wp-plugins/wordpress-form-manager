@@ -27,7 +27,12 @@ $fm_dateRangeOptions = array(
 	'other' => _x('Range...', 'date-range', 'wordpress-form-manager')
 	);
 
-////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// HOOK ////////////////////////////////////////////////////////////////////////////////////
+
+do_action( 'fm_data_page_head' );
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 function fm_colSelect($name, $cols, $selected = NULL){
 	if($selected === NULL)
@@ -277,6 +282,13 @@ if(isset($_POST['fm-doaction'])){
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// HOOK ////////////////////////////////////////////////////////////////////////////////////
+
+do_action( 'fm_data_process_checked', $checked );
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 if(isset($_POST['submit-edit'])){
 	$checked = fm_getEditItems();
 	foreach($checked as $subID){
@@ -418,6 +430,24 @@ for($x=1;$x<=$dataNumPages;$x++){
 }
 
 /////
+
+$bulkActions = array(
+	'none' => __("...", 'wordpress-form-manager'),
+);
+if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data')){
+	$bulkActions['delete'] = __("Delete Selected", 'wordpress-form-manager');
+	$bulkActions['delete_all'] = __("Delete All Submission Data", 'wordpress-form-manager');
+}
+if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')){
+	$bulkActions['edit'] = __("Edit Selected", 'wordpress-form-manager');
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// HOOK ////////////////////////////////////////////////////////////////////////////////////
+
+$bulkActions = apply_filters( 'fm_data_bulk_actions', $bulkActions );
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 ?>
 <form enctype="multipart/form-data" name="fm-main-form" id="fm-main-form" action="" method="post">
@@ -577,14 +607,9 @@ for($x=1;$x<=$dataNumPages;$x++){
 		<div class="tablenav" style="float:left; clear:none;">			
 			<div class="alignleft actions">
 				<select name="fm-action-select" id="fm-action-select">
-					<option value="-1" selected="selected"><?php _e("Bulk Actions", 'wordpress-form-manager');?></option>
-					<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_data')): ?>
-					<option value="delete"><?php _e("Delete Selected", 'wordpress-form-manager');?></option>
-					<option value="delete_all"><?php _e("Delete All Submission Data", 'wordpress-form-manager');?></option>
-					<?php endif; ?>
-					<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_edit_data')): ?>
-					<option value="edit"><?php _e("Edit Selected", 'wordpress-form-manager');?></option>
-					<?php endif; ?>
+					<?php foreach ( $bulkActions as $value => $label ): ?>
+						<option value="<?php echo $value;?>"><?php echo $label;?></option>
+					<?php endforeach; ?>
 				</select>
 				<input type="submit" value="<?php _e("Apply", 'wordpress-form-manager');?>" name="fm-doaction" id="fm-doaction" onclick="return fm_confirmSubmit()" class="button-secondary action" />							
 				<script type="text/javascript">
