@@ -246,7 +246,7 @@ if(isset($_POST['message']))
 			<?php
 				$types=array();
 				foreach($fm_controls as $controlKey=>$controlType){
-					if($controlKey != 'default')
+					if($controlKey != 'default' && $controlType->isFormField())
 						$types[]="<a class=\"edit-form-button\" onclick=\"fm_addItem('{$controlKey}')\">".$controlType->getTypeLabel()."</a>";
 				}
 				echo implode(" | \n", $types);
@@ -291,6 +291,11 @@ if(isset($_POST['message']))
 		</div>
 	</div>	
 	
+	<?php if(get_option('fm-last-version') == '1.5.29'): ?>
+	<div class='fm-message'>
+		<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=nicknames&id=".$form['ID'];?>"><?php echo _x("Private fields have moved", 'upgrade-notice', 'wordpress-form-manager');?></a>
+	</div>
+	<?php endif; ?>
 	
 	<script type="text/javascript">	
 	fm_initEditor();
