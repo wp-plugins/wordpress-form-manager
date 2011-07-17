@@ -759,16 +759,18 @@ function getUniqueItemID($type){
 function getDataPageSettings($formID){
 	$dataPageSettings = get_option('fm-ds-'.$formID);
 
-	$settingsDefaults = array(
-		'hide' => array(),
-		'noedit' => array(),
-		'nosummary' => array(),
-		'date' => array( 'range' => 'all' ),
-		'showoptions' => 'no',
-		'search' => array(),
-		'results' => array(),
+	$settingsDefaults 	= array(
+		'hide' 			=> array(),
+		'noedit' 		=> array(),
+		'nosummary' 	=> array(),
+		'date' 			=> array( 'range' => 'all' ),
+		'showoptions' 	=> 'no',
+		'search' 		=> array(),
+		'results' 		=> array(),
 	);
+	
 	$flag = false;
+	
 	if(!is_array($dataPageSettings)){
 		$dataPageSettings = $settingsDefaults;
 		$flag = true;

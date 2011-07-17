@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.11
+Version: 1.6.12
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.11";
+$fm_currentVersion = 		"1.6.12";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -383,7 +383,8 @@ function fm_setupAdminMenu() {
 		'fm-global-settings-advanced',
 		'fm_showSettingsAdvancedPage'
 		);
-		
+	
+	/*
 	$pages[] = add_object_page(
 		__("Data", 'wordpress-form-manager'),
 		__("Data", 'wordpress-form-manager'),
@@ -392,7 +393,8 @@ function fm_setupAdminMenu() {
 		'fm_showMainPage',
 		plugins_url( '/mce_plugins/formmanager.png', __FILE__ )
 	);
-		
+	*/
+	
 	foreach ( $pages as $page ) {
 		add_action( 'admin_head-' . $page, 'fm_adminHeadPluginOnly' );
 	}
@@ -425,6 +427,7 @@ function fm_adminHead() {
 		}
 	}
 	
+	/*
 	if ( fm_userCanViewData() ) {
 		$sub = &$submenu[ 'fm-submission-data-top-level' ];
 		
@@ -436,7 +439,7 @@ function fm_adminHead() {
 					get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=data&id=" . $form['ID'],
 				);
 		}
-	}
+	}*/
 }
 
 //only show this stuff when viewing a plugin page, since some of it is messy
