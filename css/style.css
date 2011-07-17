@@ -265,7 +265,89 @@ table.condition-buttons td{
 	padding-right:15px;
 }
 
+/******************************************/
+/* Data page */
 
+#fm-data-more-options td {
+	vertical-align: top;
+}
+
+#fm-data-per-page {
+	width: 30px;
+}
+
+.fm-data-pagination {
+	padding-top:10px;
+	padding-right:15px;
+}
+
+th.fm-data-actions-col{
+	width:50px;
+}
+
+.fm-data-options-show-btn{
+	padding-top:5px;
+}
+
+.fm-data-option-submit-btn{
+	float:right;
+	padding:10px;
+	padding-top:0px;
+	margin:0px;
+}
+
+div.fm-data-options{
+	float:left;
+	margin:10px;
+	width: auto;
+}
+
+.fm-data-options td{
+	padding:2px;
+	text-align:center;
+	height:20px;
+}
+
+.fm-data-options td.field-title{
+	text-align:left;
+}
+
+.fm-data-options table{
+	padding-left:15px;
+	padding-bottom:5px;
+}
+
+.fm-data-options h3{
+	font-size:12px;
+	padding:5px;
+	margin-bottom:0px;
+	margin-top:0px;
+}
+
+.fm-data-options th{
+	padding:10px;
+}
+
+td.fm-data-option-title{
+	font-weight:bold;
+	padding-right:5px;
+	padding-top:10px;
+}
+
+table.fm-data-summary-table td, table.fm-data-summary-table th{
+	padding:10px;
+	text-align:left;
+}
+table.fm-data-summary-table{
+	margin-left:15px;
+}
+
+.fm-message {
+	padding:5px;
+	margin:0px;
+	border:1px solid #e6db55;
+	background-color:#ffffe0;
+}
 /******************************************************************/
 /* USER SIDE */
 
@@ -341,83 +423,5 @@ table.condition-buttons td{
 }
 
 .fm-form #ajax-loading{
-	float:right;
-}
-
-/******************************************************************/
-/* WIDGET */
-
-
-.fm-form-widget fieldset{	
-	border: 1px solid #000;
-	padding:10px 10px 10px 10px;
-}
-
-.fm-form-widget h3{
-	font-weight:bold;
-}
-
-.fm-form-widget legend{
-	font-size:15px;
-	margin:10px 10px 10px 10px;
-}
-
-.fm-form-widget em{
-	color:#FF0000;
-	font-weight:bold;
-	font-style: normal;
-}
-.fm-form-widget .separator{
-	font-size:15px;
-	font-weight:bold;
-	margin-top:10px;
-}
-
-.fm-form-widget label{
-	text-align: left; 
-	margin-right: 0.5em;
-	display:block; 
-}
-
-.fm-form-widget input{
-	margin:3px 0px 0px 0px;
-	padding:0px 0px 0px 0px;
-}
-
-.fm-form-widget input[type='checkbox']{
-	margin-top:5px;
-}
-
-.fm-form-widget table, .fm-form-widget tr, .fm-form-widget td{
-	border:none !important;
-	margin:0px !important;
-	padding:0px !important;
-	vertical-align:top;
-}
-
-.fm-form-widget select{
-	margin:0px 0px 0px 0px;
-	padding:0px 0px 0px 0px;
-}
-
-.fm-form-widget ul li:before{
-	content:inherit; 
-}
-
-.fm-form-widget li{
-	margin-left:-15px !important;
-}
-
-.fm-form-widget li{
-	list-style:none !important;
-	margin:0px 0px 5px 0px;
-	padding:0px 0px 0px 0px;
-}
-
-.fm-form-widget li.content{	
-	margin-bottom:10px;
-}
-
-.fm-form-widget input.submit{
 	float:right;
 }

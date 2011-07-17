@@ -21,9 +21,13 @@ class fm_advanced_email_class{
 		$this->formData = $formData;
 	}
 	
-	function generateEmails($inputStr){
+	function generateEmails($inputStr, $parseShortcodes = true){
 		$parser = new fm_custom_shortcode_parser($this->shortcodeList, array($this, 'emailShortcodeCallback'));
-		$shortCoded = $parser->parse($inputStr);
+		
+		if($parseShortcodes)
+			$shortCoded = $parser->parse($inputStr);
+		else
+			$shortCoded = $inputStr;
 		
 		//split into multiple definitions
 		$definitions = $this->splitIntoDefinitions($shortCoded);
@@ -62,6 +66,11 @@ class fm_advanced_email_class{
 		$atts = $attParser->getAttributes($def['headers']);
 		$def['to'] = $atts['To'];
 		$def['subject'] = $atts['Subject'];
+		
+		if(isset($atts['FM-EMAIL-NAME'])){
+			$def['email-name'] = $atts['FM-EMAIL-NAME'];
+			unset($atts['FM-EMAIL-NAME']);
+		}
 	
 		unset($atts['To']);
 		unset($atts['Subject']);
