@@ -189,7 +189,7 @@ class fm_fileControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<div class=\"fm-small\" style\"padding-bottom:15px;\">".__("Using an upload directory will allow you to post links to uploaded files.  Otherwise, Form Manager will manage the uploaded files for you in the database.", 'wordpress-form-manager')."</div>", '');
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'upload_url', __('Upload URL', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['upload_url']));
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("This will be the base URL used for links to the uploaded files.  If left blank, no links will be generated.", 'wordpress-form-manager')."</span>", '');
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'name_format', __('Name Format', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['name_format']));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'name_format', __('Name format', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['name_format']));
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("This only applies if you specify an upload directory. Insert %filename% where you want the filename to appear. The rest will be used as a PHP timestamp format.", 'wordpress-form-manager')."</span>", '');
 		
 		return $arr;
