@@ -22,7 +22,8 @@ class fm_fileControl extends fm_controlBase{
 		$itemInfo['description'] = __("Item Description", 'wordpress-form-manager');
 		$itemInfo['extra'] = array('max_size' => 10000,
 									'upload_url' => '%wp_uploads_url%',
-									'upload_dir' => '%wp_uploads_dir%');
+									'upload_dir' => '%wp_uploads_dir%',
+									'name_format' => get_option('fm-file-name-format'));
 		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
@@ -85,8 +86,8 @@ class fm_fileControl extends fm_controlBase{
 		else{
 			//make sure to add a trailing slash if this was forgotten.
 			$uploadDir = $this->parseUploadDir($itemInfo['extra']['upload_dir']);
-			$pathInfo = pathinfo($_FILES[$uniqueName]['name']);
-			$newFileName = substr($_FILES[$uniqueName]['name'], 0, (-1*(strlen($pathInfo['extension'])+1))).' ('.date('m-d-y-h-i-s').').'.$pathInfo['extension'];
+			
+			$newFileName = $this->getFormattedFileName($uniqueName, $itemInfo);
 			
 			move_uploaded_file($_FILES[$uniqueName]['tmp_name'], $uploadDir.$newFileName);
 			$saveVal = array('filename' => $newFileName,
@@ -95,6 +96,37 @@ class fm_fileControl extends fm_controlBase{
 								'size' => $_FILES[$uniqueName]['size']);
 			return addslashes(serialize($saveVal));
 		}	
+	}
+	
+	protected function getFormattedFileName($uniqueName, $itemInfo){
+		$pathInfo = pathinfo($_FILES[$uniqueName]['name']);
+		$fileNameFormat = trim($itemInfo['extra']['name_format']) == "" ? get_option( 'fm-file-name-format' ) : trim($itemInfo['extra']['name_format']);
+		if($fileNameFormat == "%filename%"){
+			$newFileName = $pathInfo['filename'];
+		}
+		else{
+			$fileNamePos = strpos($fileNameFormat, '%filename%');
+			if($fileNamePos !== false){
+				if($fileNamePos > 0){
+					$before = substr($fileNameFormat, 0, $fileNamePos);
+					$after = substr($fileNameFormat, $fileNamePos + 10, strlen($fileNameFormat) - $fileNamePos - 10);
+				}
+				else{
+					$before = "";
+					$after = substr($fileNameFormat, -1 * (strlen($fileNameFormat) - 10));
+				}
+			}		
+			$newFileName = "";
+			if($before != "")
+				$newFileName.= fm_get_time($before);
+			if($fileNamePos !== false)
+				$newFileName.= $pathInfo['filename'];
+			if($after != "")
+				$newFileName.= fm_get_time($after);
+		}
+		$newFileName.= '.'.$pathInfo['extension'];
+		
+		return $newFileName;
 	}
 	
 	public function parseData($uniqueName, $itemInfo, $data){
@@ -157,13 +189,15 @@ class fm_fileControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<div class=\"fm-small\" style\"padding-bottom:15px;\">".__("Using an upload directory will allow you to post links to uploaded files.  Otherwise, Form Manager will manage the uploaded files for you in the database.", 'wordpress-form-manager')."</div>", '');
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'upload_url', __('Upload URL', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['upload_url']));
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("This will be the base URL used for links to the uploaded files.  If left blank, no links will be generated.", 'wordpress-form-manager')."</span>", '');
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'name_format', __('Name Format', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['name_format']));
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("This only applies if you specify an upload directory. Insert %filename% where you want the filename to appear. The rest will be used as a PHP timestamp format.", 'wordpress-form-manager')."</span>", '');
 		
 		return $arr;
 	}
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
-		$opt['extra'] = $this->extraScriptHelper(array('restrict' => 'restrict', 'exclude' => 'exclude', 'max_size' => 'max_size', 'upload_dir' => 'upload_dir', 'upload_url' => 'upload_url' ));
+		$opt['extra'] = $this->extraScriptHelper(array('restrict' => 'restrict', 'exclude' => 'exclude', 'max_size' => 'max_size', 'upload_dir' => 'upload_dir', 'upload_url' => 'upload_url', 'name_format' => 'name_format' ));
 		return $opt;
 	}
 	

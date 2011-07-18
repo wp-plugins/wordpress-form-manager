@@ -20,6 +20,10 @@ function fm_restrictString($string, $length, $useEllipse = true){
 	else return substr($string, 0, $length);
 }
 
+// get a properly adjusted for GMT date/time
+function fm_get_time($format = 'Y-m-d H:i:s'){
+	return gmdate( $format , ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+}
 function helper_text_field($id, $label, $value, $desc = ""){
 	global $fm_globalSettings;
 	?>

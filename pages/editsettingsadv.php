@@ -56,6 +56,7 @@ if(isset($_POST['submit-settings'])){
 	
 	update_option('fm-enable-mce-button', $_POST['enable_mce_button']?"YES":"");
 	update_option('fm-file-method', $_POST['file_method']);
+	update_option('fm-file-name-format', $_POST['file_name_format']);
 	
 }
 elseif(isset($_POST['remove-template'])){
@@ -246,6 +247,7 @@ file_method
 );
 ?>
 <?php helper_option_field('file_method', __("Write method", 'wordpress-form-manager'), $fileMethods, get_option('fm-file-method') ); ?>
+<?php helper_text_field('file_name_format', __("Default file naming format", 'wordpress-form-manager'), get_option('fm-file-name-format') ); ?>
 </table>
 
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />

@@ -120,7 +120,7 @@ $this->globalSettings = array(
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
 					'template_form' => '',
-					'text_validator_count' => 4,
+					'text_validator_count' => 7,
 					'text_validator_0' => array('name' => 'number',
 												/* translators: the following are for the numbers only validator */
 												'label' => __('Numbers Only', 'wordpress-form-manager'),
@@ -145,7 +145,22 @@ $this->globalSettings = array(
 												'label' => __("Date (MM/DD/YY)", 'wordpress-form-manager'),
 												'message' => __("'%s' must be a date (MM/DD/YY)", 'wordpress-form-manager'),
 												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/'
-												)
+												),
+					'text_validator_4' => array('name' => 'state',
+												'label' => __("State (U.S.)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid state abbreviation", 'wordpress-form-manager'),
+												'regexp' => '/^(A[LKSZRAEP]|C[AOT]|D[EC]|F[LM]|G[AU]|HI|I[ADLN]|K[SY]|LA|M[ADEHINOPST]|N[CDEHJMVY]|O[HKR]|P[ARW]|RI|S[CD]|T[NX]|UT|V[AIT]|W[AIVY])$/i'
+												),
+					'text_validator_5' => array('name' => 'zip',
+												'label' => __("Zip code (U.S.)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid zip code", 'wordpress-form-manager'),
+												'regexp' => '/^\d{5}$/'
+												),
+					'text_validator_6' => array('name' => 'dimensions',
+												'label' => __("Dimensions (L x W x H)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be dimensions (L x W x H)", 'wordpress-form-manager'),
+												'regexp' => '/^\s*(\d+(\.\d+)?)\s*(x|X)\s*(\d+(\.\d+)?)\s*(x|X)\s*(\d+(\.\d+)?)\s*$/'
+												),
 					);
 }
 
@@ -817,13 +832,6 @@ function processPost($formID, $extraInfo = NULL, $overwrite = false, $ignoreType
 	
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0)
 		$postData = array_merge($postData, $extraInfo);
-	
-	//generate a timestamp
-	$q = "SELECT NOW()";
-	$res = $this->query($q);
-	$row = mysql_fetch_array($res);
-	mysql_free_result($res);
-	$postData['timestamp'] = $row[0];
 		
 	if($this->lastPostFailed === false){
 		if($overwrite){	
@@ -884,7 +892,7 @@ function insertSubmissionData($formID, $dataTable, $postData){
 	
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
-	$postData['timestamp'] = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+	$postData['timestamp'] = fm_get_time();
 	
 	foreach($postData as $k=>$v)
 		$arr[] = "`{$k}` = '".$v."'";

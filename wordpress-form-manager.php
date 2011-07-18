@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.12
+Version: 1.6.13
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.12";
+$fm_currentVersion = 		"1.6.13";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -80,12 +80,16 @@ include 'formdefinition.php';
 /**************************************************************/
 /******* PLUGIN OPTIONS ***************************************/
 
-if ( get_option( 'fm-shortcode' ) === false )
-	update_option("fm-shortcode", "form");
-if ( get_option( 'fm-enable-mce-button' ) === false )
-	update_option( "fm-enable-mce-button", "YES" );
-if ( get_option( 'fm-file-method' ) === false )
-	update_option( 'fm-file-method', 'auto' );
+$optionDefaults = array(
+	'fm-shortcode' => 'form',
+	'fm-enable-mce-button' => 'YES',
+	'fm-file-method' => 'auto',
+	'fm-file-name-format' => '%filename% (m-d-y-h-i-s)',
+);
+foreach ( $optionDefaults as $key=>$val ){
+	if ( get_option( $key ) === false )
+		update_option( $key, $val );
+}
 	
 update_option( "fm-forms-table-name", 			"fm_forms" );
 update_option( "fm-items-table-name", 			"fm_items" );
@@ -183,6 +187,8 @@ function fm_uninstall() {
 	delete_option( 'fm-temp-dir' );
 	delete_option( 'fm-data-shortcode' );
 	delete_option( 'fm-enable-mce-button' );
+	delete_option( 'fm-file-method' );
+	delete_option( 'fm-file-name-format' );
 }
 register_uninstall_hook( __FILE__, 'fm_uninstall' );
 
