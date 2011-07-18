@@ -832,7 +832,13 @@ function processPost($formID, $extraInfo = NULL, $overwrite = false, $ignoreType
 	
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0)
 		$postData = array_merge($postData, $extraInfo);
-		
+	
+	//add blanks for non-existent fields
+	foreach($formInfo['items'] as $item){
+		if(!isset($postData[$item['unique_name']]) && $item['db_type'] != "NONE")
+			$postData[$item['unique_name']] = "";
+	}
+	
 	if($this->lastPostFailed === false){
 		if($overwrite){	
 			$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
@@ -1398,12 +1404,23 @@ function createForm($formInfo=null){
 	$dataTablePrefix = $this->dataTablePrefix();	
 	$newID = $this->getUniqueFormID();
 	$dataTable = $dataTablePrefix."_".$newID;
-	$q = "INSERT INTO `".$this->formsTable."` SET `ID` = '".$newID."', `data_table` = '".$dataTable."'";
-	$this->query($q);
+
 	if($formInfo == null)	//use the default settings
 		$formInfo = $this->getSettings();
 	$formInfo['shortcode'] = 'form-'.$newID; //give new forms a shortcode based on numerical ID	
-	$this->updateForm($newID, $formInfo);			
+
+	$formInfo['ID'] = $newID;
+	$formInfo['data_table'] = $dataTable;
+	
+	$strArr=array();
+	foreach($formInfo as $k=>$v){
+		if(is_array($formInfo[$k])) $formInfo[$k] = serialize($formInfo[$k]);
+		$strArr[] = "`{$k}` = '".addslashes($formInfo[$k])."'";
+	}
+			
+	$q = "INSERT INTO `".$this->formsTable."` SET ".implode(", ", $strArr);	
+	$this->query($q);
+	
 	$this->createDataTable($formInfo, $dataTable);
 	return $newID;
 }
