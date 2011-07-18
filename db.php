@@ -887,7 +887,7 @@ function getErrorUniqueName(){
 	return $this->lastUniqueName;
 }
 
-function insertSubmissionData($formID, $dataTable, $postData){
+function insertSubmissionData($formID, $dataTable, &$postData){
 	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$postData['unique_id']."'";
 	$res = $this->query($q);
 	
@@ -1222,8 +1222,9 @@ function getSubmission($formID, $timestamp, $user, $cols = "*"){
 }
 
 function getSubmissionByID($formID, $subID, $cols = "*"){
+	global $wpdb;
 	$dataTable = $this->getDataTableName($formID);
-	$q = "SELECT ".$cols." FROM `".$dataTable."` WHERE `unique_id` = '".$subID."'";
+	$q = $wpdb->prepare("SELECT ".$cols." FROM `".$dataTable."` WHERE `unique_id` = %s", $subID);
 	$res = $this->query($q);
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);
@@ -1683,9 +1684,10 @@ function sanitizeUniqueName($name){
 
 //cached data table name (should not be changing within a page load)
 function getDataTableName($formID){
+	global $wpdb;
 	$dataTable = $this->getCache($formID, 'data-table');
 	if($dataTable == null){
-		$q = "SELECT `data_table` FROM `".$this->formsTable."` WHERE `ID` = '".$formID."'";
+		$q = $wpdb->prepare("SELECT `data_table` FROM `".$this->formsTable."` WHERE `ID` = %s", $formID);
 		$res = $this->query($q);
 		$row = mysql_fetch_assoc($res);
 		$dataTable = $row['data_table'];

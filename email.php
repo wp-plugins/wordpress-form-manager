@@ -96,6 +96,7 @@ class fm_advanced_email_class{
 			case "form":
 				switch(trim($matches[2])){
 					case "title": return $this->formInfo['title'];
+					case "id": return $this->formInfo['ID'];
 					default: return $matches[0];
 				}
 				break;
@@ -124,10 +125,14 @@ class fm_advanced_email_class{
 			case "item":
 				$name = trim($matches[2]);
 				$item = $fmdb->getItemByNickname($this->formInfo['ID'], $name);
-				if($item === false)
-					$item = $fmdb->getFormItem($name);
-				if($item !== false)
-					return $fm_controls[$item['type']]->parseData($item['unique_name'], $item, $this->formData[$item['unique_name']]);
+				switch($name){
+					case 'unique_id': return $this->formData['unique_id'];
+					default:				
+						if($item === false)
+							$item = $fmdb->getFormItem($name);
+						if($item !== false)
+							return $fm_controls[$item['type']]->parseData($item['unique_name'], $item, $this->formData[$item['unique_name']]);
+				}
 				break;
 			case "label":
 				$name = trim($matches[2]);
