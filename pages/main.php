@@ -100,6 +100,12 @@ if($currentDialog == "verify-delete"):?>
 
 else: ?>
 
+<?php if(get_option('fm-last-version') == '1.5.29'): ?>
+	<div class="fm-message">
+	<?php echo _x("The 'Submission Data' page has changed. You may want to review permissions if you are using the 'Members' plugin.", 'upgrade-notice', 'wordpress-form-manager');?>
+	</div>
+<?php endif; ?>
+
 <form name="fm-main-form" id="fm-main-form" action="" method="post">
 	<div class="wrap">
 		<div id="icon-edit-pages" class="icon32"></div>
