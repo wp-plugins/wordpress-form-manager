@@ -30,7 +30,7 @@ class fm_recaptchaControl extends fm_controlBase{
 		
 		if(!function_exists('recaptcha_check_answer'))			
 			require_once('recaptcha/recaptchalib.php');		
-			
+	
 		$resp = recaptcha_check_answer ($privatekey,
 									$_SERVER["REMOTE_ADDR"],
 									$_POST["recaptcha_challenge_field"],
