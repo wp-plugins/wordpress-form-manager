@@ -185,7 +185,7 @@ function fm_getFileLink($col, $dbRow){
 
 function fm_getTableCol($item){
 	$col = array( 
-		'value' => (empty($item['nickname']) ? $item['label'] : $item['nickname']),
+		'value' => (empty($item['nickname']) ? htmlspecialchars($item['label']) : $item['nickname']),
 		'key' => $item['unique_name'],
 		'item' => $item,
 		'editable' => true,
@@ -376,6 +376,30 @@ class fm_custom_attribute_parser{
 		foreach($matches[2] as $index => $match)
 			$vars[$matches[1][$index][0]] = $match[0];
 		return $vars;
+	}
+}
+
+function fm_getSubmissionDataShortcoded($inputStr, &$formInfo, &$subData){
+	$email = new fm_advanced_email_class(&$formInfo, &$subData);
+	
+	$parser = new fm_custom_shortcode_parser($email->shortcodeList, array($email, 'emailShortcodeCallback'));
+	
+	$shortCoded = $parser->parse($inputStr);
+	
+	return $shortCoded;
+}
+
+function fm_sendEmail($to, $subject, $message, $headers){
+	$method = get_option('fm-email-send-method');
+	
+	switch($method){
+		case 'mail': mail($to, $subject, $message, $headers);
+			break;
+		case 'off':
+			break;
+		case 'wp_mail':
+		default:
+			wp_mail($to, $subject, $message, $headers);
 	}
 }
 ?>

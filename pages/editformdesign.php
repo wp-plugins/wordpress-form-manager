@@ -171,8 +171,18 @@ if(isset($_POST['message']))
 
 							<p>
 							<label><?php _e("Also send notification(s) to", 'wordpress-form-manager');?>:</label>
-							<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" />
+							<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" style="width:100%;"/>
 							<p class="howto" style="margin-top:-8px"><?php _e("Enter a list of e-mail addresses separated by commas", 'wordpress-form-manager');?></p>
+							</p>
+							
+							<p>
+							<label><?php _e("Subject", 'wordpress-form-manager');?>:</label>
+							<input type="text" id="email_subject" value="<?php echo htmlspecialchars($form['email_subject']); ?>" style="width:100%;" />
+							</p>
+							
+							<p>
+							<label><?php _e("From", 'wordpress-form-manager');?>:</label>
+							<input type="text" id="email_from" value="<?php echo htmlspecialchars($form['email_from']); ?>" style="width:100%;" />
 							</p>
 							
 						</div>						

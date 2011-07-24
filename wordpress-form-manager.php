@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.15
+Version: 1.6.16
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.15";
+$fm_currentVersion = 		"1.6.16";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -85,6 +85,7 @@ $optionDefaults = array(
 	'fm-enable-mce-button' => 'YES',
 	'fm-file-method' => 'auto',
 	'fm-file-name-format' => '%filename% (m-d-y-h-i-s)',
+	'fm-email-send-method' => 'wp_mail',
 );
 foreach ( $optionDefaults as $key=>$val ){
 	if ( get_option( $key ) === false )
@@ -164,6 +165,8 @@ function fm_install() {
 	$fmdb->fixDBTypeBug();
 	
 	$fmdb->fixDateValidator();
+	
+	$fmdb->fixFormEmailOptions();
 		
 	update_option( 'fm-version', $fm_currentVersion );			
 }  
@@ -328,8 +331,17 @@ function fm_userInit() {
 	if ( $ver != $fm_currentVersion ) {
 		fm_install();
 	}
+	
+	////////////////////////////////////////////////////////////
+	
+	$fm_oldIncludePath = get_include_path();
+	set_include_path( dirname( __FILE__ ) . '/' );
 
 	include 'settings.php';
+	
+	set_include_path( $fm_oldIncludePath );
+
+	////////////////////////////////////////////////////////////
 
 	fm_init_members_integration();
 	

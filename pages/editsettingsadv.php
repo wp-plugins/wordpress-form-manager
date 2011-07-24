@@ -57,6 +57,7 @@ if(isset($_POST['submit-settings'])){
 	update_option('fm-enable-mce-button', $_POST['enable_mce_button']?"YES":"");
 	update_option('fm-file-method', $_POST['file_method']);
 	update_option('fm-file-name-format', $_POST['file_name_format']);
+	update_option('fm-email-send-method', $_POST['email_send_method']);
 	
 }
 elseif(isset($_POST['remove-template'])){
@@ -248,6 +249,17 @@ file_method
 ?>
 <?php helper_option_field('file_method', __("Write method", 'wordpress-form-manager'), $fileMethods, get_option('fm-file-method') ); ?>
 <?php helper_text_field('file_name_format', __("Default file naming format", 'wordpress-form-manager'), get_option('fm-file-name-format') ); ?>
+</table>
+
+<h3><?php _e("E-Mail", 'wordpress-form-manager');?></h3>
+<?php $emailMethods = array(
+	'wp_mail' => __('WordPress (wp_mail)', 'wordpress-form-manager'),
+	'mail' => __('PHP (mail)', 'wordpress-form-manager'),
+	'off' => __('None', 'wordpress-form-manager'),
+);
+?>
+<table class="form-table">
+<?php helper_option_field('email_send_method', __("Send method", 'wordpress-form-manager'), $emailMethods, get_option('fm-email-send-method') ); ?>
 </table>
 
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />

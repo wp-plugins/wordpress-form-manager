@@ -118,7 +118,7 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
 				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
 						$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
-						$lbl = ($item['nickname'] == "" ? $item['label'] : $item['nickname']);
+						$lbl = ($item['nickname'] == "" ? htmlspecialchars($item['label']) : $item['nickname']);
 						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$lbl.'</th>';
 				}
 			}
@@ -300,7 +300,7 @@ function fm_doFormBySlug($formSlug, $options = array()){
 				$headerStr = "";
 				foreach($email['headers'] as $header => $value)
 					$headerStr.= $header.": ".$value."\r\n";
-				wp_mail($email['to'], $email['subject'], $email['message'], $headerStr);
+				fm_sendEmail($email['to'], $email['subject'], $email['message'], $headerStr);
 			}
 		}
 		
@@ -401,26 +401,26 @@ function fm_helper_sendEmail($formInfo, $postData){
 	|| $fmdb->getGlobalSetting('email_admin') == "YES"
 	|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
 	
-		$subject = get_option('blogname').": '".$formInfo['title']."' Submission";				
+		$subject = fm_getSubmissionDataShortcoded($formInfo['email_subject'], $formInfo, $postData);	
 		$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
-		$headers  = 'MIME-Version: 1.0'."\r\n".
-					'Content-type: text/html'."\r\n".
-					'From: '.get_option('admin_email')."\r\n".
-					'Reply-To: '.get_option('admin_email')."\r\n";
+		$headers  = 'From: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
+					'Reply-To: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
+					'MIME-Version: 1.0'."\r\n".
+					'Content-type: text/html'."\r\n";
 		
 		$temp = "";
 		if($fmdb->getGlobalSetting('email_admin') == "YES")
-			wp_mail(get_option('admin_email'), $subject, $message, $headers);
+			fm_sendEmail(get_option('admin_email'), $subject, $message, $headers);
 			
 		if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
 			if(trim($current_user->user_email) != "")
-				wp_mail($current_user->user_email, $subject, $message, $headers);
+				fm_sendEmail($current_user->user_email, $subject, $message, $headers);
 		}
 		if($formInfo['email_list'] != "")
-			wp_mail($formInfo['email_list'], $subject, $message, $headers);
+			fm_sendEmail($formInfo['email_list'], $subject, $message, $headers);
 			
 		if($formInfo['email_user_field'] != "")
-			wp_mail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
+			fm_sendEmail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
 	}
 }
 ?>

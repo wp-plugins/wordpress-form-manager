@@ -3,7 +3,6 @@
 class fm_controlBase{
 	
 	public function __construct(){
-		$this->isMeta = false;
 	}
 	
 	//used to name javascript functions and such
@@ -226,13 +225,14 @@ class fm_controlBase{
 	
 	function showHiddenVars($uniqueName, $itemInfo, $hideKeys = null, $script = "fm_base_get(itemID, index)"){
 		global $fmdb;
+		$str = "";
 		$itemInfo['extra'] = serialize($itemInfo['extra']);
 		if($hideKeys==null) $hideKeys = array();
 		$str.= $this->getScriptHidden($uniqueName, $script)."\n";
 		$str.= $this->getTypeHidden($uniqueName, $itemInfo);
 		foreach($fmdb->itemKeys as $key=>$value){
 			if(!in_array($key,$hideKeys,true))
-				$str.= "<input type=\"hidden\" id=\"{$uniqueName}-{$key}\" value=\"".htmlspecialchars($itemInfo[$key])."\" />";
+				$str.= "<input type=\"hidden\" id=\"{$uniqueName}-{$key}\" value=\"".htmlspecialchars(isset($itemInfo[$key]) ? $itemInfo[$key] : "")."\" />";
 		}
 		return $str;
 	}

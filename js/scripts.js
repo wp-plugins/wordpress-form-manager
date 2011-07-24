@@ -33,6 +33,8 @@ function fm_saveForm(){
 				required_msg: document.getElementById('required_msg').value,				
 				show_summary: document.getElementById('show_summary').checked,
 				email_list: document.getElementById('email_list').value,
+				email_subject: document.getElementById('email_subject').value,
+				email_from: document.getElementById('email_from').value,
 				email_user_field: document.getElementById('email_user_field').value,
 				auto_redirect: document.getElementById('auto_redirect').checked,
 				auto_redirect_page: document.getElementById('auto_redirect_page').value,

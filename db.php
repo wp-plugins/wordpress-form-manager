@@ -79,6 +79,8 @@ $this->formSettingsKeys = array(
 					'email_user_field' => '',
 					'form_template' => '',
 					'email_template' => '',
+					'email_from' => '',
+					'email_subject' => '',
 					'summary_template' => '',
 					'template_values' => '',
 					'show_summary' => 0,
@@ -119,6 +121,8 @@ $this->globalSettings = array(
 					'reg_user_only_msg' => addslashes(__("'%s' is only available to registered users.", 'wordpress-form-manager')),
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
+					'email_subject' => __("[form title] Submission", 'wordpress-form-manager'),
+					'email_from' => "[admin email]",
 					'template_form' => '',
 					'text_validator_count' => 7,
 					'text_validator_0' => array('name' => 'number',
@@ -195,6 +199,8 @@ function setupFormManager(){
 		email_user_field	- the unique name of a field within the form that will contain an e-mail address upon submission, which will be sent a notification
 		form_template		- the file name of the form template to use. if blank, uses the default template
 		email_template		- same as above, as applies to email notifications
+		email_subject		- subject line of the e-mail notifications (shortcoded)
+		email_from			- from header of the e-mail notofications (shortcoded)
 		summary_template	- same as aoove, as applies to the summaries displayed for single submission / user profile style forms
 		template_values		- associative array of the template specific values, as set in the form editor
 		show_summary		- whether or not to show a summary of the submitted data along with the submission acknowledgment
@@ -226,6 +232,8 @@ function setupFormManager(){
 		`email_user_field` VARCHAR( 64 ) DEFAULT '' NOT NULL,
 		`form_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`email_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
+		`email_subject` VARCHAR( 1024 ) DEFAULT '' NOT NULL,
+		`email_from` VARCHAR( 1024 ) DEFAULT '' NOT NULL,
 		`summary_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`template_values` TEXT NOT NULL,
 		`show_summary` BOOL DEFAULT '0' NOT NULL,
@@ -542,6 +550,16 @@ function fixDateValidator(){
 	if($val['regexp'] == '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/.'){
 		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/';
 		$this->setGlobalSetting('text_validator_3', $val);
+	}
+}
+
+function fixFormEmailOptions(){
+	if ( version_compare( get_option('fm-version'), '1.6.16', '<' ) ){
+		$q = "UPDATE `".$this->formsTable."` SET 
+		`email_subject` = '".$this->globalSettings['email_subject']."', 
+		`email_from` = '".$this->globalSettings['email_from']."'
+		WHERE `ID` > 0";
+		$this->query($q);
 	}
 }
 

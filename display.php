@@ -227,9 +227,6 @@ function getEditorItem($uniqueName, $type, $itemInfo, $isMeta = false){
 		$control = $fm_controls[$type];
 	else
 		$control = $fm_controls['default'];
-		
-	$oldMeta = $control->isMeta;
-	$control->isMeta = $isMeta;
 	
 	// a new item
 	if($itemInfo == null) $itemInfo = $control->itemDefaults();
@@ -245,8 +242,6 @@ function getEditorItem($uniqueName, $type, $itemInfo, $isMeta = false){
 			"</tr>".
 			"</table>".
 			"<input type=\"hidden\" id=\"{$uniqueName}-type\" value=\"{$type}\" />";
-	
-	$control->isMeta = $oldMeta;
 	
 	return $str;
 }

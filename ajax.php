@@ -22,6 +22,10 @@ function fm_saveFormAjax() {
 	
 	$formInfo = fm_saveHelperGatherFormInfo();
 	
+	foreach ( $formInfo['items'] as $k=>$item ) {
+		$formInfo['items'][$k]['set'] = 0;
+	}
+	
 	//check if the shortcode is a duplicate
 	$scID = $fmdb->getFormID( $formInfo[ 'shortcode' ] );
 	if( !( $scID == false 
@@ -85,7 +89,9 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['required_msg'] = $_POST['required_msg'];
 	$formInfo['template_values'] = $_POST['template_values'];	
 	$formInfo['show_summary'] = ($_POST['show_summary']=="true"?1:0);
-	$formInfo['email_user_field'] = $_POST['email_user_field'];	
+	$formInfo['email_user_field'] = $_POST['email_user_field'];
+	$formInfo['email_subject'] = $_POST['email_subject'];
+	$formInfo['email_from'] = $_POST['email_from'];
 	$formInfo['auto_redirect'] = ($_POST['auto_redirect']=="true"?1:0);
 	$formInfo['auto_redirect_page'] = $_POST['auto_redirect_page'];
 	$formInfo['auto_redirect_timeout'] = $_POST['auto_redirect_timeout'];
@@ -149,6 +155,9 @@ function fm_newItemAjax(){
 	global $fm_display;
 	global $fmdb;
 	
+	$olderr = error_reporting();
+	error_reporting(E_ALL ^ E_NOTICE);
+	
 	$uniqueName = $fmdb->getUniqueItemID($_POST['type']);
 
 	$str = "{".
@@ -157,6 +166,8 @@ function fm_newItemAjax(){
 		"}";
 	
 	echo $str;
+	
+	error_reporting($olderr);
 	
 	die();
 }

@@ -80,14 +80,13 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <tr><th><strong><?php _e("Item Label", 'wordpress-form-manager');?></strong></th><th><strong><?php _e("Nickname", 'wordpress-form-manager');?></strong></th></tr>
 <?php 
 foreach($form['items'] as $item){
-	if($item['type'] != 'separator' && $item['type'] != 'note' && $item['type'] != 'recaptcha')
-		helper_text_field($item['unique_name'].'-edit-nickname', $item['label'], $item['nickname']);
+	helper_text_field($item['unique_name'].'-edit-nickname', htmlspecialchars($item['label']), $item['nickname']);
 }
 ?>
 <tr><td><hr /></td><td>&nbsp;</td></tr>
 <?php
 foreach($metaForm['items'] as $item){
-	helper_text_field($item['unique_name'].'-edit-nickname', $item['label'], $item['nickname']);
+	helper_text_field($item['unique_name'].'-edit-nickname', htmlspecialchars($item['label']), $item['nickname']);
 }
 ?>
 </table>
