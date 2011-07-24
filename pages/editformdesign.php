@@ -171,8 +171,18 @@ if(isset($_POST['message']))
 
 							<p>
 							<label><?php _e("Also send notification(s) to", 'wordpress-form-manager');?>:</label>
-							<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" />
+							<input type="text" id="email_list" value="<?php echo (sizeof($email_list)==0)?"":implode(", ", $email_list); ?>" style="width:100%;"/>
 							<p class="howto" style="margin-top:-8px"><?php _e("Enter a list of e-mail addresses separated by commas", 'wordpress-form-manager');?></p>
+							</p>
+							
+							<p>
+							<label><?php _e("Subject", 'wordpress-form-manager');?>:</label>
+							<input type="text" id="email_subject" value="<?php echo htmlspecialchars($form['email_subject']); ?>" style="width:100%;" />
+							</p>
+							
+							<p>
+							<label><?php _e("From", 'wordpress-form-manager');?>:</label>
+							<input type="text" id="email_from" value="<?php echo htmlspecialchars($form['email_from']); ?>" style="width:100%;" />
 							</p>
 							
 						</div>						
@@ -246,7 +256,7 @@ if(isset($_POST['message']))
 			<?php
 				$types=array();
 				foreach($fm_controls as $controlKey=>$controlType){
-					if($controlKey != 'default')
+					if($controlKey != 'default' && $controlType->isFormField())
 						$types[]="<a class=\"edit-form-button\" onclick=\"fm_addItem('{$controlKey}')\">".$controlType->getTypeLabel()."</a>";
 				}
 				echo implode(" | \n", $types);
@@ -291,6 +301,11 @@ if(isset($_POST['message']))
 		</div>
 	</div>	
 	
+	<?php if(get_option('fm-last-version') == '1.5.29'): ?>
+	<div class='fm-message'>
+		<a href="<?php echo get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=nicknames&id=".$form['ID'];?>"><?php echo _x("Private fields have moved", 'upgrade-notice', 'wordpress-form-manager');?></a>
+	</div>
+	<?php endif; ?>
 	
 	<script type="text/javascript">	
 	fm_initEditor();

@@ -19,6 +19,8 @@ if(isset($_POST['submit-settings'])){
 	$fmdb->setGlobalSetting('recaptcha_theme', (trim($_POST['recaptcha_theme_custom']) == "" ? $_POST['recaptcha_theme'] : $_POST['recaptcha_theme_custom']));
 	$fmdb->setGlobalSetting('email_admin', $_POST['email_admin'] == "on" ? "YES" : "");
 	$fmdb->setGlobalSetting('email_reg_users', $_POST['email_reg_users'] == "on" ? "YES" : "");
+	$fmdb->setGlobalSetting('email_subject', $_POST['email_subject']);
+	$fmdb->setGlobalSetting('email_from', $_POST['email_from']);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +52,8 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 <tr><td colspan="2"><?php _e("These settings will be applied to every form you create.", 'wordpress-form-manager');?></td></tr>
 <?php helper_checkbox_field('email_admin', __("Send to Administrator", 'wordpress-form-manager')." (".get_option('admin_email').")", ($fm_globalSettings['email_admin'] == "YES")); ?>
 <?php helper_checkbox_field('email_reg_users', __("Registered Users", 'wordpress-form-manager'), ($fm_globalSettings['email_reg_users'] == "YES"), __("A confirmation e-mail will be sent to a registered user only when they submit a form", 'wordpress-form-manager')); ?>
+<?php helper_text_field('email_subject', __("Default Subject", 'wordpress-form-manager'), $fm_globalSettings['email_subject']);?>
+<?php helper_text_field('email_from', __("Default From", 'wordpress-form-manager'), $fm_globalSettings['email_from']);?>
 </table>
 
 <h3><?php _e("Default Form Settings", 'wordpress-form-manager');?></h3>
