@@ -277,12 +277,12 @@ function fm_doFormBySlug($formSlug, $options = array()){
 		foreach($formInfo['items'] as $item){			
 			$postData[$item['unique_name']] = stripslashes($postData[$item['unique_name']]);
 		}
-			
+		
 		if($fmdb->processFailed()){			
 			return '<em>'.$fmdb->getErrorMessage().'</em>'.
 					$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'use_placeholders' => false), $postData);
 		}
-		
+				
 		// send email notifications
 			
 		if($formInfo['use_advanced_email'] != 1){
@@ -308,6 +308,14 @@ function fm_doFormBySlug($formSlug, $options = array()){
 		if($formInfo['publish_post'] == 1){				
 			fm_helper_publishPost($formInfo, $postData);
 		}			
+		
+		//call the form submission action with nice data
+		$niceData = $postData;
+		foreach( $formInfo['items'] as $item ){
+			if($item['nickname'] != "")
+				$niceData[$item['nickname']] = $postData[$item['unique_name']];
+		}
+		do_action( 'fm_form_submission', array('form' => $formInfo, 'data' => $niceData) );
 		
 		//display the acknowledgment of a successful submission
 		$output.= '<p>'.$formInfo['submitted_msg'].'</p>';
@@ -413,8 +421,12 @@ function fm_helper_sendEmail($formInfo, $postData){
 			fm_sendEmail(get_option('admin_email'), $subject, $message, $headers);
 			
 		if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
-			if(trim($current_user->user_email) != "")
-				fm_sendEmail($current_user->user_email, $subject, $message, $headers);
+			if(trim($current_user->user_email) != ""){
+				if( ($fmdb->getGlobalSetting('email_admin') == "YES" && $current_user->user_email != get_option('admin_email') )
+					|| $fmdb->getGlobalSetting('email_admin') != "YES" ){
+						fm_sendEmail($current_user->user_email, $subject, $message, $headers);
+				}
+			}
 		}
 		if($formInfo['email_list'] != "")
 			fm_sendEmail($formInfo['email_list'], $subject, $message, $headers);
