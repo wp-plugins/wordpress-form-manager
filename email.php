@@ -21,9 +21,13 @@ class fm_advanced_email_class{
 		$this->formData = $formData;
 	}
 	
-	function generateEmails($inputStr){
+	function generateEmails($inputStr, $parseShortcodes = true){
 		$parser = new fm_custom_shortcode_parser($this->shortcodeList, array($this, 'emailShortcodeCallback'));
-		$shortCoded = $parser->parse($inputStr);
+		
+		if($parseShortcodes)
+			$shortCoded = $parser->parse($inputStr);
+		else
+			$shortCoded = $inputStr;
 		
 		//split into multiple definitions
 		$definitions = $this->splitIntoDefinitions($shortCoded);
@@ -62,6 +66,11 @@ class fm_advanced_email_class{
 		$atts = $attParser->getAttributes($def['headers']);
 		$def['to'] = $atts['To'];
 		$def['subject'] = $atts['Subject'];
+		
+		if(isset($atts['FM-EMAIL-NAME'])){
+			$def['email-name'] = $atts['FM-EMAIL-NAME'];
+			unset($atts['FM-EMAIL-NAME']);
+		}
 	
 		unset($atts['To']);
 		unset($atts['Subject']);
@@ -87,6 +96,7 @@ class fm_advanced_email_class{
 			case "form":
 				switch(trim($matches[2])){
 					case "title": return $this->formInfo['title'];
+					case "id": return $this->formInfo['ID'];
 					default: return $matches[0];
 				}
 				break;
@@ -115,10 +125,14 @@ class fm_advanced_email_class{
 			case "item":
 				$name = trim($matches[2]);
 				$item = $fmdb->getItemByNickname($this->formInfo['ID'], $name);
-				if($item === false)
-					$item = $fmdb->getFormItem($name);
-				if($item !== false)
-					return $fm_controls[$item['type']]->parseData($item['unique_name'], $item, $this->formData[$item['unique_name']]);
+				switch($name){
+					case 'unique_id': return $this->formData['unique_id'];
+					default:				
+						if($item === false)
+							$item = $fmdb->getFormItem($name);
+						if($item !== false)
+							return $fm_controls[$item['type']]->parseData($item['unique_name'], $item, $this->formData[$item['unique_name']]);
+				}
 				break;
 			case "label":
 				$name = trim($matches[2]);

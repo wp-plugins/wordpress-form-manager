@@ -22,6 +22,10 @@ function fm_saveFormAjax() {
 	
 	$formInfo = fm_saveHelperGatherFormInfo();
 	
+	foreach ( $formInfo['items'] as $k=>$item ) {
+		$formInfo['items'][$k]['set'] = 0;
+	}
+	
 	//check if the shortcode is a duplicate
 	$scID = $fmdb->getFormID( $formInfo[ 'shortcode' ] );
 	if( !( $scID == false 
@@ -51,6 +55,24 @@ function fm_saveFormAjax() {
 	die();
 }
 
+add_action( 'wp_ajax_fm_save_submission_meta', 'fm_saveSubmissionMetaAjax' );
+
+function fm_saveSubmissionMetaAjax() {
+	global $fmdb;
+	
+	$formInfo = array();
+	$formInfo['items'] = fm_saveHelperGatherItems();
+	
+	foreach ( $formInfo['items'] as $k=>$item ) {
+		$formInfo['items'][$k]['set'] = 1;
+	}
+	
+	$fmdb->updateForm( $_POST[ 'id' ], $formInfo, 1 );
+	echo "1";
+	
+	die();
+}
+
 function fm_saveHelperGatherFormInfo(){
 	global $fm_save_had_error;
 	
@@ -67,7 +89,9 @@ function fm_saveHelperGatherFormInfo(){
 	$formInfo['required_msg'] = $_POST['required_msg'];
 	$formInfo['template_values'] = $_POST['template_values'];	
 	$formInfo['show_summary'] = ($_POST['show_summary']=="true"?1:0);
-	$formInfo['email_user_field'] = $_POST['email_user_field'];	
+	$formInfo['email_user_field'] = $_POST['email_user_field'];
+	$formInfo['email_subject'] = $_POST['email_subject'];
+	$formInfo['email_from'] = $_POST['email_from'];
 	$formInfo['auto_redirect'] = ($_POST['auto_redirect']=="true"?1:0);
 	$formInfo['auto_redirect_page'] = $_POST['auto_redirect_page'];
 	$formInfo['auto_redirect_timeout'] = $_POST['auto_redirect_timeout'];
@@ -96,7 +120,13 @@ function fm_saveHelperGatherFormInfo(){
 	}
 		
 	//build the items list
-	$formInfo['items'] = array();
+	$formInfo['items'] = fm_saveHelperGatherItems();
+	
+	return $formInfo;
+}
+
+function fm_saveHelperGatherItems(){
+	$items = array();
 	if(isset($_POST['items'])){
 		foreach($_POST['items'] as $item){			
 			if(!is_serialized($item['extra'])){ //if not a serialized array, hopefully a parseable php array definition..								
@@ -112,11 +142,11 @@ function fm_saveHelperGatherFormInfo(){
 				}					
 				$item['extra'] = $newExtra;
 			}			
-			$formInfo['items'][] = $item;			
+			$items[] = $item;			
 		}
 	}
 	
-	return $formInfo;
+	return $items;
 }
 
 //insert a new form item
@@ -124,6 +154,9 @@ add_action('wp_ajax_fm_new_item', 'fm_newItemAjax');
 function fm_newItemAjax(){
 	global $fm_display;
 	global $fmdb;
+	
+	$olderr = error_reporting();
+	error_reporting(E_ALL ^ E_NOTICE);
 	
 	$uniqueName = $fmdb->getUniqueItemID($_POST['type']);
 
@@ -133,6 +166,8 @@ function fm_newItemAjax(){
 		"}";
 	
 	echo $str;
+	
+	error_reporting($olderr);
 	
 	die();
 }
@@ -145,44 +180,24 @@ function fm_createFormElement(){
 	die();
 }
 
-//Create a CSV file for download
-add_action('wp_ajax_fm_create_csv', 'fm_createCSV');
-function fm_createCSV(){
-	global $fmdb;
-
-	/* translators: the date format for creating the filename of a .csv file.  see http://php.net/date */
-	$fname = $_POST['title']." (".date(__("m-y-d h-i-s", 'wordpress-form-manager')).").csv";
-	
-	$CSVFileFullPath = dirname(__FILE__)."/".get_option("fm-temp-dir")."/".$fname;
-	
-	$csvText = $fmdb->getFormSubmissionDataCSV($_POST['id']);
-	
-	fm_write_file( $CSVFileFullPath, $csvText );
-	
-	echo plugins_url('/'.get_option("fm-temp-dir").'/',  __FILE__).$fname;
-	
-	die();
-}
-
 //Download an uploaded file stored in the database
 add_action('wp_ajax_fm_download_file', 'fm_downloadFile');
 function fm_downloadFile(){
 	global $fmdb;
 	
-	$tmpDir =  dirname(__FILE__)."/".get_option("fm-temp-dir")."/";
+	$tmpDir =  fm_getTmpPath();
 	
 	$formID = $_POST['id'];
 	$itemID = $_POST['itemid'];
-	$timestamp = $_POST['timestamp'];
-	$userName = $_POST['user'];
+	$subID = $_POST['subid'];
 	
-	$dataRow = $fmdb->getSubmission($formID, $timestamp, $userName, "`".$itemID."`");
+	$dataRow = $fmdb->getSubmissionByID($formID, $subID, "`".$itemID."`");
 	
 	$fileInfo = unserialize($dataRow[$itemID]);	
 	
 	fm_write_file( $tmpDir.$fileInfo['filename'], $fileInfo['contents'] );
 	
-	echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__).$fileInfo['filename'];		
+	echo fm_getTmpURL().$fileInfo['filename'];		
 	
 	die();
 }
@@ -192,7 +207,7 @@ function fm_downloadAllFiles(){
 	global $fmdb;
 	global $fm_controls;
 	
-	$tmpDir =  dirname(__FILE__)."/".get_option("fm-temp-dir")."/";
+	$tmpDir =  fm_getTmpPath();
 	
 	$formID = $_POST['id'];	
 	$itemID = $_POST['itemid'];
@@ -228,11 +243,11 @@ function fm_downloadAllFiles(){
 		$zipFullPath =  $tmpDir.sanitize_title($zipFileName);	
 		fm_createZIP($files, $zipFullPath); 
 		 
-		$fp = fopen(dirname(__FILE__)."/".get_option("fm-temp-dir")."/"."download.php", "w");	
+		$fp = fopen(fm_getTmpPath()."download.php", "w");	
 		fwrite($fp, fm_createDownloadFileContents($zipFullPath, $zipFileName));	
 		fclose($fp); 
 		
-		echo plugins_url('/'.get_option("fm-temp-dir").'/', __FILE__)."download.php";
+		echo fm_getTmpURL()."download.php";
 		die();
 	}
 	else{
