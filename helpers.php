@@ -338,6 +338,10 @@ function fm_getTmpURL(){
 	return WP_PLUGIN_URL."/".dirname(plugin_basename(__FILE__))."/".get_option("fm-temp-dir")."/";
 }
 
+function fm_strip_tags($str){
+	return strip_tags($str, get_option('fm-allowed-tags'));
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Custom shortcode processor
 

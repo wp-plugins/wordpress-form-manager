@@ -518,12 +518,12 @@ $bulkActions = apply_filters( 'fm_data_bulk_actions', $bulkActions );
 		<div class="tablenav" style="float:right; clear:right; padding-right:10px;" >
 			<label for="fm-data-download-csv-type"><?php _e("Download Data (.csv)", 'wordpress-form-manager');?>:</label>
 			<select name="fm-data-download-csv-type" id="fm-data-download-csv-type" >
-				<option value="all"><?php _e("All entries", 'wordpress-form-manager');?></option>
-				<option value="current-search"><?php _e("Search results (all pages)", 'wordpress-form-manager');?></option>
-				<option value="current-page"><?php _e("Search results (current page only)", 'wordpress-form-manager');?></option>
 				<?php if(!$fm_MEMBERS_EXISTS || current_user_can('form_manager_data_csv_all')): ?>
 					<option value="allfields"><?php _e("All entries (including hidden fields)", 'wordpress-form-manager'); ?></option>
 				<?php endif; ?>
+				<option value="all"><?php _e("All entries", 'wordpress-form-manager');?></option>
+				<option value="current-search"><?php _e("Search results (all pages)", 'wordpress-form-manager');?></option>
+				<option value="current-page"><?php _e("Search results (current page only)", 'wordpress-form-manager');?></option>				
 			</select>
 			<input type="submit" name="submit-download-csv" id="submit-download-csv" class="button-primary" value="<?php _e("Download", 'wordpress-form-manager');?>" />
 		</div>		

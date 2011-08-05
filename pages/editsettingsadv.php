@@ -58,6 +58,7 @@ if(isset($_POST['submit-settings'])){
 	update_option('fm-file-method', $_POST['file_method']);
 	update_option('fm-file-name-format', $_POST['file_name_format']);
 	update_option('fm-email-send-method', $_POST['email_send_method']);
+	update_option('fm-allowed-tags', $_POST['fm-allowed-tags']);
 	
 }
 elseif(isset($_POST['remove-template'])){
@@ -260,6 +261,11 @@ file_method
 ?>
 <table class="form-table">
 <?php helper_option_field('email_send_method', __("Send method", 'wordpress-form-manager'), $emailMethods, get_option('fm-email-send-method') ); ?>
+</table>
+
+<h3><?php _e("Content Filtering", 'wordpress-form-manager');?></h3>
+<table class="form-table">
+<?php helper_text_field('fm-allowed-tags', __("Allowed HTML Tags", 'wordpress-form-manager'), get_option('fm-allowed-tags'), htmlspecialchars(__("Enter tags including '<' and '>', e.g., \"<a><em><strong><br><hr>\" etc.", 'wordpress-form-manager')));?>
 </table>
 
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />

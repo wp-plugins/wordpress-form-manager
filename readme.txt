@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.2
-Stable tag: 1.6.17
+Stable tag: 1.6.18
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -47,8 +47,13 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
+* Russian (ru_RU) - Ellena Murawski
 
 == Changelog ==
+= 1.6.18 =
+* Added option to allow certain HTML tags
+* Added Russian language translation
+
 = 1.6.17 =
 * Admin no longer receives two e-mails if both 'send to admin' and 'send to user' are checked
 * Added a pluggable action for form submission

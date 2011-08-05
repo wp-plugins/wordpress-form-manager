@@ -147,7 +147,7 @@ class fm_metaTextareaControl extends fm_textareaControl {
 	
 	public function processPost($uniqueName, $itemInfo){
 		if(!isset($_POST[$uniqueName]))
-			return strip_tags($_POST[$uniqueName]);
+			return fm_strip_tags($_POST[$uniqueName]);
 		return $itemInfo['extra']['value'];
 	}
 	

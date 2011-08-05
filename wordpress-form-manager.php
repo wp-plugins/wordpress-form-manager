@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.17
+Version: 1.6.18
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.17";
+$fm_currentVersion = 		"1.6.18";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -86,6 +86,7 @@ $optionDefaults = array(
 	'fm-file-method' => 'auto',
 	'fm-file-name-format' => '%filename% (m-d-y-h-i-s)',
 	'fm-email-send-method' => 'wp_mail',
+	'fm-allowed-tags' => '<a><abbr><acronym><b><bdo><blockquote><br><caption><center><cite><code><col><colgroup><dd><del><dfn><div><dl><dt><em><h1><h2><h3><h4><h5><h6><hr><i><img><ins><kbd><legend><li><ol><p><pre><q><s><samp><span><strike><strong><sub><sup><table><tbody><td><tfoot><th><thead><tr><tt><u><ul>',
 );
 foreach ( $optionDefaults as $key=>$val ){
 	if ( get_option( $key ) === false )
@@ -192,6 +193,7 @@ function fm_uninstall() {
 	delete_option( 'fm-enable-mce-button' );
 	delete_option( 'fm-file-method' );
 	delete_option( 'fm-file-name-format' );
+	delete_option( 'fm-allowed-tags' );
 }
 register_uninstall_hook( __FILE__, 'fm_uninstall' );
 

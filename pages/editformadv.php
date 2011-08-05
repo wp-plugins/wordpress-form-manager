@@ -131,7 +131,7 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 <table class="form-table">
 <?php helper_checkbox_field('publish_post', __("Publish submissions as posts", 'wordpress-form-manager'), ($form['publish_post'] == 1)); ?> 
 <tr><th scope="row"><label><?php _e("Post category", 'wordpress-form-manager'); ?></label></th><td><?php wp_dropdown_categories(array('hide_empty' => 0, 'name' => 'publish_post_category', 'hierarchical' => true, 'selected' => $form['publish_post_category'])); ?></td></tr>
-<?php helper_text_field('publish_post_title', __("Post title", 'wordpress-form-manager'), htmlspecialchars($form['publish_post_title']), __("Include '%s' where you would like the form title to appear", 'wordpress-form-manager')); ?>
+<?php helper_text_field('publish_post_title', __("Post title", 'wordpress-form-manager'), htmlspecialchars($form['publish_post_title'])); ?>
 <?php helper_option_field('publish_post_status', __("Publish status", 'wordpress-form-manager'), array( 'publish' => 'Publish', 'draft' => 'Draft' ), $form['publish_post_status'] ); ?>
 </table>
 

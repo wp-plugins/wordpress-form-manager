@@ -89,7 +89,7 @@ class fm_controlBase{
 	//items can return boolean false to indicate a failure, or NULL to indicate information should not be updated.
 	public function processPost($uniqueName, $itemInfo){
 		if(isset($_POST[$uniqueName]))
-			return strip_tags($_POST[$uniqueName]);
+			return fm_strip_tags($_POST[$uniqueName]);
 		return NULL;
 	}
 	
