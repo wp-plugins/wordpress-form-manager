@@ -118,7 +118,8 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
 				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
 						$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
-						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$item['nickname'].'</th>';
+						$lbl = ($item['nickname'] == "" ? htmlspecialchars($item['label']) : $item['nickname']);
+						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$lbl.'</th>';
 				}
 			}
 		}
@@ -227,23 +228,29 @@ function fm_getFormID($formSlug){
 function fm_doFormBySlug($formSlug, $options = array()){
 	global $fm_display;
 	global $fmdb;
-	global $current_user;
-	global $fm_registered_user_only_msg;
-	
+	global $current_user;	
 	
 	// error checking
 	$formID = $fmdb->getFormID($formSlug);
 	if($formID === false) return sprintf(__("(form  %s not found)", 'wordpress-form-manager'), (trim($formSlug)!=""?"'{$formSlug}' ":""));
+	
+	$formInfo = $fmdb->getForm($formID);
+
+	$formBehaviors = fm_helper_parseBehaviors($formInfo['behaviors']);
 		
-	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == "") 
-		return sprintf($fm_registered_user_only_msg, $formInfo['title']);
+	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == ""){
+		$msg = empty($formInfo['reg_user_only_msg']) ? $fmdb->getGlobalSetting('reg_user_only_msg') : $formInfo['reg_user_only_msg'];
+		if(isset($formBehaviors['allow_view'])){
+			return sprintf($msg, $formInfo['title']).
+			'<br/>'.
+			$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'show_submit' => false)));
+		}			
+		else
+			return sprintf($msg, $formInfo['title']);
+	}
 		
 	$output = "";
 	
-	$formInfo = $fmdb->getForm($formID);
-	
-	$formBehaviors = fm_helper_parseBehaviors($formInfo['behaviors']);
-		
 	$userDataCount = $fmdb->getUserSubmissionCount($formID, $current_user->user_login);
 	
 	//process the data submission
@@ -270,18 +277,22 @@ function fm_doFormBySlug($formSlug, $options = array()){
 		foreach($formInfo['items'] as $item){			
 			$postData[$item['unique_name']] = stripslashes($postData[$item['unique_name']]);
 		}
-			
+		
 		if($fmdb->processFailed()){			
 			return '<em>'.$fmdb->getErrorMessage().'</em>'.
 					$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'use_placeholders' => false), $postData);
 		}
-		
+				
 		// send email notifications
 			
 		if($formInfo['use_advanced_email'] != 1){
 			fm_helper_sendEmail($formInfo, $postData);			
-		}else{			
-			$advEmail = new fm_advanced_email_class($formInfo, $postData);
+		}else{
+			$metaForm = $formInfo;
+			$metaItems = $fmdb->getFormItems( $formInfo['ID'], 1 );
+			$metaForm['items'] = array_merge( $formInfo['items'], $metaItems );
+			
+			$advEmail = new fm_advanced_email_class($metaForm, $postData);
 
 			$emails = $advEmail->generateEmails($formInfo['advanced_email']);
 							
@@ -289,7 +300,7 @@ function fm_doFormBySlug($formSlug, $options = array()){
 				$headerStr = "";
 				foreach($email['headers'] as $header => $value)
 					$headerStr.= $header.": ".$value."\r\n";
-				wp_mail($email['to'], $email['subject'], $email['message'], $headerStr);
+				fm_sendEmail($email['to'], $email['subject'], $email['message'], $headerStr);
 			}
 		}
 		
@@ -297,6 +308,14 @@ function fm_doFormBySlug($formSlug, $options = array()){
 		if($formInfo['publish_post'] == 1){				
 			fm_helper_publishPost($formInfo, $postData);
 		}			
+		
+		//call the form submission action with nice data
+		$niceData = $postData;
+		foreach( $formInfo['items'] as $item ){
+			if($item['nickname'] != "")
+				$niceData[$item['nickname']] = $postData[$item['unique_name']];
+		}
+		do_action( 'fm_form_submission', array('form' => $formInfo, 'data' => $niceData) );
 		
 		//display the acknowledgment of a successful submission
 		$output.= '<p>'.$formInfo['submitted_msg'].'</p>';
@@ -366,7 +385,7 @@ function fm_helper_publishPost($formInfo, $postData){
 	$newPost = array(
 		'post_title' => sprintf($postTitle, $formInfo['title']),
 		'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
-		'post_status' => 'publish',
+		'post_status' => (trim($formInfo['publish_post_status']) == "" ? 'publish' : $formInfo['publish_post_status']),
 		'post_author' => 1,
 		'post_category' => array($formInfo['publish_post_category'])
 	);
@@ -390,26 +409,30 @@ function fm_helper_sendEmail($formInfo, $postData){
 	|| $fmdb->getGlobalSetting('email_admin') == "YES"
 	|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
 	
-		$subject = get_option('blogname').": '".$formInfo['title']."' Submission";				
+		$subject = fm_getSubmissionDataShortcoded($formInfo['email_subject'], $formInfo, $postData);	
 		$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
-		$headers  = 'MIME-Version: 1.0'."\r\n".
-					'Content-type: text/html'."\r\n".
-					'From: '.get_option('admin_email')."\r\n".
-					'Reply-To: '.get_option('admin_email')."\r\n";
+		$headers  = 'From: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
+					'Reply-To: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
+					'MIME-Version: 1.0'."\r\n".
+					'Content-type: text/html'."\r\n";
 		
 		$temp = "";
 		if($fmdb->getGlobalSetting('email_admin') == "YES")
-			wp_mail(get_option('admin_email'), $subject, $message, $headers);
+			fm_sendEmail(get_option('admin_email'), $subject, $message, $headers);
 			
 		if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
-			if(trim($current_user->user_email) != "")
-				wp_mail($current_user->user_email, $subject, $message, $headers);
+			if(trim($current_user->user_email) != ""){
+				if( ($fmdb->getGlobalSetting('email_admin') == "YES" && $current_user->user_email != get_option('admin_email') )
+					|| $fmdb->getGlobalSetting('email_admin') != "YES" ){
+						fm_sendEmail($current_user->user_email, $subject, $message, $headers);
+				}
+			}
 		}
 		if($formInfo['email_list'] != "")
-			wp_mail($formInfo['email_list'], $subject, $message, $headers);
+			fm_sendEmail($formInfo['email_list'], $subject, $message, $headers);
 			
 		if($formInfo['email_user_field'] != "")
-			wp_mail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
+			fm_sendEmail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
 	}
 }
 ?>

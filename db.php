@@ -68,7 +68,8 @@ $this->formSettingsKeys = array(
 					'title' => '',
 					'submitted_msg' => '', 
 					'submit_btn_text' => __('Submit', 'wordpress-form-manager'), 
-					'required_msg' => '', 
+					'required_msg' => '',
+					'reg_user_only_msg' => '',
 					'action' => '',
 					'data_index' => '',
 					'shortcode' => '',
@@ -78,6 +79,8 @@ $this->formSettingsKeys = array(
 					'email_user_field' => '',
 					'form_template' => '',
 					'email_template' => '',
+					'email_from' => '',
+					'email_subject' => '',
 					'summary_template' => '',
 					'template_values' => '',
 					'show_summary' => 0,
@@ -85,7 +88,8 @@ $this->formSettingsKeys = array(
 					'advanced_email' => '',
 					'publish_post' => 0,
 					'publish_post_category' => '',
-					'publish_post_title' => __('%s Submission', 'wordpress-form-manager'),
+					'publish_post_status' => 'publish',
+					'publish_post_title' => __('[form title] Submission', 'wordpress-form-manager'),
 					'auto_redirect' => 0,
 					'auto_redirect_page' => 0,
 					'auto_redirect_timeout' => 5,
@@ -101,7 +105,7 @@ $this->itemKeys = array (
 					'required' => 0,
 					'db_type' => 0,
 					'description' => 0,
-					'meta' => 0,
+					'set' => 0,
 					);
 
 
@@ -114,10 +118,13 @@ $this->globalSettings = array(
 					'submitted_msg' => 		__('Thank you! Your data has been submitted.', 'wordpress-form-manager'), 
 					/* translators: the default message given if a required item is left blank.  You must include a backslash before any single quotes */
 					'required_msg' => 		__("\'%s\' is required.", 'wordpress-form-manager'),
+					'reg_user_only_msg' => addslashes(__("'%s' is only available to registered users.", 'wordpress-form-manager')),
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
+					'email_subject' => __("[form title] Submission", 'wordpress-form-manager'),
+					'email_from' => "[admin email]",
 					'template_form' => '',
-					'text_validator_count' => 4,
+					'text_validator_count' => 7,
 					'text_validator_0' => array('name' => 'number',
 												/* translators: the following are for the numbers only validator */
 												'label' => __('Numbers Only', 'wordpress-form-manager'),
@@ -141,8 +148,23 @@ $this->globalSettings = array(
 												/* translators: the following are for the date validator */
 												'label' => __("Date (MM/DD/YY)", 'wordpress-form-manager'),
 												'message' => __("'%s' must be a date (MM/DD/YY)", 'wordpress-form-manager'),
-												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/'
-												)
+												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/'
+												),
+					'text_validator_4' => array('name' => 'state',
+												'label' => __("State (U.S.)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid state abbreviation", 'wordpress-form-manager'),
+												'regexp' => '/^(A[LKSZRAEP]|C[AOT]|D[EC]|F[LM]|G[AU]|HI|I[ADLN]|K[SY]|LA|M[ADEHINOPST]|N[CDEHJMVY]|O[HKR]|P[ARW]|RI|S[CD]|T[NX]|UT|V[AIT]|W[AIVY])$/i'
+												),
+					'text_validator_5' => array('name' => 'zip',
+												'label' => __("Zip code (U.S.)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a valid zip code", 'wordpress-form-manager'),
+												'regexp' => '/^\d{5}$/'
+												),
+					'text_validator_6' => array('name' => 'dimensions',
+												'label' => __("Dimensions (L x W x H)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be dimensions (L x W x H)", 'wordpress-form-manager'),
+												'regexp' => '/^\s*(\d+(\.\d+)?)\s*(x|X)\s*(\d+(\.\d+)?)\s*(x|X)\s*(\d+(\.\d+)?)\s*$/'
+												),
 					);
 }
 
@@ -177,6 +199,8 @@ function setupFormManager(){
 		email_user_field	- the unique name of a field within the form that will contain an e-mail address upon submission, which will be sent a notification
 		form_template		- the file name of the form template to use. if blank, uses the default template
 		email_template		- same as above, as applies to email notifications
+		email_subject		- subject line of the e-mail notifications (shortcoded)
+		email_from			- from header of the e-mail notofications (shortcoded)
 		summary_template	- same as aoove, as applies to the summaries displayed for single submission / user profile style forms
 		template_values		- associative array of the template specific values, as set in the form editor
 		show_summary		- whether or not to show a summary of the submitted data along with the submission acknowledgment
@@ -208,6 +232,8 @@ function setupFormManager(){
 		`email_user_field` VARCHAR( 64 ) DEFAULT '' NOT NULL,
 		`form_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`email_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
+		`email_subject` VARCHAR( 1024 ) DEFAULT '' NOT NULL,
+		`email_from` VARCHAR( 1024 ) DEFAULT '' NOT NULL,
 		`summary_template` VARCHAR( 128 ) DEFAULT '' NOT NULL,
 		`template_values` TEXT NOT NULL,
 		`show_summary` BOOL DEFAULT '0' NOT NULL,
@@ -216,10 +242,12 @@ function setupFormManager(){
 		`publish_post` BOOL DEFAULT '0' NOT NULL,
 		`publish_post_category` TEXT NOT NULL,
 		`publish_post_title` TEXT NOT NULL,
+		`publish_post_status` VARCHAR( 16 ) DEFAULT 'publish' NOT NULL,
 		`auto_redirect` BOOL DEFAULT '0' NOT NULL,
 		`auto_redirect_page` INT DEFAULT '0' NOT NULL,
 		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
 		`conditions` TEXT NOT NULL,
+		`reg_user_only_msg` TEXT NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -246,17 +274,17 @@ function setupFormManager(){
 	//form items - stores the items on all forms
 	
 	$sql = "CREATE TABLE `".$this->itemsTable."` ( 
-				`ID` INT NOT NULL ,							
-				`index` INT NOT NULL ,
+				`ID` INT DEFAULT '0' NOT NULL ,							
+				`index` INT DEFAULT '0' NOT NULL ,
 				`unique_name` VARCHAR( 64 ) DEFAULT '' NOT NULL ,
 				`type` VARCHAR( 32 ) DEFAULT '' NOT NULL ,
 				`extra` TEXT NOT NULL ,
 				`nickname` TEXT NOT NULL ,
 				`label` TEXT NOT NULL ,
-				`required` BOOL NOT NULL ,
+				`required` BOOL DEFAULT '0' NOT NULL ,
 				`db_type` VARCHAR( 16 ) DEFAULT '' NOT NULL ,
 				`description` TEXT NOT NULL ,
-				`meta` TEXT NOT NULL ,
+				`set` INT DEFAULT '0' NOT NULL ,
 				INDEX ( `ID` ) ,
 				UNIQUE (`unique_name`)
 				) ".$charset_collate.";";
@@ -280,6 +308,60 @@ function setupFormManager(){
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 // for upgrading the database
+
+//for 1.5.29 to 1.6.0+
+function fixItemMeta(){
+	$q = "ALTER TABLE `".$this->itemsTable."` ADD `set` INT DEFAULT '0' NOT NULL";
+	$this->query($q);
+	
+	$caps = array();
+	
+	$q = "SELECT * FROM `".$this->itemsTable."`";
+	$res = $this->query($q);
+	
+	while($row = mysql_fetch_assoc($res)){
+		$meta = unserialize($row['meta']);
+		$item = $this->unpackItem($row);
+		if($meta['private'] == '1'){
+			$item['set'] = '1';
+			if(!empty($meta['capability'])){
+				if(!isset($caps[$item['ID']])) $caps[$item['ID']] = array();
+				$caps[$item['ID']][$item['unique_name']] = $meta['capability'];
+			}
+			
+			switch($item['type']){
+				case 'text':
+				case 'textarea':
+				case 'checkbox':
+				case 'custom_list':
+					$item['type'] = 'meta'.$item['type'];
+					break;
+				default:
+					$item['set'] = 0;
+			}
+			
+			$this->updateFormItem($row['ID'], $item['unique_name'], $item);
+		}
+	}
+	
+	$q = "ALTER TABLE `".$this->itemsTable."` DROP `meta`";
+	$this->query($q);
+	
+	//now create default settings for each form
+	
+	$q = "SELECT `ID` FROM `".$this->formsTable."`";
+	$res = $this->query($q);
+	while($row = mysql_fetch_assoc($res)){
+		if(isset($caps[$row['ID']])){
+			$ds = $this->getDataPageSettings($row['ID']);
+			foreach($caps[$row['ID']] as $uniqueName => $capability){				
+				$ds['edit_capabilities'][$uniqueName] = $capability;
+			}
+			update_option('fm-ds-'.$row['ID'], $ds);
+		}			
+	}
+	mysql_free_result($res);
+}
 
 //fix the collation on the data tables
 function fixCollation(){
@@ -419,6 +501,17 @@ function updateDataTables(){
 			$q = "ALTER TABLE `".$dataTable."` ADD INDEX (`unique_id`)";
 			$this->query($q);
 		}
+		
+		//now add unique IDs if none exist
+		$q = "SELECT COUNT(*) FROM `".$dataTable."`";
+		$res = $this->query($q);
+		$row = mysql_fetch_array($res);
+		$count = $row[0];
+		
+		for($x=0; $x<$count; $x++){
+			$q = "UPDATE `".$dataTable."` SET `unique_id` = '".uniqid()."' WHERE `unique_id` = '' LIMIT 1";
+			$this->query($q);
+		}
 	}
 }
 
@@ -451,8 +544,22 @@ function fixDateValidator(){
 	$count = $this->getGlobalSetting('text_validator_count');
 	$val = $this->getGlobalSetting('text_validator_3');
 	if($val['regexp'] == '/^([0-9]{1,2}[/]){2}([0-9]{2}|[0-9]{4})$/'){
-		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}.$/';
+		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/';
 		$this->setGlobalSetting('text_validator_3', $val);
+	}
+	if($val['regexp'] == '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/.'){
+		$val['regexp'] = '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/';
+		$this->setGlobalSetting('text_validator_3', $val);
+	}
+}
+
+function fixFormEmailOptions(){
+	if ( version_compare( get_option('fm-version'), '1.6.16', '<' ) ){
+		$q = "UPDATE `".$this->formsTable."` SET 
+		`email_subject` = '".$this->globalSettings['email_subject']."', 
+		`email_from` = '".$this->globalSettings['email_from']."'
+		WHERE `ID` > 0";
+		$this->query($q);
 	}
 }
 
@@ -464,7 +571,7 @@ function removeFormManager(){
 	$res = $this->query($q);
 	if(mysql_num_rows($res)>0){
 		mysql_free_result($res);
-		$q = "SELECT `data_table` FROM `{$this->formsTable}`";	
+		$q = "SELECT `data_table`, `ID` FROM `{$this->formsTable}`";	
 		$res = $this->query($q);
 		while($row=mysql_fetch_assoc($res)){
 			if($row['data_table'] != ""){			
@@ -476,6 +583,7 @@ function removeFormManager(){
 				}
 				mysql_free_result($r);
 			}
+			delete_option('fm-ds-'.$row['ID']);
 		}
 		mysql_free_result($res);
 	}
@@ -681,6 +789,38 @@ function getUniqueItemID($type){
 	return uniqid($type."-");
 }
 
+function getDataPageSettings($formID){
+	$dataPageSettings = get_option('fm-ds-'.$formID);
+
+	$settingsDefaults 	= array(
+		'hide' 			=> array(),
+		'noedit' 		=> array(),
+		'nosummary' 	=> array(),
+		'date' 			=> array( 'range' => 'all' ),
+		'showoptions' 	=> 'no',
+		'search' 		=> array(),
+		'results' 		=> array(),
+	);
+	
+	$flag = false;
+	
+	if(!is_array($dataPageSettings)){
+		$dataPageSettings = $settingsDefaults;
+		$flag = true;
+	}
+	else 
+		foreach($settingsDefaults as $k=>$v)
+			if(!isset($dataPageSettings[$k])){
+				$dataPageSettings[$k] = $v;
+				$flag = true;
+			}
+	
+	if($flag)
+		update_option('fm-ds-'.$formID, $dataPageSettings);
+	
+	return $dataPageSettings;
+}
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -696,46 +836,58 @@ function isForm($formID){
 	return ($n>0);
 }
 
-function processPost($formID, $extraInfo = null, $overwrite = false){	
+function processPost($formID, $extraInfo = NULL, $overwrite = false, $ignoreTypes = NULL, $uniqueNames = NULL){	
 	global $fm_controls;
 	global $msg;
 	$this->lastPostFailed = false;
-	$formInfo = $this->getForm($formID);
+	$formInfo = $this->getForm($formID, 0);
+	$metaItems = $this->getFormItems($formID, 1);
+	$formInfo['items'] = array_merge( $formInfo['items'], $metaItems );	
+	
 	$dataTable = $this->getDataTableName($formID);
-	$postData = array();
-	foreach($formInfo['items'] as $item){
-		if($this->isDataCol($item['unique_name'])) {
-			//&& (!isset($item['meta']['private']) || $item['meta']['private'] === false) ) {
-			
-			$processed = $fm_controls[$item['type']]->processPost($item['unique_name'], $item);
-			if($processed === false){
-				$this->lastPostFailed = true;
-			}
-									
-			$postData[$item['unique_name']] = $processed;
-		}
-	}
-	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0){
+	
+	$postData = $this->getProcessPost($formInfo, $ignoreTypes, $uniqueNames);
+	
+	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0)
 		$postData = array_merge($postData, $extraInfo);
+	
+	//add blanks for non-existent fields
+	foreach($formInfo['items'] as $item){
+		if(!isset($postData[$item['unique_name']]) && $item['db_type'] != "NONE")
+			$postData[$item['unique_name']] = "";
 	}
 	
-	//generate a timestamp
-	$q = "SELECT NOW()";
-	$res = $this->query($q);
-	$row = mysql_fetch_array($res);
-	mysql_free_result($res);
-	$postData['timestamp'] = $row[0];
-		
 	if($this->lastPostFailed === false){
 		if($overwrite){	
 			$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
 			$this->query($q);
 		}
-		if($this->insertSubmissionData($formID, $dataTable, $postData) === false){
+		if($this->insertSubmissionData($formID, $dataTable, $postData) === false)
 			$this->lastPostFailed = true;
-		}
 	}
 	
+	return $postData;
+}
+
+function getProcessPost($formInfo, $ignoreTypes = NULL, $uniqueNames = NULL){
+	global $fm_controls;
+	$postData = array();
+	foreach($formInfo['items'] as $item){
+		if($ignoreTypes === NULL || !in_array($item['type'], $ignoreTypes) ){
+			if($uniqueNames === NULL)
+				$uniqueName = $item['unique_name'];
+			else
+				$uniqueName = $uniqueNames[$item['unique_name']];
+				
+			$processed = $fm_controls[$item['type']]->processPost($uniqueName, $item);
+			if($processed === false)
+				$this->lastPostFailed = true;
+			
+			//check if the item is a data column AFTER processing; it might be a recatpcha or something like that
+			if($processed !== NULL && $this->isDataCol($item['unique_name']))
+				$postData[$item['unique_name']] = $processed;
+		}
+	}
 	return $postData;
 }
 
@@ -753,7 +905,7 @@ function getErrorUniqueName(){
 	return $this->lastUniqueName;
 }
 
-function insertSubmissionData($formID, $dataTable, $postData){
+function insertSubmissionData($formID, $dataTable, &$postData){
 	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$postData['unique_id']."'";
 	$res = $this->query($q);
 	
@@ -764,7 +916,7 @@ function insertSubmissionData($formID, $dataTable, $postData){
 	
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
-	$postData['timestamp'] = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+	$postData['timestamp'] = fm_get_time();
 	
 	foreach($postData as $k=>$v)
 		$arr[] = "`{$k}` = '".$v."'";
@@ -772,59 +924,85 @@ function insertSubmissionData($formID, $dataTable, $postData){
 	$this->query($q);
 }
 
-function getFormSubmissionDataCSV($formID){
+function getFormSubmissionDataCSV($formID, $query, $ignoreFields = NULL){
+	global $fm_controls;
+	
+	if($ignoreFields === NULL){
+		$ignoreFields = array('post_id', 'unique_id');
+	}
+	
+	$baseFields = array('timestamp' => 'Timestamp',
+						'user' => 'User',
+						'user_ip' => 'IP Address',
+						'post_id' => 'Post ID',
+						'unique_id' => 'Unique Identifier',
+						);
+	
 	$formInfo = $this->getForm($formID);
-	$data = $this->getFormSubmissionData($formID, 'timestamp', 'DESC', 0, 0);
+	$metaFields = $this->getFormItems($formID, 1);	
+	$formInfo['items'] = array_merge($formInfo['items'], $metaFields);
 	
-	$data = $data['data'];
-	//store the lines in an array
-	$csvRows = array();
+	//remove fields that need to be ignored
 	
-	//store each name in an array
-	$fieldNames=array();
+	foreach($baseFields as $k=>$f){
+		if(in_array($k, $ignoreFields)) unset($baseFields[$k]);
+	}
+	foreach($formInfo['items'] as $k=>$item){
+		if(in_array($item['unique_name'], $ignoreFields)) unset($formInfo['items'][$k]);
+	}
 	
-	//index form fields by unique_name, remove fields with no data
-	$newItems = array();
+	//remove fields that are not in the result	
+	$res = $this->query($query);
+	$firstRow = mysql_fetch_assoc($res);
+	
+	foreach($baseFields as $k=>$f){
+		if(!isset($firstRow[$k])) unset($baseFields[$k]);
+	}
+	foreach($formInfo['items'] as $k=>$item){
+		if(!isset($firstRow[$item['unique_name']])) unset($formInfo['items'][$k]);
+	}
+	
+	//build the title row
+	$titleRow = array();
+	foreach($baseFields as $k=>$f){
+		$titleRow[] = $f;
+	}
 	foreach($formInfo['items'] as $item){
-		if($this->isDataCol($item['unique_name']))
-			$newItems[$item['unique_name']] = $item;
-	}
-	$formInfo['items'] = $newItems;
-	
-	//add the field headers
-	$fieldNames[] = 'timestamp';
-	$fieldNames[] = 'user';
-	$fieldNames[] = 'user_ip';
-	foreach($formInfo['items'] as $k=>$v){
-		if(!isset($formInfo['items'][$k]))							$label = $k;
-		else if(trim($formInfo['items'][$k]['nickname']) != '') 	$label = $formInfo['items'][$k]['nickname'];
-		else														$label = $formInfo['items'][$k]['label'];
-		
-		$fieldNames[] = $label;		
+		$titleRow[] = (trim($item['nickname']) == "" ? $item['label'] : $item['nickname']);
 	}
 	
-	$csvRows[] = $fieldNames;	
+	//build the CSV data
 	
-	if($data !== false){
-		foreach($data as $dataRow){
-			$dataItems=array();
-			$dataItems[] = $dataRow['timestamp'];
-			$dataItems[] = $dataRow['user'];
-			$dataItems[] = $dataRow['user_ip'];
-			foreach($formInfo['items'] as $k=>$v){
-				$dataItems[] = $dataRow[$k];
+	$data = array();
+	$data[] = $titleRow;
+	
+	$row = $firstRow;
+	do{
+		$newRow = array();
+		foreach($baseFields as $k=>$f){
+			if(isset($row[$k])){
+				$newRow[$k] = $row[$k];
 			}
-			$csvRows[] = $dataItems;
 		}
-	}
-
+		foreach($formInfo['items'] as $item){		
+			if(isset($row[$item['unique_name']])){
+				//use the item's CSV parse version
+				$newRow[$item['unique_name']] = $fm_controls[$item['type']]->parseDataCSV($item['unique_name'], $item, $row[$item['unique_name']]);
+			}
+		}
+		
+		$data[] = $newRow;
+	}while($row = mysql_fetch_assoc($res));
+	
+	mysql_free_result($res);
+	
 	//use the stream capture to get the CSV formatted data, since we need to mess with the encoding later
 	ob_start();
 	
 	$fp = fopen("php://output",'w');
 	
 	//use fputcsv instead of reinventing the wheel:
-	foreach($csvRows as $csvRow){
+	foreach($data as $csvRow){
 		fputcsv($fp, $csvRow, chr(9));	
 	}
 	
@@ -898,6 +1076,12 @@ function deleteSubmissionDataRow($formID, $data){
 	$this->query($q);
 }
 
+function deleteSubmissionDataByID($formID, $dataID){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "DELETE FROM `{$dataTable}` WHERE `unique_id` = '".$dataID."' LIMIT 1";
+	$this->query($q);
+}
+
 function updateDataSubmissionRow($formID, $timestamp, $user, $user_ip, $newData){
 	$dataTable = $this->getDataTableName($formID);
 	$q = "UPDATE `{$dataTable}` SET";
@@ -907,6 +1091,18 @@ function updateDataSubmissionRow($formID, $timestamp, $user, $user_ip, $newData)
 	}
 	$q.= implode(", ", $arr);
 	$q.= " WHERE `timestamp` = '{$timestamp}' AND `user` = '{$user}' AND `user_ip` = '{$user_ip}'";
+	$this->query($q);
+}
+
+function updateDataSubmissionRowByID($formID, $dataID, $newData){
+	$dataTable = $this->getDataTableName($formID);
+	$q = "UPDATE `{$dataTable}` SET";
+	$arr = array();
+	foreach($newData as $k=>$v){
+		$arr[] = "`{$k}` = '{$v}'";
+	}
+	$q.= implode(", ", $arr);
+	$q.= " WHERE `unique_id` = '".$dataID."' LIMIT 1";
 	$this->query($q);
 }
 
@@ -941,7 +1137,7 @@ function getDataType($uniqueName){
 	if($fullType == null){
 		$q = "SELECT `ID`, `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
 		$res = $this->query($q);		
-		$row = mysql_fetch_assoc($res);		
+		$row = mysql_fetch_assoc($res);
 		mysql_free_result($res);
 		
 		if($row['db_type'] == "NONE") return "NONE";
@@ -1041,7 +1237,17 @@ function getSubmission($formID, $timestamp, $user, $cols = "*"){
 	$row = mysql_fetch_assoc($res);
 	mysql_free_result($res);
 	return $row;
-}	
+}
+
+function getSubmissionByID($formID, $subID, $cols = "*"){
+	global $wpdb;
+	$dataTable = $this->getDataTableName($formID);
+	$q = $wpdb->prepare("SELECT ".$cols." FROM `".$dataTable."` WHERE `unique_id` = %s", $subID);
+	$res = $this->query($q);
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	return $row;
+}
 
 //////////////////////////////////////////////////////////////////
 
@@ -1058,10 +1264,17 @@ function getFormList(){
 }
 
 //gets an associative array containing the form settings and items; the array is the same format as that passed to 'updateForm'
-function getForm($formID){
-	$formInfo = $this->getFormSettings($formID, $this->formsTable, $this->conn);	
-	$formInfo['items']=$this->getFormItems($formID, $this->itemsTable, $this->conn);
+function getForm($formID, $itemSet = 0){
+	$formInfo = $this->getFormSettings($formID);	
+	$formInfo['items']=$this->getFormItems($formID, $itemSet);
 	return $formInfo;
+}
+
+function getFormAndMeta($formID){
+	$form = $this->getForm($formID);
+	$formMeta = $this->getFormItems($formID, 1);
+	$form['items'] = array_merge( $form['items'], $formMeta );
+	return $form;
 }
 
 //does not change the database; returns a form identical to $formID, but with new unique names for the form items
@@ -1139,14 +1352,14 @@ function updateFormSettings($formID, $formInfo){
 }
 
 //update the form. If $formInfoOld is 'null', assumes everything is new
-function updateForm($formID, $formInfoNew){
+function updateForm($formID, $formInfoNew, $itemSet = 0){
 	//update the settings
 	$this->updateFormSettings($formID, $formInfoNew);
 	//check the old form structure
 	
-	$formInfoOld = $this->getForm($formID);
+	$formInfoOld = $this->getForm($formID, $itemSet);
 	
-	$compare = $this->compareFormItems($formInfoOld, $formInfoNew);
+	$compare = $this->compareFormItems($formInfoOld, $formInfoNew, $itemSet);
 	
 	foreach($compare['delete'] as $toDelete)  //deletions are stored as their unique name
 		$this->deleteFormItem($formID, $toDelete);
@@ -1159,7 +1372,7 @@ function updateForm($formID, $formInfoNew){
 //returns an array with three keys, 'delete', 'update', and 'create'
 // 'delete' is an array of the unique names of the items to be deleted
 // 'update' and 'create' contain 'item info' arrays of the updated / new values respectively
-function compareFormItems($formInfoOld, $formInfoNew){
+function compareFormItems($formInfoOld, $formInfoNew, $itemSet = 0){
 	$ret = array();
 	$ret['delete'] = array();
 	$ret['update'] = array();
@@ -1176,12 +1389,14 @@ function compareFormItems($formInfoOld, $formInfoNew){
 	
 	//loop through the old items to determine deletions and updates
 	foreach($formInfoOld['items'] as $item){
-		//see if the item from the old list is in the new list
-		$newItem = $this->formInfoGetItem($item['unique_name'], $formInfoNew);
-		//if not, to be deleted
-		if($newItem == null) $ret['delete'][] = $item['unique_name'];
-		//otherwise needs to be updated, unless nothing has changed
-		else if(!$this->itemInfoIsEqual($item, $newItem)) $ret['update'][] = $newItem;
+		if($item['set'] == $itemSet) {		
+			//see if the item from the old list is in the new list
+			$newItem = $this->formInfoGetItem($item['unique_name'], $formInfoNew);
+			//if not, to be deleted
+			if($newItem == null) $ret['delete'][] = $item['unique_name'];
+			//otherwise needs to be updated, unless nothing has changed
+			else if(!$this->itemInfoIsEqual($item, $newItem)) $ret['update'][] = $newItem;
+		}
 	}
 	//loop through the new items to determine creations
 	foreach($formInfoNew['items'] as $item){
@@ -1208,12 +1423,23 @@ function createForm($formInfo=null){
 	$dataTablePrefix = $this->dataTablePrefix();	
 	$newID = $this->getUniqueFormID();
 	$dataTable = $dataTablePrefix."_".$newID;
-	$q = "INSERT INTO `".$this->formsTable."` SET `ID` = '".$newID."', `data_table` = '".$dataTable."'";
-	$this->query($q);
+
 	if($formInfo == null)	//use the default settings
 		$formInfo = $this->getSettings();
 	$formInfo['shortcode'] = 'form-'.$newID; //give new forms a shortcode based on numerical ID	
-	$this->updateForm($newID, $formInfo);			
+
+	$formInfo['ID'] = $newID;
+	$formInfo['data_table'] = $dataTable;
+	
+	$strArr=array();
+	foreach($formInfo as $k=>$v){
+		if(is_array($formInfo[$k])) $formInfo[$k] = serialize($formInfo[$k]);
+		$strArr[] = "`{$k}` = '".addslashes($formInfo[$k])."'";
+	}
+			
+	$q = "INSERT INTO `".$this->formsTable."` SET ".implode(", ", $strArr);	
+	$this->query($q);
+	
 	$this->createDataTable($formInfo, $dataTable);
 	return $newID;
 }
@@ -1245,9 +1471,14 @@ function dataTablePrefix(){
 
 
 //returns an indexed array of all items in a form
-function getFormItems($formID){
+function getFormItems($formID, $itemSet = 0){
 	$items=array();
-	$q = "SELECT * FROM `".$this->itemsTable."` WHERE `ID` = '".$formID."' ORDER BY `index` ASC";
+	
+	$q = "SELECT * FROM `".$this->itemsTable."` 
+	WHERE `ID` = '".$formID."' 
+	AND `set` = '".($itemSet)."' 
+	ORDER BY `index` ASC";
+	
 	$res = $this->query($q);
 	if(mysql_num_rows($res)==0) return array();
 	$n = mysql_num_rows($res);
@@ -1425,7 +1656,6 @@ function unpackItem($item){
 	foreach($item as $k=>$v){
 		switch($k){
 			case 'extra':
-			case 'meta':
 				$item[$k] = unserialize($item[$k]);
 				break;
 			default:
@@ -1439,13 +1669,9 @@ function packItem($item){
 	if(!isset($item['extra']) || $item['extra']=="")
 		$item['extra'] = array();
 		
-	if(!isset($item['meta']) || $item['meta']=="")
-		$item['meta'] = array();
-	
 	foreach($item as $k=>$v){
 		switch($k){
 			case 'extra':
-			case 'meta':
 				if(is_array($item[$k]))
 					$item[$k] = addslashes(serialize($item[$k]));
 				break;
@@ -1476,9 +1702,10 @@ function sanitizeUniqueName($name){
 
 //cached data table name (should not be changing within a page load)
 function getDataTableName($formID){
+	global $wpdb;
 	$dataTable = $this->getCache($formID, 'data-table');
 	if($dataTable == null){
-		$q = "SELECT `data_table` FROM `".$this->formsTable."` WHERE `ID` = '".$formID."'";
+		$q = $wpdb->prepare("SELECT `data_table` FROM `".$this->formsTable."` WHERE `ID` = %s", $formID);
 		$res = $this->query($q);
 		$row = mysql_fetch_assoc($res);
 		$dataTable = $row['data_table'];
