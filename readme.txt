@@ -47,7 +47,7 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
-* Russian (ru_RU) - Ellena Murawski
+* Русский (ru_RU) - [Ellena Murawski](http://www.artmind.com.ua)
 
 == Changelog ==
 = 1.6.18 =
