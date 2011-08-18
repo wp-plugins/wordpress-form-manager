@@ -379,10 +379,6 @@ $res = $fmdb->query($dataQuery);
 //create a CSV download file
 
 if(isset($_POST['submit-download-csv']) && fm_userCanGetCSV()){
-
-	$filename = 'data.csv';
-	$fullpath = fm_getTmpPath().$filename;
-	$CSVFileURL = fm_getTmpURL().$filename;
 	
 	$csvQuery = "";
 	switch($_POST['fm-data-download-csv-type']){
@@ -403,8 +399,17 @@ if(isset($_POST['submit-download-csv']) && fm_userCanGetCSV()){
 			break;
 	}
 	if($csvQuery != ""){
-		$err = fm_createCSVFile($form['ID'], $csvQuery, $fullpath);
+		/*
+		$filename = 'data.csv';
+		$fullpath = fm_getTmpPath().$filename;
+		$CSVFileURL = fm_getTmpURL().$filename;		
+	
+		$err = fm_createCSVFile($form['ID'], $csvQuery, $filename);
 		if($err != 0) echo '<em>'.$err.'</em>';
+		*/
+		
+		$key = fm_createCSVDownload($form['ID'], $csvQuery);
+		$CSVFileURL = WP_PLUGIN_URL.'/wordpress-form-manager/getcsv.php?q='.$key.'&id='.$form['ID'];
 	}
 }
 

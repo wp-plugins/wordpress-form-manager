@@ -322,12 +322,31 @@ function fm_getEditPost($subID, $cols, $isSummary = false){
 	return $data;
 }
 
-function fm_createCSVFile($formID, $query, $filename){
+function fm_createCSVDownload($formID, $query){
+	global $fmdb;
+	
+	$optKey = uniqid();
+	$optName = 'fm-csv-query-'.$optKey;
+
+	wp_schedule_single_event(time()+3600, 'fm_clear_temp', $optName);
+
+	update_option( $optName, $query );
+	//$csvData = $fmdb->getFormSubmissionDataCSV($formID, $query);
+	
+	return $optKey;
+}
+
+function fm_createCSVFile($formID, $query, $fullpath){
 	global $fmdb;
 
 	$csvData = $fmdb->getFormSubmissionDataCSV($formID, $query);
 	
-	fm_write_file($filename, $csvData);
+	return fm_write_file( $fullpath, $csvData );
+}
+
+add_action('fm_clear_temp','fm_clearTempOption');
+function fm_clearTempOption($optName){
+	delete_option( $optName );
 }
 
 function fm_getTmpPath(){
