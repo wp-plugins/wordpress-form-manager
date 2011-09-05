@@ -318,7 +318,8 @@ function fm_doFormBySlug($formSlug, $options = array()){
 		do_action( 'fm_form_submission', array('form' => $formInfo, 'data' => $niceData) );
 		
 		//display the acknowledgment of a successful submission
-		$output.= '<p>'.$formInfo['submitted_msg'].'</p>';
+		$ack = fm_getSubmissionDataShortcoded($formInfo['submitted_msg'], $formInfo, $postData);
+		$output.= '<p>'.$ack.'</p>';
 		
 		//show the automatic redirection script
 		if($formInfo['auto_redirect']==1){
@@ -373,7 +374,7 @@ function fm_helper_parseBehaviors($behaviorString){
 	}
 	return $formBehaviors;
 }
-function fm_helper_publishPost($formInfo, $postData){
+function fm_helper_publishPost($formInfo, &$postData){
 	global $fm_display;
 	global $fmdb;
 	
@@ -395,6 +396,8 @@ function fm_helper_publishPost($formInfo, $postData){
 	if($postID != 0){					
 		$fmdb->updateDataSubmissionRow($formInfo['ID'], $postData['timestamp'], $postData['user'], $postData['user_ip'], array('post_id' => $postID));
 	}
+	
+	$postData['post_id'] = $postID;
 }
 function fm_helper_sendEmail($formInfo, $postData){
 	global $fmdb;
