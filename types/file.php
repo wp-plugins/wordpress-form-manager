@@ -224,11 +224,11 @@ class fm_fileControl extends fm_controlBase{
 			var restrictExtensions = document.getElementById(itemID + '-restrict').value.toString();
 			var excludeExtensions = document.getElementById(itemID + '-restrict').value.toString();
 				
-			if(!restrictExtensions.match(/^(\s*\.[a-zA-Z]+\s*)?(,\s*\.[a-zA-Z]+\s*)*$/)){
+			if(!restrictExtensions.match(/^(\s*\.[a-zA-Z0-9]+\s*)?(,\s*\.[a-zA-Z0-9]+\s*)*$/)){
 				alert(itemLabel + ": <?php _e("'Only allow' must be a list of extensions separated by commas", 'wordpress-form-manager');?>");
 				return false;
 			}
-			if(!excludeExtensions.match(/^(\s*\.[a-zA-Z]+\s*)?(,\s*\.[a-zA-Z]+\s*)*$/)){
+			if(!excludeExtensions.match(/^(\s*\.[a-zA-Z0-9]+\s*)?(,\s*\.[a-zA-Z0-9]+\s*)*$/)){
 				alert(itemLabel + ": <?php _e("'Do not allow' must be a list of extensions separated by commas", 'wordpress-form-manager');?>");
 				return false;
 			}
