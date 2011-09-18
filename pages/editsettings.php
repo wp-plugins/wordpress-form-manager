@@ -17,6 +17,7 @@ if(isset($_POST['submit-settings'])){
 	$fmdb->setGlobalSetting('recaptcha_public', $_POST['recaptcha_public']);
 	$fmdb->setGlobalSetting('recaptcha_private', $_POST['recaptcha_private']);
 	$fmdb->setGlobalSetting('recaptcha_theme', (trim($_POST['recaptcha_theme_custom']) == "" ? $_POST['recaptcha_theme'] : $_POST['recaptcha_theme_custom']));
+	$fmdb->setGlobalSetting('recaptcha_lang', $_POST['recaptcha_lang']);
 	$fmdb->setGlobalSetting('email_admin', $_POST['email_admin'] == "on" ? "YES" : "");
 	$fmdb->setGlobalSetting('email_reg_users', $_POST['email_reg_users'] == "on" ? "YES" : "");
 	$fmdb->setGlobalSetting('email_subject', $_POST['email_subject']);
@@ -84,6 +85,7 @@ $found = false;
 		</select>		
 	</td>
 </tr>
+<?php helper_text_field('recaptcha_lang', __("Language", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['recaptcha_lang'])); ?>
 </table>
 
 </div>

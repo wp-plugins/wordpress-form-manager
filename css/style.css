@@ -17,7 +17,9 @@
 
 /* control selector in the form editor */
 .fm-editor-controls{
+	background-color: #eee;
 	padding:5px 15px;
+	border-bottom: 1px solid #ccc;
 }
 
 /* for the 'Settings' panel in the form editor */

@@ -251,7 +251,6 @@ if(isset($_POST['message']))
 
 	</div>
 	<div id='editorcontainer'>
-		<div id="quicktags">
 			<div class="fm-editor-controls">			
 			<?php
 				$types=array();
@@ -268,8 +267,6 @@ if(isset($_POST['message']))
 			}
 			</script>
 			</div>
-			
-		</div>
 		<div class="fm-editor">
 			<div style="display:none;" id="load-saved-fields-div">
 				<div class="load-saved-fields">

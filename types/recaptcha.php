@@ -3,11 +3,15 @@
 class fm_recaptchaControl extends fm_controlBase{
 	
 	var $err;
-	
+		
 	public function getTypeName(){ return "recaptcha"; }
 	
 	/* translators: this appears in the 'Add Form Element' menu */
 	public function getTypeLabel(){ return __("reCAPTCHA", 'wordpress-form-manager'); }
+	
+	public function getThemeList(){
+		return array('red' => __("Red", 'wordpress-form-manager'), 'white' => __("White", 'wordpress-form-manager'), 'blackglass' => __("Black", 'wordpress-form-manager'), 'clean' => __("Clean", 'wordpress-form-manager'));
+	}
 	
 	public function showItem($uniqueName, $itemInfo){
 		global $fmdb;
@@ -15,9 +19,21 @@ class fm_recaptchaControl extends fm_controlBase{
 		if($publickey == "") return __("(No reCAPTCHA API public key found)", 'wordpress-form-manager');
 		
 		if(!function_exists('recaptcha_get_html'))
-			require_once('recaptcha/recaptchalib.php');		
-			
-		return "<script type=\"text/javascript\"> var RecaptchaOptions = { theme : '".$fmdb->getGlobalSetting('recaptcha_theme')."', tabindex : 100 }; </script>".
+			require_once('recaptcha/recaptchalib.php');
+		
+		$theme = $itemInfo['extra']['theme'];
+		$themeList = $this->getThemeList();
+		
+		if ( ! (isset($theme) && isset($themeList[$theme]) )){
+			$theme = $fmdb->getGlobalSetting('recaptcha_theme');
+		}		
+		
+		$lang = $fmdb->getGlobalSetting('recaptcha_lang');
+		if ( $lang == "" ) $lang = "en";
+		
+		return "<script type=\"text/javascript\"> var RecaptchaOptions = { ".
+				"theme : '".$theme."', ".
+				"lang : '".$lang."', tabindex : 100 }; </script>".
 				recaptcha_get_html($publickey).
 				(isset($_POST['recaptcha_challenge_field'])?"<br /> <em> ".__("The reCAPTCHA was incorrect.", 'wordpress-form-manager')." </em>":"");
 	}	
@@ -50,7 +66,7 @@ class fm_recaptchaControl extends fm_controlBase{
 		$itemInfo = array();
 		$itemInfo['label'] = "New reCAPTCHA";
 		$itemInfo['description'] = "Item Description";
-		$itemInfo['extra'] = array();
+		$itemInfo['extra'] = array( 'theme' => 'default' );
 		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
@@ -71,11 +87,16 @@ class fm_recaptchaControl extends fm_controlBase{
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();		
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'theme', __('Style', 'wordpress-form-manager'), 
+						array('options' => array_merge( array( 'default' => '...' ), $this->getThemeList() ),
+							'value' => $itemInfo['extra']['theme'])
+						);
 		return $arr;
 	}
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();
+		$opt['extra'] = $this->extraScriptHelper(array('theme' => 'theme'));
 		return $opt;
 	}
 	

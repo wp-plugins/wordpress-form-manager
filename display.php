@@ -296,7 +296,7 @@ fm_current_form = <?php echo $formInfo['ID'];?>;
 		$options = $this->options;
 		
 		?><script type="text/javascript">
-//<![CDATA[
+/* <![CDATA[ */
 fm_register_form(<?php echo $formInfo['ID'];?>);
 <?php
 	//below is a workaround: the 'default value' for a text item is displayed as a placeholder.  In some instances, this should be an actual value in the field.  The script below takes care of this.	
@@ -309,7 +309,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 	
 	echo $this->getConditionHandlerScripts();
 ?>
-//]]>
+/* ]]> */
 </script><?php
 	
 	}
@@ -374,7 +374,8 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 								break;
 							default:
 								$str.= "\"\"; var x".$x." = document.getElementById('".$test['unique_name']."').selectedIndex;\n";
-								$str.= "t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
+								$str.= "if(x".$x." == -1) t".$x." = '';\n";
+								$str.= "else t".$x." = document.getElementById('".$test['unique_name']."').options[x".$x."].text;\n";
 						}
 						break;
 					case 'text':
@@ -467,8 +468,8 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 					case '__never__':
 						break;
 					default:
-						if(!isset($itemDependents[$itemNames[$test['unique_name']]])) $itemDependents[$itemNames[$test['unique_name']]] = array();
-						$itemDependents[$itemNames[$test['unique_name']]][] = $fn;
+						if(!isset($itemDependents[$itemNames[$test['unique_name']]])) $itemDependents[$test['unique_name']] = array();
+						$itemDependents[$test['unique_name']][] = $fn;
 				}
 			}
 			
@@ -477,13 +478,49 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 		}
 			
 		//now set the onchange event handlers
-		foreach($itemDependents as $uniqueName => $itemDeps){
-			$str.= "document.getElementById('fm-item-".$uniqueName."').onchange = function(){ ";
-			foreach($itemDeps as $dep){
-				$str.= $dep."();\n";
+		foreach($itemDependents as $uniqueName => $itemDeps){			
+			
+			// build the event handler
+			$tmpFnName = "fn_".uniqid();
+			$str.= "function ".$tmpFnName."() { \n";			
+				foreach($itemDeps as $dep){
+					$str.= $dep."();\n";
+				}
+				// a workaround for simulating the HTML5 placeholder attribute in text fields
+				$str.= "this.ph_hasEdit = true;\n";
+				$str.= "}\n";
+			
+			$itemType = $itemTypes[ $uniqueName ];
+			switch( $itemType ){
+				case 'text':
+				case 'textarea':
+					$str.= "document.getElementById('".$uniqueName."').onchange = ".$tmpFnName.";\n";
+					break;
+				case 'checkbox':
+					$str.= "document.getElementById('".$uniqueName."').onclick = ".$tmpFnName.";\n";
+					break;
+				case 'custom_list':
+					$listItem = $itemObjects[ $uniqueName ];
+					switch ( $listItem['extra']['list_type'] ) {
+						case 'select':
+						case 'list':
+							$str.= "document.getElementById('".$uniqueName."').onclick = ".$tmpFnName.";\n";
+							break;
+						case 'checkbox':
+						case 'radio':
+							$numItems = sizeof($listItem['extra']['options']);
+							for ( $x=0; $x<$numItems; $x++) {
+								$str.= "document.getElementById('".$uniqueName."-".$x."').onclick = ".$tmpFnName.";\n";
+							}
+							break;
+						default:
+							break;
+					}
+					break;
+				default:
+					break;
 			}
-			$str.= "}\n";
-		}
+		}	
 	
 		return $str;
 	}

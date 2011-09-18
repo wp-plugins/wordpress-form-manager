@@ -113,6 +113,7 @@ $this->globalSettings = array(
 					'recaptcha_public' => '',
 					'recaptcha_private' => '',
 					'recaptcha_theme' => 'red',
+					'recaptcha_lang' => substr(get_bloginfo('language'), 0, 2),
 					/* translators: the default name of a new form */				
 					'title' =>				__("New Form", 'wordpress-form-manager'),	
 					'submitted_msg' => 		__('Thank you! Your data has been submitted.', 'wordpress-form-manager'), 
