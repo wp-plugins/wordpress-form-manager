@@ -74,6 +74,9 @@ function fm_buildControlTypes($controlTypes){
 	foreach($controlTypes as $name=>$class){
 		$arr[$name] = new $class();
 	}
+	
+	$arr = apply_filters( 'fm_control_types', $arr );
+	
 	return $arr;
 }
 
