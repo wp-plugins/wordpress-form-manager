@@ -224,22 +224,98 @@ function fm_getFormID($formSlug){
 
 //takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior), processes posts, etc.
 
-
 function fm_doFormBySlug($formSlug, $options = array()){
 	global $fm_display;
-	global $fmdb;
+	global $fm_globals;
+	global $fmdb;	
 	global $current_user;	
-	
+
 	// error checking
 	$formID = $fmdb->getFormID($formSlug);
 	if($formID === false) return sprintf(__("(form  %s not found)", 'wordpress-form-manager'), (trim($formSlug)!=""?"'{$formSlug}' ":""));
 	
-	$formInfo = $fmdb->getForm($formID);
+	if ( !isset($fm_globals['form_info'][$formID]) ){
+		$formInfo = $fmdb->getForm($formID);
+		$formInfo['behaviors'] = fm_helper_parseBehaviors($formInfo['behaviors']);
+	}
+	else
+		$formInfo = $fm_globals['form_info'][$formID];
 
-	$formBehaviors = fm_helper_parseBehaviors($formInfo['behaviors']);
+	if ( isset($fm_globals['post_data'][$formID]) )
+		$postData = $fm_globals['post_data'][$formID];
+	else
+		$postData = null;
 		
-	if(isset($formBehaviors['reg_user_only']) && $current_user->user_login == ""){
+	return fm_displayForm( $formInfo, $options, $postData );
+}
+
+// processes submitted data and calls the 'fm_form_submission' action
+function fm_processPost( $formInfo ) {
+	global $current_user;
+	global $fmdb;
+	
+	// check if the form is restricted to registered users	
+	if(isset($formInfo['behaviors']['reg_user_only']) && $current_user->user_login == "")
+		return false;
+	
+	// if this is a single submission form and there is already a submission, do nothing
+	if(isset($formInfo['behaviors']['single_submission'])){
+		$userDataCount = $fmdb->getUserSubmissionCount($formInfo['ID'], $current_user->user_login);
+		if( $userDataCount > 0 )
+			return false;
+	}
+	
+	// verify the nonce
+	if( ! wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') )
+		return false;
+			
+	// process the post
+	
+	get_currentuserinfo();		
+	$overwrite = (isset($formInfo['behaviors']['display_summ']) || isset($formInfo['behaviors']['overwrite']));
+	
+	// this will do the processing and the database insertion.
+	$postData = $fmdb->processPost(
+		$formInfo['ID'],
+		array('user'=>$current_user->user_login,
+			'user_ip' => fm_get_user_IP(),
+			'unique_id' => 'fm-'.uniqid(),
+			),
+		$overwrite
+		);
+		
+	//strip slashes so the action hooks get nice data
+	foreach($formInfo['items'] as $item){			
+		$postData[$item['unique_name']] = stripslashes($postData[$item['unique_name']]);
+	}
+		
+	// index the data by nickname as well
+	$niceData = $postData;
+	foreach( $formInfo['items'] as $item ){
+		if($item['nickname'] != "")
+			$niceData[$item['nickname']] = $postData[$item['unique_name']];
+	}
+	
+	// if there was a failure, we need to stop
+	if($fmdb->processFailed())
+		return $postData;
+		
+	do_action( 'fm_form_submission', array('form' => $formInfo, 'data' => $niceData) );
+	
+	return $postData;
+}
+
+// show the form, summary, or acknowledgment message
+function fm_displayForm( $formInfo, $options, $postData = null ){
+	global $current_user;
+	global $fmdb;
+	global $fm_display;
+	
+	// see if this is a restricted form
+	if(isset($formInfo['behaviors']['reg_user_only']) && $current_user->user_login == ""){
 		$msg = empty($formInfo['reg_user_only_msg']) ? $fmdb->getGlobalSetting('reg_user_only_msg') : $formInfo['reg_user_only_msg'];
+		
+		// show the form, but no submit button. No danger, since this same check is done on processPost()
 		if(isset($formBehaviors['allow_view'])){
 			return sprintf($msg, $formInfo['title']).
 			'<br/>'.
@@ -249,122 +325,81 @@ function fm_doFormBySlug($formSlug, $options = array()){
 			return sprintf($msg, $formInfo['title']);
 	}
 		
-	$output = "";
-	
-	$userDataCount = $fmdb->getUserSubmissionCount($formID, $current_user->user_login);
-	
-	//process the data submission
-	if($_POST['fm_id'] == $formID 
-		&& (wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') 
-			&& ($userDataCount == 0 || !isset($formBehaviors['single_submission']))
-			)
-		){
-		// process the post
-		get_currentuserinfo();	
-		
-		$overwrite = (isset($formBehaviors['display_summ']) || isset($formBehaviors['overwrite']));
-		
-		$postData = $fmdb->processPost(
-			$formID,
-			array('user'=>$current_user->user_login,
-				'user_ip' => fm_get_user_IP(),
-				'unique_id' => $_POST['fm_unique_id'],
-				), 
-			$overwrite
-			);			
-		
-		//strip slashes in case we need to display the submitted data
-		foreach($formInfo['items'] as $item){			
-			$postData[$item['unique_name']] = stripslashes($postData[$item['unique_name']]);
-		}
-		
-		if($fmdb->processFailed()){			
-			return '<em>'.$fmdb->getErrorMessage().'</em>'.
-					$fm_display->displayForm($formInfo, array('action' => get_permalink(), 'use_placeholders' => false), $postData);
-		}
-				
-		// send email notifications
-			
-		if($formInfo['use_advanced_email'] != 1){
-			fm_helper_sendEmail($formInfo, $postData);			
-		}else{
-			$metaForm = $formInfo;
-			$metaItems = $fmdb->getFormItems( $formInfo['ID'], 1 );
-			$metaForm['items'] = array_merge( $formInfo['items'], $metaItems );
-			
-			$advEmail = new fm_advanced_email_class($metaForm, $postData);
-
-			$emails = $advEmail->generateEmails($formInfo['advanced_email']);
-							
-			foreach($emails as $email){				
-				$headerStr = "";
-				foreach($email['headers'] as $header => $value)
-					$headerStr.= $header.": ".$value."\r\n";
-				fm_sendEmail($email['to'], $email['subject'], $email['message'], $headerStr);
-			}
-		}
-		
-		//publish the submission as a post, if the form is set to do so
-		if($formInfo['publish_post'] == 1){				
-			fm_helper_publishPost($formInfo, $postData);
-		}			
-		
-		//call the form submission action with nice data
-		$niceData = $postData;
-		foreach( $formInfo['items'] as $item ){
-			if($item['nickname'] != "")
-				$niceData[$item['nickname']] = $postData[$item['unique_name']];
-		}
-		do_action( 'fm_form_submission', array('form' => $formInfo, 'data' => $niceData) );
-		
-		//display the acknowledgment of a successful submission
-		$ack = fm_getSubmissionDataShortcoded($formInfo['submitted_msg'], $formInfo, $postData);
-		$output.= '<p>'.$ack.'</p>';
-		
-		//show the automatic redirection script
-		if($formInfo['auto_redirect']==1){
-			$output.=	"<script language=\"javascript\"><!--\n".
-						"setTimeout('location.replace(\"".get_permalink($formInfo['auto_redirect_page'])."\")', ".($formInfo['auto_redirect_timeout']*1000).");\n".
-						"//-->\n".
-						"</script>\n";
-		}
-		
-		//the 'display_summ' behavior means we show the summary *instead of* the form.  The 'show_summary' flag in formInfo means we show a summary *with* the form. Confusing.
-		if(!isset($formBehaviors['display_summ']))
-			return $output.
-					($formInfo['show_summary']==1 ? $fm_display->displayDataSummary('summary', $formInfo, $postData) : "");		
-	}
-		
-	//'display_summ', show previous submission if there is one, instead of the form
-	
-	if(isset($formBehaviors['display_summ'])){
-		$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
-		
-		if(sizeof($userData) > 0){		//only display a summary if there is a previous submission by this user
-			if(!$_REQUEST['fm-edit-'.$formID] == '1'){							
-				if(!isset($formBehaviors['edit']))
-					return $output.$fm_display->displayDataSummary('summary', $formInfo, $postData);
-				else{
-					$currentPage = get_permalink();
-					$parsedURL = parse_url($currentPage);
-					if(trim($parsedURL['query']) == "")
-						$editLink = $curentPage."?fm-edit-".$formID."=1";
-					else
-						$editLink = $currentPage."&fm-edit-".$formID."=1";
-					
-					return $output.
-							$fm_display->displayDataSummary('summary', $formInfo, $userData[0]).
-							"<span class=\"fm-data-summary-edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
-				}				
-			}
-			else
-				return $output.$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)), $userData[0]);
-		}
+	// if this was a failed process, show the error message and a repopulated form
+	if($fmdb->processFailed()){
+		return '<em>'.$fmdb->getErrorMessage().'</em>'.
+			$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)), $postData);
 	}
 	
-	//if we got this far, just display the form
-	return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink())));
+	// 'User Profile' mode has its own quirks (used to be called 'summary' mode)
+	if(isset($formInfo['behaviors']['display_summ']))
+		return fm_helper_displaySummaryMode( $formInfo, $options, $postData );
+	
+	// otherwise, a non-null $postData indicates there was a successful submission
+	if($postData !== null){		
+		// show the acknowledgement
+		return fm_helper_displayAck( $formInfo, $postData );
+	}
+	
+	return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink())));	
 }
+
+function fm_helper_displayAck( $formInfo, $postData ){
+	global $fm_display;
+	
+	$ack = fm_getSubmissionDataShortcoded($formInfo['submitted_msg'], $formInfo, $postData);
+	$output = '<p>'.$ack.'</p>';
+	
+	//show the automatic redirection script
+	if($formInfo['auto_redirect'] == 1){
+		$output.=	"<script language=\"javascript\"><!--\n".
+					"setTimeout('location.replace(\"".get_permalink($formInfo['auto_redirect_page'])."\")', ".($formInfo['auto_redirect_timeout']*1000).");\n".
+					"//-->\n".
+					"</script>\n";
+	}
+	
+	//show the data summary
+	if( $formInfo['show_summary'] == 1 )
+		$output.= $fm_display->displayDataSummary('summary', $formInfo, $postData);
+		
+	return $output;
+}
+
+function fm_helper_displaySummaryMode( $formInfo, $options, $postData ){
+	global $current_user;
+	global $fmdb;
+	global $fm_display;
+	
+	$formID = $formInfo['ID'];
+	
+	$userData = $fmdb->getUserSubmissions($formID, $current_user->user_login, true);
+		
+	if(sizeof($userData) > 0){		//only display a summary if there is a previous submission by this user
+		if(!$_REQUEST['fm-edit-'.$formID] == '1'){							
+			if(!isset($formInfo['behaviors']['edit']))
+				return $fm_display->displayDataSummary('summary', $formInfo, $userData[0]);
+			else{
+				$currentPage = get_permalink();
+				$parsedURL = parse_url($currentPage);
+				if(trim($parsedURL['query']) == "")
+					$editLink = $currentPage."?fm-edit-".$formID."=1";
+				else
+					$editLink = $currentPage."&fm-edit-".$formID."=1";
+				
+				return $output.
+						$fm_display->displayDataSummary('summary', $formInfo, $userData[0]).
+						"<span class=\"fm-data-summary-edit\"><a href=\"".$editLink."\">Edit '".$formInfo['title']."'</a></span>";
+			}				
+		}
+		else
+			return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)), $userData[0]);
+	}
+	
+	return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)));
+}
+
+/*****************************/
+/*****************************/
 
 function fm_helper_parseBehaviors($behaviorString){
 	$arr = explode(",", $behaviorString);
@@ -374,68 +409,5 @@ function fm_helper_parseBehaviors($behaviorString){
 	}
 	return $formBehaviors;
 }
-function fm_helper_publishPost($formInfo, &$postData){
-	global $fm_display;
-	global $fmdb;
-	
-	//use the same shortcodes as the e-mails
-	$advEmail = new fm_advanced_email_class($formInfo, $postData);
-	$parser = new fm_custom_shortcode_parser($advEmail->shortcodeList, array($advEmail, 'emailShortcodeCallback'));
-	$postTitle = $parser->parse($formInfo['publish_post_title']);
-	
-	$newPost = array(
-		'post_title' => sprintf($postTitle, $formInfo['title']),
-		'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
-		'post_status' => (trim($formInfo['publish_post_status']) == "" ? 'publish' : $formInfo['publish_post_status']),
-		'post_author' => 1,
-		'post_category' => array($formInfo['publish_post_category'])
-	);
-	
-	// Insert the post into the database
-	$postID = wp_insert_post($newPost, false);
-	if($postID != 0){					
-		$fmdb->updateDataSubmissionRow($formInfo['ID'], $postData['timestamp'], $postData['user'], $postData['user_ip'], array('post_id' => $postID));
-	}
-	
-	$postData['post_id'] = $postID;
-}
-function fm_helper_sendEmail($formInfo, $postData){
-	global $fmdb;
-	global $current_user;
-	global $fm_display;
-	
-	$formInfo['email_list'] = trim($formInfo['email_list']) ;
-	$formInfo['email_user_field'] = trim($formInfo['email_user_field']);		
-		
-	if($formInfo['email_list'] != ""
-	|| $formInfo['email_user_field'] != "" 
-	|| $fmdb->getGlobalSetting('email_admin') == "YES"
-	|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
-	
-		$subject = fm_getSubmissionDataShortcoded($formInfo['email_subject'], $formInfo, $postData);	
-		$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
-		$headers  = 'From: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
-					'Reply-To: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
-					'MIME-Version: 1.0'."\r\n".
-					'Content-type: text/html'."\r\n";
-		
-		$temp = "";
-		if($fmdb->getGlobalSetting('email_admin') == "YES")
-			fm_sendEmail(get_option('admin_email'), $subject, $message, $headers);
-			
-		if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
-			if(trim($current_user->user_email) != ""){
-				if( ($fmdb->getGlobalSetting('email_admin') == "YES" && $current_user->user_email != get_option('admin_email') )
-					|| $fmdb->getGlobalSetting('email_admin') != "YES" ){
-						fm_sendEmail($current_user->user_email, $subject, $message, $headers);
-				}
-			}
-		}
-		if($formInfo['email_list'] != "")
-			fm_sendEmail($formInfo['email_list'], $subject, $message, $headers);
-			
-		if($formInfo['email_user_field'] != "")
-			fm_sendEmail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
-	}
-}
+
 ?>
