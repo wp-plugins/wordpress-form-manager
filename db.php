@@ -848,6 +848,9 @@ function processPost($formID, $extraInfo = NULL, $overwrite = false, $ignoreType
 	
 	$dataTable = $this->getDataTableName($formID);
 	
+	if ( $this-> submissionIDExists( $extraInfo['unique_id'], $dataTable ) )
+		return false;
+	
 	$postData = $this->getProcessPost($formInfo, $ignoreTypes, $uniqueNames);
 	
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0)
@@ -911,15 +914,18 @@ function getErrorUniqueName(){
 	return $this->lastUniqueName;
 }
 
-function insertSubmissionData($formID, $dataTable, &$postData){
-	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$postData['unique_id']."'";
+function submissionIDExists( $uniqueID, $dataTable ) {
+	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$uniqueID."'";
 	$res = $this->query($q);
 	
 	if(mysql_num_rows($res) > 0){
 		mysql_free_result($res);
-		return false;
+		return true;
 	}
-	
+	return false;
+}
+
+function insertSubmissionData($formID, $dataTable, &$postData){
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
 	$postData['timestamp'] = fm_get_time();
@@ -1856,7 +1862,6 @@ function tableExists($tableName){
 	if(mysql_num_rows($res) == 0) return false;
 	return true;		
 }
-
 
 }
 

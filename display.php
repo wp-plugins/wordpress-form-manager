@@ -566,6 +566,9 @@ function fm_form_hidden(){
 	global $fm_display;
 	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
 	$str.= "<input type=\"hidden\" name=\"fm_id\" id=\"fm_id\" value=\"".$fm_display->currentFormInfo['ID']."\" />\n";
+	// this is to prevent submitting the same instance of a form more than once
+	$str.= "<input type=\"hidden\" name=\"fm_uniq_id\" id=\"fm_uniq_id\" value=\"fm-".uniqid()."\" />\n";
+	
 	return $str;
 }
 

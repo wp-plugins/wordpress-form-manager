@@ -222,7 +222,7 @@ function fm_getFormID($formSlug){
 	return $fmdb->getFormID($formSlug);
 }
 
-//takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior), processes posts, etc.
+//takes a form's slug as a string.  It has the same behavior as using the shortcode.  Displays the form (according to the set behavior)
 
 function fm_doFormBySlug($formSlug, $options = array()){
 	global $fm_display;
@@ -279,10 +279,13 @@ function fm_processPost( $formInfo ) {
 		$formInfo['ID'],
 		array('user'=>$current_user->user_login,
 			'user_ip' => fm_get_user_IP(),
-			'unique_id' => 'fm-'.uniqid(),
+			'unique_id' => $_POST['fm_uniq_id'],
 			),
 		$overwrite
 		);
+		
+	if ( $postData === false )
+		return false;
 		
 	//strip slashes so the action hooks get nice data
 	foreach($formInfo['items'] as $item){			

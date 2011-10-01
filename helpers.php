@@ -397,7 +397,8 @@ function fm_helper_sendEmail($formInfo, $postData){
 		$headers  = 'From: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
 					'Reply-To: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
 					'MIME-Version: 1.0'."\r\n".
-					'Content-type: text/html'."\r\n";
+					'Content-type: text/html; charset=utf-8'."\r\n".
+					'Content-Transfer-Encoding: 8bit'."\r\n";
 		
 		$temp = "";
 		if($fmdb->getGlobalSetting('email_admin') == "YES")
