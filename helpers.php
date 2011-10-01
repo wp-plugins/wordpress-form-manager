@@ -361,6 +361,91 @@ function fm_strip_tags($str){
 	return strip_tags($str, get_option('fm-allowed-tags'));
 }
 
+function fm_helper_sendEmail($formInfo, $postData){
+	global $fmdb;
+	global $current_user;
+	global $fm_display;
+	
+	if($formInfo['use_advanced_email'] == 1){
+		$metaForm = $formInfo;
+		$metaItems = $fmdb->getFormItems( $formInfo['ID'], 1 );
+		$metaForm['items'] = array_merge( $formInfo['items'], $metaItems );
+		
+		$advEmail = new fm_advanced_email_class($metaForm, $postData);
+
+		$emails = $advEmail->generateEmails($formInfo['advanced_email']);
+						
+		foreach($emails as $email){				
+			$headerStr = "";
+			foreach($email['headers'] as $header => $value)
+				$headerStr.= $header.": ".$value."\r\n";
+			fm_sendEmail($email['to'], $email['subject'], $email['message'], $headerStr);
+		}
+		return true;
+	}
+	
+	$formInfo['email_list'] = trim($formInfo['email_list']) ;
+	$formInfo['email_user_field'] = trim($formInfo['email_user_field']);		
+		
+	if($formInfo['email_list'] != ""
+	|| $formInfo['email_user_field'] != "" 
+	|| $fmdb->getGlobalSetting('email_admin') == "YES"
+	|| $fmdb->getGlobalSetting('email_reg_users') == "YES"){
+	
+		$subject = fm_getSubmissionDataShortcoded($formInfo['email_subject'], $formInfo, $postData);	
+		$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
+		$headers  = 'From: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
+					'Reply-To: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
+					'MIME-Version: 1.0'."\r\n".
+					'Content-type: text/html; charset=utf-8'."\r\n".
+					'Content-Transfer-Encoding: 8bit'."\r\n";
+		
+		$temp = "";
+		if($fmdb->getGlobalSetting('email_admin') == "YES")
+			fm_sendEmail(get_option('admin_email'), $subject, $message, $headers);
+			
+		if($fmdb->getGlobalSetting('email_reg_users') == "YES"){
+			if(trim($current_user->user_email) != ""){
+				if( ($fmdb->getGlobalSetting('email_admin') == "YES" && $current_user->user_email != get_option('admin_email') )
+					|| $fmdb->getGlobalSetting('email_admin') != "YES" ){
+						fm_sendEmail($current_user->user_email, $subject, $message, $headers);
+				}
+			}
+		}
+		if($formInfo['email_list'] != "")
+			fm_sendEmail($formInfo['email_list'], $subject, $message, $headers);
+			
+		if($formInfo['email_user_field'] != "")
+			fm_sendEmail($postData[$formInfo['email_user_field']], $subject, $message, $headers);
+	}
+}
+
+function fm_helper_publishPost($formInfo, &$postData){
+	global $fm_display;
+	global $fmdb;
+	
+	//use the same shortcodes as the e-mails
+	$advEmail = new fm_advanced_email_class($formInfo, $postData);
+	$parser = new fm_custom_shortcode_parser($advEmail->shortcodeList, array($advEmail, 'emailShortcodeCallback'));
+	$postTitle = $parser->parse($formInfo['publish_post_title']);
+	
+	$newPost = array(
+		'post_title' => sprintf($postTitle, $formInfo['title']),
+		'post_content' => $fm_display->displayDataSummary('summary', $formInfo, $postData),
+		'post_status' => (trim($formInfo['publish_post_status']) == "" ? 'publish' : $formInfo['publish_post_status']),
+		'post_author' => 1,
+		'post_category' => array($formInfo['publish_post_category'])
+	);
+	
+	// Insert the post into the database
+	$postID = wp_insert_post($newPost, false);
+	if($postID != 0){					
+		$fmdb->updateDataSubmissionRow($formInfo['ID'], $postData['timestamp'], $postData['user'], $postData['user_ip'], array('post_id' => $postID));
+	}
+	
+	$postData['post_id'] = $postID;
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Custom shortcode processor
 
