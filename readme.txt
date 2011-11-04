@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.2
-Stable tag: 1.6.21
+Stable tag: 1.6.24
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -50,6 +50,17 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Русский (ru_RU) - [Ellena Murawski](http://www.artmind.com.ua)
 
 == Changelog ==
+= 1.6.24 =
+* Fixed file upload link bug
+
+= 1.6.23 =
+* Fixed conflict with portfolio slideshow
+* Fixed multiple submission bug
+* Added missing headers from default e-mail notifications (encoding)
+
+= 1.6.22 =
+* Fixed conflict with Facebook Simple Connect
+
 = 1.6.21 =
 * Fixed conflict with CKEditor plugin
 * Fixed conditions in IE8 & IE9
