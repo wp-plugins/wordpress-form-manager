@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.21
+Version: 1.6.25
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.21";
+$fm_currentVersion = 		"1.6.25";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -37,6 +37,10 @@ $fm_DEBUG = 				false;
 // flags for other plugins we want to integrate with
 global $fm_SLIMSTAT_EXISTS;
 global $fm_MEMBERS_EXISTS;
+
+// API globals, the API is not an object.
+global $fm_globals;
+$fm_globals = array();
 
 $fm_SLIMSTAT_EXISTS = 		false;
 $fm_MEMBERS_EXISTS = 		false;
@@ -87,6 +91,7 @@ $optionDefaults = array(
 	'fm-file-name-format' => '%filename% (m-d-y-h-i-s)',
 	'fm-email-send-method' => 'wp_mail',
 	'fm-allowed-tags' => '<a><abbr><acronym><b><bdo><blockquote><br><caption><center><cite><code><col><colgroup><dd><del><dfn><div><dl><dt><em><h1><h2><h3><h4><h5><h6><hr><i><img><ins><kbd><legend><li><ol><p><pre><q><s><samp><span><strike><strong><sub><sup><table><tbody><td><tfoot><th><thead><tr><tt><u><ul>',
+	'fm-nonce-check' => 'YES',
 );
 foreach ( $optionDefaults as $key=>$val ){
 	if ( get_option( $key ) === false )
@@ -194,6 +199,7 @@ function fm_uninstall() {
 	delete_option( 'fm-file-method' );
 	delete_option( 'fm-file-name-format' );
 	delete_option( 'fm-allowed-tags' );
+	delete_option( 'fm-nonce-check' );
 }
 register_uninstall_hook( __FILE__, 'fm_uninstall' );
 
@@ -359,6 +365,27 @@ function fm_userInit() {
 	
 	wp_register_style( 'form-manager-css', plugins_url( '/css/style.css', __FILE__ ) );
 	wp_enqueue_style( 'form-manager-css' );
+	
+	////////////////////////////////////////////////////////////
+	
+	fm_handleFormSubmission();
+}
+
+function fm_handleFormSubmission(){
+	global $fmdb;
+	global $fm_globals;
+	
+	// process a submission if there was one
+	if ( isset($_POST['fm_id']) ){
+		$formInfo = $fmdb->getForm($_POST['fm_id']);
+		$formInfo['behaviors'] = fm_helper_parseBehaviors($formInfo['behaviors']);
+		
+		$fm_globals['form_info'][$_POST['fm_id']] = $formInfo;
+		
+		$postData = fm_processPost( $formInfo );
+		if($postData !== false)
+			$fm_globals['post_data'][$_POST['fm_id']] = $postData;
+	}
 }
 
 /**************************************************************/
@@ -633,6 +660,22 @@ if( get_option( 'fm-enable-mce-button' ) == "YES" ) {
 	include 'tinymce.php';
 }
 
+/**************************************************************/
+/******* SUBMISSION ACTIONS ***********************************/
+
+add_action( 'fm_form_submission', 'fm_extraSubmissionActions' );
+function fm_extraSubmissionActions( $info ){
+	$formInfo = $info['form'];
+	$postData = $info['data'];
+
+	//send emails
+	fm_helper_sendEmail($formInfo, $postData);
+	
+	//publish post
+	if($formInfo['publish_post'] == 1){				
+		fm_helper_publishPost($formInfo, $postData);
+	}
+}
 
 //set the include path back to whatever it was before:
 set_include_path( $fm_oldIncludePath );

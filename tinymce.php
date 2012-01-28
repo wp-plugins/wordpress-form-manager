@@ -25,13 +25,13 @@ function add_form_manager_tinymce_plugin($plugin_array) {
    return $plugin_array;
 }
  
-function my_refresh_mce($ver) {
+function fm_refresh_mce($ver) {
   $ver += 3;
   return $ver;
 }
 
 // init process for button control
-add_filter( 'tiny_mce_version', 'my_refresh_mce');
+add_filter( 'tiny_mce_version', 'fm_refresh_mce');
 add_action('init', 'add_formmanager_button');
 /****************************************************************/
 /***********  END TINYMCE BUTTON ********************************/
