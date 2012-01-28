@@ -429,11 +429,11 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 							break;
 						case "lt":			$str.= "(t".$x." < ".$test['val']." && t".$x." !== '')"; 
 							break;
-						case "gt":			$str.= "t".$x." > ".$test['val']." && t".$x." !== '')"; 
+						case "gt":			$str.= "(t".$x." > ".$test['val']." && t".$x." !== '')"; 
 							break;
-						case "lteq":		$str.= "t".$x." <= ".$test['val']." && t".$x." !== '')"; 
+						case "lteq":		$str.= "(t".$x." <= ".$test['val']." && t".$x." !== '')"; 
 							break;
-						case "gteq":		$str.= "t".$x." >= ".$test['val']." && t".$x." !== '')"; 
+						case "gteq":		$str.= "(t".$x." >= ".$test['val']." && t".$x." !== '')"; 
 							break;
 						case "isempty":		$str.= "t".$x." === ''";
 							break;
@@ -564,7 +564,7 @@ function fm_form_end(){
 }
 function fm_form_hidden(){
 	global $fm_display;
-	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
+	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";
 	$str.= "<input type=\"hidden\" name=\"fm_id\" id=\"fm_id\" value=\"".$fm_display->currentFormInfo['ID']."\" />\n";
 	// this is to prevent submitting the same instance of a form more than once
 	$str.= "<input type=\"hidden\" name=\"fm_uniq_id\" id=\"fm_uniq_id\" value=\"fm-".uniqid()."\" />\n";

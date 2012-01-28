@@ -140,7 +140,9 @@ function fm_set_required(itemID, req){
 			fm_registered_form_items[x].required = req;
 			tempID = 'fm-item-' + (temp.nickname != "" ? temp.nickname : temp.unique_name);
 			EMs = document.getElementById(tempID).getElementsByTagName('em');
-			EMs[0].style.display = (req == 1 ? 'inline' : 'none');
+			if (EMs[0] !== undefined){
+				EMs[0].style.display = (req == 1 ? 'inline' : 'none');
+			}
 		}
 	}
 	

@@ -50,6 +50,11 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Русский (ru_RU) - [Ellena Murawski](http://www.artmind.com.ua)
 
 == Changelog ==
+= 1.6.25 =
+* Fixed required condition bug
+* Fixed greater than / less than condition bug
+* Added option to disable nonce check on form submission
+
 = 1.6.24 =
 * Fixed file upload link bug
 

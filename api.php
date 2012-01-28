@@ -265,9 +265,13 @@ function fm_processPost( $formInfo ) {
 			return false;
 	}
 	
-	// verify the nonce
-	if( ! wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') )
-		return false;
+	
+	if( get_option( 'fm-nonce-check' ) == "YES" ){
+		
+		// verify the nonce
+		if( ! wp_verify_nonce($_POST['fm_nonce'],'fm-nonce') )
+			return false;	
+	}
 			
 	// process the post
 	
