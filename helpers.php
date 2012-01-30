@@ -488,7 +488,7 @@ class fm_custom_attribute_parser{
 }
 
 function fm_getSubmissionDataShortcoded($inputStr, &$formInfo, &$subData){
-	$email = new fm_advanced_email_class(&$formInfo, &$subData);
+	$email = new fm_advanced_email_class($formInfo, $subData);
 	
 	$parser = new fm_custom_shortcode_parser($email->shortcodeList, array($email, 'emailShortcodeCallback'));
 	
