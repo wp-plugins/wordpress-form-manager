@@ -12,6 +12,12 @@ var $currentFormData;
 var $currentItemIndex;
 var $nextItemIndex;
 
+// make sure only one instance of a form is displayed per page
+var $formsDisplayed;
+
+function __construct() {
+	$this->formsDisplayed = array();
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +29,7 @@ function displayForm($formInfo, $options=array(), $values=array()){
 	global $fm_templates;
 	global $fm_controls;
 	global $fmdb;
-	
+
 	$templateFile = $formInfo['form_template'];
 	if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_form');
 	if($templateFile == '') $templateFile = get_option('fm-default-form-template');
@@ -33,6 +39,9 @@ function displayForm($formInfo, $options=array(), $values=array()){
 	else
 		$str = $this->displayFormTemplate(get_option('fm-default-form-template'), $formInfo, $options, $values);
 
+	// now that we have completely echoed the form, set a flag
+	$this->formsDisplayed[$formInfo['ID']] = true;
+	
 	return $str;
 }
 
@@ -140,10 +149,13 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 	$str.= ob_get_contents();
 	ob_end_clean();
 	
-	// show the support scripts, validation, etc.
-	$scripts = new fm_script_display_class($formInfo, $options);
-	add_action('wp_footer', array($scripts, 'showBeforeFormScripts'));
-	add_action('wp_footer', array($scripts, 'showAfterFormScripts'));
+	// show the support scripts, validation, etc. only once
+	
+	if ( !$this->formsDisplayed[$formInfo['ID']] ){	
+		$scripts = new fm_script_display_class($formInfo, $options);
+		add_action('wp_footer', array($scripts, 'showBeforeFormScripts'));
+		add_action('wp_footer', array($scripts, 'showAfterFormScripts'));
+	}
 	
 	return $str;
 }
@@ -252,6 +264,7 @@ function getEditorItem($uniqueName, $type, $itemInfo, $isMeta = false){
 class fm_script_display_class{
 	var $formInfo;
 	var $options;
+	var $counter;
 	
 	function __construct($_formInfo, $_options){
 		$this->formInfo = &$_formInfo;
@@ -416,11 +429,11 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 							break;
 						case "lt":			$str.= "(t".$x." < ".$test['val']." && t".$x." !== '')"; 
 							break;
-						case "gt":			$str.= "t".$x." > ".$test['val']." && t".$x." !== '')"; 
+						case "gt":			$str.= "(t".$x." > ".$test['val']." && t".$x." !== '')"; 
 							break;
-						case "lteq":		$str.= "t".$x." <= ".$test['val']." && t".$x." !== '')"; 
+						case "lteq":		$str.= "(t".$x." <= ".$test['val']." && t".$x." !== '')"; 
 							break;
-						case "gteq":		$str.= "t".$x." >= ".$test['val']." && t".$x." !== '')"; 
+						case "gteq":		$str.= "(t".$x." >= ".$test['val']." && t".$x." !== '')"; 
 							break;
 						case "isempty":		$str.= "t".$x." === ''";
 							break;
@@ -551,9 +564,11 @@ function fm_form_end(){
 }
 function fm_form_hidden(){
 	global $fm_display;
-	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";	
+	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";
 	$str.= "<input type=\"hidden\" name=\"fm_id\" id=\"fm_id\" value=\"".$fm_display->currentFormInfo['ID']."\" />\n";
-	$str.= "<input type=\"hidden\" name=\"fm_unique_id\" id=\"fm_unique_id\" value=\"".uniqid()."\" />\n";
+	// this is to prevent submitting the same instance of a form more than once
+	$str.= "<input type=\"hidden\" name=\"fm_uniq_id\" id=\"fm_uniq_id\" value=\"fm-".uniqid()."\" />\n";
+	
 	return $str;
 }
 
