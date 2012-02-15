@@ -24,13 +24,14 @@ function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, 
 	$this->lastPostFailed = false;
 	$this->showerr = true;
 	$this->initDefaultSettings();
+	
+	$this->lastPostFailed = false;
 }
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
 function query($q){
-	//echo '<p>'.$q.'</p>';
 	$res = mysql_query($q, $this->conn);
 	if($this->showerr && mysql_errno()) die(mysql_error());
 	return $res;
@@ -369,6 +370,10 @@ function fixCollation(){
 	
 	$charset_collate = $this->getCharsetCollation();
 	
+	// do nothing if there is no collation or charset information
+	if ( $charset_collage == "" )
+		return;
+		
 	//build a list of tables to fix
 	$tableList = array($this->formsTable, $this->itemsTable, $this->settingsTable);
 
@@ -403,6 +408,8 @@ function fixCollation(){
 
 function getCharsetCollation(){
 	global $wpdb;
+	
+	$charset_collate = "";
 	
 	//establish the current charset / collation
 	if (!empty($wpdb->charset))
@@ -847,6 +854,9 @@ function processPost($formID, $extraInfo = NULL, $overwrite = false, $ignoreType
 	
 	$dataTable = $this->getDataTableName($formID);
 	
+	if ( $this-> submissionIDExists( $extraInfo['unique_id'], $dataTable ) )
+		return false;
+	
 	$postData = $this->getProcessPost($formInfo, $ignoreTypes, $uniqueNames);
 	
 	if($extraInfo != null && is_array($extraInfo) && sizeof($extraInfo)>0)
@@ -863,8 +873,10 @@ function processPost($formID, $extraInfo = NULL, $overwrite = false, $ignoreType
 			$q = "DELETE FROM `{$dataTable}` WHERE `user` = '".$postData['user']."'";
 			$this->query($q);
 		}
-		if($this->insertSubmissionData($formID, $dataTable, $postData) === false)
+		if($this->insertSubmissionData($formID, $dataTable, $postData) === false) {
 			$this->lastPostFailed = true;
+			$this->setErrorMessage( "Insertion failed" );	
+		}
 	}
 	
 	return $postData;
@@ -881,8 +893,10 @@ function getProcessPost($formInfo, $ignoreTypes = NULL, $uniqueNames = NULL){
 				$uniqueName = $uniqueNames[$item['unique_name']];
 				
 			$processed = $fm_controls[$item['type']]->processPost($uniqueName, $item);
-			if($processed === false)
+			if($processed === false) {
 				$this->lastPostFailed = true;
+				$name = $item['nickname'] != "" ? $item['nickname'] : $item['unique_name'];
+			}
 			
 			//check if the item is a data column AFTER processing; it might be a recatpcha or something like that
 			if($processed !== NULL && $this->isDataCol($item['unique_name']))
@@ -896,7 +910,7 @@ function processFailed(){
 	return $this->lastPostFailed;
 }
 function setErrorMessage($message, $for = ""){
-	$this->lastErrorMessage = $message;
+	$this->lastErrorMessage .= $message;
 	$this->lastUniqueName = $for;
 }
 function getErrorMessage(){
@@ -906,15 +920,18 @@ function getErrorUniqueName(){
 	return $this->lastUniqueName;
 }
 
-function insertSubmissionData($formID, $dataTable, &$postData){
-	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$postData['unique_id']."'";
+function submissionIDExists( $uniqueID, $dataTable ) {
+	$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$uniqueID."'";
 	$res = $this->query($q);
 	
 	if(mysql_num_rows($res) > 0){
 		mysql_free_result($res);
-		return false;
+		return true;
 	}
-	
+	return false;
+}
+
+function insertSubmissionData($formID, $dataTable, &$postData){
 	$q = "INSERT INTO `{$dataTable}` SET ";
 	$arr = array();
 	$postData['timestamp'] = fm_get_time();
@@ -1851,7 +1868,6 @@ function tableExists($tableName){
 	if(mysql_num_rows($res) == 0) return false;
 	return true;		
 }
-
 
 }
 

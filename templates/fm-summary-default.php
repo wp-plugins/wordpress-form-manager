@@ -49,10 +49,6 @@ IP: <strong><?php echo fm_summary_the_IP(); ?></strong> <br />
 <?php while(fm_summary_have_items()): fm_summary_the_item(); ?>
 	<?php switch(fm_summary_the_type()){
 		case 'separator': ?><hr /><?php break;
-		case 'file':?>
-			<li<?php if(fm_summary_the_nickname() != "") echo " id=\"fm-item-".fm_summary_the_nickname()."\"";?>><?php echo fm_summary_the_label();?>:
-				<?php $fileInfo = fm_summary_get_item_value(fm_summary_the_nickname()); print_r($fileInfo);?></li>
-			<?php break; 
 		default:
 		if(fm_summary_has_data()): ?>
 		<li<?php if(fm_summary_the_nickname() != "") echo " id=\"fm-item-".fm_summary_the_nickname()."\"";?>><?php echo fm_summary_the_label();?>: <strong><?php echo fm_summary_the_value();?></strong></li>

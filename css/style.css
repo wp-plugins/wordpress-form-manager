@@ -369,7 +369,7 @@ table.fm-data-summary-table{
 }
 
 .fm-form em{
-	color:#FF0000;
+	color:#FF0000 !important;
 	font-weight:bold;
 	font-style: normal;
 }
