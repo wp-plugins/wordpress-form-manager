@@ -370,6 +370,10 @@ function fixCollation(){
 	
 	$charset_collate = $this->getCharsetCollation();
 	
+	// do nothing if there is no collation or charset information
+	if ( $charset_collage == "" )
+		return;
+		
 	//build a list of tables to fix
 	$tableList = array($this->formsTable, $this->itemsTable, $this->settingsTable);
 
@@ -404,6 +408,8 @@ function fixCollation(){
 
 function getCharsetCollation(){
 	global $wpdb;
+	
+	$charset_collate = "";
 	
 	//establish the current charset / collation
 	if (!empty($wpdb->charset))

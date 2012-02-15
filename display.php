@@ -335,6 +335,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 	}
 	
 	protected function getConditionHandlerScripts(){
+				
 		$formInfo = &$this->formInfo;
 		
 		if(!is_array($formInfo['conditions'])) return "";
@@ -481,7 +482,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 					case '__never__':
 						break;
 					default:
-						if(!isset($itemDependents[$itemNames[$test['unique_name']]])) $itemDependents[$test['unique_name']] = array();
+						if(!isset($itemDependents[$test['unique_name']])) $itemDependents[$test['unique_name']] = array();
 						$itemDependents[$test['unique_name']][] = $fn;
 				}
 			}
@@ -504,26 +505,35 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 				$str.= "}\n";
 			
 			$itemType = $itemTypes[ $uniqueName ];
+			
+			// IE behaves strangely, as per usual, so we need to hook into different events for IE
+				global $is_IE;
+				if ( $is_IE )
+					$changeEvent = 'onclick';
+				else
+					$changeEvent = 'onchange';
+			
 			switch( $itemType ){
+				
 				case 'text':
 				case 'textarea':
 					$str.= "document.getElementById('".$uniqueName."').onchange = ".$tmpFnName.";\n";
 					break;
 				case 'checkbox':
-					$str.= "document.getElementById('".$uniqueName."').onclick = ".$tmpFnName.";\n";
+					$str.= "document.getElementById('".$uniqueName."').".$changeEvent." = ".$tmpFnName.";\n";
 					break;
 				case 'custom_list':
 					$listItem = $itemObjects[ $uniqueName ];
 					switch ( $listItem['extra']['list_type'] ) {
 						case 'select':
 						case 'list':
-							$str.= "document.getElementById('".$uniqueName."').onclick = ".$tmpFnName.";\n";
+							$str.= "document.getElementById('".$uniqueName."').".$changeEvent." = ".$tmpFnName.";\n";
 							break;
 						case 'checkbox':
 						case 'radio':
 							$numItems = sizeof($listItem['extra']['options']);
 							for ( $x=0; $x<$numItems; $x++) {
-								$str.= "document.getElementById('".$uniqueName."-".$x."').onclick = ".$tmpFnName.";\n";
+								$str.= "document.getElementById('".$uniqueName."-".$x."').".$changeEvent." = ".$tmpFnName.";\n";
 							}
 							break;
 						default:

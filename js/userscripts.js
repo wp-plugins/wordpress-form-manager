@@ -227,10 +227,20 @@ function fm_array_contains(haystack, needle){
 
 // form element base class
 function fm_base_required_validator(formID, itemID){
-	return (fm_trim(document.getElementById('fm-form-' + formID)[itemID].value) != "");
+	var e = document.getElementById('fm-form-' + formID)[itemID];
+	if ( typeof(e.ph_hasEdit) != 'undefined' ){
+		return ( e.ph_hasEdit );
+	}	
+	return (fm_trim(e.value) != "");
 }
 function fm_base_get_value(formID, itemID){
-	return fm_trim(document.getElementById('fm-form-' + formID)[itemID].value);
+	var e = document.getElementById('fm-form-' + formID)[itemID];
+	if ( typeof(e.ph_hasEdit) != 'undefined' ){
+		if ( e.ph_hasEdit == true )
+			return fm_trim(e.value);
+		return "";
+	}
+	return fm_trim(e.value);
 }
 
 // checkbox

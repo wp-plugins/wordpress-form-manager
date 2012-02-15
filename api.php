@@ -118,7 +118,7 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
 				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
 						$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
-						$lbl = ($item['nickname'] == "" ? htmlspecialchars($item['label']) : $item['nickname']);
+						$lbl = htmlspecialchars($item['label']);
 						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$lbl.'</th>';
 				}
 			}
@@ -149,10 +149,7 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 			$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];
 			if($fmdb->isDataCol($item['unique_name']) && fm_helper_is_shown_col($showcols, $hidecols, $lbl)){				
 				$tmp = $dataRow[$item['unique_name']];
-				if($item['type'] == 'file')	
-					$str.= '<td class="fm-item-cell-'.$lbl.'">'.$tmp.'</td>';
-				else
-					$str.= '<td class="fm-item-cell-'.$lbl.'">'.fm_restrictString($tmp, 75).'</td>';
+				$str.=  '<td class="fm-item-cell-'.$lbl.'">'.htmlspecialchars($tmp).'</td>';
 			}		
 		}
 		$str.= '</tr>';

@@ -50,7 +50,7 @@ class fm_fileControl extends fm_controlBase{
 		if($_FILES[$uniqueName]['error'] == 4) return NULL;
 		
 		if($_FILES[$uniqueName]['error'] > 0){
-			if($_FILES[$uniqueName]['error'] == 2)
+			if($_FILES[$uniqueName]['error'] == 2 || $_FILES[$uniqueName]['error'] == 1 )
 				$fmdb->setErrorMessage("(".$itemInfo['label'].") ".__("File upload exceeded maximum allowable size.", 'wordpress-form-manager'));
 			else if($_FILES[$uniqueName]['error'] == 4) // no file
 				return "";
@@ -89,10 +89,15 @@ class fm_fileControl extends fm_controlBase{
 			
 			$newFileName = $this->getFormattedFileName($uniqueName, $itemInfo);
 			
-			move_uploaded_file($_FILES[$uniqueName]['tmp_name'], $uploadDir.$newFileName);
+			$fullPath = $uploadDir . $newFileName;
+			
+			$uploadURL = $this-> parseUploadURL($itemInfo['extra']['upload_url']);
+			
+			move_uploaded_file($_FILES[$uniqueName]['tmp_name'], $fullPath);
 			$saveVal = array('filename' => $newFileName,
 								'contents' => '',
 								'upload_dir' => true,
+								'upload_url' => $uploadURL,
 								'size' => $_FILES[$uniqueName]['size']);
 			return addslashes(serialize($saveVal));
 		}	
@@ -130,17 +135,25 @@ class fm_fileControl extends fm_controlBase{
 	}
 	
 	public function parseData($uniqueName, $itemInfo, $data){
+						
 		if(trim($data) == "") return "";
+		
 		$fileInfo = unserialize($data);
+				
 		if($fileInfo['size'] < 1024)
 			$sizeStr = $fileInfo['size']." B";
 		else
 			$sizeStr = ((int)($fileInfo['size']/1024))." kB";
-			
+		
 		if(!isset($fileInfo['upload_dir']) || trim($itemInfo['extra']['upload_url']) == "") 
 			return $fileInfo['filename']." (".$sizeStr.")";
 		else{
-			$uploadURL = $this->parseUploadURL($itemInfo['extra']['upload_url']);
+			if( isset( $fileInfo['upload_url'] ) ){
+				$uploadURL = $fileInfo['upload_url'];
+			}
+			else {
+				$uploadURL = $this->parseUploadURL($itemInfo['extra']['upload_url']);
+			}
 			return '<a class="fm-download-link" href="'.$uploadURL.$fileInfo['filename'].'">'.$fileInfo['filename'].' ('.$sizeStr.')'.'</a>';
 		}
 	}
