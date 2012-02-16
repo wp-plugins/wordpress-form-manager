@@ -140,7 +140,9 @@ function fm_set_required(itemID, req){
 			fm_registered_form_items[x].required = req;
 			tempID = 'fm-item-' + (temp.nickname != "" ? temp.nickname : temp.unique_name);
 			EMs = document.getElementById(tempID).getElementsByTagName('em');
-			EMs[0].style.display = (req == 1 ? 'inline' : 'none');
+			if (EMs[0] !== undefined){
+				EMs[0].style.display = (req == 1 ? 'inline' : 'none');
+			}
 		}
 	}
 	
@@ -225,10 +227,20 @@ function fm_array_contains(haystack, needle){
 
 // form element base class
 function fm_base_required_validator(formID, itemID){
-	return (fm_trim(document.getElementById('fm-form-' + formID)[itemID].value) != "");
+	var e = document.getElementById('fm-form-' + formID)[itemID];
+	if ( typeof(e.ph_hasEdit) != 'undefined' ){
+		return ( e.ph_hasEdit );
+	}	
+	return (fm_trim(e.value) != "");
 }
 function fm_base_get_value(formID, itemID){
-	return fm_trim(document.getElementById('fm-form-' + formID)[itemID].value);
+	var e = document.getElementById('fm-form-' + formID)[itemID];
+	if ( typeof(e.ph_hasEdit) != 'undefined' ){
+		if ( e.ph_hasEdit == true )
+			return fm_trim(e.value);
+		return "";
+	}
+	return fm_trim(e.value);
 }
 
 // checkbox

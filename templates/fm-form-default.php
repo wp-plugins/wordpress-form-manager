@@ -85,7 +85,9 @@ __("Applies to checkboxes, and when labels are to the left", 'wordpress-form-man
 			<?php while(fm_form_have_items()): fm_form_the_item(); ?>
 			<li id="fm-item-<?php echo (fm_form_the_nickname() != "" ? fm_form_the_nickname() : fm_form_the_ID()); ?>">
 				<?php if($labelPosition == "top"): ?>
-					<label style="display:block;width:<?php echo $labelwidth;?>px;"><?php echo fm_form_the_label(); ?><?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?></label><?php echo fm_form_the_input(); ?>
+					<label style="display:block;width:<?php echo $labelwidth;?>px;"><?php echo fm_form_the_label(); ?>
+					<?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?>
+					</label><?php echo fm_form_the_input(); ?>
 				<?php else: ?>
 					<table><tr>
 						<td style="width:<?php echo $labelWidth; ?>px"><label><?php echo fm_form_the_label(); ?><?php if(fm_form_is_required()) echo "&nbsp;<em>*</em>"; ?></label></td>

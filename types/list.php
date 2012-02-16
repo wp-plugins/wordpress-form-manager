@@ -31,12 +31,17 @@ class fm_customListControl extends fm_controlBase{
 	
 	public function showItem($uniqueName, $itemInfo){
 		$fn = $itemInfo['extra']['list_type']."_showItem";
+		
+		if ( !isset( $itemInfo['extra']['value'] ) && isset( $itemInfo['extra']['default'] ) )
+			$itemInfo['extra']['value'] = $itemInfo['extra']['default'];
+		
 		return $this->$fn($uniqueName, $itemInfo).
 				"<input type=\"hidden\" id=\"".$uniqueName."-list-style\" value=\"".$itemInfo['extra']['list_type']."\" />".
 				"<input type=\"hidden\" id=\"".$uniqueName."-count\" value=\"".sizeof($itemInfo['extra']['options'])."\" />";
 		
 	}
 		public function select_showItem($uniqueName, $itemInfo, $disabled = false){
+			
 			$elem=array('type' => 'select',
 						'attributes' => array('name' => $uniqueName,
 												'id'=> $uniqueName
@@ -102,6 +107,7 @@ class fm_customListControl extends fm_controlBase{
 	
 	public function editItem($uniqueName, $itemInfo){	
 		$fn = $itemInfo['extra']['list_type']."_showItem";
+		$itemInfo['extra']['value'] = $itemInfo['extra']['default'];
 		unset($itemInfo['extra']['size']);
 		return "<div id=\"".$itemInfo['unique_name']."-edit-value\">".$this->$fn($uniqueName, $itemInfo, true)."</div>";
 	}
@@ -146,12 +152,13 @@ class fm_customListControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'size', __('Width (in pixels)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['size']));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		$arr[] = new fm_editPanelItemMulti($uniqueName, 'options', __('List Items', 'wordpress-form-manager'), array('options' => $itemInfo['extra']['options'], 'get_item_script' => 'fm_custom_list_options_panel_item', 'get_item_value_script' => 'fm_custom_list_option_get'));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'default', __('Default', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['default']));
 		return $arr;
 	}
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
-		$opt['extra'] = "\"array('options' => \" + js_multi_item_get_php_array('multi-panel-' + itemID, 'fm_custom_list_option_get') + \", 'size' => '\" + fm_get_item_value(itemID, 'size') + \"', 'list_type' => '\" + fm_get_item_value(itemID, 'list_type') + \"')\"";
+		$opt['extra'] = "\"array('options' => \" + js_multi_item_get_php_array('multi-panel-' + itemID, 'fm_custom_list_option_get') + \", 'size' => '\" + fm_get_item_value(itemID, 'size') + \"', 'list_type' => '\" + fm_get_item_value(itemID, 'list_type') + \"', 'default' => '\" + fm_get_item_value(itemID, 'default') + \"' )\"";
 		$opt['required'] = $this->checkboxScriptHelper('required');
 		
 		return $opt;
@@ -174,6 +181,7 @@ class fm_customListControl extends fm_controlBase{
 					document.getElementById(itemID + '-edit-required').innerHTML = "";
 				var listType = fm_get_item_value(itemID, 'list_type');
 				var listOptions = js_multi_item_get('multi-panel-' + itemID, 'fm_custom_list_option_get');
+				var defaultValue = fm_get_item_value(itemID, 'default');
 				
 				var itemDef;
 				switch(listType){
@@ -190,7 +198,10 @@ class fm_customListControl extends fm_controlBase{
 						itemDef = fm_get_list_list_preview(itemID, listOptions);
 						break;
 				}
-			
+
+				if(fm_trim(defaultValue) != "")
+					itemDef.value = defaultValue;
+				
 				var data = {
 					action: 'fm_create_form_element',
 					elem: itemDef
@@ -199,7 +210,6 @@ class fm_customListControl extends fm_controlBase{
 				jQuery.post(ajaxurl, data, function(response){		
 					document.getElementById(itemID + '-edit-value').innerHTML = response;
 				});
-				
 			}
 		}
 		function fm_get_radio_list_preview(itemID, listOptions){		
@@ -237,14 +247,33 @@ class fm_customListControl extends fm_controlBase{
 					attributes: { disabled: 'disabled' }
 			};		
 					
-			return data;	
-			
+			return data;
 		}
+	
+		
 		function fm_get_list_list_preview(itemID, listOptions){
 			var data = {	
 					type: 'select',
 					options: listOptions,
 					attributes: { disabled: 'disabled', size: listOptions.length }
+			};		
+					
+			return data;
+		}
+
+		function fm_get_select_list(itemID, listOptions){
+			if(document.getElementById(itemID + '-required').checked){
+				var newList = new Array();
+				newList.push('...');
+				for(x=0;x<listOptions.length;x++)
+					newList.push(listOptions[x]);
+				listOptions = newList;
+			}
+			
+			var data = {	
+					type: 'select',
+					options: listOptions,
+					attributes: { id: itemID, name: itemID }
 			};		
 					
 			return data;
