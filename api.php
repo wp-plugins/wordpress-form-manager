@@ -149,7 +149,7 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 			$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];
 			if($fmdb->isDataCol($item['unique_name']) && fm_helper_is_shown_col($showcols, $hidecols, $lbl)){				
 				$tmp = $dataRow[$item['unique_name']];
-				$str.=  '<td class="fm-item-cell-'.$lbl.'">'.htmlspecialchars($tmp).'</td>';
+				$str.=  '<td class="fm-item-cell-'.$lbl.'">'.$tmp.'</td>';
 			}		
 		}
 		$str.= '</tr>';
