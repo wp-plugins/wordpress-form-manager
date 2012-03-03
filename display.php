@@ -179,6 +179,8 @@ function displayDataSummary($type, $formInfo, $data){
 		if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_summary');
 		if($templateFile == '') $templateFile = get_option('fm-default-summary-template');
 	}
+	else if($fm_templates->isTemplate($type))	
+		$templateFile = $type;
 	else if($fm_templates->isTemplate($type.".php"))	
 		$templateFile = $type.".php";
 	

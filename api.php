@@ -38,7 +38,7 @@ function fm_doPaginatedSummariesBySlugCallback($formSlug, $template, $callback, 
 	$numPages = ceil($submissionCount / $dataPerPage);
 	$pageLinkStr = "";
 	
-	$pageRoot = get_permalink();
+	$pageRoot = fm_helper_form_action();
 	$pageRoot = substr($pageRoot, 0, strpos($pageRoot, "?"));
 	
 	// navigation 
@@ -204,6 +204,12 @@ function fm_getFormDataSummaries($formID, $template, $orderBy = 'timestamp', $or
 	
 	$formInfo = $fmdb->getForm($formID);
 	
+	// figure out which template to use
+	if ( $template == '' )
+		$template = $formInfo['summary_template'];
+	if ( $template == '' )
+		$template = $fmdb-> getGlobalSetting('template_summary');
+	
 	$formData = $fmdb->getFormSubmissionDataRaw($formID, $orderBy, strtoupper($ord), $startIndex, $numItems);
 	
 	$strArray = array();
@@ -315,6 +321,8 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 	global $fmdb;
 	global $fm_display;
 	
+	$formAction = fm_helper_form_action();
+	
 	// see if this is a restricted form
 	if(isset($formInfo['behaviors']['reg_user_only']) && $current_user->user_login == ""){
 		$msg = empty($formInfo['reg_user_only_msg']) ? $fmdb->getGlobalSetting('reg_user_only_msg') : $formInfo['reg_user_only_msg'];
@@ -323,7 +331,7 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 		if(isset($formBehaviors['allow_view'])){
 			return sprintf($msg, $formInfo['title']).
 			'<br/>'.
-			$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'show_submit' => false)));
+			$fm_display->displayForm($formInfo, array_merge($options, array('action' => $formAction, 'show_submit' => false)));
 		}			
 		else
 			return sprintf($msg, $formInfo['title']);
@@ -332,7 +340,7 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 	// if this was a failed process, show the error message and a repopulated form
 	if($fmdb->processFailed()){
 		return '<em>'.$fmdb->getErrorMessage().'</em>'.
-			$fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)), $postData);
+			$fm_display->displayForm($formInfo, array_merge($options, array('action' => $formAction, 'use_placeholders' => false)), $postData);
 	}
 	
 	// 'User Profile' mode has its own quirks (used to be called 'summary' mode)
@@ -345,7 +353,7 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 		return fm_helper_displayAck( $formInfo, $postData );
 	}
 	
-	return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink())));	
+	return $fm_display->displayForm($formInfo, array_merge($options, array( 'action' => $formAction )));	
 }
 
 function fm_helper_displayAck( $formInfo, $postData ){
@@ -396,10 +404,10 @@ function fm_helper_displaySummaryMode( $formInfo, $options, $postData ){
 			}				
 		}
 		else
-			return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)), $userData[0]);
+			return $fm_display->displayForm($formInfo, array_merge($options, array('action' => fm_helper_form_action(), 'use_placeholders' => false)), $userData[0]);
 	}
 	
-	return $fm_display->displayForm($formInfo, array_merge($options, array('action' => get_permalink(), 'use_placeholders' => false)));
+	return $fm_display->displayForm($formInfo, array_merge($options, array('action' => fm_helper_form_action(), 'use_placeholders' => false)));
 }
 
 /*****************************/
