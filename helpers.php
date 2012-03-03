@@ -446,6 +446,13 @@ function fm_helper_publishPost($formInfo, &$postData){
 	$postData['post_id'] = $postID;
 }
 
+function fm_helper_form_action(){
+	if ( is_home() )
+		return home_url();
+	
+	return get_permalink();
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Custom shortcode processor
 
