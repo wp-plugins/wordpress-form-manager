@@ -1490,6 +1490,7 @@ function createDataTable($formInfo, $dataTable){
 		"`user` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
 		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
 		"`post_id` INT DEFAULT '0' NOT NULL ,".
+		"`parent_post_id` INT DEFAULT '0' NOT NULL ,".
 		"`unique_id` VARCHAR( 32 ) DEFAULT '' NOT NULL ,".
 		"INDEX (`unique_id`)";
 	$q.= ") ".$charset_collate.";";

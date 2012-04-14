@@ -189,6 +189,7 @@ class fm_fileControl extends fm_controlBase{
 		$arr=array();
 		
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'max_size', __('Max file size (in kB)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['max_size']));
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Your host restricts uploads to", 'wordpress-form-manager')." ".ini_get('upload_max_filesize')."B</span>", '');
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span style=\"font-weight:bold;\">".__("File Types", 'wordpress-form-manager')."</span>", '');
@@ -211,6 +212,7 @@ class fm_fileControl extends fm_controlBase{
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
 		$opt['extra'] = $this->extraScriptHelper(array('restrict' => 'restrict', 'exclude' => 'exclude', 'max_size' => 'max_size', 'upload_dir' => 'upload_dir', 'upload_url' => 'upload_url', 'name_format' => 'name_format' ));
+		$opt['required'] = $this->checkboxScriptHelper('required');	
 		return $opt;
 	}
 	
@@ -222,13 +224,20 @@ class fm_fileControl extends fm_controlBase{
 		return "fm_file_save_validator";
 	}
 	
+	public function getRequiredValidatorName(){ 
+		return 'fm_base_required_validator';
+	}
+	
 	protected function showExtraScripts(){
 		?><script type="text/javascript">
 //<![CDATA[
 		function fm_file_show_hide(itemID, isDone){
 			if(isDone){
 				document.getElementById(itemID + '-edit-label').innerHTML = document.getElementById(itemID + '-label').value;
-							
+				if(document.getElementById(itemID + '-required').checked)
+					document.getElementById(itemID + '-edit-required').innerHTML = "<em>*</em>";
+				else
+					document.getElementById(itemID + '-edit-required').innerHTML = "";		
 			}
 		}		
 		
@@ -254,7 +263,7 @@ class fm_fileControl extends fm_controlBase{
 	}
 
 	protected function getPanelKeys(){
-		return array('label');
+		return array('label','required');
 	}
 }
 ?>
