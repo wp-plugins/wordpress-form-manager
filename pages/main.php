@@ -33,7 +33,7 @@ if(isset($_POST['fm-doaction'])){
 }
 
 //SINGLE DELETE
-if((!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_forms')) && $_POST['fm-action'] == "delete"){
+if((!$fm_MEMBERS_EXISTS || current_user_can('form_manager_delete_forms')) && isset($_POST['fm-action']) && $_POST['fm-action'] == "delete"){
 	$deleteIds = array();
 	$deleteIds[0] = $_POST['fm-id'];
 	$currentDialog = "verify-delete";
