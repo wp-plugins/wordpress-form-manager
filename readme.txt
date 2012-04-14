@@ -48,6 +48,7 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
 * Русский (ru_RU) - [Ellena Murawski](http://www.artmind.com.ua)
+* Fran&ccedil;ais (fr_FR) - [Serge Rauber](http://kalyx.fr)
 
 == Changelog ==
 = 1.6.29 =
