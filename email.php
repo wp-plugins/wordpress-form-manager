@@ -127,8 +127,13 @@ class fm_advanced_email_class{
 				$item = $fmdb->getItemByNickname($this->formInfo['ID'], $name);
 				switch($name){
 					case 'unique_id': 		return $this->formData['unique_id'];
+					
 					case 'post_id': 		return $this->formData['post_id'];
 					case 'post_url':		return get_permalink( $this->formData['post_id'] );
+									
+					case 'parent_post_id':	return $this->formData['parent_post_id'];
+					case 'parent_post_url':	return get_permalink( $this->formData['parent_post_id'] );
+					
 					case 'user_ip': 		return $this->formData['user_ip'];
 					case 'user': 			return $this->formData['user'];
 					case 'timestamp': 		return $this->formData['timestamp'];

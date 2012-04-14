@@ -158,6 +158,13 @@ function fm_getDefaultDataCols(){
 					'editable' => false,
 					);
 	$cols[] = array('attributes' =>
+					array( 'class' => 'parent-post-column' ),
+					'value' => __("Parent", 'wordpress-form-manager'),
+					'key' => 'parent_post_id',
+					'editable' => false,
+					'show-callback' => 'fm_getPostLink',
+					);
+	$cols[] = array('attributes' =>
 					array( 'class' => 'post-column' ),
 					'value' => __("Post Link", 'wordpress-form-manager'),
 					'key' => 'post_id',
@@ -168,7 +175,7 @@ function fm_getDefaultDataCols(){
 }
 
 function fm_getPostLink($col, $dbRow){
-	$postID = $dbRow['post_id'];
+	$postID = $dbRow[$col['key']];
 	if($postID != 0)
 		return '<a href="'.get_permalink($postID).'">'.$postID.'</a>';
 	else
@@ -447,8 +454,8 @@ function fm_helper_publishPost($formInfo, &$postData){
 }
 
 function fm_helper_form_action(){
-	if ( is_home() )
-		return home_url();
+	/*if ( is_front_page() || is_home() )
+		return home_url();*/
 	
 	return get_permalink();
 }
@@ -516,5 +523,19 @@ function fm_sendEmail($to, $subject, $message, $headers){
 		default:
 			wp_mail($to, $subject, $message, $headers);
 	}
+}
+
+function fm_helper_cleanEmptyFields( &$formInfo, &$data ){
+	foreach( $formInfo['items'] as $key => $item ){
+		if( trim($data[$item['unique_name']]) == "" ){
+			unset($formInfo['items'][$key]);
+		}
+	}
+	$newItems = array();
+	$index = 0;
+	foreach( $formInfo['items'] as $item ){
+		$newItems[$index++] = $item;
+	}
+	$formInfo['items'] = $newItems;
 }
 ?>
