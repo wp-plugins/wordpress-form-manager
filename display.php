@@ -194,6 +194,10 @@ function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "
 	global $fm_controls;
 	global $fmdb;
 	
+	if( $formInfo['summary_hide_empty'] == '1' ){
+		fm_helper_cleanEmptyFields($formInfo, $data);
+	}
+	
 	$str = "";
 	$str.= "<div class=\"fm-data-summary\">\n";
 	$str.= $before;
@@ -217,6 +221,10 @@ function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "
 
 function displayDataSummaryTemplate($template, $formInfo, $data){
 	global $fm_templates;
+	
+	if( $formInfo['summary_hide_empty'] == '1' ){
+		fm_helper_cleanEmptyFields($formInfo, $data);
+	}
 	
 	$this->currentFormInfo = $formInfo;
 	$this->currentFormData = $data;
@@ -576,11 +584,13 @@ function fm_form_end(){
 }
 function fm_form_hidden(){
 	global $fm_display;
+	global $post;
+	
 	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";
 	$str.= "<input type=\"hidden\" name=\"fm_id\" id=\"fm_id\" value=\"".$fm_display->currentFormInfo['ID']."\" />\n";
 	// this is to prevent submitting the same instance of a form more than once
 	$str.= "<input type=\"hidden\" name=\"fm_uniq_id\" id=\"fm_uniq_id\" value=\"fm-".uniqid()."\" />\n";
-	
+	$str.= "<input type=\"hidden\" name=\"fm_parent_post_id\" id=\"fm_parent_post_id\" value=\"".$post->ID."\" />\n";
 	return $str;
 }
 
@@ -758,6 +768,10 @@ function fm_summary_the_nickname(){
 
 function fm_summary_the_IP(){
 	return fm_summary_get_value('user_ip');
+}
+
+function fm_summary_the_parent(){
+	return fm_summary_get_value('parent_post_id');
 }
 
 function fm_summary_the_title(){

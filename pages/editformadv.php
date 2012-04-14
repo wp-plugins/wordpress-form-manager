@@ -10,9 +10,11 @@ global $fm_DEBUG;
 global $fm_MEMBERS_EXISTS;
 
 $form = null;
-if($_REQUEST['id']!="")
+if($_REQUEST['id']!=""){
 	$form = $fmdb->getForm($_REQUEST['id']);
-
+	$formMeta = $fmdb->getFormItems($_REQUEST['id'],1);
+	$allFormItems = array_merge($form['items'], $formMeta);
+}
 /////////////////////////////////////////////////////////////////////////////////////
 // Process settings changes
 
@@ -21,22 +23,23 @@ if(isset($_POST['submit-form-settings'])){
 	
 	$formInfo['behaviors'] = $_POST['behaviors'];
 	
-	$formInfo['form_template'] = $_POST['form_template'];
-	$formInfo['email_template'] = $_POST['email_template'];
-	$formInfo['summary_template'] = $_POST['summary_template'];
-	$formInfo['use_advanced_email'] = ($_POST['use_advanced_email']=="on"?1:0);
-	$formInfo['advanced_email'] = $_POST['advanced_email'];
-	$formInfo['publish_post'] = ($_POST['publish_post']=="on"?1:0);
-	$formInfo['publish_post_category'] = $_POST['publish_post_category'];
-	$formInfo['publish_post_title'] = $_POST['publish_post_title'];
-	$formInfo['reg_user_only_msg'] = $_POST['reg_user_only_msg'];
-	$formInfo['publish_post_status'] = $_POST['publish_post_status'];
+	$formInfo['form_template'] 			= $_POST['form_template'];
+	$formInfo['email_template'] 		= $_POST['email_template'];
+	$formInfo['summary_template'] 		= $_POST['summary_template'];
+	$formInfo['use_advanced_email'] 	= ($_POST['use_advanced_email']=="on"?1:0);
+	$formInfo['advanced_email'] 		= $_POST['advanced_email'];
+	$formInfo['publish_post'] 			= ($_POST['publish_post']=="on"?1:0);
+	$formInfo['publish_post_category'] 	= $_POST['publish_post_category'];
+	$formInfo['publish_post_title'] 	= $_POST['publish_post_title'];
+	$formInfo['reg_user_only_msg'] 		= $_POST['reg_user_only_msg'];
+	$formInfo['publish_post_status'] 	= $_POST['publish_post_status'];
+	$formInfo['summary_hide_empty']		= ($_POST['summary_hide_empty']=="on"?1:0);
 	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 	
 	$fmdb->showerr = false;
 	$itemTypeErr = array();
-	foreach($form['items'] as $item){
+	foreach($allFormItems as $item){
 		if($fmdb->isDataCol($item['unique_name']) 
 			&& $_POST[$item['unique_name']."-dbtype-prev"] != $_POST[$item['unique_name']."-dbtype"]){			
 			$fmdb->updateDataType($form['ID'], $item['unique_name'], stripslashes($_POST[$item['unique_name']."-dbtype"]));
@@ -110,7 +113,7 @@ helper_text_field('reg_user_only_msg', __("Message displayed to unregistered use
 ?>
 </table>
 
-<h3>Templates</h3>
+<h3><?php _e("Templates", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 <?php 
 /* translators: the following apply to the different kinds of templates */
@@ -118,6 +121,11 @@ helper_option_field('form_template', __("Form Display", 'wordpress-form-manager'
 helper_option_field('email_template', __("E-Mail Notifications", 'wordpress-form-manager'), array_merge(array( '' => __("(use default)", 'wordpress-form-manager')), $templateList['email']), $form['email_template']);
 helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manager'), array_merge(array( '' => __("(use default)", 'wordpress-form-manager')), $templateList['summary']), $form['summary_template']);
 ?>
+</table>
+
+<h3><?php _e("Summary Fields", 'wordpress-form-manager');?></h3>
+<table class="form-table">
+<?php helper_checkbox_field('summary_hide_empty', __("Hide empty fields in summaries", 'wordpress-form-manager'), ($form['summary_hide_empty'] == 1)); ?> 
 </table>
 
 <h3><?php _e("Custom E-Mail Notifications", 'wordpress-form-manager');?></h3>
@@ -138,7 +146,7 @@ helper_option_field('summary_template', __("Data Summary", 'wordpress-form-manag
 <h3><?php _e("Submission Data", 'wordpress-form-manager'); ?></h3>
 <table class="form-table">
 <?php
-foreach($form['items'] as $item){
+foreach($allFormItems as $item){
 	if($fmdb->isDataCol($item['unique_name'])){
 		$dbType = $fmdb->getDataType($item['unique_name']);
 		helper_text_field($item['unique_name']."-dbtype", ($item['nickname'] != "" ? $item['nickname'] : $item['label']), $dbType);
