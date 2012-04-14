@@ -52,7 +52,7 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 
 == Changelog ==
 = 1.6.30 =
-* Added French translation, thanks to Serge Rauber
+* Added French translation, thanks to Serge Rauber. Updated Dutch, thanks to Dani&euml;l Karssen
 * Data table formatting fix, thanks to Eduardo Aranda
 * 'Show' and 'hide' options work with non-table data lists
 * Added 'showprivate' option to formdata shortcode to show private fields

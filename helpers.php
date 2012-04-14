@@ -176,8 +176,9 @@ function fm_getDefaultDataCols(){
 
 function fm_getPostLink($col, $dbRow){
 	$postID = $dbRow[$col['key']];
+	$post = get_post( $postID );  
 	if($postID != 0)
-		return '<a href="'.get_permalink($postID).'">'.$postID.'</a>';
+		return '<a href="'.get_permalink($postID).'">'.$post->post_title.'</a>';
 	else
 		return "";
 }
