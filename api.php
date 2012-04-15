@@ -246,8 +246,7 @@ function fm_getFormDataSummaries($formID, $formInfo, $template, $orderBy = 'time
 		$strArray[] = $fm_display->displayDataSummary($template, $formInfo, $dataRow);
 	}
 	
-	return '<p class="fm-data">'.implode('</p><p class="fm-data">', $strArray).'</p>'.
-		'<pre>'.print_r($options,true).'</ br></ br>'.print_r($formInfo,true).'</pre>';
+	return '<p class="fm-data">'.implode('</p><p class="fm-data">', $strArray).'</p>';
 }
 
 function fm_getFormID($formSlug){
