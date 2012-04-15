@@ -326,7 +326,14 @@ if(isset($_POST['message']))
 	<h3 class='hndle'><span><?php _e("Appearance", 'wordpress-form-manager');?></span></h3>
 		<div class="inside">
 		<div class="fm-form-admin">
+			<?php $keys = array( 'description', 'default', 'label', 'type' ); ?>
 			<?php foreach($formTemplate['options'] as $option): ?>
+			<?php
+				foreach ( $keys as $key ){
+					if ( !isset( $option[$key] ) )
+						$option[$key] = "";
+				} 
+			?>
 			<div class="fm-admin-field-wrap">								
 				<label><?php echo __(trim($option['label']), 'wordpress-form-manager');?>
 				<span class="small"><?php echo __(trim($option['description']), 'wordpress-form-manager');?></span>
