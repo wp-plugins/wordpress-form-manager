@@ -150,8 +150,8 @@ function fm_getFormDataTable($formID, $formInfo, $template, $orderBy = 'timestam
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
 						
 				$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
-				$lbl = htmlspecialchars($item['label']);
-				$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$lbl.'</th>';
+				
+				$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.htmlspecialchars($item['label']).'</th>';
 			}
 		}
 	$tbllbl.= '</tr>';
