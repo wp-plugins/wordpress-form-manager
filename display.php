@@ -150,11 +150,16 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 	ob_end_clean();
 	
 	// show the support scripts, validation, etc. only once
+	$scripts = new fm_script_display_class($formInfo, $options);
 	
-	if ( !$this->formsDisplayed[$formInfo['ID']] ){	
-		$scripts = new fm_script_display_class($formInfo, $options);
+	if ( get_option( 'fm-shortcode-scripts') != 'YES' && !$this->formsDisplayed[$formInfo['ID']] ){	
 		add_action('wp_footer', array($scripts, 'showBeforeFormScripts'));
 		add_action('wp_footer', array($scripts, 'showAfterFormScripts'));
+	} else if( get_option( 'fm-shortcode-scripts' ) == 'YES' ) {
+		ob_start();
+		$scripts-> showBeforeFormScripts();
+		$scripts-> showAfterFormScripts();
+		$str.= ob_get_clean();
 	}
 	
 	return $str;
