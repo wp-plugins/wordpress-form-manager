@@ -3,8 +3,8 @@ Contributors: hoffcamp
 Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
-Tested up to: 3.2
-Stable tag: 1.6.29
+Tested up to: 3.3.1
+Stable tag: 1.6.34
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -45,11 +45,36 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 
 * Espa&ntilde;ol (es_ES) - [Eduardo Aranda](http://sinetiks.com)
 * Italiano (it_IT) - [Andrea Bersi](http://www.andreabersi.com)
-* Nederlands (nl_NL) - [Sander Kolthof](http://www.fullcirclemedia.nl)
+* Nederlands (nl_NL) - Dani&euml;l Karssen, [Sander Kolthof](http://www.fullcirclemedia.nl)
 * Portugu&ecirc;s (Brazil) (pt_BR) - [Samuel Martins](http://www.samuelmartins.com.br)
-* Русский (ru_RU) - [Ellena Murawski](http://www.artmind.com.ua)
+* &#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081; (ru_RU) - [Ellena Murawski](http://www.artmind.com.ua)
+* Fran&ccedil;ais (fr_FR) - [Serge Rauber](http://kalyx.fr)
+* &#1662;&#1575;&#1585;&#1587;&#1740; (fa_IR) - Salman MP
 
 == Changelog ==
+= 1.6.34 =
+* Added Persian language
+* Added RTL language support for reCAPTCHA
+* Added option to include scripts with form render instead of in footer (for AJAX loaded posts)
+
+= 1.6.33 =
+* Fixed bug for checkbox lists (not escaping special characters)
+
+= 1.6.32 =
+* Removed debug output from formdata summary output
+
+= 1.6.31 =
+* Fixed data table bug for new forms
+* Added 'required' option for file uploads
+
+= 1.6.30 =
+* Added French translation, thanks to Serge Rauber. Updated Dutch, thanks to Dani&euml;l Karssen
+* Data table formatting fix, thanks to Eduardo Aranda
+* 'Show' and 'hide' options work with non-table data lists
+* Added 'showprivate' option to formdata shortcode to show private fields
+* Option to hide empty fields in summary
+* Include the form's parent post ID in submission data
+
 = 1.6.29 =
 * Fixed summary list template bug
 * Fixed form action for non-pages / non-posts

@@ -639,7 +639,7 @@ $bulkActions = apply_filters( 'fm_data_bulk_actions', $bulkActions );
 	<?php endif; ?>
 	
 	<div class="wrap">
-		<table class="widefat post fixed">
+		<table class="widefat post fixed" style="width:auto;">
 			<?php outputTableHead($cols); ?>
 			<?php while($row = mysql_fetch_assoc($res)): ?>
 				<?php if($fm_showEditRows && in_array($row['unique_id'], $checked)): ?>
