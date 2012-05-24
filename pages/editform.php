@@ -63,7 +63,7 @@ $pages = apply_filters( 'fm_form_editor_tabs', $pages );
 		foreach($pages as $key => $page){
 			if(!$fm_MEMBERS_EXISTS || current_user_can($page['capability'])){
 				if(!isset($page['parent'])){
-					if($_REQUEST['sec'] == $page['sec'] || $pages[$_REQUEST['sec']]['parent'] == $page['sec'])
+					if(isset($_REQUEST['sec']) && $_REQUEST['sec'] == $page['sec'])
 						$arr[] = "<a class=\"nav-tab nav-tab-active\" href=\"".get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=".$page['sec']."&id=".$_REQUEST['id']."\" title=\"".$page['title']."\" />".$page['linktext']."</a>";
 					else
 						$arr[] = "<a class=\"nav-tab nav-tab-inactive\" href=\"".get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=".$page['sec']."&id=".$_REQUEST['id']."\" title=\"".$page['title']."\" />".$page['linktext']."</a>";	
@@ -85,7 +85,7 @@ $pages = apply_filters( 'fm_form_editor_tabs', $pages );
 // show the appropriate page
 $found = false;
 foreach($pages as $page)
-	if($queryVars['sec'] == $page['sec'] &&
+	if(isset($queryVars['sec']) && $queryVars['sec'] == $page['sec'] &&
 		(!$fm_MEMBERS_EXISTS || current_user_can($page['capability']))){
 			if(isset( $page['page_function'] )){
 				$page['page_function']();
