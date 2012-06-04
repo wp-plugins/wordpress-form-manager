@@ -142,7 +142,7 @@ class fm_customListControl extends fm_controlBase{
 				if(isset($_POST[$uniqueName."-".$x]))
 					$arr[] = ($_POST[$uniqueName."-".$x]=="on"?$itemInfo['extra']['options'][$x]:"");
 			}
-			return implode(", ", $arr);
+			return addslashes(implode(", ", $arr));
 		}
 		
 	public function getPanelItems($uniqueName, $itemInfo){

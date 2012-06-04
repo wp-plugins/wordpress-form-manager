@@ -60,6 +60,8 @@ if(isset($_POST['submit-settings'])){
 	update_option('fm-email-send-method', $_POST['email_send_method']);
 	update_option('fm-allowed-tags', $_POST['fm-allowed-tags']);
 	update_option('fm-nonce-check', $_POST['fm-nonce-check']?"YES":"");
+	update_option('fm-shortcode-scripts', $_POST['fm-shortcode-scripts']?"YES":"");
+	update_option('fm-disable-css', $_POST['fm-disable-css']?"YES":"");
 	
 }
 elseif(isset($_POST['remove-template'])){
@@ -273,6 +275,17 @@ file_method
 <table class="form-table">
 <?php helper_checkbox_field('fm-nonce-check', __("Enable nonce check", 'wordpress-form-manager'), (get_option('fm-nonce-check') == "YES")); ?>
 </table>
+
+<h3><?php _e("Scripts", 'wordpress-form-manager');?></h3>
+<table class="form-table">
+<?php helper_checkbox_field('fm-shortcode-scripts', __("Include scripts in the shortcode (instead of the footer)", 'wordpress-form-manager'), (get_option('fm-shortcode-scripts') == "YES")); ?>
+</table>
+
+<h3><?php _e("CSS", 'wordpress-form-manager');?></h3>
+<table class="form-table">
+<?php helper_checkbox_field('fm-disable-css', __("Disable the default CSS", 'wordpress-form-manager'), (get_option('fm-disable-css') == "YES")); ?>
+</table>
+
 
 <input type="hidden" id="remove-template-filename" name="remove-template-filename" value="" />
 

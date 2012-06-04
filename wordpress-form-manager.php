@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.29
+Version: 1.6.36
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.29";
+$fm_currentVersion = 		"1.6.36";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -92,7 +92,10 @@ $optionDefaults = array(
 	'fm-email-send-method' => 'wp_mail',
 	'fm-allowed-tags' => '<a><abbr><acronym><b><bdo><blockquote><br><caption><center><cite><code><col><colgroup><dd><del><dfn><div><dl><dt><em><h1><h2><h3><h4><h5><h6><hr><i><img><ins><kbd><legend><li><ol><p><pre><q><s><samp><span><strike><strong><sub><sup><table><tbody><td><tfoot><th><thead><tr><tt><u><ul>',
 	'fm-nonce-check' => 'YES',
+	'fm-shortcode-scripts' => 'NO',
+	'fm-disable-css' => 'NO',
 );
+
 foreach ( $optionDefaults as $key=>$val ){
 	if ( get_option( $key ) === false )
 		update_option( $key, $val );
@@ -227,12 +230,21 @@ add_action( 'admin_init', 'fm_adminInit' );
 function fm_adminInit() {
 	global $fm_SLIMSTAT_EXISTS;
 	global $fm_templates;
+	global $plugin_page;
 	
 	if ( get_option( 'slimstat_secret' ) !==  false ) {
 		$fm_SLIMSTAT_EXISTS = true;
 	}
 	
 	$fm_templates->initTemplates();
+	
+	$isFMPage = strrpos($plugin_page, 'fm-');
+	if( $isFMPage !== false && $isFMPage == 0 ) {
+		
+		wp_register_style( 'form-manager-css', plugins_url( '/css/style.css', __FILE__ ) );
+		wp_enqueue_style( 'form-manager-css' );	
+		
+	}
 }
 
 add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts', 10, 1);
@@ -324,9 +336,6 @@ function fm_adminEnqueueScripts( ) {
 					__("is not checked", 'wordpress-form-manager')
 				)
 			); 
-	
-		wp_register_style( 'form-manager-css', plugins_url( '/css/style.css', __FILE__ ) );
-		wp_enqueue_style( 'form-manager-css' );	
 	}
 }
 
@@ -363,8 +372,10 @@ function fm_userInit() {
 		array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) )
 		);
 	
-	wp_register_style( 'form-manager-css', plugins_url( '/css/style.css', __FILE__ ) );
-	wp_enqueue_style( 'form-manager-css' );
+	if ( get_option('fm-disable-css') != "YES" ){
+		wp_register_style( 'form-manager-css', plugins_url( '/css/style.css', __FILE__ ) );
+		wp_enqueue_style( 'form-manager-css' );
+	}
 	
 	////////////////////////////////////////////////////////////
 	
@@ -605,6 +616,7 @@ function fm_dataShortcodeHandler( $atts ) {
 			'col_class' => '',
 			'show' => '',
 			'hide' => '',
+			'showprivate' => '',
 			), 
 		$atts
 		);
@@ -624,7 +636,8 @@ function fm_dataShortcodeHandler( $atts ) {
 			$atts[ 'template' ],
 			$atts[ 'orderby' ],
 			$atts[ 'order' ],
-			$atts[ 'dataperpage' ]
+			$atts[ 'dataperpage' ],
+			$options
 			);
 	}
 	

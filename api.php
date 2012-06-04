@@ -58,8 +58,43 @@ function fm_doPaginatedSummariesBySlugCallback($formSlug, $template, $callback, 
 		$pageLinkStr.= "</p>";
 	}
 	
-	// summaries
-	$summaryListStr = $callback($formID, $template, $orderBy, $ord, $currentStartIndex, $dataPerPage, $options);
+	// process the form structure
+	$showcols = isset($options['show']) ? explode(',', $options['show']) : false;
+	$hidecols = isset($options['hide']) ? explode(',', $options['hide']) : false;
+	$showmeta = isset($options['showprivate']) ? explode(',', $options['showprivate']) : false;
+	$formInfo = $fmdb->getForm($formID);
+	$formInfo['meta'] = $fmdb->getFormItems($formID,'1');
+	
+	// unset the hidden columns form structure
+	foreach($formInfo['items'] as $key => $item){
+		$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
+		if (!fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
+			unset($formInfo['items'][$key]);
+		}		
+	}
+	
+	// the 'items' array uses integer keys. unsetting the key will leave a 'blank spot' in the array:
+	$newItems = array();
+	$index = 0;
+	foreach( $formInfo['items'] as $item ){
+		$item['index'] = $index;
+		$newItems[$index++] = $item;
+	}
+	// add any private fields if they are selected
+	if( $showmeta !== false ){
+		foreach ( $formInfo['meta'] as $item ){
+			$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];
+			if( fm_helper_is_shown_col( $showmeta, false, $lbl) ){
+				$item['set'] = 0;
+				$item['index'] = $index;
+				$newItems[$index++] = $item;
+			}
+		}
+	}
+	$formInfo['items'] = $newItems;
+	
+	// render the summary
+	$summaryListStr = $callback($formID, $formInfo, $template, $orderBy, $ord, $currentStartIndex, $dataPerPage, $options);
 	
 	// put it all together
 	return  $pageLinkStr.
@@ -71,22 +106,19 @@ function fm_doDataTableBySlug($formSlug, $template, $orderBy = 'timestamp', $ord
 	return fm_doPaginatedSummariesBySlugCallback($formSlug, $template, 'fm_getFormDataTable', $orderBy, $ord, $dataPerPage, $options);
 }
 
-function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30, $options=array()){
+function fm_getFormDataTable($formID, $formInfo, $template, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30, $options=array()){
 	global $fmdb;
 	global $fm_display;
 	global $fm_controls;
 	
-	$showcols = isset($options['show']) ? explode(',', $options['show']) : false;
-	$hidecols = isset($options['hide']) ? explode(',', $options['hide']) : false;
-	
-	$formInfo = $fmdb->getForm($formID);
 	$formData = $fmdb->getFormSubmissionData($formID, $orderBy, strtoupper($ord), $startIndex, $numItems);
 	$atts = fm_helper_extractColumnAtts($formInfo, $options);
 	$hasPosts = $fmdb->dataHasPublishedSubmissions($formInfo['ID']);
 	
+	$showcols = isset($options['show']) ? explode(',', $options['show']) : false;
+	$hidecols = isset($options['hide']) ? explode(',', $options['hide']) : false;
+	
 	$str = "";
-//	$str .= '<pre>'.print_r($options,true).'</pre>';
-//	$str .= '<pre>'.print_r($atts,true).'</pre>';
 	$str .= '<table class="fm-data">';
 	
 	$tbllbl = '<tr>';
@@ -116,11 +148,10 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 		foreach($formInfo['items'] as $item){
 			if($fmdb->isDataCol($item['unique_name'])){
 				$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];				
-				if (fm_helper_is_shown_col($showcols, $hidecols, $lbl)) {			
-						$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
-						$lbl = htmlspecialchars($item['label']);
-						$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.$lbl.'</th>';
-				}
+						
+				$width = ' style="width:'.$atts[$item['nickname'].'_width'].';"';	
+				
+				$tbllbl.= '<th class="fm-item-header-'.$lbl.'"'.$width.'>'.htmlspecialchars($item['label']).'</th>';
 			}
 		}
 	$tbllbl.= '</tr>';
@@ -147,7 +178,7 @@ function fm_getFormDataTable($formID, $template, $orderBy = 'timestamp', $ord = 
 			
 		foreach($formInfo['items'] as $item){
 			$lbl = ($item['nickname'] != "") ? $item['nickname'] : $item['unique_name'];
-			if($fmdb->isDataCol($item['unique_name']) && fm_helper_is_shown_col($showcols, $hidecols, $lbl)){				
+			if($fmdb->isDataCol($item['unique_name'])){				
 				$tmp = $dataRow[$item['unique_name']];
 				$str.=  '<td class="fm-item-cell-'.$lbl.'">'.$tmp.'</td>';
 			}		
@@ -193,25 +224,23 @@ function fm_helper_is_shown_col($showcols, $hidecols, $lbl){
 }
 
 //takes a form's slug as a string, returns paginated 
-function fm_doDataListBySlug($formSlug, $template, $orderBy = 'timestamp', $ord = 'DESC', $dataPerPage = 30){
-	return fm_doPaginatedSummariesBySlugCallback($formSlug, $template, 'fm_getFormDataSummaries', $orderBy, $ord, $dataPerPage);
+function fm_doDataListBySlug($formSlug, $template, $orderBy = 'timestamp', $ord = 'DESC', $dataPerPage = 30, $options = array()){
+	return fm_doPaginatedSummariesBySlugCallback($formSlug, $template, 'fm_getFormDataSummaries', $orderBy, $ord, $dataPerPage, $options);
 }
 
 //takes a form's slug as a string, returns formatted data summaries, using the 'summary' template.
-function fm_getFormDataSummaries($formID, $template, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){
+function fm_getFormDataSummaries($formID, $formInfo, $template, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30, $options){
 	global $fmdb;
 	global $fm_display;
-	
-	$formInfo = $fmdb->getForm($formID);
 	
 	// figure out which template to use
 	if ( $template == '' )
 		$template = $formInfo['summary_template'];
 	if ( $template == '' )
 		$template = $fmdb-> getGlobalSetting('template_summary');
-	
+		
 	$formData = $fmdb->getFormSubmissionDataRaw($formID, $orderBy, strtoupper($ord), $startIndex, $numItems);
-	
+			
 	$strArray = array();
 	foreach($formData as $dataRow){
 		$strArray[] = $fm_display->displayDataSummary($template, $formInfo, $dataRow);
@@ -287,6 +316,7 @@ function fm_processPost( $formInfo ) {
 		array('user'=>$current_user->user_login,
 			'user_ip' => fm_get_user_IP(),
 			'unique_id' => $_POST['fm_uniq_id'],
+			'parent_post_id' => $_POST['fm_parent_post_id'],
 			),
 		$overwrite
 		);
@@ -321,7 +351,7 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 	global $fmdb;
 	global $fm_display;
 	
-	$formAction = fm_helper_form_action();
+	$formAction = fm_helper_form_action( $formInfo );
 	
 	// see if this is a restricted form
 	if(isset($formInfo['behaviors']['reg_user_only']) && $current_user->user_login == ""){
