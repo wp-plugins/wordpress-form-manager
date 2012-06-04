@@ -96,6 +96,7 @@ $this->formSettingsKeys = array(
 					'auto_redirect_timeout' => 5,
 					'conditions' => '',
 					'summary_hide_empty' => 0,
+					'exact_form_action' => '',
 					);
 					
 $this->itemKeys = array (
@@ -252,6 +253,7 @@ function setupFormManager(){
 		`conditions` TEXT NOT NULL,
 		`reg_user_only_msg` TEXT NOT NULL,
 		`summary_hide_empty` BOOL DEFAULT '0' NOT NULL,
+		`exact_form_action` VARCHAR( 1024 ) DEFAULT '' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 

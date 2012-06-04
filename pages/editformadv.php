@@ -34,6 +34,7 @@ if(isset($_POST['submit-form-settings'])){
 	$formInfo['reg_user_only_msg'] 		= $_POST['reg_user_only_msg'];
 	$formInfo['publish_post_status'] 	= $_POST['publish_post_status'];
 	$formInfo['summary_hide_empty']		= ($_POST['summary_hide_empty']=="on"?1:0);
+	$formInfo['exact_form_action']		= $_POST['exact_form_action'];
 	
 	$fmdb->updateForm($_POST['fm-form-id'], $formInfo);
 	
@@ -76,7 +77,6 @@ $templateList = $fm_templates->getTemplateFilesByType();
 $fm_globalSettings = $fmdb->getGlobalSettings();
 
 ?>
-
 <form name="fm-main-form" id="fm-main-form" action="" method="post">
 <input type="hidden" value="1" name="message" id="message-post" />
 <input type="hidden" value="<?php echo $form['ID'];?>" name="fm-form-id" />
@@ -110,6 +110,7 @@ foreach($fm_form_behavior_types as $desc => $val)
 helper_option_field('behaviors', __("Behavior Type", 'wordpress-form-manager'), $behaviorList, $form['behaviors'], __("Behavior types other than 'Default' require a registered user", 'wordpress-form-manager'));
 $msg = empty($formInfo['reg_user_only_msg']) ? $fmdb->getGlobalSetting('reg_user_only_msg') : $form['reg_user_only_msg'];
 helper_text_field('reg_user_only_msg', __("Message displayed to unregistered users", 'wordpress-form-manager'), $msg, __("Include '%s' where you would like the form title to appear", 'wordpress-form-manager'));
+helper_text_field('exact_form_action', __("Exact URL of destination page", 'wordpress-form-manager'), $form['exact_form_action'], __("This page will be loaded after submitting the form, regardless of the 'behavior' setting", 'wordpress-form-manager'));
 ?>
 </table>
 

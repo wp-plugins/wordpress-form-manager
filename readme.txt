@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.3.1
-Stable tag: 1.6.35
+Stable tag: 1.6.36
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -52,6 +52,12 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * &#1662;&#1575;&#1585;&#1587;&#1740; (fa_IR) - Salman
 
 == Changelog ==
+= 1.6.36 =
+* Fixed IE placeholder bug
+* Added option in Form > Advanced to specify form action manually
+* Added html and body tags to the default e-mails
+* Added option to turn of default CSS
+
 = 1.6.35 =
 * Fixed data table CSS class names
 

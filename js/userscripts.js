@@ -38,6 +38,7 @@ function fm_register_form(formID){
 function fm_submit_onclick(formID){
 	if(!fm_check_required_items(formID)) return false;
 	if(!fm_check_text_validation(formID)) return false;
+	fm_remove_placeholders();
 	return true;
 }
 
@@ -96,7 +97,7 @@ function fm_check_text_validation(formID){
 }
 
 function fm_item_validation_satisfied(itemDef){
-	if(itemDef.validation_callback != ""){
+	if(itemDef.validation_callback != ""){		
 		eval("temp = " + itemDef.validation_callback + "('" + itemDef.formID + "', '" + itemDef.unique_name + "', '" + itemDef.validation_type + "');");
 		return temp;
 	}
@@ -147,7 +148,6 @@ function fm_set_required(itemID, req){
 	}
 	
 }
-/* HTML 5 support & simulation */
 
 function fm_supports_placeholder(){
 	placeholderSupport = ("placeholder" in document.createElement("input"));
@@ -187,13 +187,17 @@ function fm_simulate_placeholder_onchange(){
 }	
 
 function fm_remove_placeholders(){	
-	for(var i=0;i<fm_registered_form_items.length;i++){
-		switch(fm_registered_form_items[i].type) {
-			case 'text':
-			case 'textarea':
-				var textItem = document.getElementById('fm-form-' + fm_registered_form_items[i].formID)[fm_registered_form_items[i].unique_name];
-				textItem.value = fm_registered_form_items[i].extra.value;
-			break;
+	if(!fm_supports_placeholder()){
+		for(var i=0;i<fm_registered_form_items.length;i++){
+			switch(fm_registered_form_items[i].type) {
+				case 'text':
+				case 'textarea':
+					formID = fm_registered_form_items[i].formID;
+					itemID = fm_registered_form_items[i].unique_name;
+					var textItem = document.getElementById('fm-form-' + formID)[itemID];
+					textItem.value = fm_base_get_value(formID, itemID);
+				break;
+			}
 		}
 	}
 }

@@ -112,7 +112,7 @@ class fm_textControl extends fm_controlBase{
 		?><script type="text/javascript">
 //<![CDATA[
 		function fm_text_validation(formID, itemID, valType){
-			var itemValue = document.getElementById('fm-form-' + formID)[itemID].value.toString();
+			var itemValue = fm_base_get_value(formID, itemID);
 			if(fm_trim(itemValue) == "") return true;
 			switch(valType){
 				<?php foreach($this->validators as $val): ?>

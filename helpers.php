@@ -402,6 +402,7 @@ function fm_helper_sendEmail($formInfo, $postData){
 	
 		$subject = fm_getSubmissionDataShortcoded($formInfo['email_subject'], $formInfo, $postData);	
 		$message = $fm_display->displayDataSummary('email', $formInfo, $postData);
+		$message = '<html><body>'.$message.'</body></html>';
 		$headers  = 'From: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
 					'Reply-To: '.fm_getSubmissionDataShortcoded($formInfo['email_from'], $formInfo, $postData)."\r\n".
 					'MIME-Version: 1.0'."\r\n".
@@ -454,11 +455,14 @@ function fm_helper_publishPost($formInfo, &$postData){
 	$postData['post_id'] = $postID;
 }
 
-function fm_helper_form_action(){
-	/*if ( is_front_page() || is_home() )
-		return home_url();*/
-	
-	return get_permalink();
+function fm_helper_form_action( $formInfo = null ){
+	if ( is_array( $formInfo ) 
+		&& trim($formInfo['exact_form_action']) != "" ) {
+		
+		return $formInfo['exact_form_action'];
+			
+	}
+	return get_permalink();		
 }
 
 /////////////////////////////////////////////////////////////////////////

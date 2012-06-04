@@ -351,7 +351,7 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 	global $fmdb;
 	global $fm_display;
 	
-	$formAction = fm_helper_form_action();
+	$formAction = fm_helper_form_action( $formInfo );
 	
 	// see if this is a restricted form
 	if(isset($formInfo['behaviors']['reg_user_only']) && $current_user->user_login == ""){
