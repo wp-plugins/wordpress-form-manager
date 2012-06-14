@@ -31,11 +31,13 @@ class fm_recaptchaControl extends fm_controlBase{
 		$lang = $fmdb->getGlobalSetting('recaptcha_lang');
 		if ( $lang == "" ) $lang = "en";
 		
-		return "<script type=\"text/javascript\"> var RecaptchaOptions = { ".
+		return "<div dir=\"ltr\">" .
+				"<script type=\"text/javascript\"> var RecaptchaOptions = { ".
 				"theme : '".$theme."', ".
 				"lang : '".$lang."', tabindex : 100 }; </script>".
 				recaptcha_get_html($publickey).
-				(isset($_POST['recaptcha_challenge_field'])?"<br /> <em> ".__("The reCAPTCHA was incorrect.", 'wordpress-form-manager')." </em>":"");
+				(isset($_POST['recaptcha_challenge_field'])?"<br /> <em> ".__("The reCAPTCHA was incorrect.", 'wordpress-form-manager')." </em>":"") .
+				"</div>";
 	}	
 	
 	public function processPost($uniqueName, $itemInfo){

@@ -94,7 +94,9 @@ $this->formSettingsKeys = array(
 					'auto_redirect' => 0,
 					'auto_redirect_page' => 0,
 					'auto_redirect_timeout' => 5,
-					'conditions' => ''
+					'conditions' => '',
+					'summary_hide_empty' => 0,
+					'exact_form_action' => '',
 					);
 					
 $this->itemKeys = array (
@@ -250,6 +252,8 @@ function setupFormManager(){
 		`auto_redirect_timeout` INT DEFAULT '5' NOT NULL,
 		`conditions` TEXT NOT NULL,
 		`reg_user_only_msg` TEXT NOT NULL,
+		`summary_hide_empty` BOOL DEFAULT '0' NOT NULL,
+		`exact_form_action` VARCHAR( 1024 ) DEFAULT '' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -469,7 +473,7 @@ function convertAppearanceSettings(){
 	$this->query($q);
 }
 
-//fix data tables for versions prior to 1.4.3; adds a column for the user's IP address
+//fix data tables from prior versions. 
 function updateDataTables(){
 	$q = "SELECT `ID`, `data_table` FROM `".$this->formsTable."` WHERE `ID` > 0";
 	$res = $this->query($q);
@@ -484,6 +488,7 @@ function updateDataTables(){
 		$found = false;
 		$postIDfound = false;
 		$uniqueIDfound = false;
+		$parentPostFound = false;
 		
 		while($row = mysql_fetch_assoc($res)){
 			if($row['Field'] == 'user_ip')
@@ -492,6 +497,8 @@ function updateDataTables(){
 				$postIDfound = true;
 			if($row['Field'] == 'unique_id')
 				$uniqueIDfound = true;
+			if($row['Field'] == 'parent_post_id')
+				$parentPostFound = true;
 		}
 		mysql_free_result($res);
 		
@@ -507,6 +514,10 @@ function updateDataTables(){
 			$q = "ALTER TABLE `".$dataTable."` ADD `unique_id` VARCHAR( 32 ) DEFAULT '' NOT NULL";
 			$this->query($q);
 			$q = "ALTER TABLE `".$dataTable."` ADD INDEX (`unique_id`)";
+			$this->query($q);
+		}
+		if(!$parentPostFound){
+			$q = "ALTER TABLE `".$dataTable."` ADD `parent_post_id` INT DEFAULT '0' NOT NULL";
 			$this->query($q);
 		}
 		
@@ -1068,10 +1079,19 @@ function getFormSubmissionUserData($formID){
 
 function getFormSubmissionDataRaw($formID, $orderBy = 'timestamp', $ord = 'DESC', $startIndex = 0, $numItems = 30){
 	$dataTable = $this->getDataTableName($formID);
+	
+	// options ASC_N and DESC_N are for numeric rather than alphabetic sort
+	if( $ord == 'ASC_N' || $ord == 'DESC_N' ){
+		$ord = substr($ord,0,strlen($ord)-2);
+		$orderBy = '(`'.$orderBy.'` + 0)';
+	} else {
+		$orderBy = '`'.$orderBy.'`';
+	}
+	
 	if( $numItems == 0 )
-		$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord}";
+		$q = "SELECT * FROM `{$dataTable}` ORDER BY {$orderBy} {$ord}";
 	else
-		$q = "SELECT * FROM `{$dataTable}` ORDER BY `{$orderBy}` {$ord} LIMIT {$startIndex}, {$numItems}";
+		$q = "SELECT * FROM `{$dataTable}` ORDER BY {$orderBy} {$ord} LIMIT {$startIndex}, {$numItems}";
 	$res = $this->query($q);
 	if(mysql_num_rows($res) == 0) return array();
 	$data=array();
@@ -1472,6 +1492,7 @@ function createDataTable($formInfo, $dataTable){
 		"`user` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
 		"`user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL ,".
 		"`post_id` INT DEFAULT '0' NOT NULL ,".
+		"`parent_post_id` INT DEFAULT '0' NOT NULL ,".
 		"`unique_id` VARCHAR( 32 ) DEFAULT '' NOT NULL ,".
 		"INDEX (`unique_id`)";
 	$q.= ") ".$charset_collate.";";

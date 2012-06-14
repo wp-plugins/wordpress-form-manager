@@ -150,11 +150,16 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 	ob_end_clean();
 	
 	// show the support scripts, validation, etc. only once
+	$scripts = new fm_script_display_class($formInfo, $options);
 	
-	if ( !$this->formsDisplayed[$formInfo['ID']] ){	
-		$scripts = new fm_script_display_class($formInfo, $options);
+	if ( get_option( 'fm-shortcode-scripts') != 'YES' && !$this->formsDisplayed[$formInfo['ID']] ){	
 		add_action('wp_footer', array($scripts, 'showBeforeFormScripts'));
 		add_action('wp_footer', array($scripts, 'showAfterFormScripts'));
+	} else if( get_option( 'fm-shortcode-scripts' ) == 'YES' ) {
+		ob_start();
+		$scripts-> showBeforeFormScripts();
+		$scripts-> showAfterFormScripts();
+		$str.= ob_get_clean();
 	}
 	
 	return $str;
@@ -194,6 +199,10 @@ function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "
 	global $fm_controls;
 	global $fmdb;
 	
+	if( $formInfo['summary_hide_empty'] == '1' ){
+		fm_helper_cleanEmptyFields($formInfo, $data);
+	}
+	
 	$str = "";
 	$str.= "<div class=\"fm-data-summary\">\n";
 	$str.= $before;
@@ -217,6 +226,10 @@ function displayDataSummaryNotemplate($formInfo, $data, $before = "", $after = "
 
 function displayDataSummaryTemplate($template, $formInfo, $data){
 	global $fm_templates;
+	
+	if( $formInfo['summary_hide_empty'] == '1' ){
+		fm_helper_cleanEmptyFields($formInfo, $data);
+	}
 	
 	$this->currentFormInfo = $formInfo;
 	$this->currentFormData = $data;
@@ -317,9 +330,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 	//below is a workaround: the 'default value' for a text item is displayed as a placeholder.  In some instances, this should be an actual value in the field.  The script below takes care of this.	
 	if(isset($options['use_placeholders']) && $options['use_placeholders'] === false)
 		echo "fm_remove_placeholders();\n"; //this will convert placeholders into values; used to re-populate a form after a bad submission, for user profile style, etc., where the 'value' field needs to be the fields' value rather than a placeholder
-	else
-		echo "fm_add_placeholders();\n"; //this will make sure the placeholder functionality is simulated in browsers that do not support HTML 5 'placeholder' attribute in text fields
-
+		
 	//condition handlers
 	
 	echo $this->getConditionHandlerScripts();
@@ -576,11 +587,13 @@ function fm_form_end(){
 }
 function fm_form_hidden(){
 	global $fm_display;
+	global $post;
+	
 	$str = "<input type=\"hidden\" name=\"fm_nonce\" id=\"fm_nonce\" value=\"".wp_create_nonce('fm-nonce')."\" />\n";
 	$str.= "<input type=\"hidden\" name=\"fm_id\" id=\"fm_id\" value=\"".$fm_display->currentFormInfo['ID']."\" />\n";
 	// this is to prevent submitting the same instance of a form more than once
 	$str.= "<input type=\"hidden\" name=\"fm_uniq_id\" id=\"fm_uniq_id\" value=\"fm-".uniqid()."\" />\n";
-	
+	$str.= "<input type=\"hidden\" name=\"fm_parent_post_id\" id=\"fm_parent_post_id\" value=\"".$post->ID."\" />\n";
 	return $str;
 }
 
@@ -758,6 +771,10 @@ function fm_summary_the_nickname(){
 
 function fm_summary_the_IP(){
 	return fm_summary_get_value('user_ip');
+}
+
+function fm_summary_the_parent(){
+	return fm_summary_get_value('parent_post_id');
 }
 
 function fm_summary_the_title(){

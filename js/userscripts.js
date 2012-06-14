@@ -96,7 +96,7 @@ function fm_check_text_validation(formID){
 }
 
 function fm_item_validation_satisfied(itemDef){
-	if(itemDef.validation_callback != ""){
+	if(itemDef.validation_callback != ""){		
 		eval("temp = " + itemDef.validation_callback + "('" + itemDef.formID + "', '" + itemDef.unique_name + "', '" + itemDef.validation_type + "');");
 		return temp;
 	}
@@ -147,60 +147,27 @@ function fm_set_required(itemID, req){
 	}
 	
 }
-/* HTML 5 support & simulation */
 
 function fm_supports_placeholder(){
 	placeholderSupport = ("placeholder" in document.createElement("input"));
 	return placeholderSupport;
 }
 
-function fm_add_placeholders(){
+
+function fm_remove_placeholders(){	
 	if(!fm_supports_placeholder()){
 		for(var i=0;i<fm_registered_form_items.length;i++){
 			switch(fm_registered_form_items[i].type) {
 				case 'text':
-				case 'textarea':				
-					var textItem = document.getElementById('fm-form-' + fm_registered_form_items[i].formID)[fm_registered_form_items[i].unique_name];
-					textItem.value = fm_registered_form_items[i].extra.value;
-					textItem.ph_hasEdit = false;
-					textItem.ph_thePlaceholder = fm_registered_form_items[i].extra.value;
-					textItem.onfocus = fm_simulate_placeholder_onfocus;
-					textItem.onblur = fm_simulate_placeholder_onblur;
-					textItem.onchange = fm_simulate_placeholder_onchange;
+				case 'textarea':
+					formID = fm_registered_form_items[i].formID;
+					itemID = fm_registered_form_items[i].unique_name;
+					var textItem = document.getElementById('fm-form-' + formID)[itemID];
+					textItem.value = fm_base_get_value(formID, itemID);
 				break;
 			}
 		}
 	}
-}
-
-function fm_simulate_placeholder_onfocus(){
-	if(!this.ph_hasEdit)
-		this.value = '';
-}
-function fm_simulate_placeholder_onblur(){
-	if(this.value == "") this.ph_hasEdit = false;
-	if(!this.ph_hasEdit)
-		this.value = this.ph_thePlaceholder;
-}
-function fm_simulate_placeholder_onchange(){
-	this.ph_hasEdit = true;
-}	
-
-function fm_remove_placeholders(){	
-	for(var i=0;i<fm_registered_form_items.length;i++){
-		switch(fm_registered_form_items[i].type) {
-			case 'text':
-			case 'textarea':
-				var textItem = document.getElementById('fm-form-' + fm_registered_form_items[i].formID)[fm_registered_form_items[i].unique_name];
-				textItem.value = fm_registered_form_items[i].extra.value;
-			break;
-		}
-	}
-}
-
-
-function fm_simulate_HTML5(){
-	
 }
 
 ////////////////////////////////////////////////////////////
