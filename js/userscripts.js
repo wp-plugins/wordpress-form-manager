@@ -38,7 +38,6 @@ function fm_register_form(formID){
 function fm_submit_onclick(formID){
 	if(!fm_check_required_items(formID)) return false;
 	if(!fm_check_text_validation(formID)) return false;
-	fm_remove_placeholders();
 	return true;
 }
 
@@ -154,37 +153,6 @@ function fm_supports_placeholder(){
 	return placeholderSupport;
 }
 
-function fm_add_placeholders(){
-	if(!fm_supports_placeholder()){
-		for(var i=0;i<fm_registered_form_items.length;i++){
-			switch(fm_registered_form_items[i].type) {
-				case 'text':
-				case 'textarea':				
-					var textItem = document.getElementById('fm-form-' + fm_registered_form_items[i].formID)[fm_registered_form_items[i].unique_name];
-					textItem.value = fm_registered_form_items[i].extra.value;
-					textItem.ph_hasEdit = false;
-					textItem.ph_thePlaceholder = fm_registered_form_items[i].extra.value;
-					textItem.onfocus = fm_simulate_placeholder_onfocus;
-					textItem.onblur = fm_simulate_placeholder_onblur;
-					textItem.onchange = fm_simulate_placeholder_onchange;
-				break;
-			}
-		}
-	}
-}
-
-function fm_simulate_placeholder_onfocus(){
-	if(!this.ph_hasEdit)
-		this.value = '';
-}
-function fm_simulate_placeholder_onblur(){
-	if(this.value == "") this.ph_hasEdit = false;
-	if(!this.ph_hasEdit)
-		this.value = this.ph_thePlaceholder;
-}
-function fm_simulate_placeholder_onchange(){
-	this.ph_hasEdit = true;
-}	
 
 function fm_remove_placeholders(){	
 	if(!fm_supports_placeholder()){
@@ -200,11 +168,6 @@ function fm_remove_placeholders(){
 			}
 		}
 	}
-}
-
-
-function fm_simulate_HTML5(){
-	
 }
 
 ////////////////////////////////////////////////////////////

@@ -330,9 +330,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 	//below is a workaround: the 'default value' for a text item is displayed as a placeholder.  In some instances, this should be an actual value in the field.  The script below takes care of this.	
 	if(isset($options['use_placeholders']) && $options['use_placeholders'] === false)
 		echo "fm_remove_placeholders();\n"; //this will convert placeholders into values; used to re-populate a form after a bad submission, for user profile style, etc., where the 'value' field needs to be the fields' value rather than a placeholder
-	else
-		echo "fm_add_placeholders();\n"; //this will make sure the placeholder functionality is simulated in browsers that do not support HTML 5 'placeholder' attribute in text fields
-
+		
 	//condition handlers
 	
 	echo $this->getConditionHandlerScripts();
