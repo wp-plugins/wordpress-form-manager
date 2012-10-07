@@ -152,7 +152,7 @@ function displayFormTemplate($template, $formInfo, $options=array(), $values=arr
 	// show the support scripts, validation, etc. only once
 	$scripts = new fm_script_display_class($formInfo, $options);
 	
-	if ( get_option( 'fm-shortcode-scripts') != 'YES' && !$this->formsDisplayed[$formInfo['ID']] ){	
+	if ( get_option( 'fm-shortcode-scripts') != 'YES' && !isset( $this->formsDisplayed[$formInfo['ID']] ) ){	
 		add_action('wp_footer', array($scripts, 'showBeforeFormScripts'));
 		add_action('wp_footer', array($scripts, 'showAfterFormScripts'));
 	} else if( get_option( 'fm-shortcode-scripts' ) == 'YES' ) {
@@ -416,6 +416,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 			}
 			
 			//now do the logical tests
+			
 			$str.="var res = (";
 			for($x=0;$x<sizeof($condition['tests']);$x++){
 				$test = $condition['tests'][$x];
@@ -457,10 +458,13 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 							break;
 						case "unchecked": 	$str.= "!t".$x;
 							break;
+						default:			$str.= "false";							
+							break;
 					}
 				}
 			}
 			$str.=");\n";
+			
 			
 			//last do the action corresponding to the condition on the listed items
 			foreach($condition['items'] as $item){
@@ -570,7 +574,8 @@ function fm_form_start(){
 
 	echo "<form enctype=\"multipart/form-data\" class=\"".$fm_display->currentFormOptions['class']."\" ".
 			"method=\"post\" action=\"".$fm_display->currentFormOptions['action']."\" ".
-			"name=\"fm-form-".$fm_display->currentFormInfo['ID']."\" id=\"fm-form-".$fm_display->currentFormInfo['ID']."\">\n";	
+			"name=\"fm-form-".$fm_display->currentFormInfo['ID']."\" id=\"fm-form-".$fm_display->currentFormInfo['ID']."\" " . 
+			"autocomplete=\"on\" >\n";	
 }
 function fm_form_class(){
 	global $fm_display;
