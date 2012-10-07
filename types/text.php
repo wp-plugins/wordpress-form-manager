@@ -314,4 +314,15 @@ class fm_metaTrackNumberControl extends fm_metaTextControl {
 		return $itemInfo;
 	}
 }
+
+$fm_controlTypes['url'] = 'fm_urlControl';
+class fm_urlControl extends fm_textControl
+{
+	public function getTypeName(){ return "url"; }
+	public function getTypeLabel(){ return "URL"; }
+	public function parseData($uniqueName, $itemInfo, $data){
+		return '<a href="' . htmlspecialchars( $data ) . '">' . $data . '</a>';
+	}
+}
+
 ?>
