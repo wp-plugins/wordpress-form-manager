@@ -198,7 +198,7 @@ function fm_downloadFile(_formID, _itemID, _subID){
 		id: document.getElementById('form-id').value,
 		itemid: _itemID,
 		subid: _subID
-	}
+	};
 	
 	jQuery.post(ajaxurl, data, function(response){		
 		window.open(response,'Download');				
@@ -211,7 +211,7 @@ function fm_downloadAllFiles(_formID, _itemID){
 		action: 'fm_download_all_files',
 		id: _formID,
 		itemid: _itemID			
-	}
+	};
 	
 	jQuery.post(ajaxurl, data, function(response){
 		switch(response){
@@ -314,7 +314,7 @@ function js_multi_item_text_entry(ulID, getcallback, setcallback){
 	}
 	var newListItemsText = prompt(fm_I18n.enter_items_separated_by_commas, listItemsText);
 	
-	var neverHappens = "@%#$*&))("
+	var neverHappens = "@%#$*&))(";
 	newListItemsText = newListItemsText.replace(/\\,/, neverHappens);
 	newListItems = newListItemsText.split(",");
 	
@@ -506,7 +506,7 @@ requiregroup - a list of elements collectively considered required, as in only o
 
 
 function fm_getNewConditionHTML(conditionInfo){
-	var str = ""
+	var str = "";
 	var temp;
 	
 	str += '<table class="condition-buttons">';
@@ -551,7 +551,7 @@ function fm_getNewConditionHTML(conditionInfo){
 		str += '<input type="hidden" name="' + conditionInfo.id + '-item-count" id="' + conditionInfo.id + '-item-count" value="' + (conditionInfo.items.length + 1) + '" />';
 		str += '</div>';
 		
-	str += '</td></tr>'
+	str += '</td></tr>';
 	
 	str += '</table>';
 	str += '</div>';
