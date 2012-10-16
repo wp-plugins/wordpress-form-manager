@@ -159,14 +159,26 @@ class fm_fileControl extends fm_controlBase{
 	}
 	
 	public function parseDataCSV($uniqueName, $itemInfo, $data){
-		if(trim($data) == "") return "";
+	if(trim($data) == "") return "";
+		
 		$fileInfo = unserialize($data);
+				
 		if($fileInfo['size'] < 1024)
 			$sizeStr = $fileInfo['size']." B";
 		else
 			$sizeStr = ((int)($fileInfo['size']/1024))." kB";
-			
-		return $fileInfo['filename'].' ('.$sizeStr.')';
+		
+		if(!isset($fileInfo['upload_dir']) || trim($itemInfo['extra']['upload_url']) == "") 
+			return $fileInfo['filename']." (".$sizeStr.")";
+		else{
+			if( isset( $fileInfo['upload_url'] ) ){
+				$uploadURL = $fileInfo['upload_url'];
+			}
+			else {
+				$uploadURL = $this->parseUploadURL($itemInfo['extra']['upload_url']);
+			}
+			return $uploadURL.$fileInfo['filename'];
+		}
 	}
 	
 	public function parseUploadDir($dir){

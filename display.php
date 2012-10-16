@@ -574,8 +574,9 @@ function fm_form_start(){
 
 	echo "<form enctype=\"multipart/form-data\" class=\"".$fm_display->currentFormOptions['class']."\" ".
 			"method=\"post\" action=\"".$fm_display->currentFormOptions['action']."\" ".
-			"name=\"fm-form-".$fm_display->currentFormInfo['ID']."\" id=\"fm-form-".$fm_display->currentFormInfo['ID']."\" " . 
-			"autocomplete=\"on\" >\n";	
+			"name=\"fm-form-".$fm_display->currentFormInfo['ID']."\" id=\"fm-form-".$fm_display->currentFormInfo['ID']."\" " .
+			($fm_display->currentFormInfo['enable_autocomplete']=="1"?"autocomplete=\"on\"":""). 
+			" >\n";	
 }
 function fm_form_class(){
 	global $fm_display;

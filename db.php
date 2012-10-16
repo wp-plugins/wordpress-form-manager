@@ -97,6 +97,7 @@ $this->formSettingsKeys = array(
 					'conditions' => '',
 					'summary_hide_empty' => 0,
 					'exact_form_action' => '',
+					'enable_autocomplete' => 1,
 					);
 					
 $this->itemKeys = array (
@@ -254,6 +255,7 @@ function setupFormManager(){
 		`reg_user_only_msg` TEXT NOT NULL,
 		`summary_hide_empty` BOOL DEFAULT '0' NOT NULL,
 		`exact_form_action` VARCHAR( 1024 ) DEFAULT '' NOT NULL,
+		`enable_autocomplete` BOOL DEFAULT '1' NOT NULL,
 		PRIMARY KEY  (`ID`)
 		) ".$charset_collate.";";
 
@@ -1319,7 +1321,7 @@ function getFormAndMeta($formID){
 function copyForm($formID){
 	$formInfo = $this->getForm($formID);
 	for($x=0;$x<sizeof($formInfo['items']);$x++){
-		$formInfo['items'][$x]['unique_name'] = $this->getUniqueItemID($item['type']);
+		$formInfo['items'][$x]['unique_name'] = $this->getUniqueItemID($formInfo['items'][$x]['type']);
 	}
 	return $formInfo;
 }
