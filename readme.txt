@@ -52,6 +52,10 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * &#1662;&#1575;&#1585;&#1587;&#1740; (fa_IR) - Salman
 
 == Changelog ==
+= 1.6.40 =
+* 'Checked by default' works
+* 
+
 = 1.6.39 =
 * CSV files show URL instead of file name for file uploads
 * 'Insert Saved Form' bug fixed

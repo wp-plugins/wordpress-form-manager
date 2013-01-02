@@ -414,7 +414,7 @@ fm_register_form(<?php echo $formInfo['ID'];?>);
 						$str.= "false;\n";
 				}
 			}
-			
+
 			//now do the logical tests
 			
 			$str.="var res = (";

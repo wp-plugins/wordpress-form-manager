@@ -25,7 +25,7 @@ class fm_checkboxControl extends fm_controlBase{
 	}
 	
 	public function showItem($uniqueName, $itemInfo){
-		$isChecked = $itemInfo['extra']['value'] == __("yes",'wordpress-form-manager');
+		$isChecked = $itemInfo['extra']['value'] == 'checked';
 		$elem=array('type' => 'checkbox',
 					'attributes' => array('name' => $uniqueName,
 											'id'=> $uniqueName,
