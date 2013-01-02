@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.37
+Version: 1.6.40
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.37";
+$fm_currentVersion = 		"1.6.40";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -85,15 +85,15 @@ include 'formdefinition.php';
 /******* PLUGIN OPTIONS ***************************************/
 
 $optionDefaults = array(
-	'fm-shortcode' => 'form',
-	'fm-enable-mce-button' => 'YES',
-	'fm-file-method' => 'auto',
-	'fm-file-name-format' => '%filename% (m-d-y-h-i-s)',
-	'fm-email-send-method' => 'wp_mail',
-	'fm-allowed-tags' => '<a><abbr><acronym><b><bdo><blockquote><br><caption><center><cite><code><col><colgroup><dd><del><dfn><div><dl><dt><em><h1><h2><h3><h4><h5><h6><hr><i><img><ins><kbd><legend><li><ol><p><pre><q><s><samp><span><strike><strong><sub><sup><table><tbody><td><tfoot><th><thead><tr><tt><u><ul>',
-	'fm-nonce-check' => 'YES',
-	'fm-shortcode-scripts' => 'NO',
-	'fm-disable-css' => 'NO',
+	'fm-shortcode' 			=> 'form',
+	'fm-enable-mce-button' 	=> 'YES',
+	'fm-file-method' 		=> 'auto',
+	'fm-file-name-format' 	=> '%filename% (m-d-y-h-i-s)',
+	'fm-email-send-method' 	=> 'wp_mail',
+	'fm-allowed-tags' 		=> '<a><abbr><acronym><b><bdo><blockquote><br><caption><center><cite><code><col><colgroup><dd><del><dfn><div><dl><dt><em><h1><h2><h3><h4><h5><h6><hr><i><img><ins><kbd><legend><li><ol><p><pre><q><s><samp><span><strike><strong><sub><sup><table><tbody><td><tfoot><th><thead><tr><tt><u><ul>',
+	'fm-nonce-check' 		=> 'YES',
+	'fm-shortcode-scripts' 	=> 'NO',
+	'fm-disable-css' 		=> 'NO',
 );
 
 foreach ( $optionDefaults as $key=>$val ){
@@ -250,10 +250,12 @@ function fm_adminInit() {
 add_action('admin_enqueue_scripts', 'fm_adminEnqueueScripts', 10, 1);
 function fm_adminEnqueueScripts( ) {
 	global $plugin_page;
+	global $fm_currentVersion;
 	
 	$isFMPage = strrpos($plugin_page, 'fm-');
 	
-	if( $isFMPage !== false && $isFMPage == 0 ) {		
+	if( $isFMPage !== false && $isFMPage == 0 ) {
+		
 		wp_enqueue_script(
 			'form-manager-js',
 			plugins_url( '/js/scripts.js', __FILE__ ),
@@ -335,7 +337,7 @@ function fm_adminEnqueueScripts( ) {
 				'is_not_checked' => 
 					__("is not checked", 'wordpress-form-manager')
 				)
-			); 
+			);
 	}
 }
 
@@ -442,17 +444,6 @@ function fm_setupAdminMenu() {
 		'fm_showSettingsAdvancedPage'
 		);
 	
-	/*
-	$pages[] = add_object_page(
-		__("Data", 'wordpress-form-manager'),
-		__("Data", 'wordpress-form-manager'),
-		apply_filters( 'fm_data_capability', 'manage_options' ),
-		'fm-submission-data-top-level',
-		'fm_showMainPage',
-		plugins_url( '/mce_plugins/formmanager.png', __FILE__ )
-	);
-	*/
-	
 	foreach ( $pages as $page ) {
 		add_action( 'admin_head-' . $page, 'fm_adminHeadPluginOnly' );
 	}
@@ -484,20 +475,6 @@ function fm_adminHead() {
 			}
 		}
 	}
-	
-	/*
-	if ( fm_userCanViewData() ) {
-		$sub = &$submenu[ 'fm-submission-data-top-level' ];
-		
-		$formList = $fmdb->getFormList();	
-		foreach ( $formList as $form ) {
-			$sub[] = array(
-					$form['title'],	
-					apply_filters( 'fm_data_capability', 'manage_options' ),
-					get_admin_url(null, 'admin.php')."?page=fm-edit-form&sec=data&id=" . $form['ID'],
-				);
-		}
-	}*/
 }
 
 //only show this stuff when viewing a plugin page, since some of it is messy
@@ -666,7 +643,6 @@ add_action( 'fm_delete_temporary_file', 'fm_deleteTemporaryFiles' );
 /**************************************************************/
 
 include 'api.php';
-
 
 /* ANDREA : include php for create TinyMCE Button */
 if( get_option( 'fm-enable-mce-button' ) == "YES" ) {

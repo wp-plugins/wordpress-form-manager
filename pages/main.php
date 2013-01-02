@@ -128,7 +128,7 @@ else: ?>
 				
 			<div class="clear"></div>
 		</div>		
-		
+
 		<table class="widefat post fixed">
 			<thead>
 			<tr>
