@@ -11,17 +11,17 @@ global $fm_MEMBERS_EXISTS;
 // Process settings changes
 
 if(isset($_POST['submit-settings'])){
-	$fmdb->setGlobalSetting('title', $_POST['title']);
-	$fmdb->setGlobalSetting('submitted_msg', $_POST['submitted_msg']);
-	$fmdb->setGlobalSetting('required_msg', $_POST['required_msg']);
-	$fmdb->setGlobalSetting('recaptcha_public', $_POST['recaptcha_public']);
-	$fmdb->setGlobalSetting('recaptcha_private', $_POST['recaptcha_private']);
-	$fmdb->setGlobalSetting('recaptcha_theme', (trim($_POST['recaptcha_theme_custom']) == "" ? $_POST['recaptcha_theme'] : $_POST['recaptcha_theme_custom']));
-	$fmdb->setGlobalSetting('recaptcha_lang', $_POST['recaptcha_lang']);
-	$fmdb->setGlobalSetting('email_admin', $_POST['email_admin'] == "on" ? "YES" : "");
-	$fmdb->setGlobalSetting('email_reg_users', $_POST['email_reg_users'] == "on" ? "YES" : "");
-	$fmdb->setGlobalSetting('email_subject', $_POST['email_subject']);
-	$fmdb->setGlobalSetting('email_from', $_POST['email_from']);
+	$fmdb->setGlobalSetting('title', stripslashes($_POST['title']));
+	$fmdb->setGlobalSetting('submitted_msg', stripslashes($_POST['submitted_msg']));
+	$fmdb->setGlobalSetting('required_msg', stripslashes($_POST['required_msg']));
+	$fmdb->setGlobalSetting('recaptcha_public', stripslashes($_POST['recaptcha_public']));
+	$fmdb->setGlobalSetting('recaptcha_private', stripslashes($_POST['recaptcha_private']));
+	$fmdb->setGlobalSetting('recaptcha_theme', stripslashes((trim($_POST['recaptcha_theme_custom']) == "" ? $_POST['recaptcha_theme'] : $_POST['recaptcha_theme_custom'])));
+	$fmdb->setGlobalSetting('recaptcha_lang', stripslashes($_POST['recaptcha_lang']));
+	$fmdb->setGlobalSetting('email_admin', stripslashes($_POST['email_admin'] == "on" ? "YES" : ""));
+	$fmdb->setGlobalSetting('email_reg_users', stripslashes($_POST['email_reg_users'] == "on" ? "YES" : ""));
+	$fmdb->setGlobalSetting('email_subject', stripslashes($_POST['email_subject']));
+	$fmdb->setGlobalSetting('email_from', stripslashes($_POST['email_from']));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
