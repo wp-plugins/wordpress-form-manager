@@ -23,7 +23,9 @@ class fm_fileControl extends fm_controlBase{
 		$itemInfo['extra'] = array('max_size' => 10000,
 									'upload_url' => '%wp_uploads_url%',
 									'upload_dir' => '%wp_uploads_dir%',
-									'name_format' => get_option('fm-file-name-format'));
+									'name_format' => get_option('fm-file-name-format'),
+									'media_type' => 'none',
+									);
 		$itemInfo['nickname'] = '';
 		$itemInfo['required'] = 0;
 		$itemInfo['validator'] = "";
@@ -75,9 +77,11 @@ class fm_fileControl extends fm_controlBase{
 			
 			$handle = fopen($filename, "rb");
 			$contents = fread($handle, filesize($filename));
+			$filetype = wp_check_filetype($filename);
 			fclose($handle);
 		
 			$saveVal = array('filename' => $_FILES[$uniqueName]['name'],
+								'mimetype' => $filetype['type'],
 								'contents' => $contents,
 								'size' => $_FILES[$uniqueName]['size']);
 								
@@ -92,9 +96,12 @@ class fm_fileControl extends fm_controlBase{
 			$fullPath = $uploadDir . $newFileName;
 			
 			$uploadURL = $this-> parseUploadURL($itemInfo['extra']['upload_url']);
+
+			$filetype = wp_check_filetype($_FILES[$uniqueName]['tmp_name']);
 			
 			move_uploaded_file($_FILES[$uniqueName]['tmp_name'], $fullPath);
 			$saveVal = array('filename' => $newFileName,
+								'mimetype' => $filetype['type'],
 								'contents' => '',
 								'upload_dir' => true,
 								'upload_url' => $uploadURL,
@@ -144,9 +151,11 @@ class fm_fileControl extends fm_controlBase{
 			$sizeStr = $fileInfo['size']." B";
 		else
 			$sizeStr = ((int)($fileInfo['size']/1024))." kB";
-		
+
+		// if the file is stored in the database, then it can't be downloaded directly
 		if(!isset($fileInfo['upload_dir']) || trim($itemInfo['extra']['upload_url']) == "") 
 			return $fileInfo['filename']." (".$sizeStr.")";
+		// file is stored in the filesystem:
 		else{
 			if( isset( $fileInfo['upload_url'] ) ){
 				$uploadURL = $fileInfo['upload_url'];
@@ -154,6 +163,12 @@ class fm_fileControl extends fm_controlBase{
 			else {
 				$uploadURL = $this->parseUploadURL($itemInfo['extra']['upload_url']);
 			}
+
+			// change how we show files according to the media type
+			if ( isset( $itemInfo['extra']['media_type'] ) && $itemInfo['extra']['media_type'] == 'image' ){
+				return '<img src="'.$uploadURL.$fileInfo['filename'].'">';
+			}
+
 			return '<a class="fm-download-link" href="'.$uploadURL.$fileInfo['filename'].'">'.$fileInfo['filename'].' ('.$sizeStr.')'.'</a>';
 		}
 	}
@@ -204,10 +219,12 @@ class fm_fileControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'required', __('Required', 'wordpress-form-manager'), array('checked'=>$itemInfo['required']));
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'max_size', __('Max file size (in kB)', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['max_size']));
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Your host restricts uploads to", 'wordpress-form-manager')." ".ini_get('upload_max_filesize')."B</span>", '');
+
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span style=\"font-weight:bold;\">".__("File Types", 'wordpress-form-manager')."</span>", '');
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Enter a list of extensions separated by commas, e.g. \".txt, .rtf, .doc\"", 'wordpress-form-manager')."</span>", '');
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'restrict', __('Only allow', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['restrict']));		
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'exclude', __('Do not allow', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['exclude']));
+
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<div style=\"font-weight:bold;padding-top:10px;\">".__("Uploads", 'wordpress-form-manager')."</div>", '');
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'upload_dir', __('Upload directory', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['upload_dir']));
 		if(trim($itemInfo['extra']['upload_dir']) != "" && !is_dir($this->parseUploadDir($itemInfo['extra']['upload_dir'])))
@@ -217,13 +234,21 @@ class fm_fileControl extends fm_controlBase{
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("This will be the base URL used for links to the uploaded files.  If left blank, no links will be generated.", 'wordpress-form-manager')."</span>", '');
 		$arr[] = new fm_editPanelItemBase($uniqueName, 'name_format', __('Name format', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['name_format']));
 		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("This only applies if you specify an upload directory. Insert %filename% where you want the filename to appear. The rest will be used as a PHP timestamp format.", 'wordpress-form-manager')."</span>", '');
+
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<div style=\"font-weight:bold;padding-top:10px;\">".__("Media", 'wordpress-form-manager')."</div>", '');
+		$mediaTypeOptions = array(
+			'none' => '...',
+			'image' => __("Image",'wordpress-form-manager'),
+			);
+		$arr[] = new fm_editPanelItemDropdown($uniqueName, 'media_type', __('Type', 'wordpress-form-manager'), array('options' => $mediaTypeOptions, 'value' => $itemInfo['extra']['media_type']));
+		$arr[] = new fm_editPanelItemNote($uniqueName, '', "<span class=\"fm-small\" style=\"padding-bottom:10px;\">".__("Choosing a media type will cause files to be shown according to their type, rather than a download link.", 'wordpress-form-manager')."</span>", '');
 		
 		return $arr;
 	}
 	
 	public function getPanelScriptOptions(){
 		$opt = $this->getPanelScriptOptionDefaults();		
-		$opt['extra'] = $this->extraScriptHelper(array('restrict' => 'restrict', 'exclude' => 'exclude', 'max_size' => 'max_size', 'upload_dir' => 'upload_dir', 'upload_url' => 'upload_url', 'name_format' => 'name_format' ));
+		$opt['extra'] = $this->extraScriptHelper(array('restrict' => 'restrict', 'exclude' => 'exclude', 'max_size' => 'max_size', 'upload_dir' => 'upload_dir', 'upload_url' => 'upload_url', 'name_format' => 'name_format', 'media_type' => 'media_type' ));
 		$opt['required'] = $this->checkboxScriptHelper('required');	
 		return $opt;
 	}

@@ -122,14 +122,14 @@ $this->globalSettings = array(
 					'title' =>				__("New Form", 'wordpress-form-manager'),	
 					'submitted_msg' => 		__('Thank you! Your data has been submitted.', 'wordpress-form-manager'), 
 					/* translators: the default message given if a required item is left blank.  You must include a backslash before any single quotes */
-					'required_msg' => 		__("\'%s\' is required.", 'wordpress-form-manager'),
-					'reg_user_only_msg' => addslashes(__("'%s' is only available to registered users.", 'wordpress-form-manager')),
+					'required_msg' => 		stripslashes(__("\'%s\' is required.", 'wordpress-form-manager')),
+					'reg_user_only_msg' => __("'%s' is only available to registered users.", 'wordpress-form-manager'),
 					'email_admin' => "YES",
 					'email_reg_users' => "YES",
 					'email_subject' => __("[form title] Submission", 'wordpress-form-manager'),
 					'email_from' => "[admin email]",
 					'template_form' => '',
-					'text_validator_count' => 7,
+					'text_validator_count' => 8,
 					'text_validator_0' => array('name' => 'number',
 												/* translators: the following are for the numbers only validator */
 												'label' => __('Numbers Only', 'wordpress-form-manager'),
@@ -154,7 +154,7 @@ $this->globalSettings = array(
 												'label' => __("Date (MM/DD/YY)", 'wordpress-form-manager'),
 												'message' => __("'%s' must be a date (MM/DD/YY)", 'wordpress-form-manager'),
 												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/'
-												),
+												),					
 					'text_validator_4' => array('name' => 'state',
 												'label' => __("State (U.S.)", 'wordpress-form-manager'),
 												'message' => __("'%s' must be a valid state abbreviation", 'wordpress-form-manager'),
@@ -170,6 +170,13 @@ $this->globalSettings = array(
 												'message' => __("'%s' must be dimensions (L x W x H)", 'wordpress-form-manager'),
 												'regexp' => '/^\s*(\d+(\.\d+)?)\s*(x|X)\s*(\d+(\.\d+)?)\s*(x|X)\s*(\d+(\.\d+)?)\s*$/'
 												),
+					'text_validator_7' => array('name' => 'date2',
+												/* translators: the following are for the date validator */
+												'label' => __("Date (DD/MM/YY)", 'wordpress-form-manager'),
+												'message' => __("'%s' must be a date (DD/MM/YY)", 'wordpress-form-manager'),
+												'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/'
+												),
+					
 					);
 }
 
@@ -675,6 +682,7 @@ public function getTextValidators(){
 	$arr = array();
 	$count = $this->getGlobalSetting('text_validator_count');
 	for($x=0;$x<$count;$x++){
+		// getGlobalSetting automatically deserializes if possible
 		$val = $this->getGlobalSetting('text_validator_'.$x);
 		$arr[$val['name']] = $val;
 	}
@@ -723,9 +731,13 @@ function initSettingsTable(){
 //returns true if something was written, false otherwise.
 // $overwrite : overwrite the old setting, if one exists.
 function setGlobalSetting($settingName, $settingValue, $overwrite = true){
-	$val = $this->getGlobalSetting($settingName);
+	$val = $this->getGlobalSetting($settingName);	
+
 	if(is_array($settingValue))
 		$settingValue = addslashes(serialize($settingValue));
+	else
+		$settingValue = addslashes($settingValue);
+
 	if($val === false){
 		$q = "INSERT INTO `".$this->settingsTable."` SET `setting_name` = '{$settingName}', `setting_value` = '{$settingValue}'";
 		$this->query($q);
@@ -790,7 +802,7 @@ function getSetting($settingName){
 	$this->query($q);
 	$row = mysql_fetch_assoc($res);	
 	mysql_free_result($res);
-	return stripslashes($row[$settingName]);
+	return $row[$settingName];
 }
 
 // Get a new unique form (integer) ID

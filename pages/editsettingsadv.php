@@ -47,9 +47,9 @@ if(isset($_POST['submit-settings'])){
 	////////////////////////////////////////////////////////////////////////////////////
 	//Process template settings
 	
-	$fmdb->setGlobalSetting('template_form', $_POST['template_form']);
-	$fmdb->setGlobalSetting('template_email', $_POST['template_email']);
-	$fmdb->setGlobalSetting('template_summary', $_POST['template_summary']);
+	$fmdb->setGlobalSetting('template_form', stripslashes($_POST['template_form']));
+	$fmdb->setGlobalSetting('template_email', stripslashes($_POST['template_email']));
+	$fmdb->setGlobalSetting('template_summary', stripslashes($_POST['template_summary']));
 	
 	////////////////////////////////////////////////////////////////////////////////////
 	//Other
@@ -182,7 +182,7 @@ function fm_getManagedListCount(ulID){
 		return str;
 	}
 	<?php 
-	$validators = $fmdb->getTextValidators(); 
+	$validators = $fmdb->getTextValidators();	
 	foreach($validators as $val){
 		$val['label'] = htmlspecialchars(addslashes($val['label']));
 		$val['message'] = htmlspecialchars(addslashes($val['message']));
