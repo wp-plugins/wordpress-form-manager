@@ -74,7 +74,6 @@ if(isset($wpdb))
 			);
 
 include 'helpers.php';
-
 include 'db.php';
 include 'display.php';
 include 'template.php';
@@ -123,13 +122,32 @@ load_plugin_textdomain(
 	dirname( plugin_basename( __FILE__ ) ) . '/languages/' 
 	);
 
-$fmdb = new fm_db_class( $wpdb->prefix.get_option( 'fm-forms-table-name' ),
+$fmdb = fm_db_class::Construct( $wpdb->prefix.get_option( 'fm-forms-table-name' ),
 	$wpdb->prefix.get_option( 'fm-items-table-name' ),
 	$wpdb->prefix.get_option( 'fm-settings-table-name' ),
 	$wpdb->prefix.get_option( 'fm-templates-table-name' ),
 	$wpdb->dbh
 	);
+
+// if there was a problem, register the error page and exit
+if ( $fmdb == null ){
+
+	function fm_showErrorPage(){ include 'pages/error.php'; }
+	function fm_registerErrorPage(){
+		add_object_page(
+			__("Forms", 'wordpress-form-manager'), 
+			__("Forms", 'wordpress-form-manager'),
+			apply_filters( 'fm_main_capability', 'manage_options' ), 
+			'fm-admin-main', 
+			'fm_showErrorPage',
+			plugins_url( '/mce_plugins/formmanager.png', __FILE__ )
+			);
+	}
+	add_action( 'admin_menu', 'fm_registerErrorPage' );
 	
+	return;
+}
+
 $fm_display = new fm_display_class();
 $fm_templates = new fm_template_manager();
 				
