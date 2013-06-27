@@ -13,25 +13,41 @@ class fm_db_class{
 	private $lastPostFailed;
 	private $lastUniqueName;
 	
-	// fails silently if an install is detected, but without tables.
-	// - fixes a bug with multisite during a clone; MySQL error when loading the settings table
-	// - fixes a bug when security plugins rename tables; 
-	
 	static function Construct($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn){
+		return new fm_db_class($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn);
+	}
+	
+	// returns the number of required tables found
+	static function DatabaseCheck($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn){
 		$installedVersion = get_option( 'fm-version', false );
+		global $fm_forceReinstall;
 		
 		// if there is an install detected, check that the tables exist
 		if ( $installedVersion !== false ){
+
+			$found = 0;
 			$tables = array ($formsTable, $itemsTable, $settingsTable, $templatesTable);
 			foreach ( $tables as $tableName ){
-				if ( mysql_num_rows( mysql_query("SHOW TABLES LIKE '".$tableName."'", $conn) ) != 1 ){
-					return null;
+				if ( mysql_num_rows( mysql_query("SHOW TABLES LIKE '".$tableName."'", $conn) ) == 1 ){
+					$found++;
 				}
 			}
+			
+			// if no tables were found, this is not an inconsistent database, it is a non-existent one; return true, and force reinstall
+			if ( $found == 0 ){
+				$fm_forceReinstall = true;
+				return true;
+			}
+			// some but not all of the tables found: signal an error
+			else if ( $found < 4 ){
+				return false;
+			}
+			// otherwise, signal OK
+			return true;
 		}
 		
-		// all the checks passed, create the object
-		return new fm_db_class($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn);
+		// no install detected, this is OK
+		return true;
 	}
 	
 	// use the above static method to create the fm_db_class object

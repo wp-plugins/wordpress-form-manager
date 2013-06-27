@@ -34,6 +34,9 @@ $fm_currentVersion = 		"1.6.41";
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
 
+global $fm_forceRinstall;
+$fm_forceReinstall =		false;
+
 // flags for other plugins we want to integrate with
 global $fm_SLIMSTAT_EXISTS;
 global $fm_MEMBERS_EXISTS;
@@ -128,9 +131,19 @@ $fmdb = fm_db_class::Construct( $wpdb->prefix.get_option( 'fm-forms-table-name' 
 	$wpdb->prefix.get_option( 'fm-templates-table-name' ),
 	$wpdb->dbh
 	);
+	
+///////////////////////////////////////////////////////////////////////////////////
+// Database error handler: sorry for the mess!
 
+$dbCheck = fm_db_class::DatabaseCheck( $wpdb->prefix.get_option( 'fm-forms-table-name' ),
+	$wpdb->prefix.get_option( 'fm-items-table-name' ),
+	$wpdb->prefix.get_option( 'fm-settings-table-name' ),
+	$wpdb->prefix.get_option( 'fm-templates-table-name' ),
+	$wpdb->dbh
+	);
+	
 // if there was a problem, register the error page and exit
-if ( $fmdb == null ){
+if ( $dbCheck === false ){
 
 	function fm_showErrorPage(){ include 'pages/error.php'; }
 	function fm_registerErrorPage(){
@@ -147,6 +160,8 @@ if ( $fmdb == null ){
 	
 	return;
 }
+
+///////////////////////////////////////////////////////////////////////////////////
 
 $fm_display = new fm_display_class();
 $fm_templates = new fm_template_manager();
@@ -362,10 +377,11 @@ function fm_adminEnqueueScripts( ) {
 add_action( 'init', 'fm_userInit' );
 function fm_userInit() {
 	global $fm_currentVersion;
+	global $fm_forceReinstall;
 	
-	//check if there was a stealth update
+	//check if there was a stealth update, or if none of the database tables were found
 	$ver = get_option( 'fm-version' );
-	if ( $ver != $fm_currentVersion ) {
+	if ( $ver != $fm_currentVersion || $fm_forceReinstall === true ) {
 		fm_install();
 	}
 	
