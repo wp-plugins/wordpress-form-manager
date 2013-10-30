@@ -53,9 +53,8 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 
 == Changelog ==
 = 1.6.41 =
-* Added 'Media' option for file uploads (can render as images)
-* Added non-US date format for text input
-* Fixed a bug causing settings saves to fail
+* Added an option on the database error page to rebuild the database (removes the WP options and any tables found, which causes the installer to run on the next load).
+* Automatically reinstalls the plugin of all of the tables are missing.
 
 = 1.6.40 =
 * 'Checked by default' works
