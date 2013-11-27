@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.3.1
-Stable tag: 1.6.42
+Stable tag: 1.6.41
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
