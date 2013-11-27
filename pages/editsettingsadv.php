@@ -59,6 +59,7 @@ if(isset($_POST['submit-settings'])){
 	update_option('fm-file-name-format', $_POST['file_name_format']);
 	update_option('fm-email-send-method', $_POST['email_send_method']);
 	update_option('fm-allowed-tags', $_POST['fm-allowed-tags']);
+	update_option('fm-strip-tags', $_POST['fm-strip-tags']?"YES":"");
 	update_option('fm-nonce-check', $_POST['fm-nonce-check']?"YES":"");
 	update_option('fm-shortcode-scripts', $_POST['fm-shortcode-scripts']?"YES":"");
 	update_option('fm-disable-css', $_POST['fm-disable-css']?"YES":"");
@@ -268,6 +269,7 @@ file_method
 
 <h3><?php _e("Content Filtering", 'wordpress-form-manager');?></h3>
 <table class="form-table">
+<?php helper_checkbox_field('fm-strip-tags', __("Strip HTML Tags", 'wordpress-form-manager'), (get_option('fm-strip-tags') == "YES"), __("If not enabled, all HTML will be displayed as its literal text.", 'wordpress-form-manager')); ?>
 <?php helper_text_field('fm-allowed-tags', __("Allowed HTML Tags", 'wordpress-form-manager'), get_option('fm-allowed-tags'), htmlspecialchars(__("Enter tags including '<' and '>', e.g., \"<a><em><strong><br><hr>\" etc.", 'wordpress-form-manager')));?>
 </table>
 

@@ -96,6 +96,7 @@ $optionDefaults = array(
 	'fm-nonce-check' 		=> 'YES',
 	'fm-shortcode-scripts' 	=> 'NO',
 	'fm-disable-css' 		=> 'NO',
+	'fm-strip-tags'			=> 'YES'
 );
 
 foreach ( $optionDefaults as $key=>$val ){

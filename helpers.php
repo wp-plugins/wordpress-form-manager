@@ -366,7 +366,11 @@ function fm_getTmpURL(){
 }
 
 function fm_strip_tags($str){
-	return strip_tags($str, get_option('fm-allowed-tags'));
+	if ( get_option('fm-strip-tags') == "YES" ){
+		return strip_tags($str, get_option('fm-allowed-tags'));
+	} else {
+		return htmlspecialchars($str);
+	}
 }
 
 function fm_helper_sendEmail($formInfo, $postData){

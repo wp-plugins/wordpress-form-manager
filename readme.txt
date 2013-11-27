@@ -52,6 +52,9 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * &#1662;&#1575;&#1585;&#1587;&#1740; (fa_IR) - Salman
 
 == Changelog ==
+= 1.6.44 =
+* Added option to include HTML tags as literal text, instead of stripping the tags.
+
 = 1.6.43 =
 * Previous version would not activate.
 
