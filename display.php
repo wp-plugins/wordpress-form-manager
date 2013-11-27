@@ -42,11 +42,6 @@ function displayForm($formInfo, $options=array(), $values=array()){
 	// now that we have completely echoed the form, set a flag
 	$this->formsDisplayed[$formInfo['ID']] = true;
 	
-	//if plugin wp-super-cache is active disable it on the page (to do: disable other cache plugins)	
-	include_once( ABSPATH . 'wp-admin/includes/plugin.php' ); //needed to use "is_plugin_active" function
-	if(is_plugin_active('wp-super-cache/wp-cache.php'))
-		define('DONOTCACHEPAGE',1);
-	
 	return $str;
 }
 

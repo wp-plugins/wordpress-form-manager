@@ -44,7 +44,7 @@ function processConditionsPost(){
 		for($x=0;$x<sizeof($testOrder);$x++){
 			$tempInfo['tests'][] = array('test' => $_POST[$condID.'-test-'.$testOrder[$x]],
 										'unique_name' => $_POST[$condID.'-test-itemID-'.$testOrder[$x]],
-										'val' => $_POST[$condID.'-test-val-'.$testOrder[$x]],
+										'val' => stripslashes($_POST[$condID.'-test-val-'.$testOrder[$x]]),
 										'connective' => $_POST[$condID.'-test-connective-'.$testOrder[$x]]
 									);
 		}

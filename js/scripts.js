@@ -584,7 +584,7 @@ function fm_getTestHTML(id, testInfo, index){
 	else
 		str += '<td>' + fm_getTestSelect(id + '-test-' + index, test) + '</td>';
 	var textID = id + '-test-val-' + index;
-	str += '<td><input type="text" size="20" id="' + textID + '" name="' + textID + '" class="test-value-input" value="' + val + '"/></td>';
+	str += '<td><input type="text" size="20" id="' + textID + '" name="' + textID + '" class="test-value-input" value="' + fm_htmlEntities(val) + '"/></td>';
 	str += '<td><a class="edit-form-button" onclick="fm_removeTest(\'' + id + '\', \'' + index + '\')" >&nbsp;&nbsp;&nbsp;' + fm_I18n.delete_button + '</a></td>';
 	str += '</tr></table>';
 	
@@ -658,7 +658,7 @@ function fm_getSelect(id, keys, names, selected){
 	for(var x=0;x<keys.length;x++){
 		str += '<option value="' + keys[x] + '"';
 		if(keys[x] == selected) str += ' selected="selected" ';
-		str += '>' + names[x] + '</option>';
+		str += '>' + fm_htmlEntities(names[x]) + '</option>';
 	}
 	str += '</select>';
 	return str;
@@ -696,7 +696,7 @@ function fm_saveConditions(){
 	var id;
 	
 	for(var x=0;x<mainUL.childNodes.length;x++){
-						//prefix is 'fm-condition-'
+		//prefix is 'fm-condition-'
 		currCondID = mainUL.childNodes[x].id.substr(13);
 		if(x>0) IDstr += ",";
 		IDstr += currCondID;

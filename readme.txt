@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.3.1
-Stable tag: 1.6.41
+Stable tag: 1.6.42
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -52,12 +52,15 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * &#1662;&#1575;&#1585;&#1587;&#1740; (fa_IR) - Salman
 
 == Changelog ==
-= 1.6.41 =
-* Added an option on the database error page to rebuild the database (removes the WP options and any tables found, which causes the installer to run on the next load).
-* Automatically reinstalls the plugin of all of the tables are missing.
+= 1.6.42 =
+* Added checks to detect if the form manager tables are still valid (some security plugins rename tables).
+* Fixed an unescaped character bug in the conditions editor, which would cause the conditions to not save.
 
-= 1.6.40 =
-* 'Checked by default' works
+= 1.6.41 =
+* Added 'Media' option for file uploads (can render as images)
+* Added non-US date format for text input
+* Fixed a bug causing settings saves to fail= 1.6.40 =
+* 'Checked by default' works 
 
 = 1.6.39 =
 * CSV files show URL instead of file name for file uploads
