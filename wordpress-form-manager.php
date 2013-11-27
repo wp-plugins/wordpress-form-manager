@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.42
+Version: 1.6.43
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.42";
+$fm_currentVersion = 		"1.6.43";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -132,18 +132,8 @@ $fmdb = fm_db_class::Construct( $wpdb->prefix.get_option( 'fm-forms-table-name' 
 	$wpdb->dbh
 	);
 	
-///////////////////////////////////////////////////////////////////////////////////
-// Database error handler: sorry for the mess!
-
-$dbCheck = fm_db_class::DatabaseCheck( $wpdb->prefix.get_option( 'fm-forms-table-name' ),
-	$wpdb->prefix.get_option( 'fm-items-table-name' ),
-	$wpdb->prefix.get_option( 'fm-settings-table-name' ),
-	$wpdb->prefix.get_option( 'fm-templates-table-name' ),
-	$wpdb->dbh
-	);
-	
 // if there was a problem, register the error page and exit
-if ( $dbCheck === false ){
+if ( $fmdb == null ){
 
 	function fm_showErrorPage(){ include 'pages/error.php'; }
 	function fm_registerErrorPage(){
