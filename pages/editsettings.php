@@ -65,7 +65,7 @@ $fm_globalSettings = $fmdb->getGlobalSettings();
 </table>
 
 <h3><?php _e("reCAPTCHA Settings", 'wordpress-form-manager');?></h3>
-<span class="description"><?php _e("API Keys for reCAPTCHA can be acquired (for free) by visiting");?> <a target="_blank" href="https://www.google.com/recaptcha">www.google.com/recaptcha</a>.</span>
+<span class="description"><?php _e("API Keys for reCAPTCHA can be acquired (for free) by visiting", 'wordpress-form-manager');?> <a target="_blank" href="https://www.google.com/recaptcha">www.google.com/recaptcha</a>.</span>
 <table class="form-table">
 <?php helper_text_field('recaptcha_public', __("reCAPTCHA Public Key", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['recaptcha_public'])); ?>
 <?php helper_text_field('recaptcha_private', __("reCAPTCHA Private Key", 'wordpress-form-manager'), htmlspecialchars($fm_globalSettings['recaptcha_private'])); ?>

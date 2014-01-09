@@ -17,8 +17,8 @@ class fm_noteControl extends fm_controlBase{
 	
 	public function getPanelItems($uniqueName, $itemInfo){
 		$arr=array();
-		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', 'Label', array('value' => $itemInfo['label']));
-		$arr[] = new fm_editPanelTextarea($uniqueName, 'content', 'Note', array('value' => $itemInfo['extra']['content'], 'rows'=> 10, 'cols' => 25));
+		$arr[] = new fm_editPanelItemBase($uniqueName, 'label', __('Label', 'wordpress-form-manager'), array('value' => $itemInfo['label']));
+		$arr[] = new fm_editPanelTextarea($uniqueName, 'content', __('Note', 'wordpress-form-manager'), array('value' => $itemInfo['extra']['content'], 'rows'=> 10, 'cols' => 25));
 		$arr[] = new fm_editPanelItemCheckbox($uniqueName, 'allow_markup', __('HTML', 'wordpress-form-manager'), array('checked'=>$itemInfo['extra']['allow_markup']));
 		return $arr;
 	}
