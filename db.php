@@ -197,7 +197,6 @@ class fm_db_class{
 													'message' => __("'%s' must be a date (DD/MM/YY)", 'wordpress-form-manager'),
 													'regexp' => '/^[0-9]{1,2}.[0-9]{1,2}.[0-9]{2}$/'
 													),
-						
 						);
 	}
 
