@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.43";
+$fm_currentVersion = 		"1.6.45";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
