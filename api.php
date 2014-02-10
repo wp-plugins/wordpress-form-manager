@@ -260,7 +260,12 @@ function fm_doFormBySlug($formSlug, $options = array()){
 	global $fm_display;
 	global $fm_globals;
 	global $fmdb;	
-	global $current_user;	
+	global $current_user;
+
+	// ask to not cache this page, if enabled
+	if ( get_option( 'fm-disable-cache' ) == 'YES' ){		
+		fm_disable_caching();
+	}
 
 	// error checking
 	$formID = $fmdb->getFormID($formSlug);
@@ -351,7 +356,7 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 	global $fmdb;
 	global $fm_display;
 	
-	$formAction = fm_helper_form_action( $formInfo );
+	$formAction = fm_helper_form_action( $formInfo );	
 	
 	// see if this is a restricted form
 	if(isset($formInfo['behaviors']['reg_user_only']) && $current_user->user_login == ""){
@@ -381,7 +386,7 @@ function fm_displayForm( $formInfo, $options, $postData = null ){
 	if($postData !== null){		
 		// show the acknowledgement
 		return fm_helper_displayAck( $formInfo, $postData );
-	}
+	}	
 	
 	return $fm_display->displayForm($formInfo, array_merge($options, array( 'action' => $formAction )));	
 }

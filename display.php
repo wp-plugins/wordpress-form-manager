@@ -24,7 +24,7 @@ function __construct() {
 //options:
 //	class - 'class' attribute for the <form> tag
 //	action - 'action' attribute for the <form> tag
-//'params' is an associative array of hidden values inserted into the form
+// 'params' is an associative array of hidden values inserted into the form
 function displayForm($formInfo, $options=array(), $values=array()){
 	global $fm_templates;
 	global $fm_controls;
@@ -32,17 +32,28 @@ function displayForm($formInfo, $options=array(), $values=array()){
 
 	$templateFile = $formInfo['form_template'];
 	if($templateFile == '') $templateFile = $fmdb->getGlobalSetting('template_form');
-	if($templateFile == '') $templateFile = get_option('fm-default-form-template');
+	if($templateFile == '') $templateFile = get_option('fm-default-form-template');	
 	
+	// generate the form 
 	if(file_exists($fm_templates->templatesDir.'/'.$templateFile))
 		$str = $this->displayFormTemplate($templateFile, $formInfo, $options, $values);
 	else
 		$str = $this->displayFormTemplate(get_option('fm-default-form-template'), $formInfo, $options, $values);
 
-	// now that we have completely echoed the form, set a flag
-	$this->formsDisplayed[$formInfo['ID']] = true;
+	$str .= $this->displayFormEtc( $formInfo );
 	
 	return $str;
+}
+
+function displayFormEtc( $formInfo ){
+	global $fm_DEBUG;
+	
+	$str = "";
+	
+	// now that we have completely generated the form, set a flag
+	$this->formsDisplayed[$formInfo['ID']] = true;	
+	
+	return $str;	
 }
 
 

@@ -3,7 +3,7 @@
 Plugin Name: Form Manager
 Plugin URI: http://www.campbellhoffman.com/form-manager/
 Description: Create custom forms; download entered data in .csv format; validation, required fields, custom acknowledgments;
-Version: 1.6.43
+Version: 1.6.46
 Author: Campbell Hoffman
 Author URI: http://www.campbellhoffman.com/
 Text Domain: wordpress-form-manager
@@ -29,7 +29,7 @@ $fm_oldIncludePath = get_include_path();
 set_include_path( dirname( __FILE__ ) . '/' );
 
 global $fm_currentVersion;
-$fm_currentVersion = 		"1.6.43";
+$fm_currentVersion = 		"1.6.46";
 
 global $fm_DEBUG;
 $fm_DEBUG = 				false;
@@ -96,7 +96,8 @@ $optionDefaults = array(
 	'fm-nonce-check' 		=> 'YES',
 	'fm-shortcode-scripts' 	=> 'NO',
 	'fm-disable-css' 		=> 'NO',
-	'fm-strip-tags'			=> 'YES'
+	'fm-strip-tags'			=> 'YES',
+	'fm-disable-cache'		=> 'NO', 		// as of 1.6.46: fresh installs will have this value set to 'YES', in the fm_install function.
 );
 
 foreach ( $optionDefaults as $key=>$val ){
@@ -164,6 +165,13 @@ function fm_install() {
 	global $fmdb;
 	global $fm_currentVersion;
 	
+	$freshInstall = ( get_option( 'fm-version', 'none' ) == 'none' );
+	
+	// default settings for new options differ for fresh vs upgraded plugin versions
+	if ( $freshInstall === true ){
+		update_option( 'fm-disable-cache', 'YES' );
+	}
+	
 	if ( get_option( 'fm-version' ) == '1.5.29' ) {
 		$fmdb->fixItemMeta();
 	}
@@ -227,6 +235,10 @@ function fm_uninstall() {
 	delete_option( 'fm-file-name-format' );
 	delete_option( 'fm-allowed-tags' );
 	delete_option( 'fm-nonce-check' );
+	delete_option( 'fm-strip-tags' );
+	delete_option( 'fm-shortcode-scripts' );
+	delete_option( 'fm-disable-css' );
+	delete_option( 'fm-disable-cache' );
 }
 register_uninstall_hook( __FILE__, 'fm_uninstall' );
 
@@ -371,7 +383,7 @@ function fm_userInit() {
 	global $fm_forceReinstall;
 	
 	//check if there was a stealth update, or if none of the database tables were found
-	$ver = get_option( 'fm-version' );
+	$ver = get_option( 'fm-version' );	
 	if ( $ver != $fm_currentVersion || $fm_forceReinstall === true ) {
 		fm_install();
 	}
