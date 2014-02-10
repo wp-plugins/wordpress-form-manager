@@ -63,6 +63,7 @@ if(isset($_POST['submit-settings'])){
 	update_option('fm-nonce-check', $_POST['fm-nonce-check']?"YES":"");
 	update_option('fm-shortcode-scripts', $_POST['fm-shortcode-scripts']?"YES":"");
 	update_option('fm-disable-css', $_POST['fm-disable-css']?"YES":"");
+	update_option('fm-disable-cache', $_POST['fm-disable-cache']?"YES":"");
 	
 }
 elseif(isset($_POST['remove-template'])){
@@ -276,6 +277,11 @@ file_method
 <h3><?php _e("Security", 'wordpress-form-manager');?></h3>
 <table class="form-table">
 <?php helper_checkbox_field('fm-nonce-check', __("Enable nonce check", 'wordpress-form-manager'), (get_option('fm-nonce-check') == "YES")); ?>
+</table>
+
+<h3><?php _e("Cache", 'wordpress-form-manager');?></h3>
+<table class="form-table">
+<?php helper_checkbox_field('fm-disable-cache', __("Try to disable caching (set DONOTCACHEPAGE) for forms", 'wordpress-form-manager'), (get_option('fm-disable-cache') == "YES")); ?>
 </table>
 
 <h3><?php _e("Scripts", 'wordpress-form-manager');?></h3>

@@ -1,10 +1,10 @@
-=== WordPress Form Manager ===
+=== Form Manager ===
 Contributors: hoffcamp
 Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.3.1
-Stable tag: 1.6.45
+Stable tag: 1.6.46
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -53,6 +53,11 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * &#27491;&#39636;&#20013;&#25991; (zh_TW) - [&#39321;&#33144;](http://sofree.cc)
 
 == Changelog ==
+= 1.6.46 =
+* Added DONOTCACHEPAGE to forms (optional). Thanks to Eduardo Aranda for the help!
+* DONOTCACHEPAGE disabled by default for plugins installed at 1.6.45 and prior, enabled by default otherwise.
+* reCAPTCHA uses current protocol.
+
 = 1.6.45 =
 * Added Chinese traditional translation, thanks to &#39321;&#33144;.
 

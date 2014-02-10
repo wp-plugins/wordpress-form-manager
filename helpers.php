@@ -1,4 +1,14 @@
 <?php
+function fm_disable_caching(){
+	global $fm_DEBUG;
+	if ( $fm_DEBUG ){
+		echo '<pre>CACHING DISABLED</pre>';
+	}
+	if ( !defined( 'DONOTCACHEPAGE' ) ){
+		define( 'DONOTCACHEPAGE', true );
+	}
+}
+
 //adds slashes for single quotes; useful for putting text from a database into javascript functions
 function format_string_for_js($str){
 	return preg_replace("/(['])/","\\\\\${0}",preg_replace("/[\\\\]/","\\\\\\\\",$str));
