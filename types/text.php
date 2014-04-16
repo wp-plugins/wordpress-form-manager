@@ -185,9 +185,13 @@ class fm_metaTextControl extends fm_textControl {
 	}
 	
 	public function processPost($uniqueName, $itemInfo){
-		if(isset($_POST[$uniqueName]))
+		if(isset($_POST[$uniqueName])){
 			return fm_strip_tags($_POST[$uniqueName]);
-		return NULL;
+		}
+		else if ( is_array( $itemInfo['extra'] ) && isset( $itemInfo['extra']['value'] ) ) {
+			return $itemInfo['extra']['value'];
+		}
+		return null; 
 	}
 }
 

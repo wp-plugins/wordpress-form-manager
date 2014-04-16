@@ -6,8 +6,7 @@ class fm_db_class{
 	public $itemsTable;
 	public $settingsTable;
 	public $templatesTable;
-	public $showerr;
-	public $conn;
+	public $showerr;	
 
 	private $lastErrorMessage;
 	private $lastPostFailed;
@@ -18,13 +17,14 @@ class fm_db_class{
 	// - fixes a bug when security plugins rename tables; 
 	
 	static function Construct($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn){
+		global $wpdb;
 		$installedVersion = get_option( 'fm-version', false );
 		
 		// if there is an install detected, check that the tables exist
 		if ( $installedVersion !== false ){
 			$tables = array ($formsTable, $itemsTable, $settingsTable, $templatesTable);
 			foreach ( $tables as $tableName ){
-				if ( mysql_num_rows( mysql_query("SHOW TABLES LIKE '".$tableName."'", $conn) ) != 1 ){
+				if ( $wpdb->query("SHOW TABLES LIKE '".$tableName."'") != 1 ){
 					return null;
 				}
 			}
@@ -35,12 +35,11 @@ class fm_db_class{
 	}
 	
 	// use the above static method to create the fm_db_class object
-	protected function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable, $conn){
+	protected function __construct($formsTable, $itemsTable, $settingsTable, $templatesTable){
 		$this->formsTable = $formsTable;
 		$this->itemsTable = $itemsTable;
 		$this->settingsTable = $settingsTable;
-		$this->templatesTable = $templatesTable;
-		$this->conn = $conn;
+		$this->templatesTable = $templatesTable;		
 		$this->cachedInfo = array();
 		$this->lastPostFailed = false;
 		$this->showerr = true;
@@ -53,9 +52,18 @@ class fm_db_class{
 	//////////////////////////////////////////////////////////////////
 
 	function query($q){
-		$res = mysql_query($q, $this->conn);
-		if($this->showerr && mysql_errno()) die(mysql_error());
-		return $res;
+		global $wpdb;
+		return $wpdb->query($q);
+	}	
+	
+	function get_results($q){
+		global $wpdb;
+		return $wpdb->get_results($q,ARRAY_A);
+	}
+	
+	function get_row($q){
+		global $wpdb;
+		return $wpdb->get_row($q,ARRAY_A);		
 	}
 
 	//////////////////////////////////////////////////////////////////
@@ -346,15 +354,15 @@ class fm_db_class{
 
 	//for 1.5.29 to 1.6.0+
 	function fixItemMeta(){
-		$q = "ALTER TABLE `".$this->itemsTable."` ADD `set` INT DEFAULT '0' NOT NULL";
-		$this->query($q);
+		$this->query(
+				"ALTER TABLE `".$this->itemsTable."` ADD `set` INT DEFAULT '0' NOT NULL"
+				);		
 		
 		$caps = array();
 		
-		$q = "SELECT * FROM `".$this->itemsTable."`";
-		$res = $this->query($q);
+		$results = $this->get_results("SELECT * FROM `".$this->itemsTable."`");		
 		
-		while($row = mysql_fetch_assoc($res)){
+		foreach( $results as $row ){		
 			$meta = unserialize($row['meta']);
 			$item = $this->unpackItem($row);
 			if($meta['private'] == '1'){
@@ -385,8 +393,9 @@ class fm_db_class{
 		//now create default settings for each form
 		
 		$q = "SELECT `ID` FROM `".$this->formsTable."`";
-		$res = $this->query($q);
-		while($row = mysql_fetch_assoc($res)){
+		$results = $this->get_results($q);
+		foreach( $results as $row )
+		{
 			if(isset($caps[$row['ID']])){
 				$ds = $this->getDataPageSettings($row['ID']);
 				foreach($caps[$row['ID']] as $uniqueName => $capability){				
@@ -394,8 +403,7 @@ class fm_db_class{
 				}
 				update_option('fm-ds-'.$row['ID'], $ds);
 			}			
-		}
-		mysql_free_result($res);
+		}		
 	}
 
 	//fix the collation on the data tables
@@ -421,11 +429,12 @@ class fm_db_class{
 			$this->query($q);
 			
 			$q = "SHOW FULL COLUMNS FROM `".$table."`";
-			$res = $this->query($q);
+			$results = $this->get_results($q);
 			$cols = array();
-			while($row = mysql_fetch_assoc($res))
+			foreach( $results as $row )	{	
 				if(!is_null($row['Collation']))
 					$cols[] = $row;		
+			}
 			
 			if(sizeof($cols)>0){
 				$q = "ALTER TABLE `".$table."` ";
@@ -433,9 +442,7 @@ class fm_db_class{
 					$cols[$x] = "CHANGE `".$cols[$x]['Field']."` `".$cols[$x]['Field']."` ".$cols[$x]['Type']." ".$charset_collate." NOT NULL";
 				$q.= implode(" , ", $cols);
 				$this->query($q);
-			}
-				
-			mysql_free_result($res);
+			}			
 		}
 	}
 
@@ -457,19 +464,17 @@ class fm_db_class{
 	function convertAppearanceSettings(){
 		
 		//check if this is a fresh install
-		$q = "SHOW TABLES LIKE '".$this->formsTable."'";
-		$res = $this->query($q);
-		if(mysql_num_rows($res) == 0) return false;
+		$q = "SHOW TABLES LIKE '".$this->formsTable."'";		
+		if($this->query($q) == 0) return false;
 		
 		//check if the old columns exist; if not, no need to do anything
 		$q = "SHOW COLUMNS FROM `".$this->formsTable."`";
-		$res = $this->query($q);
+		$results = $this->get_results($q);
 		$found = false;
-		while($row = mysql_fetch_assoc($res))
+		foreach ( $results as $row ){
 			if($row['Field'] == 'labels_on_top')
 				$found = true;
-		
-		mysql_free_result($res);	
+		}			
 
 		if(!$found) return false;
 		
@@ -477,12 +482,11 @@ class fm_db_class{
 		$this->query($q);		
 		
 		$q = "SELECT * FROM `".$this->formsTable."`";
-		$res = $this->query($q);
+		$results = $this->get_results($q);
 		$forms = array();
-		while($row = mysql_fetch_assoc($res)){
+		foreach ( $results as $row ){
 			$forms[] = $row;
-		}	
-		mysql_free_result($res);
+		}		
 		
 		foreach($forms as $form){		
 			$values = array( 'showFormTitle' => ($form['show_title']==1?"true":"false"),
@@ -504,22 +508,23 @@ class fm_db_class{
 
 	//fix data tables from prior versions. 
 	function updateDataTables(){
-		$q = "SELECT `ID`, `data_table` FROM `".$this->formsTable."` WHERE `ID` > 0";
-		$res = $this->query($q);
+		$q = "SELECT `ID`, `data_table` FROM `".$this->formsTable."` WHERE `ID` > 0";		
 		$dataTables = array();
-		while($row = mysql_fetch_assoc($res)){
+		$results = $this->get_results($q);
+		foreach ( $results as $row ){
 			$dataTables[] = $row['data_table'];
 		}
-		mysql_free_result($res);
+		
 		foreach($dataTables as $dataTable){
 			$q = "SHOW COLUMNS FROM `".$dataTable."`";
-			$res = $this->query($q);
+			
 			$found = false;
 			$postIDfound = false;
 			$uniqueIDfound = false;
 			$parentPostFound = false;
 			
-			while($row = mysql_fetch_assoc($res)){
+			$results = $this->get_results( $q );
+			foreach ( $results as $row ){
 				if($row['Field'] == 'user_ip')
 					$found = true;
 				if($row['Field'] == 'post_id')
@@ -528,8 +533,7 @@ class fm_db_class{
 					$uniqueIDfound = true;
 				if($row['Field'] == 'parent_post_id')
 					$parentPostFound = true;
-			}
-			mysql_free_result($res);
+			}			
 			
 			if(!$found){
 				$q = "ALTER TABLE `".$dataTable."` ADD `user_ip` VARCHAR( 64 ) DEFAULT '' NOT NULL";
@@ -551,10 +555,9 @@ class fm_db_class{
 			}
 			
 			//now add unique IDs if none exist
-			$q = "SELECT COUNT(*) FROM `".$dataTable."`";
-			$res = $this->query($q);
-			$row = mysql_fetch_array($res);
-			$count = $row[0];
+			$q = "SELECT COUNT(*) as `count` FROM `".$dataTable."`";
+			$row = $this->get_row($q);			
+			$count = $row['count'];
 			
 			for($x=0; $x<$count; $x++){
 				$q = "UPDATE `".$dataTable."` SET `unique_id` = '".uniqid()."' WHERE `unique_id` = '' LIMIT 1";
@@ -565,27 +568,25 @@ class fm_db_class{
 
 	function fixTemplatesTableModified(){
 		$q = "SHOW COLUMNS FROM `".$this->templatesTable."`";
-		$res = $this->query($q);
-		while($row = mysql_fetch_assoc($res)){
+		$results = $this->get_results($q);
+		foreach ( $results as $row ){
 			if($row['Field'] == 'modified' && strpos(strtolower($row['Type']), 'bigint') !== false){
 				$q = "ALTER TABLE `".$this->templatesTable."` CHANGE `modified` `modified` BIGINT NOT NULL ";
 				$this->query($q);
 			}
-		}
-		mysql_free_result($res);	
+		}		
 	}
 
 	function fixDBTypeBug(){
 		$q = "SELECT `unique_name`, `db_type` FROM `".$this->itemsTable."`";
-		$res = $this->query($q);
-		while($row = mysql_fetch_assoc($res)){
+		$results = $this->get_results($q);
+		foreach ( $results as $row ){
 			$dbType = $row['db_type'];
 			if(trim($dbType) != "NONE"){
 				$q = "UPDATE `".$this->itemsTable."` SET `db_type` = 'DATA' WHERE `unique_name` = '".$row['unique_name']."'";
 				$this->query($q);
 			}
-		}
-		mysql_free_result($res);
+		}		
 	}
 
 	function fixDateValidator(){
@@ -617,26 +618,21 @@ class fm_db_class{
 	function removeFormManager(){
 		$q = "SHOW TABLES LIKE '{$this->formsTable}'";
 		$res = $this->query($q);
-		if(mysql_num_rows($res)>0){
-			mysql_free_result($res);
+		if($res>0){
+			
 			$q = "SELECT `data_table`, `ID` FROM `{$this->formsTable}`";	
-			$res = $this->query($q);
-			while($row=mysql_fetch_assoc($res)){
+			$results = $this->get_results($q);
+			foreach ( $results as $row ){
 				if($row['data_table'] != ""){			
-					$q = "SHOW TABLES LIKE '".$row['data_table']."'";
-					$r = $this->query($q);
-					if(mysql_num_rows($r) > 0){
+					$q = "SHOW TABLES LIKE '".$row['data_table']."'";					
+					if($this->query($q) > 0){
 						$q="DROP TABLE IF EXISTS `".$row['data_table']."`";				
 						$this->query($q);
-					}
-					mysql_free_result($r);
+					}					
 				}
 				delete_option('fm-ds-'.$row['ID']);
-			}
-			mysql_free_result($res);
-		}
-		else
-			mysql_free_result($res);	
+			}			
+		}		
 			
 		$q = "DROP TABLE IF EXISTS `{$this->formsTable}`";	
 		$this->query($q);
@@ -668,19 +664,15 @@ class fm_db_class{
 			$q = "SELECT * FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
 		else
 			$q = "SELECT `title`, `filename`, `status`, `modified` FROM `".$this->templatesTable."` WHERE `filename` = '".$filename."'";
-		$res = $this->query($q);
-		$row = mysql_fetch_assoc($res);
-		mysql_free_result($res);
-		return $row;
+		return $this->get_row($q);
 	}
 	function getTemplateList(){
 		$q = "SELECT `title`, `filename`, `modified` FROM `".$this->templatesTable."`";
-		$res = $this->query($q);
+		$results = $this->get_results($q);
 		$list = array();
-		while($row = mysql_fetch_assoc($res)){
+		foreach ( $results as $row ){
 			$list[$row['filename']] = $row;
-		}
-		mysql_free_result($res);
+		}		
 		return $list;
 	}
 	function removeTemplate($filename){
@@ -726,11 +718,9 @@ class fm_db_class{
 		//see if a settings row exists
 		$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` < 0";	
 		$res = $this->query($q);
-		if(mysql_num_rows($res) == 0){
-			$q = $this->getDefaultSettingsQuery();
-		}	
-		mysql_free_result($res);
-		$this->query($q);
+		if($res == 0){
+			$this->query( $this->getDefaultSettingsQuery() );
+		}		
 	}
 
 	function initSettingsTable(){	
@@ -773,25 +763,22 @@ class fm_db_class{
 
 	function getGlobalSetting($settingName){
 		$q = "SELECT `setting_value` FROM `".$this->settingsTable."` WHERE `setting_name` = '".$settingName."'";
-		$res = $this->query($q);
-		if(mysql_num_rows($res) == 0) return false;
-		$row = mysql_fetch_assoc($res);
-		mysql_free_result($res);
+		$row = $this->get_row($q);
+		if($row === null) return false;		
 		if(is_serialized($row['setting_value']))
 			return unserialize($row['setting_value']);
 		return $row['setting_value'];
 	}
 
 	function getGlobalSettings(){
-		$q = "SELECT * FROM `".$this->settingsTable."`";
-		$res = $this->query($q);
+		$q = "SELECT * FROM `".$this->settingsTable."`";		
 		$vals = array();
-		while($row = mysql_fetch_assoc($res)){
+		$results = $this->get_results($q);
+		foreach ( $results as $row ){
 			if(is_serialized($row['setting_value']))
 				$row['setting_value'] = unserialize($row['setting_value']);
 			$vals[$row['setting_name']] = $row['setting_value'];		
-		}
-		mysql_free_result($res);
+		}		
 		return $vals;
 	}
 
@@ -819,22 +806,19 @@ class fm_db_class{
 		$val = $this->getGlobalSetting($settingName);
 		if($val !== false) return $val;
 		$q = "SELECT `".$settingName."` FROM `".$this->formsTable."` WHERE `ID` < 0";
-		$this->query($q);
-		$row = mysql_fetch_assoc($res);	
-		mysql_free_result($res);
+		$row = $this->get_row($q);		
 		return $row[$settingName];
 	}
 
 	// Get a new unique form (integer) ID
 	function getUniqueFormID(){
+		// God only knows why I chose to do this... not trusting autoincrement? why????
 		$q = "SELECT `ID` FROM `".$this->formsTable."` WHERE `ID` < 0";
-		$res = $this->query($q);
-		$row = mysql_fetch_assoc($res);
+		$row = $this->get_row($q);		
 		$intID = (int)$row['ID'];
 		$nextID = $intID - 1;
 		$q = "UPDATE `".$this->formsTable."` SET `ID` = '".$nextID."' WHERE `ID` = '".$intID."'";
-		$this->query($q);
-		mysql_free_result($res);
+		$this->query($q);		
 		return $intID*(-1);
 	}
 
@@ -883,10 +867,7 @@ class fm_db_class{
 	//Submission data
 	function isForm($formID){
 		$q = "SELECT `ID` FROM `{$this->formsTable}` WHERE `ID` = '{$formID}'";
-		$res = $this->query($q);
-		$n = mysql_num_rows($res);
-		mysql_free_result($res);
-		return ($n>0);
+		return ( $this->query($q) > 0 );		
 	}
 
 	function processPost($formID, $extraInfo = NULL, $overwrite = false, $ignoreTypes = NULL, $uniqueNames = NULL){	
@@ -967,13 +948,7 @@ class fm_db_class{
 
 	function submissionIDExists( $uniqueID, $dataTable ) {
 		$q = "SELECT `unique_id` FROM `{$dataTable}` WHERE `unique_id` = '".$uniqueID."'";
-		$res = $this->query($q);
-		
-		if(mysql_num_rows($res) > 0){
-			mysql_free_result($res);
-			return true;
-		}
-		return false;
+		return ( $this->query($q) > 0 );
 	}
 
 	function insertSubmissionData($formID, $dataTable, &$postData){
@@ -1015,8 +990,8 @@ class fm_db_class{
 		}
 		
 		//remove fields that are not in the result	
-		$res = $this->query($query);
-		$firstRow = mysql_fetch_assoc($res);
+		$results = $this->get_results($query);
+		$firstRow = reset( $results );
 		
 		foreach($baseFields as $k=>$f){
 			if(!isset($firstRow[$k])) unset($baseFields[$k]);
@@ -1055,9 +1030,7 @@ class fm_db_class{
 			}
 			
 			$data[] = $newRow;
-		}while($row = mysql_fetch_assoc($res));
-		
-		mysql_free_result($res);
+		}while( ($row = next( $results )) !== false );		
 		
 		//use the stream capture to get the CSV formatted data, since we need to mess with the encoding later
 		ob_start();
@@ -1104,10 +1077,10 @@ class fm_db_class{
 		$dataTable = $this->getDataTableName($formID);
 		$q = "SELECT `timestamp`, `user`, `user_ip` FROM `{$dataTable}`";
 		$data = array();
-		$res = $this->query($q);
-		while($row = mysql_fetch_assoc($res))
+		$results = $this->get_results($q);
+		foreach ( $results as $row ){
 			$data[] =  $row;
-		mysql_free_result($res);
+		}		
 		return $data;
 	}
 
@@ -1126,13 +1099,8 @@ class fm_db_class{
 			$q = "SELECT * FROM `{$dataTable}` ORDER BY {$orderBy} {$ord}";
 		else
 			$q = "SELECT * FROM `{$dataTable}` ORDER BY {$orderBy} {$ord} LIMIT {$startIndex}, {$numItems}";
-		$res = $this->query($q);
-		if(mysql_num_rows($res) == 0) return array();
-		$data=array();
-		while($row = mysql_fetch_assoc($res)){
-			$data[] = $row;
-		}	
-		mysql_free_result($res);
+		$data = $this->get_results($q);
+				
 		return $data;
 	}
 
@@ -1181,12 +1149,9 @@ class fm_db_class{
 	function dataHasPublishedSubmissions($formID){
 		$hasPosts = false;
 		$dataTable = $this->getDataTableName($formID);
-		$q = "SELECT COUNT(*) FROM `{$dataTable}` WHERE `post_id` > 0";
-		$res = $this->query($q);
-		$row = mysql_fetch_array($res);
-		mysql_free_result($res);
-		if($row[0] > 0) return  true;
-		return false;
+		$q = "SELECT COUNT(*) as `count` FROM `{$dataTable}` WHERE `post_id` > 0";
+		$row = $this->get_row($q);		
+		return ($row['count'] > 0);
 	}
 								
 	function isDataCol($uniqueName){
@@ -1194,9 +1159,7 @@ class fm_db_class{
 		$type = $this->getCache(1, $cacheKey);
 		if($type == null){
 			$q = "SELECT `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '{$uniqueName}'";
-			$res = $this->query($q);
-			$row = mysql_fetch_assoc($res);
-			mysql_free_result($res);
+			$row = $this->get_row($q);			
 			$type = $row['db_type'];
 			$this->setCache(1, $cacheKey, $type);
 		}
@@ -1208,27 +1171,21 @@ class fm_db_class{
 		$fullType = $this->getCache(1, $cacheKey);
 		if($fullType == null){
 			$q = "SELECT `ID`, `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
-			$res = $this->query($q);		
-			$row = mysql_fetch_assoc($res);
-			mysql_free_result($res);
+			$row = $this->get_row($q);
 			
 			if($row['db_type'] == "NONE") return "NONE";
 			
 			$dataTable = $this->getDataTableName($row['ID']);
 			
 			$q = "SHOW FULL COLUMNS FROM `{$dataTable}` LIKE '".$uniqueName."'";
-			$res = $this->query($q);		
-			$row = mysql_fetch_assoc($res);		
-			mysql_free_result($res);
+			$row = $this->get_row($q);
 			
 			//VARCHAR( 1000 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'doop'
 			if($row['Collation'] == "")
 				$charCollate = "";
 			else{
-				$q = "SHOW COLLATION LIKE '".$row['Collation']."'";
-				$res = $this->query($q);
-				$collRow = mysql_fetch_assoc($res);
-				mysql_free_result($res);
+				$q = "SHOW COLLATION LIKE '".$row['Collation']."'";				
+				$collRow = $this->get_row($q);				
 				$charCollate = " CHARACTER SET ".$collRow['Charset']." COLLATE ".$row['Collation'];	
 			}
 			
@@ -1266,72 +1223,54 @@ class fm_db_class{
 	function getSubmissionDataCount($formID){ return $this->getSubmissionDataNumRows($formID); }
 	function getSubmissionDataNumRows($formID){
 		$dataTable = $this->getDataTableName($formID);
-		$q = "SELECT COUNT(*) FROM `{$dataTable}`";
-		$res = $this->query($q);
-		$row = mysql_fetch_row($res);
-		mysql_free_result($res);
-		return $row[0];
+		$q = "SELECT COUNT(*) as `count` FROM `{$dataTable}`";		
+		$row = $this->get_row($q);		
+		return $row['count'];
 	}
 
 	function getLastSubmission($formID){
 		$dataTable = $this->getDataTableName($formID);
 		$q = "SELECT * FROM `{$dataTable}` WHERE `timestamp` = ( SELECT MAX(`timestamp`) FROM `{$dataTable}` )";
-		$res = $this->query($q);
-		$row = mysql_fetch_assoc($res);
-		mysql_free_result($res);
-		return $row;
+		return $this->get_row($q);
 	}
 
 	function getUserSubmissions($formID, $user, $lastOnly = false){
 		$dataTable = $this->getDataTableName($formID);
 		$q = "SELECT * FROM `{$dataTable}` WHERE `user` = '".$user."' ORDER BY `timestamp` DESC".($lastOnly?" LIMIT 1":'');
-		$res = $this->query($q);
-		$data = array();
-		while($row = mysql_fetch_assoc($res))
-			$data[] = $row;
-		mysql_free_result($res);
+		$data = $this->get_results($q);
 		return $data;
 	}
 
 	function getUserSubmissionCount($formID, $user){
 		$dataTable = $this->getDataTableName($formID);
-		$q = "SELECT COUNT(*) FROM `{$dataTable}` WHERE `user` = '".$user."'";
-		$res = $this->query($q);
-		$row = mysql_fetch_array($res);
-		mysql_free_result($res);
-		return $row[0];
+		$q = "SELECT COUNT(*) as `count` FROM `{$dataTable}` WHERE `user` = '".$user."'";
+		$row = $this->get_row($q);
+		return $row['count'];
 	}
 
 	function getSubmission($formID, $timestamp, $user, $cols = "*"){
 		$dataTable = $this->getDataTableName($formID);
 		$q = "SELECT ".$cols." FROM `".$dataTable."` WHERE `timestamp` = '".$timestamp."' AND `user` = '".$user."'";
-		$res = $this->query($q);
-		$row = mysql_fetch_assoc($res);
-		mysql_free_result($res);
-		return $row;
+		return $this->get_row($q);
 	}
 
 	function getSubmissionByID($formID, $subID, $cols = "*"){
 		global $wpdb;
 		$dataTable = $this->getDataTableName($formID);
 		$q = $wpdb->prepare("SELECT ".$cols." FROM `".$dataTable."` WHERE `unique_id` = %s", $subID);
-		$res = $this->query($q);
-		$row = mysql_fetch_assoc($res);
-		mysql_free_result($res);
-		return $row;
+		return $this->get_row($q);
 	}
 
 	//////////////////////////////////////////////////////////////////
 
 	function getFormList(){
 		$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` >= 0 ORDER BY `ID` ASC";
-		$res = $this->query($q);
+		$results = $this->get_results($q);
 		$formList=array();
-		while($row=mysql_fetch_assoc($res)){
+		foreach ( $results as $row ){
 			$row['title']=stripslashes($row['title']);
 			$formList[]=$row;		
-		}
-		mysql_free_result($res);
+		}		
 		return $formList;
 	}
 
@@ -1367,19 +1306,15 @@ class fm_db_class{
 
 	function getFormID($slug){
 		$q = "SELECT `ID` FROM `".$this->formsTable."` WHERE `shortcode` = '".$slug."'";
-		$res = $this->query($q);
-		if(mysql_num_rows($res)==0) return false;
-		$row = mysql_fetch_assoc($res);
-		mysql_free_result($res);
+		$row = $this->get_row($q);
+		if($row === null) return false;		
 		return $row['ID'];
 	}
 
 	function getFormShortcode($formID){
 		$q = "SELECT `shortcode` FROM `".$this->formsTable."` WHERE `ID` = '".$formID."'";
-		$res = $this->query($q);
-		if(mysql_num_rows($res)==0) return false;
-		$row = mysql_fetch_assoc($res);
-		mysql_free_result($res);
+		$row = $this->get_row($q);
+		if($row === null) return false;
 		return $row['shortcode'];
 	}
 
@@ -1389,15 +1324,14 @@ class fm_db_class{
 		
 		$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` = '".$formID."'";
 
-		$res = $this->query($q);
-		if(mysql_num_rows($res)==0) return null;
-		$row = mysql_fetch_assoc($res);
+		$row = $this->get_row($q);
+		if ( $row === null ) return null;
+		
 		foreach($row as $k=>$v){
 			$row[$k]=stripslashes($v);
 			if(is_serialized($row[$k])) $row[$k] = unserialize($row[$k]);
-		}
+		}		
 		
-		mysql_free_result($res);
 		foreach($this->formSettingsKeys as $k=>$v){
 			if(!is_array($row[$k]) && trim($row[$k]) == "") $row[$k] = $v;
 		}
@@ -1542,7 +1476,6 @@ class fm_db_class{
 	//////////////////////////////////////////////////////////////////
 	// Items
 
-
 	//returns an indexed array of all items in a form
 	function getFormItems($formID, $itemSet = 0){
 		$items=array();
@@ -1552,23 +1485,19 @@ class fm_db_class{
 		AND `set` = '".($itemSet)."' 
 		ORDER BY `index` ASC";
 		
-		$res = $this->query($q);
-		if(mysql_num_rows($res)==0) return array();
-		$n = mysql_num_rows($res);
-		for($x=0;$x<$n;$x++){		
-			$items[] = $this->unpackItem(mysql_fetch_assoc($res));
-		}
-		mysql_free_result($res);
+		$results = $this->get_results($q);
+		foreach ( $results as $row ){
+			$items[] = $this->unpackItem($row);
+		}		
 		return $items;
 	}
 
 	//gets an associative array for an individual form item
 	function getFormItem($uniqueName){
 		$q = "SELECT * FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
-		$res = $this->query($q);
-		if(mysql_num_rows($res)==0)	return false;
-		$row = $this->unpackItem(mysql_fetch_assoc($res));
-		mysql_free_result($res);
+		$row = $this->get_row($q);
+		if($row === null) return false;
+		$row = $this->unpackItem( $row );		
 		return $row;
 	}
 
@@ -1579,10 +1508,12 @@ class fm_db_class{
 		if($itemInfo['index']== -1){
 			//find the last index in the current table
 			$q = "SELECT `index` FROM `".$this->itemsTable."` WHERE `ID` = '".$formID."' ORDER BY `index` DESC";
-			$res = $this->query($q);
-			$row = mysql_fetch_assoc($res);
-			$itemInfo['index'] = $row['index'] + 1;
-			mysql_free_result($res);
+			$row = $this->get_row($q);
+			if ( $row === null ){
+				$itemInfo['index'] = 0;				
+			} else {
+				$itemInfo['index'] = $row['index'] + 1;
+			}			
 		}
 		
 		//now add the item to the items table
@@ -1635,30 +1566,25 @@ class fm_db_class{
 	function getDataFieldIndex($formID){
 		$dataTable = $this->getDataTableName($formID);
 		$q = "SHOW INDEXES FROM `".$dataTable."`";
-		$res = $this->query($q);
-		if(mysql_num_rows($res) == 0) return null;
-		$row = mysql_fetch_assoc($res);	
-		mysql_free_result($res);
+		$row = $this->get_row($q);
+		if ( $row === null ) return null;
 		return $row['Column_name'];
 	}
 
 	function removeDataFieldIndex($formID){
 		$dataTable = $this->getDataTableName($formID);
 		$q = "SHOW INDEXES FROM `".$dataTable."`";
-		$res = $this->query($q);
-		while($row = mysql_fetch_assoc($res)){				
+		$results = $this->query($q);
+		foreach ( $results as $row ){				
 			$q = "ALTER TABLE `".$dataTable."` DROP INDEX `".$row['Column_name']."`";
 			$this->query($q);
-		}	
-		mysql_free_result($res);	
+		}		
 	}
 
 	function deleteFormItem($formID, $uniqueName){
 		$q = "SELECT `db_type` FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
-		$res = $this->query($q);
-		$row = mysql_fetch_assoc($res);
-		$dbType = $row['db_type'];
-		mysql_free_result($res);
+		$row = $this->get_row($q);
+		$dbType = $row['db_type'];		
 		
 		$q = "DELETE FROM `".$this->itemsTable."` WHERE `unique_name` = '".$uniqueName."'";
 		$this->query($q);
@@ -1679,10 +1605,9 @@ class fm_db_class{
 
 	function getItemByNickname($formID, $nickname){
 		$q = "SELECT * FROM `".$this->itemsTable."` WHERE `nickname` = '".$nickname."' AND `ID` = '".$formID."'";
-		$res = $this->query($q);
-		if(mysql_num_rows($res) == 0) return false;
-		$row = $this->unpackItem(mysql_fetch_assoc($res));
-		mysql_free_result($res);
+		$row = $this->get_row($q);
+		if($row === null) return false;
+		$row = $this->unpackItem($row);		
 		return $row;
 	}
 
@@ -1779,10 +1704,8 @@ class fm_db_class{
 		$dataTable = $this->getCache($formID, 'data-table');
 		if($dataTable == null){
 			$q = $wpdb->prepare("SELECT `data_table` FROM `".$this->formsTable."` WHERE `ID` = %s", $formID);
-			$res = $this->query($q);
-			$row = mysql_fetch_assoc($res);
-			$dataTable = $row['data_table'];
-			mysql_free_result($res);
+			$row = $this->get_row($q);
+			$dataTable = $row['data_table'];			
 			$this->setCache($formID, 'data-table', $dataTable);
 		}
 		return $dataTable;
@@ -1813,28 +1736,26 @@ class fm_db_class{
 		
 			//make sure a data table exists for each form
 			$q = "SELECT `ID`, `data_table` FROM `".$this->formsTable."` WHERE `ID` > 0";
-			$res = $this->query($q);
-			while($row = mysql_fetch_assoc($res)){
+			$results = $this->get_results($q);
+			foreach ( $results as $row ){
 				echo  "Form ".$row['ID']." for data table: ";
 				$q = "SHOW TABLES LIKE '".$row['data_table']."'";
-				if(mysql_num_rows($this->query($q)) == 1)
+				if($this->query($q) == 1)
 					echo  "OK\n";
 				else
 					echo  "FAIL\n";
-			}
-			mysql_free_result($res);		
+			}				
 			
 			//no duplicate form IDs or slugs
 			echo  "For duplicate IDs and slugs...\n";
 			$q = "SELECT * FROM `".$this->formsTable."` WHERE `ID` > 0";
-			$res = $this->query($q);
+			$results = $this->query($q);
 			$ids = array();
 			$slugs = array();
-			while($row = mysql_fetch_assoc($res)){
+			foreach ( $results as $row ){
 				$ids[] = $row['ID'];
 				$slugs[] = $row['shortcode'];
-			}		
-			mysql_free_result($res);
+			}			
 			
 			sort($ids);
 			sort($slugs);
@@ -1863,17 +1784,17 @@ class fm_db_class{
 			echo  "Items table...\n";
 			echo "Checking form IDs exists...\n";
 			$q = "SELECT * FROM `".$this->itemsTable."`";
-			$res = $this->query($q);
+			$results = $this->get_results($q);
 			$items = array();
 			$err = false;
-			while($row = mysql_fetch_assoc($res)){
+			foreach ( $results as $row ){
 				$items[] = $row;
 				if(!in_array($row['ID'], $ids)){
 					echo  $row['unique_name'].": nonexistent form ".$row['ID']."\n";
 					$err = true;
 				}
 			}
-			mysql_free_result($res);
+			
 			if(!$err)
 				echo  "OK\n";
 			
@@ -1894,12 +1815,9 @@ class fm_db_class{
 		if($found[2]){
 			echo  "Templates entries: \n";
 			$q = "SELECT `title`, `filename`, `modified` FROM `".$this->templatesTable."`";
-			$res = $this->query($q);
-			if(mysql_num_rows($res) > 0){
-				while($row = mysql_fetch_assoc($res)){
-					echo " Title: ".$row['title']."  Filename: ".$row['filename']."  Modified: ".$row['modified']."\n";
-				}
-				mysql_free_result($res);
+			$results = $this->query($q);
+			foreach ( $results as $row ){
+				echo " Title: ".$row['title']."  Filename: ".$row['filename']."  Modified: ".$row['modified']."\n";				
 			}
 		}
 		
@@ -1907,20 +1825,20 @@ class fm_db_class{
 		if($found[3]){
 			echo  "Settings entries: \n";
 			$q = "SELECT * FROM `".$this->settingsTable."`";
-			$res = $this->query($q);
-			while($row = mysql_fetch_assoc($res)){
+			$results = $this->query($q);
+			foreach ( $results as $row ){
 				echo " Name: ".$row['setting_name']."  Value: ".$row['setting_value']."\n";
-			}
-			mysql_fetch_assoc($res);
+			}			
 		}
 		
 		echo "Done.\n";
 	}
 
 	function tableExists($tableName){
+		global $wpdb;		
 		$q = "SHOW TABLES LIKE '".$this->formsTable."'";
-		$res = mysql_query($q);
-		if(mysql_num_rows($res) == 0) return false;
+		$res = $this->query($q);
+		if($res == 0) return false;
 		return true;		
 	}
 

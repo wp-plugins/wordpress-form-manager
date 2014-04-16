@@ -45,10 +45,7 @@ if(isset($_POST['submit-form-settings'])){
 		if($fmdb->isDataCol($item['unique_name']) 
 			&& $_POST[$item['unique_name']."-dbtype-prev"] != $_POST[$item['unique_name']."-dbtype"]){			
 			$fmdb->updateDataType($form['ID'], $item['unique_name'], stripslashes($_POST[$item['unique_name']."-dbtype"]));
-			if(mysql_errno())
-				$itemTypeErr[$item['unique_name']] = mysql_error();
-			else
-				$itemTypeErr[$item['unique_name']] = false;
+			$itemTypeErr[$item['unique_name']] = false;
 		}
 	}
 	$fmdb->showerr = true;

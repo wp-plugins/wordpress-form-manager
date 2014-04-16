@@ -127,9 +127,15 @@ class fm_metaCheckboxControl extends fm_checkboxControl {
 	}
 	
 	public function processPost($uniqueName, $itemInfo){
-		if(isset($_POST[$uniqueName]))
-			return $_POST[$uniqueName]=="on"?__("yes",'wordpress-form-manager'):__("no",'wordpress-form-manager');
-		return $itemInfo['extra']['value']=='checked'?__("yes",'wordpress-form-manager'):__("no",'wordpress-form-manager');
+		$val = '';
+		if(isset($_POST[$uniqueName])) {
+			$val = $_POST[$uniqueName];
+		} else if ( isset($_POST['fm_form_submit']) 
+		&& ( is_array( $itemInfo['extra'] ) && isset( $itemInfo['extra']['value'] ) ) ) {
+			$val = $itemInfo['extra']['value'] == 'checked' ? 'on' : '';
+		}
+		
+		return $val=="on"?__("yes",'wordpress-form-manager'):__("no",'wordpress-form-manager');
 	}
 	
 	protected function showExtraScripts(){ }

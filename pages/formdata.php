@@ -359,9 +359,9 @@ if(sizeof($queryClauses) > 0){
 }
 
 //get the full query count
-$res = $fmdb->query($dataQuery);
-$dataCount = mysql_num_rows($res);
-mysql_free_result($res);
+$results = $fmdb->get_results($dataQuery);
+
+$dataCount = sizeof($results);
 
 //sort the results
 $dataQuery .= " ORDER BY `".$dataSortBy."` ".$dataSortOrder;
@@ -374,7 +374,7 @@ $dataQuery .= " LIMIT ".(($dataCurrentPage-1)*$dataPerPage).", ".$dataPerPage;
 
 //echo $dataQuery."<br />";
 
-$res = $fmdb->query($dataQuery);
+
 
 //create a CSV download file
 
@@ -641,13 +641,13 @@ $bulkActions = apply_filters( 'fm_data_bulk_actions', $bulkActions );
 	<div class="wrap">
 		<table class="widefat post fixed" style="width:auto;">
 			<?php outputTableHead($cols); ?>
-			<?php while($row = mysql_fetch_assoc($res)): ?>
+			<?php foreach( $results as $row ): ?>
 				<?php if($fm_showEditRows && in_array($row['unique_id'], $checked)): ?>
 					<?php fm_echoDataTableRowEdit($cols, $row); ?>
 				<?php else: ?>
 					<?php fm_echoDataTableRow($cols, $row, $form); ?>
 				<?php endif; ?>			
-			<?php endwhile; ?>
+			<?php endforeach; ?>
 			<?php outputTableFoot($cols); ?>
 		</table>
 	</div>
