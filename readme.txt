@@ -4,7 +4,7 @@ Donate link: http://www.campbellhoffman.com/
 Tags: form, forms, form manager
 Requires at least: 3.0.0
 Tested up to: 3.9
-Stable tag: 1.6.47
+Stable tag: 1.6.48
 
 Put custom forms into posts and pages using shortcodes. Download submissions in .csv format.
 
@@ -53,6 +53,9 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * &#27491;&#39636;&#20013;&#25991; (zh_TW) - [&#39321;&#33144;](http://sofree.cc)
 
 == Changelog ==
+= 1.6.48 =
+* Fixed data table sorting.
+
 = 1.6.47 =
 * Fixed DB access to use $wpdb.
 * Fixed 'hidden fields' to use their default values.

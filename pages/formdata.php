@@ -359,9 +359,7 @@ if(sizeof($queryClauses) > 0){
 }
 
 //get the full query count
-$results = $fmdb->get_results($dataQuery);
-
-$dataCount = sizeof($results);
+$dataCount = sizeof( $fmdb->get_results($countQuery) );
 
 //sort the results
 $dataQuery .= " ORDER BY `".$dataSortBy."` ".$dataSortOrder;
@@ -372,9 +370,7 @@ $searchQuery = $dataQuery;
 //page range
 $dataQuery .= " LIMIT ".(($dataCurrentPage-1)*$dataPerPage).", ".$dataPerPage;
 
-//echo $dataQuery."<br />";
-
-
+$results = $fmdb->get_results( $dataQuery );
 
 //create a CSV download file
 
