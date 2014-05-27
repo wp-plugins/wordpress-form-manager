@@ -304,7 +304,7 @@ $dataCurrentPage = isset($_POST['fm-data-current-page']) ? $_POST['fm-data-curre
 $dataQuery = "SELECT `unique_id`, ".fm_getColQueryList( $cols )." FROM `".$form['data_table']."` ";
 $allQuery = $dataQuery;
 
-$countQuery = "SELECT COUNT(*) FROM `".$form['data_table']."` ";
+$countQuery = "SELECT COUNT(*) as cnt FROM `".$form['data_table']."` ";
 
 $queryClauses = array();
 
@@ -359,7 +359,8 @@ if(sizeof($queryClauses) > 0){
 }
 
 //get the full query count
-$dataCount = sizeof( $fmdb->get_results($countQuery) );
+$dataCount = $fmdb->get_results($countQuery);
+$dataCount = $dataCount[0]['cnt'];
 
 //sort the results
 $dataQuery .= " ORDER BY `".$dataSortBy."` ".$dataSortOrder;
