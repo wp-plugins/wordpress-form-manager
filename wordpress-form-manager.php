@@ -249,14 +249,17 @@ register_uninstall_hook( __FILE__, 'fm_uninstall' );
 //delete .csv files on each login
 add_action( 'wp_login', 'fm_cleanCSVData' );
 function fm_cleanCSVData() {
-	$dirName = @dirname( __FILE__ ) . "/" . get_option( "fm-temp-dir" );
-	$dir = @opendir( $dirName );
-	while ( $fname = @readdir( $dir ) ) {
-		if ( file_exists( $dirName . "/" . $fname ) ) {
-			@unlink( $dirName . "/" . $fname );
-		}			
+	$fmTmpDir = get_option( "fm-temp-dir", false );
+	if ( $fmTmpDir !== false && trim( $fmTmpDir ) != "" ){
+		$dirName = @dirname( __FILE__ ) . "/" . $fmTmpDir;
+		$dir = @opendir( $dirName );
+		while ( $fname = @readdir( $dir ) ) {
+			if ( file_exists( $dirName . "/" . $fname ) ) {
+				@unlink( $dirName . "/" . $fname );
+			}			
+		}
+		@closedir( $dir );
 	}
-	@closedir( $dir );
 }
 
 /**************************************************************/
@@ -663,16 +666,19 @@ function fm_dataShortcodeHandler( $atts ) {
 //allow scheduling of clearing the temporary directory
 
 function fm_deleteTemporaryFiles( $filename ) {
-	$dir = dirname( __FILE__ ) . "/" . get_option( "fm-temp-dir" );	
-	if ( $handle = opendir( $dir ) ) {
-		while ( ( $file = readdir( $handle ) ) !== false ) {
-			if ( $file != "."
-				&& $file != ".."
-				&& is_file( $dir . "/" . $file ) ) {
-				unlink( $dir . "/" . $file );
+	$fmTmpDir = get_option( "fm-temp-dir", false );
+	if ( $fmTmpDir !== false && trim( $fmTmpDir ) != "" ){
+		$dir = dirname( __FILE__ ) . "/" . $fmTmpDir;
+		if ( $handle = opendir( $dir ) ) {
+			while ( ( $file = readdir( $handle ) ) !== false ) {
+				if ( $file != "."
+					&& $file != ".."
+					&& is_file( $dir . "/" . $file ) ) {
+					unlink( $dir . "/" . $file );
+				}
 			}
+			closedir( $handle );		
 		}
-		closedir( $handle );		
 	}
 }
 add_action( 'fm_delete_temporary_file', 'fm_deleteTemporaryFiles' );
