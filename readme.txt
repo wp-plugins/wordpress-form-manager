@@ -54,6 +54,9 @@ You can also type in shortcodes yourself.  For example, if your form's slug is '
 * Chinese Simplified (zh_CN)
 
 == Changelog ==
+= 1.7.2 =
+* Fixed textarea private fields
+
 = 1.7.1 =
 * Fixed CSV download ( dependency on PHP multibyte strings module removed )
 
