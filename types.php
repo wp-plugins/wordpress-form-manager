@@ -26,17 +26,17 @@ $fm_controlTypes = array('default' => 			'fm_controlBase',
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //control base class
-include 'types/base.php';
+include_once 'types/base.php';
 
 //control types
-include 'types/separator.php';
-include 'types/text.php';
-include 'types/textarea.php';
-include 'types/checkbox.php';
-include 'types/list.php';
-include 'types/note.php';
-include 'types/recaptcha.php';
-include 'types/file.php';
+include_once 'types/separator.php';
+include_once 'types/text.php';
+include_once 'types/textarea.php';
+include_once 'types/checkbox.php';
+include_once 'types/list.php';
+include_once 'types/note.php';
+include_once 'types/recaptcha.php';
+include_once 'types/file.php';
 
 //'panel' helpers
 include 'types/panelhelper.php';
